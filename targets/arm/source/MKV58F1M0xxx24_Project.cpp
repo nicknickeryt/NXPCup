@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 /**
  * @file    MKV58F1M0xxx24_Project.cpp
  * @brief   Application entry point.
@@ -48,9 +48,16 @@
 /*
  * @brief   Application entry point.
  */
-#define ECHO_BUFFER_LENGTH 8
+#define ECHO_BUFFER_LENGTH 1
 
+/* UART user callback */
+void UART_UserCallback(UART_Type *base, uart_handle_t *handle, status_t status, void *userData);
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
 uart_handle_t g_uartHandle;
+
 uint8_t g_tipString[] =
         "Uart interrupt example\r\nBoard receives 8 characters then sends them out\r\nNow please input:\r\n";
 
@@ -61,23 +68,17 @@ volatile bool txBufferFull = false;
 volatile bool txOnGoing = false;
 volatile bool rxOnGoing = false;
 
-
-void uart_callback(UART_Type *base, uart_handle_t *handle, status_t status, void *userData) {
-    static bool state = false;
-    if (state) {
-        state = false;
-        GPIO_PinWrite(GPIOA, 16U, 1U);
-    } else {
-        state = true;
-        GPIO_PinWrite(GPIOA, 16U, 0U);
-    }
-
-//    userData = userData;
-
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+/* UART user callback */
+void UART_UserCallback(UART_Type *base, uart_handle_t *handle, status_t status, void *userData)
+{
     (void)base;
     (void)handle;
     (void)status;
     (void)userData;
+
     if (kStatus_UART_TxIdle == status)
     {
         txBufferFull = false;
@@ -89,56 +90,32 @@ void uart_callback(UART_Type *base, uart_handle_t *handle, status_t status, void
         rxBufferEmpty = false;
         rxOnGoing = false;
     }
-
-
 }
-//void UART0_RX_TX_IRQHandler(void){
-//    uart_callback();
-//}
 
-int main(void) {
+/*!
+ * @brief Main function
+ */
+int main(void)
+{
     uart_config_t config;
     uart_transfer_t xfer;
     uart_transfer_t sendXfer;
     uart_transfer_t receiveXfer;
 
-  	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-
-    /* Force the counter to be placed into memory. */
-    volatile static long long i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-
-    uart_config_t uartConfig;
-    UART_GetDefaultConfig(&uartConfig);
-
-
-    uartConfig.baudRate_Bps = 115200U;
-//    uartConfig.parityMode = kUART_ParityDisabled;
-//    uartConfig.stopBitCount = kUART_OneStopBit;
-//    uartConfig.txFifoWatermark = 0;
-//    uartConfig.rxFifoWatermark = 1;
-    uartConfig.enableTx = true;
-    uartConfig.enableRx = true;
-    UART_Init(UART0, &uartConfig, 120000000);
-
     PORT_SetPinMux(PORTA, 14U, kPORT_MuxAlt3);
     PORT_SetPinMux(PORTA, 15U, kPORT_MuxAlt3);
 
-    UART_WriteByte(UART0, 'e');
+    UART_GetDefaultConfig(&config);
+    config.baudRate_Bps = 115200;
+    config.enableTx = true;
+    config.enableRx = true;
 
-
-//    uint32_t state = 0;
-//    (void)state;
-
-    uart_handle_t uart_handle;
-
-//    UART_TransferCreateHandle(DEMO_UART, &g_uartHandle, UART_UserCallback, NULL);
-
-    UART_TransferCreateHandle(UART0, &uart_handle, reinterpret_cast<uart_transfer_callback_t>(uart_callback), nullptr);
+    UART_Init(UART0, &config, 120000000);
+    UART_TransferCreateHandle(UART0, &g_uartHandle, UART_UserCallback, NULL);
 
     /* Send g_tipString out. */
     xfer.data = g_tipString;
@@ -157,28 +134,28 @@ int main(void) {
     receiveXfer.data = g_rxBuffer;
     receiveXfer.dataSize = ECHO_BUFFER_LENGTH;
 
-
-//    UART_TransferHandleIRQ(UART0, &uart_handle);
-    while(1) {
-
-//        (void)i;
-        i++ ;
-        if (i > 100000) {
-        	i = 0;
-//        	static bool state = false;
-//            if (state) {
-//            	state = false;
-//            	GPIO_PinWrite(GPIOA, 16U, 1U);
-//            } else {
-//            	state = true;
-//            	GPIO_PinWrite(GPIOA, 16U, 0U);
-//            }
-
-            UART_WriteByte(UART0, 'c');
+    while (1)
+    {
+        /* If RX is idle and g_rxBuffer is empty, start to read data to g_rxBuffer. */
+        if ((!rxOnGoing) && rxBufferEmpty)
+        {
+            rxOnGoing = true;
+            UART_TransferReceiveNonBlocking(UART0, &g_uartHandle, &receiveXfer, NULL);
         }
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-//        __asm volatile ("nop");
+
+        /* If TX is idle and g_txBuffer is full, start to send data. */
+        if ((!txOnGoing) && txBufferFull)
+        {
+            txOnGoing = true;
+            UART_TransferSendNonBlocking(UART0, &g_uartHandle, &sendXfer);
+        }
+
+        /* If g_txBuffer is empty and g_rxBuffer is full, copy g_rxBuffer to g_txBuffer. */
+        if ((!rxBufferEmpty) && (!txBufferFull))
+        {
+            memcpy(g_txBuffer, g_rxBuffer, ECHO_BUFFER_LENGTH);
+            rxBufferEmpty = true;
+            txBufferFull = true;
+        }
     }
-    return 0 ;
 }
