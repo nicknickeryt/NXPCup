@@ -1,0 +1,8 @@
+si 1
+speed auto
+r
+halt
+loadbin "${FLASH_FILE}", ${BASE_ADDRESS}
+r
+g
+exit
