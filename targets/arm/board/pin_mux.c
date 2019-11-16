@@ -58,16 +58,6 @@ void BOARD_InitPins(void)
     /* Port A Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortA);
 
-    gpio_pin_config_t gpioa_pin68_config = {
-        .pinDirection = kGPIO_DigitalOutput,
-        .outputLogic = 1U
-    };
-    /* Initialize GPIO functionality on pin PTA16 (pin 68)  */
-    GPIO_PinInit(GPIOA, 16U, &gpioa_pin68_config);
-
-    /* PORTA16 (pin 68) is configured as PTA16 */
-    PORT_SetPinMux(PORTA, 16U, kPORT_MuxAsGpio);
-
     /* PORTA18 (pin 72) is configured as EXTAL0 */
     PORT_SetPinMux(PORTA, 18U, kPORT_PinDisabledOrAnalog);
 

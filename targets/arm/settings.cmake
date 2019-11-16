@@ -12,4 +12,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++17 -Dregister=\"/**/\" -fno-ex
 
 set(PLATFORM_LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/MKV58F1M0xxx24.ld)
 
-set(PROJECT_DIRECTORIES "board CMSIS device drivers source startup")
+set(PROJECT_DIRECTORIES "board CMSIS device drivers source startup NXP_hal")

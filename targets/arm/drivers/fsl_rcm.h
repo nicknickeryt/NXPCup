@@ -130,7 +130,7 @@ typedef enum _rcm_interrupt_enable
     kRCM_IntNone = 0U,                              /*!< No interrupt enabled.           */
     kRCM_IntLossOfClk = RCM_SRIE_LOC_MASK,          /*!< Loss of clock interrupt.        */
     kRCM_IntLossOfLock = RCM_SRIE_LOL_MASK,         /*!< Loss of lock interrupt.         */
-    kRCM_IntWatchDog = RCM_SRIE_WDOG_MASK,          /*!< Watch dog interrupt.            */
+    kRCM_IntWatchDog = RCM_SRIE_WDOG_MASK,          /*!< Watch froggy interrupt.            */
     kRCM_IntExternalPin = RCM_SRIE_PIN_MASK,        /*!< External pin interrupt.         */
     kRCM_IntGlobal = RCM_SRIE_GIE_MASK,             /*!< Global interrupts.              */
     kRCM_IntCoreLockup = RCM_SRIE_LOCKUP_MASK,      /*!< Core lock up interrupt           */

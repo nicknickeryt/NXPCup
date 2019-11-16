@@ -1,38 +1,5 @@
-/*
- * Copyright 2016-2019 NXP
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of NXP Semiconductor, Inc. nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/**
- * @file    MKV58F1M0xxx24_Project.cpp
- * @brief   Application entry point.
- */
 #include <stdio.h>
+#include <frog.h>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -45,6 +12,8 @@
 #include "fsl_uart.h"
 #include "fsl_port.h"
 
+#include "NXP_hal.h"
+#include "LEDLine.h"
 /*
  * @brief   Application entry point.
  */
@@ -52,6 +21,23 @@
 
 /* UART user callback */
 void UART_UserCallback(UART_Type *base, uart_handle_t *handle, status_t status, void *userData);
+
+NXP_GPIO LED0(PORTA, GPIOA, 16U);
+NXP_GPIO LED1(PORTA, GPIOA, 17U);
+NXP_GPIO LED2(PORTA, GPIOA, 24U);
+NXP_GPIO LED3(PORTA, GPIOA, 25U);
+NXP_GPIO LED4(PORTA, GPIOA, 26U);
+NXP_GPIO LED5(PORTA, GPIOA, 27U);
+NXP_GPIO LED6(PORTA, GPIOA, 28U);
+NXP_GPIO LED7(PORTA, GPIOA, 29U);
+
+FROGGY& froggy() {
+    static LEDLine LED_line(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7);
+
+    static FROGGY _froggy(LED_line);
+
+    return _froggy;
+}
 
 /*******************************************************************************
  * Variables
@@ -106,6 +92,8 @@ int main(void)
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+    froggy().LED_line.init();
+
     PORT_SetPinMux(PORTA, 14U, kPORT_MuxAlt3);
     PORT_SetPinMux(PORTA, 15U, kPORT_MuxAlt3);
 
@@ -134,8 +122,41 @@ int main(void)
     receiveXfer.data = g_rxBuffer;
     receiveXfer.dataSize = ECHO_BUFFER_LENGTH;
 
+    uint32_t licznik = 0;
+    int led_index = 0;
+    uint8_t direction = 0;
+    uint8_t old_led = 0;
     while (1)
     {
+//        froggy().LED1.set();
+        licznik++;
+
+        if (licznik == 90000) {
+            licznik = 0;
+            if (direction == 0) {
+                old_led = led_index;
+                led_index++;
+                if (led_index == 8) {
+                    led_index = 6;
+                    direction = 1;
+                    old_led = 7;
+                }
+                froggy().LED_line.at(led_index).set();
+                froggy().LED_line.at(old_led).reset();
+            } else if (direction == 1) {
+                old_led = led_index;
+                led_index--;
+                if (led_index == -1) {
+                    led_index = 1;
+                    direction = 0;
+                    old_led = 0;
+                }
+
+                froggy().LED_line.at(led_index).set();
+                froggy().LED_line.at(old_led).reset();
+            }
+        }
+        
         /* If RX is idle and g_rxBuffer is empty, start to read data to g_rxBuffer. */
         if ((!rxOnGoing) && rxBufferEmpty)
         {
