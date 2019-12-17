@@ -97,10 +97,13 @@ void uart_callback(UART_Type *base, uart_handle_t *handle, status_t status, void
 //}
 
 int main(void) {
-    uart_config_t config;
+//    uart_config_t config;
     uart_transfer_t xfer;
-    uart_transfer_t sendXfer;
-    uart_transfer_t receiveXfer;
+    volatile uart_transfer_t sendXfer;
+    (void)sendXfer;
+
+    volatile uart_transfer_t receiveXfer;
+    (void) receiveXfer;
 
   	/* Init board hardware. */
     BOARD_InitBootPins();
