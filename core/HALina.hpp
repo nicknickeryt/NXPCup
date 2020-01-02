@@ -2,7 +2,6 @@
 
 #include <gsl/gsl>
 
-
 namespace hal {
 
     class GPIO {
@@ -12,7 +11,6 @@ namespace hal {
             OUTPUT,
             TIMER,
         };
-        int x = 0;
 
         virtual void set() = 0;
         virtual void reset() = 0;
