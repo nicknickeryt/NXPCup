@@ -1,9 +1,12 @@
-//
-// Created by Kamil on 02.01.2020.
-//
+/**
+ * Copyright (c) Kolo Naukowe Elektronikow, Akademia Gorniczo-Hutnicza im. Stanislawa Staszica w Krakowie 2020
+ * Authors: Arkadiusz Balys, Kamil Kasperczyk, Witold Lukasik
+ *
+ * NXP HALina implementation of servo
+ *
+ */
 
-#ifndef PROJECT_NAME_NXP_SERVO_HPP
-#define PROJECT_NAME_NXP_SERVO_HPP
+#pragma once
 
 #include "NXP_hal.hpp"
 
@@ -15,5 +18,3 @@ public:
 
     float get() override;
 };
-
-#endif //PROJECT_NAME_NXP_SERVO_HPP
