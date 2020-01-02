@@ -1,5 +1,5 @@
-#ifndef PROJECT_NAME_UART_H
-#define PROJECT_NAME_UART_H
+#ifndef PROJECT_NAME_HAL_UART_HPP
+#define PROJECT_NAME_HAL_UART_HPP
 
 #include <gsl/gsl>
 #include "cyclicBuffer.hpp"
@@ -17,4 +17,4 @@ public:
 };
 
 
-#endif //PROJECT_NAME_UART_H
+#endif //PROJECT_NAME_HAL_UART_HPP

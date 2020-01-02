@@ -1,7 +1,7 @@
-#ifndef PROJECT_NAME_NXP_HAL_H
-#define PROJECT_NAME_NXP_HAL_H
+#ifndef PROJECT_NAME_NXP_HAL_HPP
+#define PROJECT_NAME_NXP_HAL_HPP
 
-#include "hal.h"
+#include "hal.hpp"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 
@@ -69,4 +69,4 @@ public:
 
 
 
-#endif //PROJECT_NAME_NXP_HAL_H
+#endif //PROJECT_NAME_NXP_HAL_HPP

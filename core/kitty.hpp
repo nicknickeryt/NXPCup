@@ -1,8 +1,8 @@
-#ifndef PROJECT_NAME_KITTY_H
-#define PROJECT_NAME_KITTY_H
+#ifndef PROJECT_NAME_KITTY_HPP
+#define PROJECT_NAME_KITTY_HPP
 
-#include "hal.h"
-#include "LEDLine.h"
+#include "hal.hpp"
+#include "LEDLine.hpp"
 struct KITTY {
 //    hal::GPIO& LED1;
 //    hal::GPIO& LED2;
@@ -15,4 +15,4 @@ struct KITTY {
 
 KITTY& kitty();
 
-#endif //PROJECT_NAME_KITTY_H
+#endif //PROJECT_NAME_KITTY_HPP

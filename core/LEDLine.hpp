@@ -1,7 +1,7 @@
-#ifndef PROJECT_NAME_LEDLINE_H
-#define PROJECT_NAME_LEDLINE_H
+#ifndef PROJECT_NAME_LEDLINE_HPP
+#define PROJECT_NAME_LEDLINE_HPP
 
-#include "hal.h"
+#include "hal.hpp"
 #include <gsl/gsl>
 
 class LEDLine {
@@ -33,4 +33,4 @@ public:
     }
 };
 
-#endif //PROJECT_NAME_LEDLINE_H
+#endif //PROJECT_NAME_LEDLINE_HPP

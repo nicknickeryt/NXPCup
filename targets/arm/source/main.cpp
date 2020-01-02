@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <kitty.h>
+#include <kitty.hpp>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -12,8 +12,8 @@
 #include "fsl_uart.h"
 #include "fsl_port.h"
 
-#include "NXP_hal.h"
-#include "LEDLine.h"
+#include "NXP_hal.hpp"
+#include "LEDLine.hpp"
 /*
  * @brief   Application entry point.
  */
