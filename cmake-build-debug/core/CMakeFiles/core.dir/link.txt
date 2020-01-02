@@ -1,2 +1,0 @@
-D:/WSN/eclipse_2019/eclipse/toolchains/arm-none-eabi/9.4/bin/arm-none-eabi-gcc-ar.exe qc ../build/arm/lib/libcore.a  CMakeFiles/core.dir/core.cpp.obj
-D:/WSN/eclipse_2019/eclipse/toolchains/arm-none-eabi/9.4/bin/arm-none-eabi-gcc-ranlib.exe ../build/arm/lib/libcore.a
