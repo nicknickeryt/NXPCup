@@ -1,7 +1,7 @@
 #ifndef PROJECT_NAME_NXP_HAL_HPP
 #define PROJECT_NAME_NXP_HAL_HPP
 
-#include "hal.hpp"
+#include "HALina.hpp"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
 

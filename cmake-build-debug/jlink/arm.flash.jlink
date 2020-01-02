@@ -1,0 +1,8 @@
+si 1
+speed auto
+r
+halt
+loadbin "D:/NXP_Cup/NXP_2019/cmake-build-debug/build/arm/bin/arm.hex", 0x0000000
+r
+g
+exit

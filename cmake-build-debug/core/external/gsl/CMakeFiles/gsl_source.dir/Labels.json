@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/CMakeFiles/gsl_source"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/CMakeFiles/gsl_source.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/CMakeFiles/gsl_source-complete.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-install.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-mkdir.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-download.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-patch.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-configure.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-build.rule"
+		},
+		{
+			"file" : "D:/NXP_Cup/NXP_2019/cmake-build-debug/core/external/gsl/gsl/src/gsl_source-stamp/gsl_source-skip-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"gsl_source"
+		],
+		"name" : "gsl_source"
+	}
+}

@@ -1,7 +1,7 @@
 #ifndef PROJECT_NAME_LEDLINE_HPP
 #define PROJECT_NAME_LEDLINE_HPP
 
-#include "hal.hpp"
+#include "HALina.hpp"
 #include <gsl/gsl>
 
 class LEDLine {

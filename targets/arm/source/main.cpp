@@ -1,17 +1,14 @@
 #include <stdio.h>
-#include <kitty.hpp>
+#include <HALina_kitty.hpp>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKV58F24.h"
-/* TODO: insert other include files here. */
 #include "fsl_gpio.h"
-/* TODO: insert other definitions and declarations here. */
 
 #include "fsl_uart.h"
 #include "fsl_port.h"
-
 #include "NXP_hal.hpp"
 #include "LEDLine.hpp"
 /*
