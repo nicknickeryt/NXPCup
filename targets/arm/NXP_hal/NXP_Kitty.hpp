@@ -12,8 +12,10 @@
 //NXP_GPIO LED7(PORTA, GPIOA, 29U);
 
 class Kitty{
-private:
+
+public:
     NXP_Uart uart;
+
 private:
     Kitty() = default;
 

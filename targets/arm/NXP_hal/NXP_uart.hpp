@@ -4,20 +4,14 @@
 
 class NXP_Uart : public halina::UART<100, 100>{
 public:
-    constexpr static auto echoBufferLength = 1000;
-private:
-    uart_config_t config;
-    uart_transfer_t xfer;
-    uart_transfer_t sendXfer;
-    uart_transfer_t receiveXfer;
+    constexpr static auto bufferLength = 1000;
 
 public:
+    void init() override;
 
-    void init();
+    void write(void const*) override;
 
-    void write(char);
-
-    char read();
+    char read() override;
 
     void proc();
 };
