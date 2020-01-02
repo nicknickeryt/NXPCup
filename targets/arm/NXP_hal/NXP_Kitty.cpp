@@ -17,6 +17,8 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
+    leftMotor.init();
+    rightMotor.init();
 }
 
 void Kitty::proc() {

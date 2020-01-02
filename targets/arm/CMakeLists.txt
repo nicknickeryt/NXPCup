@@ -32,7 +32,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO} NXP_hal/NXP_gpio.hpp NXP_hal/NXP_uart.hpp NXP_hal/NXP_gpio.cpp NXP_hal/NXP_uart.cpp NXP_hal/NXP_Kitty.hpp NXP_hal/NXP_Kitty.cpp NXP_hal/NXP_display.hpp NXP_hal/NXP_display.cpp HALina_config.hpp NXP_hal/NXP_pwm.hpp NXP_hal/NXP_pwm.cpp NXP_hal/NXP_servo.cpp)
+set(SOURCES ${SOURCES_AUTO} NXP_hal/NXP_gpio.hpp NXP_hal/NXP_uart.hpp NXP_hal/NXP_gpio.cpp NXP_hal/NXP_uart.cpp NXP_hal/NXP_Kitty.hpp NXP_hal/NXP_Kitty.cpp NXP_hal/NXP_display.hpp NXP_hal/NXP_display.cpp HALina_config.hpp NXP_hal/NXP_pwm.hpp NXP_hal/NXP_pwm.cpp NXP_hal/NXP_servo.cpp NXP_hal/NXP_motor.hpp NXP_hal/NXP_motor.cpp)
 
 add_executable(${NAME} ${SOURCES})
 

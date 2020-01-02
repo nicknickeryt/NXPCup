@@ -43,3 +43,9 @@
 #define DISPLAY_F				((uint32_t)(1<<10))
 #define DISPLAY_G				((uint32_t)(1<<15))
 #define DISPLAY_DP				((uint32_t)(1<<12))
+
+/////////////////////// MOTORS ///////////////////////
+#define MOTOR_CLOCK_PRESCALER 		1
+#define MOTOR_CLOCK_INPUT			DEFAULT_SYSTEM_CLOCK
+#define MOTOR_CLOCK_OUTPUT			10000
+#define MOTOR_CLOCK_MOD				MOTOR_CLOCK_INPUT/MOTOR_CLOCK_PRESCALER/MOTOR_CLOCK_OUTPUT

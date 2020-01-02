@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) Kolo Naukowe Elektronikow, Akademia Gorniczo-Hutnicza im. Stanislawa Staszica w Krakowie 2020
+ * Authors: Arkadiusz Balys, Kamil Kasperczyk, Witold Lukasik
+ *
+ * Main Kitty class
+ *
+ */
+
 #pragma once
 
 #include "HALina.hpp"
@@ -5,6 +13,7 @@
 #include "NXP_uart.hpp"
 #include "NXP_display.hpp"
 #include "NXP_servo.hpp"
+#include "NXP_motor.hpp"
 
 class Kitty{
 private:
@@ -22,6 +31,8 @@ public:
     halina::LedLine ledLine;
     NXP_Display display;
     NXP_Servo servo;
+    NXP_LeftMotor leftMotor;
+    NXP_RightMotor rightMotor;
 
 private:
     Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7) {}
