@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <frog.h>
+#include <kitty.h>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -31,12 +31,12 @@ NXP_GPIO LED5(PORTA, GPIOA, 27U);
 NXP_GPIO LED6(PORTA, GPIOA, 28U);
 NXP_GPIO LED7(PORTA, GPIOA, 29U);
 
-FROGGY& froggy() {
+KITTY& kitty() {
     static LEDLine LED_line(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7);
 
-    static FROGGY _froggy(LED_line);
+    static KITTY static_kitty(LED_line);
 
-    return _froggy;
+    return static_kitty;
 }
 
 /*******************************************************************************
@@ -92,7 +92,7 @@ int main(void)
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    froggy().LED_line.init();
+    kitty().LED_line.init();
 
     PORT_SetPinMux(PORTA, 14U, kPORT_MuxAlt3);
     PORT_SetPinMux(PORTA, 15U, kPORT_MuxAlt3);
@@ -126,11 +126,9 @@ int main(void)
     int led_index = 0;
     uint8_t direction = 0;
     uint8_t old_led = 0;
-    while (1)
+    while (true)
     {
-//        froggy().LED1.set();
         licznik++;
-
         if (licznik == 90000) {
             licznik = 0;
             if (direction == 0) {
@@ -141,8 +139,8 @@ int main(void)
                     direction = 1;
                     old_led = 7;
                 }
-                froggy().LED_line.at(led_index).set();
-                froggy().LED_line.at(old_led).reset();
+                kitty().LED_line.at(led_index).set();
+                kitty().LED_line.at(old_led).reset();
             } else if (direction == 1) {
                 old_led = led_index;
                 led_index--;
@@ -152,8 +150,8 @@ int main(void)
                     old_led = 0;
                 }
 
-                froggy().LED_line.at(led_index).set();
-                froggy().LED_line.at(old_led).reset();
+                kitty().LED_line.at(led_index).set();
+                kitty().LED_line.at(old_led).reset();
             }
         }
         
