@@ -10,7 +10,7 @@ file(GLOB_RECURSE SOURCES
 message("SOURCES: ${SOURCES}")
 
 add_library(${NAME}
-	${SOURCES} core.cpp)
+	${SOURCES})
 
 target_link_libraries(${NAME}
 	msftgsl
