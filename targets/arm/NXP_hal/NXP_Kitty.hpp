@@ -4,6 +4,7 @@
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
 #include "NXP_display.hpp"
+#include "NXP_servo.hpp"
 
 class Kitty{
 private:
@@ -20,6 +21,7 @@ public:
     NXP_Uart uart;
     halina::LedLine ledLine;
     NXP_Display display;
+    NXP_Servo servo;
 
 private:
     Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7) {}

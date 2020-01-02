@@ -11,11 +11,14 @@ namespace halina {
 
     class Servo {
     public:
-        Servo();
+        Servo() = default;
 
-        virtual void set(float position);
+        virtual void init() = 0;
 
-        virtual float get();
+        virtual void set(float position) = 0;
+
+        virtual float get() = 0;
+
     };
 
 }
