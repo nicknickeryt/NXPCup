@@ -29,7 +29,6 @@ void NXP_Uart::init(){
     UART_Init(UART0, &config, 120000000);
     UART_TransferStartRingBuffer(UART0, &uartHandle, buffer, NXP_Uart::bufferLength);
     UART_TransferCreateHandle(UART0, &uartHandle, UART_UserCallback, NULL);
-
 }
 
 void NXP_Uart::proc() {
