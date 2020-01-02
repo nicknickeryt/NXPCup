@@ -11,7 +11,6 @@
 
 namespace halina {
 
-    template<int rx_size, int tx_size>
     class UART {
 
     public:

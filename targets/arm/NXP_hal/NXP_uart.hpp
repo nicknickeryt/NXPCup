@@ -8,12 +8,9 @@
 
 #pragma once
 
-#include "NXP_hal.hpp"
+#include "HALina.hpp"
 
-class NXP_Uart : public halina::UART<100, 100>{
-public:
-    constexpr static auto bufferLength = 1000;
-
+class NXP_Uart : public halina::UART{
 public:
     void init() override;
 

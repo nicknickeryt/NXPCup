@@ -6,7 +6,7 @@
  *
  */
 
-#include "NXP_hal.hpp"
+#include "NXP_Kitty.hpp"
 
 void Kitty::init() {
     BOARD_InitBootPins();
@@ -15,11 +15,13 @@ void Kitty::init() {
 
     uart.init();
     ledLine.init();
+    display.init();
 }
 
 void Kitty::proc() {
     uart.proc();
     magicDiodComposition();
+    display.update();
 }
 
 void Kitty::magicDiodComposition(){

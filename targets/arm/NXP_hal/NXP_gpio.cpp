@@ -6,7 +6,7 @@
  *
  */
 
-#include "NXP_hal.hpp"
+#include "NXP_gpio.hpp"
 
 void NXP_GPIO::init() {
     if (port_base == PORTA) {

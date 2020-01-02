@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "NXP_hal.hpp"
+#include "HALina.hpp"
 
 class NXP_Servo : public halina::Servo{
 public:

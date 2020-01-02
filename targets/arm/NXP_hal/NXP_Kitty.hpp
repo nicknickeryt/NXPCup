@@ -1,8 +1,9 @@
 #pragma once
 
-#include "NXP_hal.hpp"
-
-
+#include "HALina.hpp"
+#include "NXP_gpio.hpp"
+#include "NXP_uart.hpp"
+#include "NXP_display.hpp"
 
 class Kitty{
 private:
@@ -18,6 +19,7 @@ private:
 public:
     NXP_Uart uart;
     halina::LedLine ledLine;
+    NXP_Display display;
 
 private:
     Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7) {}
