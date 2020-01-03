@@ -14,7 +14,6 @@
 #define UART_RX_PIN				14U
 #define UART_TX_PIN				15U
 #define UART_BAUDRATE			115200
-#define UART_BUFFER_SIZE		1024
 
 #define DMA						DMA0
 

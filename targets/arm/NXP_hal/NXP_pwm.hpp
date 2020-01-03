@@ -14,6 +14,7 @@ class NXP_PWM : public halina::PWM{
 private:
     float dutyCycle;
 
+public:
     // clock consts
     static constexpr auto magicNumber = 0.99;
     static constexpr auto clockPrescaler = 64;
@@ -25,6 +26,9 @@ public:
     NXP_PWM() = default;
 
     void setDutyCycle(int32_t value) override;
+
     void init() override;
+
     int32_t getDutyCycle() override;
+
 };

@@ -8,10 +8,12 @@
 
 #include "HALina.hpp"
 #include "NXP_Kitty.hpp"
+#include "clock_config.h"
 
 using namespace halina;
 
-int main(void){
+int main(){
+    BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
 
     kitty.init();
@@ -27,6 +29,7 @@ int main(void){
         if(10000 == i++){
             kitty.display.print(++counter);
             i = 0;
+            kitty.servo.set(counter);
             if(counter == 9999){
                 counter = 0;
             }

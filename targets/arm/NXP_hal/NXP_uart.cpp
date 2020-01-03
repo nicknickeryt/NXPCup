@@ -12,7 +12,6 @@
 
 using namespace halina;
 
-uint8_t buffer[UART_BUFFER_SIZE] = {0};
 uart_handle_t uartHandle;
 
 /* UART user callback */
@@ -37,7 +36,7 @@ void NXP_Uart::init(){
     config.enableRx = true;
 
     UART_Init(UART, &config, 120000000);
-    UART_TransferStartRingBuffer(UART, &uartHandle, buffer, UART_BUFFER_SIZE);
+//    UART_TransferStartRingBuffer(UART, &uartHandle, buffer, UART_BUFFER_SIZE);
     UART_TransferCreateHandle(UART, &uartHandle, UART_UserCallback, NULL);
 }
 

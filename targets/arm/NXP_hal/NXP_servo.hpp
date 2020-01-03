@@ -13,11 +13,10 @@
 
 class NXP_Servo : public halina::Servo{
 private:
-    NXP_PWM pwm;
-
     class Filter{
     private:
         static constexpr auto tapNumber = 25;
+        constexpr static auto NUMPR = 20;
         int32_t filterTapsArray[tapNumber] = {1949, 2709, -1061, -71, 939, -1477, 1453, -661, -908,
                                               2992,-5110,6681,25501,6681,-5110,2992,-908,-661,1453,-1477,939,-71,-1061,2709,1949};
 
@@ -48,9 +47,37 @@ private:
             };
             return result >> 16;
         }
+
+        int32_t runningAverage(int32_t value){
+            static int32_t avg[NUMPR];
+            for (uint8_t i =0; i < (NUMPR-1); i ++)
+            {
+                avg[i] = avg[i+1];
+            }
+            avg[NUMPR-1] = value;
+
+            value = 0;
+            for (uint8_t i =0; i < NUMPR; i ++)
+            {
+                value += avg[i];
+            }
+            value /= NUMPR;
+            return value;
+        }
+
     };
 
+public:
+    constexpr static uint32_t servoMinValue = 20000;
+    constexpr static uint32_t servoMaxValue = 50000;
+    constexpr static uint32_t servoMeanValue = (servoMinValue + servoMaxValue) / 2;
+    constexpr static uint32_t servoOffset = 0;
+
+private:
+    NXP_PWM pwm;
     Filter filter;
+
+    float servoPosition = 0;
 
 public:
     NXP_Servo() = default;

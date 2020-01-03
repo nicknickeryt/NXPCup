@@ -28,9 +28,6 @@
 
         void update();
 
-        /*
-         * Statyczne metody do ustawianai poszczególnych pinów wyświetlacza
-         */
         static void A1_On()  { DISPLAY_GPIO->PCOR = DISPLAY_A1; }
         static void A2_On()  { DISPLAY_GPIO->PCOR = DISPLAY_A2; }
         static void A3_On()  { DISPLAY_GPIO->PCOR = DISPLAY_A3; }
@@ -73,13 +70,6 @@
         static void G_Toggle()  { DISPLAY_GPIO->PTOR = DISPLAY_G; }
         static void DP_Toggle()  { DISPLAY_GPIO->PTOR = DISPLAY_DP; }
 
-        /*
-         * zgaszenie wszystkich diod w segmencie
-         */
         static void signsOff()  { DISPLAY_GPIO->PSOR = DISPLAY_A1 | DISPLAY_A2 | DISPLAY_A3 | DISPLAY_A4; }
-
-        /*
-         * Zgaszenie wszystkich segmentów
-         */
         static void segmentsOff()  { DISPLAY_GPIO->PSOR = DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G | DISPLAY_DP; }
     };
