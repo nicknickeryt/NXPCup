@@ -11,10 +11,10 @@
 
 void NXP_PWM::setDutyCycle(int32_t value){
     dutyCycle = value;
-    if (portFirst.checkPort()) {
+    if (portFirst.checkPort() && value > 0) {
         ftm->CONTROLS[channelFirst].CnV = FTM_CnV_VAL(dutyCycle);
     }
-    if (portFirst.checkPort()) {
+    if (portFirst.checkPort() && value < 0) {
         ftm->CONTROLS[channelSecond].CnV = FTM_CnV_VAL(dutyCycle);
     }
 }
@@ -28,13 +28,13 @@ void NXP_PWM::init() {
         portFirst.setMux();
     }
     if (portSecond.checkPort()) {
-        portSecond.setMux();
         ftm->CONTROLS[channelSecond].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
+        portSecond.setMux();
     }
 
     setDutyCycle(0);
 
-    ftm->SC = (FTM_SC_CLKS(0x01) | FTM_SC_PS(0x06) | FTM_SC_TOIE_MASK);
+    ftm->SC = (FTM_SC_CLKS(0x01) | FTM_SC_PS(0x01));
 }
 
 int32_t NXP_PWM::getDutyCycle(){

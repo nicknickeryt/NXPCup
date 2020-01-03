@@ -20,21 +20,7 @@ int main(){
     kitty.uartDebug.write("Hello world xD\n");
     kitty.servo.set(0.0);
 
-    kitty.display.print(6969);
-
     while (true){
         kitty.proc();
-
-        // todo delete this test!
-        static uint32_t i;
-        static float counter = -1.0;
-        if(10000 == i++){
-            counter += 0.01;
-            i = 0;
-            kitty.servo.set(counter);
-            if(counter >=  1.0){
-                counter =  -1.0;
-            }
-        }
     }
 }

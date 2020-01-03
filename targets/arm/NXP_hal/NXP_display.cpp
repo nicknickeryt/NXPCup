@@ -31,6 +31,7 @@ void NXP_Display::init(void) {
 }
 
 void NXP_Display::print(const char* data) {
+    memset(displayBuffer, 0, 4);
     for(auto i = 0; i < 4; i++){
         if(data[i] == '-' ||
            data[i] == '1' ||
@@ -53,6 +54,7 @@ void NXP_Display::print(const char* data) {
 }
 
 void NXP_Display::print(uint32_t data) {
+    memset(displayBuffer, 0, 4);
     if(data < 10000) {
         displayBuffer[0] = (data / 1000) + 48;
         data -= ((data / 1000) * 1000);

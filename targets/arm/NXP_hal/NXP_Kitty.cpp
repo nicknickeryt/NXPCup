@@ -13,18 +13,34 @@ void Kitty::init() {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+    FTM_Init();
     uartDebug.init();
     ledLine.init();
     display.init();
     servo.init();
-//    leftMotor.init();
-//    rightMotor.init();
+    motors.motorLeft.init();
+    motors.motorRight.init();
+
+    motors.motorLeft.setValue(1000);
+    motors.motorRight.setValue(1000);
 }
 
 void Kitty::proc() {
     uartDebug.proc();
     magicDiodComposition();
     display.update();
+}
+
+void Kitty::FTM_Init() {
+        SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
+        SIM->SOPT2 |= SIM_SOPT2_TIMESRC(1);
+        SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
+        SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
+        SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
+        SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
+        SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
+        GPIOE->PDDR |= ((uint32_t)(1<<4));
+        GPIOE->PSOR = ((uint32_t)(1<<4));
 }
 
 void Kitty::magicDiodComposition(){
