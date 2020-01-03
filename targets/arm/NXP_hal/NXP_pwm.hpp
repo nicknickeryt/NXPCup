@@ -11,9 +11,12 @@
 #include "clock_config.h"
 #include "NXP_gpio.hpp"
 
+class Kitty;
+
 class NXP_PWM : public halina::PWM{
 private:
-    float dutyCycle;
+    int32_t dutyCycle;
+    Kitty& kitty;
     FTM_Type* ftm;
     NXP_PORT& portFirst;
     NXP_PORT& portSecond;
@@ -21,9 +24,10 @@ private:
     uint8_t channelSecond;
     uint32_t clockPrescaler;
 
+
 public:
-    NXP_PWM(FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t clockPrescaler) :
-            ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), clockPrescaler(clockPrescaler) { }
+    NXP_PWM(Kitty& kitty, FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t clockPrescaler) :
+            kitty(kitty), ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), clockPrescaler(clockPrescaler) { }
 
     void setDutyCycle(int32_t value) override;
 

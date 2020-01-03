@@ -18,11 +18,11 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
-    motors.motorLeft.init();
-    motors.motorRight.init();
-
-    motors.motorLeft.setValue(1000);
-    motors.motorRight.setValue(1000);
+    servo.set(1.0);
+    motorLeft.init();
+    motorRight.init();
+    motorLeft.setValue(12000);
+    motorRight.setValue(12000);
 }
 
 void Kitty::proc() {
@@ -39,8 +39,6 @@ void Kitty::FTM_Init() {
         SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
         SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
         SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
-        GPIOE->PDDR |= ((uint32_t)(1<<4));
-        GPIOE->PSOR = ((uint32_t)(1<<4));
 }
 
 void Kitty::magicDiodComposition(){

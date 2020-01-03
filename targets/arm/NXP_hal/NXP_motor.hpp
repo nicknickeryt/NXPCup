@@ -13,51 +13,26 @@
 
 class Kitty;
 
-class NXP_Motor {
-public:
-class NXP_MotorLeft : public halina::Motor {
-    friend class NXP_Motor;
-    private:
+class NXP_Motor : public halina::Motor{
+private:
     constexpr static auto NUMPR = 10;
-    private:
-        int32_t speed = 0;
-        NXP_Motor& motor;
-        NXP_PWM& pwm;
-    public:
-    NXP_MotorLeft(NXP_Motor& motor, NXP_PWM& pwm) : motor(motor), pwm(pwm){ }
+private:
+    Kitty& kitty;
+    int32_t speed = 0;
+    NXP_PWM& pwm;
+    NXP_GPIO enablePin;
+
+public:
+    NXP_Motor(Kitty& kitty_, NXP_PWM& pwm, NXP_GPIO enablePin) : kitty(kitty_), pwm(pwm), enablePin(enablePin) {}
 
     void init() override;
 
     void setValue(int32_t) override;
 
     int32_t getValue() override;
-    };
 
-    class NXP_MotorRight : public halina::Motor {
-        friend class NXP_Motor;
-    private:
-        constexpr static auto NUMPR = 10;
-    private:
-        int32_t speed = 0;
-        NXP_Motor& motor;
-        NXP_PWM& pwm;
-    public:
+    void block() override { enablePin.reset(); }
 
-        NXP_MotorRight(NXP_Motor& motor, NXP_PWM& pwm) : motor(motor), pwm(pwm){ }
+    void run() override { enablePin.set(); };
 
-        void init() override;
-
-        void setValue(int32_t) override;
-
-        int32_t getValue() override;
-    };
-
-private:
-    Kitty& kitty;
-public:
-    NXP_MotorLeft motorLeft;
-    NXP_MotorRight motorRight;
-
-public:
-    NXP_Motor(Kitty& kitty_, NXP_PWM& left, NXP_PWM& right) : kitty(kitty_), motorLeft(*this, left), motorRight(*this,right) {}
 };

@@ -17,5 +17,9 @@ namespace halina {
         virtual void setValue(int32_t) = 0;
 
         virtual int32_t getValue() = 0;
+
+        virtual void block() = 0;
+
+        virtual void run() = 0;
     };
 }

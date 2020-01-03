@@ -8,10 +8,13 @@
 
 #include "fsl_pwm.h"
 #include "NXP_pwm.hpp"
+#include "NXP_Kitty.hpp"
+
+char buffer[50];
 
 void NXP_PWM::setDutyCycle(int32_t value){
     dutyCycle = value;
-    if (portFirst.checkPort() && value > 0) {
+    if (portFirst.checkPort() && dutyCycle > 0) {
         ftm->CONTROLS[channelFirst].CnV = FTM_CnV_VAL(dutyCycle);
     }
     if (portFirst.checkPort() && value < 0) {
@@ -33,7 +36,6 @@ void NXP_PWM::init() {
     }
 
     setDutyCycle(0);
-
     ftm->SC = (FTM_SC_CLKS(0x01) | FTM_SC_PS(0x01));
 }
 
