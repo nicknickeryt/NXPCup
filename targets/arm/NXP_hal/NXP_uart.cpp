@@ -37,7 +37,7 @@ void NXP_Uart::init(){
     config.enableTx = true;
     config.enableRx = true;
 
-    UART_Init(uart, &config, BOARD_BOOTCLOCKRUN_CORE_CLOCK);
+    UART_Init(uart, &config, 120000000);
 //    UART_TransferStartRingBuffer(UART, &uartHandle, buffer, UART_BUFFER_SIZE);
     UART_TransferCreateHandle(uart, &uartHandle, UART_UserCallback, NULL);
 }
