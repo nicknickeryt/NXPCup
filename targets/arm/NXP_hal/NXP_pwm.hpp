@@ -9,18 +9,20 @@
 
 #include "HALina.hpp"
 #include "clock_config.h"
+#include "NXP_gpio.hpp"
 
 class NXP_PWM : public halina::PWM{
 private:
     float dutyCycle;
-
+    FTM_Type * ftm;
+    NXP_PORT& port;
 public:
     static constexpr auto clockPrescaler = 64;
     static constexpr auto outputClockPrescaler = 50;
     static constexpr auto clockMod = BOARD_BOOTCLOCKRUN_CORE_CLOCK/clockPrescaler/outputClockPrescaler;
 
 public:
-    NXP_PWM() = default;
+    NXP_PWM(FTM_Type * ftm, NXP_PORT& port) : ftm(ftm), port(port) { }
 
     void setDutyCycle(int32_t value) override;
 

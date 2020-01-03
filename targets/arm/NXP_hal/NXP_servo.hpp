@@ -70,7 +70,7 @@ private:
 
 private:
     Kitty& kitty;
-    NXP_PWM pwm;
+    NXP_PWM& pwm;
     Filter filter;
 
 public:
@@ -79,7 +79,7 @@ public:
     int32_t servoCenterValue;
 
 public:
-    explicit NXP_Servo(Kitty& kitty_, int32_t minValue, int32_t maxValue) : kitty(kitty_), servoMinValue(minValue), servoMaxValue(maxValue), servoCenterValue((maxValue + minValue)/2) { }
+    explicit NXP_Servo(Kitty& kitty_, NXP_PWM& pwm, int32_t minValue, int32_t maxValue) : kitty(kitty_), pwm(pwm), servoMinValue(minValue), servoMaxValue(maxValue), servoCenterValue((maxValue + minValue)/2) { }
 
     void init() override;
 

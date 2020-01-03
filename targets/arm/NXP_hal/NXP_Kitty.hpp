@@ -26,6 +26,8 @@ private:
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
 
+    NXP_PORT servo_port = {PORTA, 7, 0x03};
+    NXP_PWM servo_pwm = {FTM0, servo_port};
 public:
     NXP_Uart uart;
     halina::LedLine ledLine;
@@ -35,7 +37,7 @@ public:
     NXP_RightMotor rightMotor;
 
 private:
-    Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7), servo(*this, 1400, 4400) {}
+    Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7), servo(*this, servo_pwm, 1400, 4400) {}
 
     void magicDiodComposition();
 

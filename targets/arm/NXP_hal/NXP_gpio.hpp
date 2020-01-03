@@ -41,3 +41,16 @@ public:
         GPIO_PortToggle(base, 1U << pin);
     }
 };
+
+//template <typename T>
+class NXP_PORT : halina::PORT {
+    PORT_Type* port;
+    uint8_t pinNumber;
+    uint8_t muxNumber;
+public:
+    NXP_PORT(PORT_Type* port, uint8_t pinNumber, uint8_t muxNumber) : port(port), pinNumber(pinNumber), muxNumber(muxNumber) { }
+
+    void set_mux() override {
+        port->PCR[pinNumber] = PORT_PCR_MUX(muxNumber);
+    }
+};
