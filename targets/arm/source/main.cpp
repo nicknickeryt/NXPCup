@@ -17,7 +17,7 @@ int main(){
     Kitty& kitty = Kitty::kitty();
 
     kitty.init();
-    kitty.uart.write("Hello world xD\n");
+    kitty.uartDebug.write("Hello world xD\n");
     kitty.servo.set(0.0);
 
     while (true){

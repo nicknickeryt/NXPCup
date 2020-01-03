@@ -13,7 +13,7 @@ void Kitty::init() {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    uart.init();
+    uartDebug.init();
     ledLine.init();
     display.init();
     servo.init();
@@ -22,7 +22,7 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
-    uart.proc();
+    uartDebug.proc();
     magicDiodComposition();
     display.update();
 }

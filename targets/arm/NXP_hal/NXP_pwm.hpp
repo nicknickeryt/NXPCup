@@ -14,15 +14,16 @@
 class NXP_PWM : public halina::PWM{
 private:
     float dutyCycle;
-    FTM_Type * ftm;
-    NXP_PORT& port;
-public:
-    static constexpr auto clockPrescaler = 64;
-    static constexpr auto outputClockPrescaler = 50;
-    static constexpr auto clockMod = BOARD_BOOTCLOCKRUN_CORE_CLOCK/clockPrescaler/outputClockPrescaler;
+    FTM_Type* ftm;
+    NXP_PORT& portFirst;
+    NXP_PORT& portSecond;
+    uint8_t channelFirst;
+    uint8_t channelSecond;
+    uint32_t clockPrescaler;
 
 public:
-    NXP_PWM(FTM_Type * ftm, NXP_PORT& port) : ftm(ftm), port(port) { }
+    NXP_PWM(FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t clockPrescaler) :
+            ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), clockPrescaler(clockPrescaler) { }
 
     void setDutyCycle(int32_t value) override;
 

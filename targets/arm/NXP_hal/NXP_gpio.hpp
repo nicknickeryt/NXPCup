@@ -42,7 +42,6 @@ public:
     }
 };
 
-//template <typename T>
 class NXP_PORT : halina::PORT {
     PORT_Type* port;
     uint8_t pinNumber;
@@ -50,7 +49,16 @@ class NXP_PORT : halina::PORT {
 public:
     NXP_PORT(PORT_Type* port, uint8_t pinNumber, uint8_t muxNumber) : port(port), pinNumber(pinNumber), muxNumber(muxNumber) { }
 
-    void set_mux() override {
+    bool checkPort(){
+        return port != nullptr;
+    }
+
+    static NXP_PORT& getEmptyPort(){
+        static NXP_PORT port = {nullptr, 0, 0};
+        return port;
+    }
+
+    void setMux() override {
         port->PCR[pinNumber] = PORT_PCR_MUX(muxNumber);
     }
 };

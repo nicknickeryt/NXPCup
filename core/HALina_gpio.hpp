@@ -14,7 +14,7 @@ namespace halina {
 
     class PORT {
     public:
-        virtual void set_mux() = 0;
+        virtual void setMux() = 0;
 
     };
 

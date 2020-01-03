@@ -9,6 +9,8 @@
 #include "HALina.hpp"
 #include "NXP_uart.hpp"
 #include "HALina_config.hpp"
+#include "fsl_uart.h"
+#include "clock_config.h"
 
 using namespace halina;
 
@@ -25,19 +27,19 @@ void UART_UserCallback(UART_Type *base, uart_handle_t *handle, status_t status, 
 }
 
 void NXP_Uart::init(){
-    PORT_SetPinMux(UART_PORT, UART_RX_PIN, kPORT_MuxAlt3);
-    PORT_SetPinMux(UART_PORT, UART_TX_PIN, kPORT_MuxAlt3);
+    PORT_SetPinMux(port, RXPin, kPORT_MuxAlt3);
+    PORT_SetPinMux(port, TXPin, kPORT_MuxAlt3);
 
     uart_config_t config;
 
     UART_GetDefaultConfig(&config);
-    config.baudRate_Bps = UART_BAUDRATE;
+    config.baudRate_Bps = baudrate;
     config.enableTx = true;
     config.enableRx = true;
 
-    UART_Init(UART, &config, 120000000);
+    UART_Init(uart, &config, BOARD_BOOTCLOCKRUN_CORE_CLOCK);
 //    UART_TransferStartRingBuffer(UART, &uartHandle, buffer, UART_BUFFER_SIZE);
-    UART_TransferCreateHandle(UART, &uartHandle, UART_UserCallback, NULL);
+    UART_TransferCreateHandle(uart, &uartHandle, UART_UserCallback, NULL);
 }
 
 void NXP_Uart::proc() {
@@ -49,7 +51,7 @@ void NXP_Uart::write(void const* data) {
     static uart_transfer_t dataTransfer;
     dataTransfer.data = (uint8_t*)data;
     dataTransfer.dataSize = strlen((char*)data);
-    UART_TransferSendNonBlocking(UART, &uartHandle, &dataTransfer);
+    UART_TransferSendNonBlocking(uart, &uartHandle, &dataTransfer);
 }
 
 char NXP_Uart::read() {
