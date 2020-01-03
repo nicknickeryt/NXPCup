@@ -41,6 +41,7 @@ processor_version: 6.0.1
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 
+#include "fsl_smc.h"
 #include "clock_config.h"
 
 /*******************************************************************************
@@ -64,7 +65,7 @@ extern uint32_t SystemCoreClock;
 /*FUNCTION**********************************************************************
  *
  * Function Name : CLOCK_CONFIG_SetSimSafeDivs
- * Description   : This function sets the system clock dividers in SIM to safe 
+ * Description   : This function sets the system clock dividers in SIM to safe
  * value.
  *
  *END**************************************************************************/
@@ -103,30 +104,31 @@ name: BOARD_BootClockRUN
 called_from_default_init: true
 outputs:
 - {id: Bus_clock.outFreq, value: 120 MHz}
-- {id: Core_clock.outFreq, value: 120 MHz}
+- {id: Core_clock.outFreq, value: 240 MHz}
 - {id: Flash_clock.outFreq, value: 24 MHz}
 - {id: FlexBus_clock.outFreq, value: 60 MHz}
 - {id: LPO_clock.outFreq, value: 1 kHz}
 - {id: MCGFFCLK.outFreq, value: 375 kHz}
-- {id: System_clock.outFreq, value: 120 MHz}
+- {id: System_clock.outFreq, value: 240 MHz}
 settings:
 - {id: MCGMode, value: PEE}
+- {id: powerMode, value: HSRUN}
 - {id: MCG.FCRDIV.scale, value: '1', locked: true}
 - {id: MCG.FRDIV.scale, value: '32', locked: true}
 - {id: MCG.IRCS.sel, value: MCG.FCRDIV}
 - {id: MCG.IREFS.sel, value: MCG.FRDIV}
 - {id: MCG.PLLS.sel, value: MCG.PLL_DIV2}
 - {id: MCG.PRDIV.scale, value: '1', locked: true}
-- {id: MCG.VDIV.scale, value: '20', locked: true}
+- {id: MCG.VDIV.scale, value: '40', locked: true}
 - {id: MCG_C2_OSC_MODE_CFG, value: ModeOscLowPower}
 - {id: MCG_C2_RANGE0_CFG, value: Very_high}
 - {id: MCG_C2_RANGE0_FRDIV_CFG, value: Very_high}
 - {id: MCG_C5_PLLCLKEN0_CFG, value: Enabled}
 - {id: MCG_C5_PLLSTEN0_CFG, value: Enabled}
 - {id: SIM.OUTDIV1.scale, value: '1', locked: true}
-- {id: SIM.OUTDIV2.scale, value: '1', locked: true}
-- {id: SIM.OUTDIV3.scale, value: '2', locked: true}
-- {id: SIM.OUTDIV4.scale, value: '5', locked: true}
+- {id: SIM.OUTDIV2.scale, value: '2', locked: true}
+- {id: SIM.OUTDIV3.scale, value: '4', locked: true}
+- {id: SIM.OUTDIV4.scale, value: '10', locked: true}
 sources:
 - {id: MCG.FAST_IRCLK.outFreq, value: 8 MHz}
 - {id: OSC.OSC.outFreq, value: 12 MHz, enabled: true}
@@ -137,44 +139,50 @@ sources:
  * Variables for BOARD_BootClockRUN configuration
  ******************************************************************************/
 const mcg_config_t mcgConfig_BOARD_BootClockRUN =
-    {
-        .mcgMode = kMCG_ModePEE,                  /* PEE - PLL Engaged External */
-        .irclkEnableMode = MCG_IRCLK_DISABLE,     /* MCGIRCLK disabled */
-        .ircs = kMCG_IrcFast,                     /* Fast internal reference clock selected */
-        .fcrdiv = 0x0U,                           /* Fast IRC divider: divided by 1 */
-        .frdiv = 0x0U,                            /* FLL reference clock divider: divided by 32 */
-        .drs = kMCG_DrsLow,                       /* Low frequency range */
-        .dmx32 = kMCG_Dmx32Default,               /* DCO has a default range of 25% */
-        .pll0Config =
-            {
-                .enableMode = kMCG_PllEnableIndependent | kMCG_PllEnableInStop,/* MCGPLLCLK enabled independently of MCG clock mode as well as in STOP mode */
-                .prdiv = 0x0U,                    /* PLL Reference divider: divided by 1 */
-                .vdiv = 0x4U,                     /* VCO divider: multiplied by 20 */
-            },
-    };
+        {
+                .mcgMode = kMCG_ModePEE,                  /* PEE - PLL Engaged External */
+                .irclkEnableMode = MCG_IRCLK_DISABLE,     /* MCGIRCLK disabled */
+                .ircs = kMCG_IrcFast,                     /* Fast internal reference clock selected */
+                .fcrdiv = 0x0U,                           /* Fast IRC divider: divided by 1 */
+                .frdiv = 0x0U,                            /* FLL reference clock divider: divided by 32 */
+                .drs = kMCG_DrsLow,                       /* Low frequency range */
+                .dmx32 = kMCG_Dmx32Default,               /* DCO has a default range of 25% */
+                .pll0Config =
+                        {
+                                .enableMode = kMCG_PllEnableIndependent | kMCG_PllEnableInStop,/* MCGPLLCLK enabled independently of MCG clock mode as well as in STOP mode */
+                                .prdiv = 0x0U,                    /* PLL Reference divider: divided by 1 */
+                                .vdiv = 0x18U,                    /* VCO divider: multiplied by 40 */
+                        },
+        };
 const sim_clock_config_t simConfig_BOARD_BootClockRUN =
-    {
-        .pllFllSel = SIM_PLLFLLSEL_MCGFLLCLK_CLK, /* PLLFLL select: MCGFLLCLK clock */
-        .er32kSrc = SIM_OSC32KSEL_OSC32KCLK_CLK,  /* OSC32KSEL select: OSC32KCLK clock */
-        .clkdiv1 = 0x140000U,                     /* SIM_CLKDIV1 - OUTDIV1: /1, OUTDIV2: /1, OUTDIV3: /2, OUTDIV4: /5 */
-    };
+        {
+                .pllFllSel = SIM_PLLFLLSEL_MCGFLLCLK_CLK, /* PLLFLL select: MCGFLLCLK clock */
+                .er32kSrc = SIM_OSC32KSEL_OSC32KCLK_CLK,  /* OSC32KSEL select: OSC32KCLK clock */
+                .clkdiv1 = 0x1390000U,                    /* SIM_CLKDIV1 - OUTDIV1: /1, OUTDIV2: /2, OUTDIV3: /4, OUTDIV4: /10 */
+        };
 const osc_config_t oscConfig_BOARD_BootClockRUN =
-    {
-        .freq = 12000000U,                        /* Oscillator frequency: 12000000Hz */
-        .capLoad = (OSC_CAP0P),                   /* Oscillator capacity load: 0pF */
-        .workMode = kOSC_ModeOscLowPower,         /* Oscillator low power */
-        .oscerConfig =
-            {
-                .enableMode = OSC_ER_CLK_DISABLE, /* Disable external reference clock */
-                .erclkDiv = 0,                    /* Divider for OSCERCLK: divided by 1 */
-            }
-    };
+        {
+                .freq = 12000000U,                        /* Oscillator frequency: 12000000Hz */
+                .capLoad = (OSC_CAP0P),                   /* Oscillator capacity load: 0pF */
+                .workMode = kOSC_ModeOscLowPower,         /* Oscillator low power */
+                .oscerConfig =
+                        {
+                                .enableMode = OSC_ER_CLK_DISABLE, /* Disable external reference clock */
+                                .erclkDiv = 0,                    /* Divider for OSCERCLK: divided by 1 */
+                        }
+        };
 
 /*******************************************************************************
  * Code for BOARD_BootClockRUN configuration
  ******************************************************************************/
 void BOARD_BootClockRUN(void)
 {
+    /* Set HSRUN power mode */
+    SMC_SetPowerModeProtection(SMC, kSMC_AllowPowerModeAll);
+    SMC_SetPowerModeHsrun(SMC);
+    while (SMC_GetPowerModeState(SMC) != kSMC_PowerStateHsrun)
+    {
+    }
     /* Set the system clock dividers in SIM to safe value. */
     CLOCK_CONFIG_SetSimSafeDivs();
     /* Initializes OSC0 according to board configuration. */

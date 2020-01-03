@@ -35,7 +35,7 @@ public:
     NXP_RightMotor rightMotor;
 
 private:
-    Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7) {}
+    Kitty() : ledLine(LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7), servo(*this, 1400, 4400) {}
 
     void magicDiodComposition();
 

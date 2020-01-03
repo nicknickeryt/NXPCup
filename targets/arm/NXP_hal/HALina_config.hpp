@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "MKV58F24.h"
+
 /////////////////////// UART ///////////////////////
 #define UART					UART0
 #define UART_PORT				PORTA
@@ -45,6 +47,6 @@
 
 /////////////////////// MOTORS ///////////////////////
 #define MOTOR_CLOCK_PRESCALER 		1
-#define MOTOR_CLOCK_INPUT			DEFAULT_SYSTEM_CLOCK
+#define MOTOR_CLOCK_INPUT			240000000
 #define MOTOR_CLOCK_OUTPUT			10000
 #define MOTOR_CLOCK_MOD				MOTOR_CLOCK_INPUT/MOTOR_CLOCK_PRESCALER/MOTOR_CLOCK_OUTPUT

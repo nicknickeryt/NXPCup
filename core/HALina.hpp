@@ -19,8 +19,8 @@
 #include "clock_config.h"
 
 #include "HALina_gpio.hpp"
-#include "HALina_pwm.hpp"
 #include "HALina_uart.hpp"
+#include "HALina_pwm.hpp"
 #include "HALina_led_line.hpp"
 #include "HALina_servo.hpp"
 #include "HALina_motor.hpp"

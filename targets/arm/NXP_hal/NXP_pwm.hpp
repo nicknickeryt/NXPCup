@@ -5,22 +5,19 @@
  * NXP HALina implementation of pwm driver
  *
  */
+#pragma once
 
 #include "HALina.hpp"
-
-#pragma once
+#include "clock_config.h"
 
 class NXP_PWM : public halina::PWM{
 private:
     float dutyCycle;
 
 public:
-    // clock consts
-    static constexpr auto magicNumber = 0.99;
     static constexpr auto clockPrescaler = 64;
-    static constexpr auto inputClockFrequency = DEFAULT_SYSTEM_CLOCK;
-    static constexpr auto outputClock = 50;
-    static constexpr auto clockMod = inputClockFrequency/clockPrescaler/outputClock/magicNumber;
+    static constexpr auto outputClockPrescaler = 50;
+    static constexpr auto clockMod = BOARD_BOOTCLOCKRUN_CORE_CLOCK/clockPrescaler/outputClockPrescaler;
 
 public:
     NXP_PWM() = default;

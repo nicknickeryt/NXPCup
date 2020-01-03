@@ -18,20 +18,20 @@ int main(){
 
     kitty.init();
     kitty.uart.write("Hello world xD\n");
-    kitty.display.print(4321);
+    kitty.servo.set(0.0);
 
     while (true){
         kitty.proc();
 
         // todo delete this test!
         static uint32_t i;
-        static uint32_t counter;
+        static float counter = -1.0;
         if(10000 == i++){
-            kitty.display.print(++counter);
+            counter += 0.01;
             i = 0;
             kitty.servo.set(counter);
-            if(counter == 9999){
-                counter = 0;
+            if(counter >=  1.0){
+                counter =  -1.0;
             }
         }
     }
