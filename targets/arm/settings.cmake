@@ -1,5 +1,5 @@
 set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror")
-set (CXXWARN "-Wall -Wextra -Werror")
+set (CXXWARN "-Wall -Wextra")
 set(CTUNING "-fomit-frame-pointer -ffunction-sections -fdata-sections")
 
 set(CMCU "-mcpu=cortex-m7 -mthumb -mfloat-abi=soft")
@@ -12,4 +12,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++2a -Dregister=\"/**/\" -fno-ex
 
 set(PLATFORM_LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/MKV58F1M0xxx24.ld)
 
-set(PROJECT_DIRECTORIES "board CMSIS device drivers source startup NXP_hal")
+set(PROJECT_DIRECTORIES "board CMSIS device drivers source startup NXP_hal debug_module")
+
+

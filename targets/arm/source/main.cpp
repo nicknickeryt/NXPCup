@@ -10,6 +10,12 @@
 #include "NXP_Kitty.hpp"
 #include "clock_config.h"
 
+#define LOG_CHANNEL APP
+#define APP_LOG_CHANNEL 1
+#define APP_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
+#include "logger.h"
+
 using namespace halina;
 
 int main(){
@@ -17,7 +23,11 @@ int main(){
     Kitty& kitty = Kitty::kitty();
 
     kitty.init();
-    kitty.uartDebug.write("Hello world xD\n");
+    uint32_t a = 10;
+    int32_t b = -3;
+    float c = 5.67;
+    char d = 'e';
+    log_notice("TEST xDDD a=%d, b=%d, c=%f, d=%c", a, b, c, d);
     kitty.servo.set(0.0);
 
     kitty.display.print(6969);
@@ -25,16 +35,5 @@ int main(){
     while (true){
         kitty.proc();
 
-        // todo delete this test!
-        static uint32_t i;
-        static float counter = -1.0;
-        if(10000 == i++){
-            counter += 0.01;
-            i = 0;
-            kitty.servo.set(counter);
-            if(counter >=  1.0){
-                counter =  -1.0;
-            }
-        }
     }
 }

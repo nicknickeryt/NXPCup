@@ -8,6 +8,12 @@
 
 #include "NXP_Kitty.hpp"
 
+#define LOG_CHANNEL KITTY
+#define KITTY_LOG_CHANNEL 2
+#define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
+#include "logger.h"
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -19,6 +25,7 @@ void Kitty::init() {
     servo.init();
 //    leftMotor.init();
 //    rightMotor.init();
+    log_notice("NO elo");
 }
 
 void Kitty::proc() {
