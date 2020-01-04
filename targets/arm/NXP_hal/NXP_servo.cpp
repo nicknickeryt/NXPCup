@@ -28,5 +28,6 @@ void NXP_Servo::set(float value){
 }
 
 float NXP_Servo::get(){
-    return 0;
+    // todo write conversion form int32_t to float
+    return static_cast<float>(pwm.getDutyCycle());
 }

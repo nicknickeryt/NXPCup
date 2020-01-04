@@ -14,9 +14,9 @@ namespace halina {
     public:
         virtual void init() = 0;
 
-        virtual void setValue(int32_t) = 0;
+        virtual void setValue(float) = 0;
 
-        virtual int32_t getValue() = 0;
+        virtual float getValue() = 0;
 
         virtual void block() = 0;
 

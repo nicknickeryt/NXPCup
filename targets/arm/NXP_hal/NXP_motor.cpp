@@ -15,25 +15,22 @@ void NXP_Motor::init(){
     pwm.init();
 }
 
-void NXP_Motor::setValue(int32_t value) {
-//    static int32_t mean[NUMPR];
-//    for (uint8_t i =0; i < (NUMPR-1); i ++)
-//    {
-//        mean[i] = mean[i+1];
-//    }
-//    mean[NUMPR-1] = value;
-//
-//    value = 0;
-//    for (uint8_t i =0; i < NUMPR; i ++)
-//    {
-//        value += mean[i];
-//    }
-//    value /= NUMPR;
+void NXP_Motor::setValue(float value) {
+    if(value > 1.0){
+        value = 1.0;
+    } else if(value < -1.0){
+        value = -1.0;
+    }
 
-    pwm.setDutyCycle(value);
+    value *= (static_cast<float>(maxValue - minValue))/2.0;
+    value += static_cast<float>(centerValue);
+    auto motorValue = int32_t(value);
+    filter.runningAverage(&motorValue);
+    pwm.setDutyCycle(motorValue);
 }
 
 
-int32_t NXP_Motor::getValue() {
-    return pwm.getDutyCycle();
+float NXP_Motor::getValue() {
+    // todo write conversion form int32_t to float
+    return static_cast<float>(pwm.getDutyCycle());
 }

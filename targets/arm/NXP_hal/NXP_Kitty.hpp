@@ -43,8 +43,8 @@ public:
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
-    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin};
-    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin};
+    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
+    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 private:
     Kitty() = default;
 
