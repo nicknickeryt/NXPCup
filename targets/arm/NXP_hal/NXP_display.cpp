@@ -8,7 +8,21 @@
 
 #include "NXP_display.hpp"
 
-void NXP_Display::init(void) {
+uint32_t displayCharacters [] {
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),
+    uint32_t(DISPLAY_B | DISPLAY_C),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_D | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_G),
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_F | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),
+    uint32_t(DISPLAY_G)
+};
+
+void NXP_Display::init() {
     DISPLAY_PORT->PCR[0] = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;
     DISPLAY_PORT->PCR[1] = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;
     DISPLAY_PORT->PCR[2] = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;
@@ -26,47 +40,11 @@ void NXP_Display::init(void) {
     DISPLAY_GPIO->PDDR |= DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D;
     DISPLAY_GPIO->PDDR |= DISPLAY_E | DISPLAY_F | DISPLAY_G | DISPLAY_DP;
 
-    signsOff();
+    digitsOff();
     segmentsOff();
 }
 
-void NXP_Display::print(const char* data) {
-    memset(displayBuffer, 0, 4);
-    for(auto i = 0; i < 4; i++){
-        if(data[i] == '-' ||
-           data[i] == '1' ||
-           data[i] == '2' ||
-           data[i] == '3' ||
-           data[i] == '4' ||
-           data[i] == '5' ||
-           data[i] == '6' ||
-           data[i] == '7' ||
-           data[i] == '8' ||
-           data[i] == '9' ||
-           data[i] == '0'){
-        }else{
-            return;
-        }
-    }
-    for(auto i = 0; i < 4; i++){
-        displayBuffer[i] = data[i];
-    }
-}
-
-void NXP_Display::print(uint32_t data) {
-    memset(displayBuffer, 0, 4);
-    if(data < 10000) {
-        displayBuffer[0] = (data / 1000) + 48;
-        data -= ((data / 1000) * 1000);
-        displayBuffer[1] = (data / 100) + 48;
-        data -= ((data / 100) * 100);
-        displayBuffer[2] = data / 10 + 48;
-        data -= ((data / 10) * 10);
-        displayBuffer[3] = data + 48;
-    }
-}
-
-void NXP_Display::update() noexcept{
+void NXP_Display::update() {
     static int refreshCounter;
     static int bufferCounter;
 
@@ -83,62 +61,41 @@ void NXP_Display::update() noexcept{
     } else {
         refreshCounter = 0;
     }
-    signsOff();
+
+    digitsOff();
     segmentsOff();
 
-    switch (displayBuffer[bufferCounter]) {
-        case '0':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F;
-            break;
-        case '1':
-            DISPLAY_GPIO->PCOR = DISPLAY_B | DISPLAY_C;
-            break;
-        case '2':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_D | DISPLAY_G;
-            break;
-        case '3':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_G;
-            break;
-        case '4':
-            DISPLAY_GPIO->PCOR = DISPLAY_B | DISPLAY_C | DISPLAY_F | DISPLAY_G;
-            break;
-        case '5':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G;
-            break;
-        case '6':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G;
-            break;
-        case '7':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_C;
-            break;
-        case '8':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G;
-            break;
-        case '9':
-            DISPLAY_GPIO->PCOR = DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G;
-            break;
-        case '-':
-            DISPLAY_GPIO->PCOR = DISPLAY_G;
-            break;
-        default:
-            break;
+    if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::DASH)) {
+        DISPLAY_GPIO->PCOR = displayCharacters[10];
+    } else if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::SPACE)) {
+        digitsOff();
+    } else {
+        uint8_t character = displayBuffer[bufferCounter];
+        if (character <= 9) {
+            if (dot[bufferCounter]) {
+                DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
+            } else {
+                DISPLAY_GPIO->PCOR = displayCharacters[character];
+            }
+        }
     }
+
 
     switch (bufferCounter) {
         case 0:
-            A1_On();
+            digitOn(DIGIT::A1);
             bufferCounter++;;
             break;
         case 1:
-            A2_On();
+            digitOn(DIGIT::A2);
             bufferCounter++;
             break;
         case 2:
-            A3_On();
+            digitOn(DIGIT::A3);
             bufferCounter++;
             break;
         case 3:
-            A4_On();
+            digitOn(DIGIT::A4);
             bufferCounter = 0;
             break;
     }

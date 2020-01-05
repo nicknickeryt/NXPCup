@@ -14,7 +14,6 @@ target_link_libraries(${NAME}
 	gtest
 	gmock
 	gtest_main
-	terminal
 )
 
 target_format_sources(${NAME} "${SOURCES}")

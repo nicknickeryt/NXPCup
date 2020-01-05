@@ -16,13 +16,9 @@ void NXP_Motor::init(){
 }
 
 void NXP_Motor::setValue(float value) {
-    if(value > 1.0){
-        value = 1.0;
-    } else if(value < -1.0){
-        value = -1.0;
-    }
+    value = std::clamp(value, -1.0f, 1.0f);
 
-    value *= (static_cast<float>(maxValue - minValue))/2.0;
+    value *= (static_cast<float>(maxValue - minValue))/2.0F;
     value += static_cast<float>(centerValue);
     auto motorValue = int32_t(value);
     filter.runningAverage(&motorValue);
