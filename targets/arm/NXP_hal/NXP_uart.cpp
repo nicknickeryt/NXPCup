@@ -9,56 +9,54 @@
 #include "HALina.hpp"
 #include "NXP_uart.hpp"
 #include "HALina_config.hpp"
-#include "fsl_uart.h"
 #include "clock_config.h"
 
 using namespace halina;
 
-uart_handle_t uartHandle;
-
 NXP_Uart* nxpUartHandler;
 
-/* UART user callback */
-void UART_UserCallback(UART_Type *base, uart_handle_t *handle, status_t status, void *userData){
-    (void)base;
-    (void)handle;
-    (void)status;
-    (void)userData;
-
-    // todo callback to future using ex. in read method
-}
-
-NXP_Uart::NXP_Uart(PORT_Type* port, UART_Type* uart, uint8_t TXPin, uint8_t RXPin, uint32_t baudrate) : port(port), TXPin(TXPin), RXPin(RXPin), baudrate(baudrate), uart(uart) {
+NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate) : baudrate(baudrate), uart(uart) {
     nxpUartHandler = this;
 }
 
 void NXP_Uart::init(){
+    uint16_t sbr = 0;
+    uint32_t baudDiff = 0;
+    uint32_t clock = 120000000;
 
-    PORT_SetPinMux(port, RXPin, kPORT_MuxAlt3);
-    PORT_SetPinMux(port, TXPin, kPORT_MuxAlt3);
+    if(uart == UART0){
+        SIM->SCGC4 |= SIM_SCGC4_UART0_MASK;
+    } else if(uart == UART1){
+        SIM->SCGC4 |= SIM_SCGC4_UART1_MASK;
+    } else if(uart == UART2){
+        SIM->SCGC4 |= SIM_SCGC4_UART2_MASK;
+    } else if(uart == UART3){
+        SIM->SCGC4 |= SIM_SCGC4_UART3_MASK;
+    }
 
-    uart_config_t config;
+    sbr = clock / (baudrate * 16);
+    if (sbr == 0){
+        sbr = 1;
+    }
+    baudDiff = (clock / (sbr * 16)) - baudrate;
+    uint16_t brfa = (2 * clock / (baudrate)) - 32 * sbr;
+    if (baudDiff > (baudrate - (clock / (16 * (sbr + 1))))) {
+        sbr++;
+    }
 
-    UART_GetDefaultConfig(&config);
-    config.baudRate_Bps = baudrate;
-    config.enableTx = true;
-    config.enableRx = true;
+    uart->C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
+    uart->BDH = (uart->BDH & ~UART_BDH_SBR_MASK) | (uint8_t)(sbr >> 8);
+    uart->BDL = (uint8_t)sbr;
+    uart->C4 = (uart->C4 & ~UART_C4_BRFA_MASK) | (brfa & UART_C4_BRFA_MASK);
+    uart->C2 |= UART_C2_TE_MASK | UART_C2_RE_MASK;
+    UART0->C4 |= 9;
+    UART0->PFIFO = 0xAA;
 
-    UART_Init(uart, &config, 120000000);
-//    UART_TransferStartRingBuffer(UART, &uartHandle, buffer, UART_BUFFER_SIZE);
-    UART_TransferCreateHandle(uart, &uartHandle, UART_UserCallback, NULL);
+    //enableInterupts();
 }
 
 void NXP_Uart::proc() {
     // todo implement when read method will be ready
-}
-//
-//
-void NXP_Uart::write(void const* data) {
-    static uart_transfer_t dataTransfer;
-    dataTransfer.data = (uint8_t*)data;
-    dataTransfer.dataSize = strlen((char*)data);
-    UART_TransferSendNonBlocking(uart, &uartHandle, &dataTransfer);
 }
 
 void NXP_Uart::writeChar(const char c) {
@@ -67,22 +65,30 @@ void NXP_Uart::writeChar(const char c) {
     {
     }
     nxpUartHandler->uart->D = c;
-//    uint32_t count;
-//    static uart_transfer_t dataTransfer;
-//    txBuffer[currentIndex] = c;
-//    currentIndex++;
-//    dataTransfer.data = txBuffer;
-//    dataTransfer.dataSize = currentIndex;
-//    if(UART_TransferGetSendCount(nxpUartHandler->uart, &uartHandle, &count) == kStatus_NoTransferInProgress) {
-//        if (kStatus_Success == UART_TransferSendNonBlocking(UART0, &uartHandle, &dataTransfer)) {
-//            currentIndex = 0;
-//        }
-//    } else{
-//
-//    }
 }
 
 char NXP_Uart::read() {
     // todo implement a read method
     return '0';
+}
+
+void NXP_Uart::enableInterupts(){
+    uart->C2 |= UART_C2_RIE_MASK | UART_C2_TIE_MASK;
+    NVIC_ClearPendingIRQ(UART0_RX_TX_IRQn);
+    NVIC_EnableIRQ(UART0_RX_TX_IRQn);
+}
+
+void NXP_Uart::disableInterupts(){
+    uart->C2 &= ~(UART_C2_RIE_MASK | UART_C2_TIE_MASK);
+}
+
+extern "C" {
+void UART0_RX_TX_DriverIRQHandler() {
+    if(UART0->S1 & UART_S1_RDRF_MASK){
+        UART0->S1 |= UART_S1_RDRF_MASK;
+    }
+    if(UART0->S1 & UART_S1_TC_MASK){
+        UART0->S1 |= UART_S1_TC_MASK;
+    }
+}
 }

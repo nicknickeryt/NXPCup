@@ -12,20 +12,21 @@
 
 class NXP_Uart : public halina::UART{
 private:
-    PORT_Type* port;
-    uint8_t TXPin;
-    uint8_t RXPin;
     uint32_t baudrate;
 public:
     UART_Type* uart;
 
-    NXP_Uart(PORT_Type* port, UART_Type* uart, uint8_t TXPin, uint8_t RXPin, uint32_t baudrate);
+private:
+    void enableInterupts();
+
+    void disableInterupts();
+
+public:
+    NXP_Uart(UART_Type* uart, uint32_t baudrate);
 
     void init() override;
 
-    void write(void const*) override;
-
-    static void writeChar(const char c);
+    static void writeChar(char c);
 
     char read() override;
 

@@ -18,8 +18,8 @@ namespace halina {
         }
 
         virtual void init() = 0;
-
-        virtual void write(void const*) = 0;
+//
+//        virtual void write(void const*) = 0;
 
         virtual char read() = 0;
     };
