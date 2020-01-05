@@ -74,4 +74,7 @@ TEST(DISPLAY, float_data) {
 
     display.print(-1.23, 2);
     EXPECT_EQ(true, stringCompare("-123", (const char*) display.getBuffer()));
+
+    display.print(-11.00, 2);
+    EXPECT_EQ(true, stringCompare("----", (const char*) display.getBuffer()));
 }

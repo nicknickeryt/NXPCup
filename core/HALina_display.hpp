@@ -89,14 +89,14 @@ public:
         }
 
         if (precision == 1) {
-            if (data < -99.9f && data > 99.9f) {
+            if (data > 99.9f) {
                 memset(displayBuffer, static_cast<uint8_t >(SPECIAL_CHARACTERS::DASH), 4);
                 return;
             }
             uintData = static_cast<uint32_t >(data * 10.0f);
             dot[2] = true;
         } else if (precision == 2) {
-            if (data < -9.99f && data > 9.99f) {
+            if (data > 9.99f) {
                 memset(displayBuffer, static_cast<uint8_t >(SPECIAL_CHARACTERS::DASH), 4);
                 return;
             }
