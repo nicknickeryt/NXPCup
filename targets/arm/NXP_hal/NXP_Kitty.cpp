@@ -20,6 +20,7 @@ void Kitty::init() {
     BOARD_InitBootPeripherals();
 
     uartDebug.init();
+    uartCommunication.init();
     ledLine.init();
     display.init();
     servo.init();
@@ -30,6 +31,7 @@ void Kitty::init() {
 //    leftMotor.init();
 //    rightMotor.init();
     log_notice("NO elo");
+    uartCommunication.write("Bejbi don't hurt me", 19);
 }
 
 void Kitty::proc() {

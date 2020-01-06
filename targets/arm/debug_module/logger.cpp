@@ -42,6 +42,6 @@ void log_write(const uint8_t channel, const uint8_t level, const char* const cha
 static void writeFunctionWrapper(const char c, void* const context) {
     (void) context;
     if (c != '\0') {
-        NXP_Uart::writeChar(c);
+        loggerWriteChar(c);
     }
 }

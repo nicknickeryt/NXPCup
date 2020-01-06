@@ -41,6 +41,7 @@ private:
     NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/64/50};
 public:
     NXP_Uart uartDebug = {UART0, 115200};
+    NXP_Uart uartCommunication = {UART3, 115200};
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
