@@ -14,13 +14,13 @@
 using namespace halina;
 
 NXP_Uart* nxpUart0Handler;
-NXP_Uart* nxpUart3Handler;
+NXP_Uart* nxpUart2Handler;
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate) : baudrate(baudrate), uart(uart){
     if(UART0 == uart){
         nxpUart0Handler = this;
-    } else if(UART3 == uart){
-        nxpUart3Handler = this;
+    } else if(UART2 == uart){
+        nxpUart2Handler = this;
     }
 
 }
@@ -159,14 +159,14 @@ void UART0_RX_TX_IRQHandler() {
     }
 }
 
-void UART3_RX_TX_IRQHandler() {
-    if(UART3->S1 & UART_S1_TDRE_MASK){
-        UART3->S1 |= UART_S1_TDRE_MASK;
+void UART2_RX_TX_IRQHandler() {
+    if(UART2->S1 & UART_S1_TDRE_MASK){
+        UART2->S1 |= UART_S1_TDRE_MASK;
         uint8_t c;
-        if (RingBuffer_GetChar(&(nxpUart3Handler->txRingBuffer), &c)) {
-            nxpUart3Handler->uart->D = c;
+        if (RingBuffer_GetChar(&(nxpUart2Handler->txRingBuffer), &c)) {
+            nxpUart2Handler->uart->D = c;
         } else {
-            nxpUart3Handler->uart->C2 &= ~(UART_C2_TIE_MASK);
+            nxpUart2Handler->uart->C2 &= ~(UART_C2_TIE_MASK);
         }
     }
 }

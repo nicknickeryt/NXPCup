@@ -24,10 +24,14 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
-    uartRxPin.init();
-    uartTxPin.init();
-    uartTXmux.setMux();
-    uartRXmux.setMux();
+    uart0RxPin.init();
+    uart0TxPin.init();
+    uart0TXmux.setMux();
+    uart0RXmux.setMux();
+    uart2RxPin.init();
+    uart2TxPin.init();
+    uart2TXmux.setMux();
+    uart2RXmux.setMux();
 //    leftMotor.init();
 //    rightMotor.init();
     log_notice("NO elo");
