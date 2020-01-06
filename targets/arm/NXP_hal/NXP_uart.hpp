@@ -9,20 +9,37 @@
 #pragma once
 
 #include "HALina.hpp"
+#include "ring_buffer.h"
+
+void loggerWriteChar(char c);
 
 class NXP_Uart : public halina::UART{
 private:
-    PORT_Type* port;
-    UART_Type* uart;
-    uint8_t TXPin;
-    uint8_t RXPin;
+    constexpr static auto txBufferSize=1024;
     uint32_t baudrate;
+
+    enum class InterruptType{
+        TX_EMPTY,
+        TX_COMPLETE,
+        RX_FULL
+    };
+
 public:
-    NXP_Uart(PORT_Type* port, UART_Type* uart, uint8_t TXPin, uint8_t RXPin, uint32_t baudrate) : port(port), uart(uart), TXPin(TXPin), RXPin(RXPin), baudrate(baudrate){}
+    UART_Type* uart;
+    uint8_t txBuffer[txBufferSize];
+    RingBuffer txRingBuffer;
+
+private:
+    void enableInterrupt(InterruptType interrupt);
+
+    void disableInterrupt(InterruptType interrupt);
+
+public:
+    NXP_Uart(UART_Type* uart, uint32_t baudrate);
 
     void init() override;
 
-    void write(void const*) override;
+    void write(void const* data, uint16_t length) override;
 
     char read() override;
 
