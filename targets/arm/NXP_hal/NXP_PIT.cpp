@@ -34,7 +34,11 @@ void NXP_PIT::PITDisable() {
     PIT->MCR |= PIT_MCR_MDIS_MASK;          // turn on PIT
 }
 
-void NXP_PIT::init() {
+bool NXP_PIT::init() {
+    if (!callbackFunctionStatus) {
+        return false;
+    }
+
     PITEnable();
     PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / interval) - 1; // set timer counting
     PIT->CHANNEL[channel].TCTRL = 0;
@@ -58,6 +62,7 @@ void NXP_PIT::init() {
             NVIC_EnableIRQ(PIT3_IRQn);
             break;
     }
+    return true;
 }
 
 void NXP_PIT::disable() {

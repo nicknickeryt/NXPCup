@@ -45,12 +45,12 @@ int main(){
     kitty.servo.set(0.0f);
 
     NXP_PIT pit0 = NXP_PIT(NXP_PIT::CHANNEL::_0, 2, handler0);
-//    NXP_PIT pit1 = NXP_PIT(NXP_PIT::CHANNEL::_1, 2, handler1);
+    NXP_PIT pit1 = NXP_PIT(NXP_PIT::CHANNEL::_1, 2, nullptr);
 //    NXP_PIT pit2 = NXP_PIT(NXP_PIT::CHANNEL::_2, 3, handler2);
 //    NXP_PIT pit3 = NXP_PIT(NXP_PIT::CHANNEL::_3, 4, handler3);
 
     pit0.init();
-//    pit1.init();
+    pit1.init();
 //    pit2.init();
 //    pit3.init();
 

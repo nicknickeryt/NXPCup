@@ -6,8 +6,11 @@
 #include <drivers/fsl_clock.h>
 
 class NXP_PIT {
+private:
     uint8_t channel;
     uint32_t interval;
+    bool callbackFunctionStatus = false;
+
 public:
     static std::array<std::function<void(void)>, 4> handlers;
     enum class CHANNEL : uint8_t {
@@ -20,11 +23,14 @@ public:
     static void PITEnable();
     static void PITDisable();
 
-    NXP_PIT(CHANNEL channel, uint32_t interval, std::function<void(void)> callback_function ) : channel(static_cast<uint8_t>(channel)), interval(interval) {
-        handlers.at(static_cast<uint8_t >(channel)) = std::move(callback_function);
+    NXP_PIT(CHANNEL channel, uint32_t interval, std::function<void(void)> callbackFunction ) : channel(static_cast<uint8_t>(channel)), interval(interval) {
+        if (callbackFunction) {
+            handlers.at(static_cast<uint8_t >(channel)) = std::move(callbackFunction);
+            callbackFunctionStatus = true;
+        }
     }
 
-    void init();
+    bool init();
 
     void disable();
 
