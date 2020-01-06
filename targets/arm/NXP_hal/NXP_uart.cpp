@@ -8,8 +8,6 @@
 
 #include "HALina.hpp"
 #include "NXP_uart.hpp"
-#include "HALina_config.hpp"
-#include "clock_config.h"
 
 using namespace halina;
 
@@ -59,7 +57,7 @@ void NXP_Uart::init(){
     uart->C4 = (uart->C4 & ~UART_C4_BRFA_MASK) | (brfa & UART_C4_BRFA_MASK);
     uart->C2 |= UART_C2_TE_MASK | UART_C2_RE_MASK;
 
-    uart->C4 |= 9;
+    uart->C4 |= 9U;
     uart->PFIFO = 0xAA;
 
     if(UART0 == uart){

@@ -35,7 +35,7 @@ void Kitty::init() {
     uart2RXmux.setMux();
 //    leftMotor.init();
 //    rightMotor.init();
-    log_notice("NO elo");
+    log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
 }
 

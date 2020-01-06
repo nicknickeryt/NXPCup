@@ -26,8 +26,8 @@ private:
 
 public:
     UART_Type* uart;
-    uint8_t txBuffer[txBufferSize];
-    RingBuffer txRingBuffer;
+    uint8_t txBuffer[txBufferSize] = {0};
+    RingBuffer txRingBuffer = {nullptr, 0, 0, nullptr, nullptr};
 
 private:
     void enableInterrupt(InterruptType interrupt);
@@ -43,5 +43,5 @@ public:
 
     char read() override;
 
-    void proc();
+   static  void proc();
 };

@@ -60,7 +60,7 @@ public:
 private:
     Kitty() = default;
 
-    void FTM_Init();
+    static void FTM_Init();
 
     void magicDiodComposition();
 

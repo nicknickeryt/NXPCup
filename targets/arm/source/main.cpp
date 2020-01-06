@@ -23,13 +23,7 @@ int main(){
     Kitty& kitty = Kitty::kitty();
 
     kitty.init();
-    uint32_t a = 10;
-    int32_t b = -3;
-    float c = 5.67;
-    char d = 'e';
-    log_notice("TEST xDDD a=%d, b=%d, c=%f, d=%c", a, b, c, d);
     kitty.servo.set(0.0);
-
     kitty.display.print(6969);
 
     while (true){
