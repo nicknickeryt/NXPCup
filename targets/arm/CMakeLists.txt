@@ -51,3 +51,5 @@ target_format_sources(${NAME} "${SOURCES_PROJECT}")
 target_jlink_flash(${NAME} 0x0000000)
 
 target_stlink_flash(${NAME})
+
+target_generate_elf(${NAME})

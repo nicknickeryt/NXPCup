@@ -12,12 +12,29 @@
 #include "clock_config.h"
 #include "NXP_PIT.hpp"
 
-using namespace halina;
-
 volatile bool flaga0 = false;
 volatile bool flaga1 = false;
 volatile bool flaga2 = false;
 volatile bool flaga3 = false;
+
+void callback1() {
+    flaga2 = true;
+}
+
+void callback2() {
+    flaga3 = true;
+}
+
+void interruptInit() {
+    NXP_GPIO intr = NXP_GPIO(PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, callback1);
+    NXP_GPIO intl = NXP_GPIO(PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, callback2);
+    intr.init();
+    intl.init();
+}
+
+
+using namespace halina;
+
 
 void handler0() {
     flaga0 = true;
@@ -54,7 +71,7 @@ int main(){
 //    pit2.init();
 //    pit3.init();
 
-
+    interruptInit();
     while (true){
         kitty.proc();
         if (flaga0) {

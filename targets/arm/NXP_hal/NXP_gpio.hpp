@@ -7,20 +7,40 @@
  */
 
 #pragma once
+
 #include "HALina.hpp"
 
-class NXP_GPIO : public halina::GPIO{
+class NXP_GPIO : public halina::GPIO {
     PORT_Type* port_base;
     GPIO_Type* base;
+public:
     uint32_t pin;
+private:
     halina::GPIO::Mode mode;
+    port_interrupt_t configInterrupt;
 
 public:
-    NXP_GPIO(PORT_Type* port_base, GPIO_Type *base, uint32_t pin, halina::GPIO::Mode mode = halina::GPIO::Mode::OUTPUT):
+    class Interrupt {
+    public:
+        uint32_t mask;
+        std::function<void(void)> callbackHandler;
+    };
+
+    static Interrupt portAInterrupts[32];
+    static Interrupt portBInterrupts[32];
+    static Interrupt portCInterrupts[32];
+    static Interrupt portDInterrupts[32];
+    static Interrupt portEInterrupts[32];
+
+    std::function<void(void)> callbackHandler;
+
+    NXP_GPIO(PORT_Type* port_base, GPIO_Type *base, uint32_t pin, halina::GPIO::Mode mode = halina::GPIO::Mode::OUTPUT, port_interrupt_t configInterrupt = kPORT_InterruptOrDMADisabled, std::function<void(void)> callbackHandler = nullptr):
             port_base(port_base),
             base(base),
             pin(pin),
-            mode(mode) {
+            mode(mode),
+            configInterrupt(configInterrupt),
+            callbackHandler(std::move(callbackHandler)) {
     }
 
     void init() override;
@@ -39,6 +59,15 @@ public:
 
     void toggle() override {
         GPIO_PortToggle(base, 1U << pin);
+    }
+
+    static void appendInterrupt(Interrupt portInterrupts[], NXP_GPIO gpio) {
+        for (uint32_t i = 0; i < 32; i++) {
+            if (portInterrupts[i].callbackHandler == nullptr) {
+                portInterrupts[i].callbackHandler = gpio.callbackHandler;
+                portInterrupts[i].mask = (1u << gpio.pin);
+            }
+        }
     }
 };
 
