@@ -23,3 +23,49 @@ void PIT3_IRQHandler(void) {
     NXP_PIT::handlers[3]();
 }
 }
+
+void NXP_PIT::PITEnable() {
+    SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
+    PIT->MCR = 0x00U;                       // turn on PIT
+}
+
+void NXP_PIT::PITDisable() {
+    SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
+    PIT->MCR |= PIT_MCR_MDIS_MASK;          // turn on PIT
+}
+
+void NXP_PIT::init() {
+    PITEnable();
+    PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / interval) - 1; // set timer counting
+    PIT->CHANNEL[channel].TCTRL = 0;
+    enable();
+
+    switch (channel) {
+        case 0:
+            NVIC_ClearPendingIRQ(PIT0_IRQn);
+            NVIC_EnableIRQ(PIT0_IRQn);
+            break;
+        case 1:
+            NVIC_ClearPendingIRQ(PIT1_IRQn);
+            NVIC_EnableIRQ(PIT1_IRQn);
+            break;
+        case 2:
+            NVIC_ClearPendingIRQ(PIT2_IRQn);
+            NVIC_EnableIRQ(PIT2_IRQn);
+            break;
+        case 3:
+            NVIC_ClearPendingIRQ(PIT3_IRQn);
+            NVIC_EnableIRQ(PIT3_IRQn);
+            break;
+    }
+}
+
+void NXP_PIT::disable() {
+    PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TIE_MASK; // timer disable interrupt
+    PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TEN_MASK; // timer disable
+}
+
+void NXP_PIT::enable() {
+    PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TIE_MASK; // timer enable interrupt
+    PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TEN_MASK; // timer enable
+}

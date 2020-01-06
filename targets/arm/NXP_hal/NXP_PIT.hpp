@@ -3,8 +3,7 @@
 #include <device/MKV58F24.h>
 #include <functional>
 #include <utility>
-
-constexpr uint32_t maxPITCounter = 24000000;
+#include <drivers/fsl_clock.h>
 
 class NXP_PIT {
     uint8_t channel;
@@ -18,56 +17,18 @@ public:
         _3 = 3
     };
 
-    static void PITEnable() {
-        SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
-        PIT->MCR = 0x00U;                       // turn on PIT
-    }
-
-    static void PITDisable() {
-        SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
-        PIT->MCR |= PIT_MCR_MDIS_MASK;          // turn on PIT
-    }
+    static void PITEnable();
+    static void PITDisable();
 
     NXP_PIT(CHANNEL channel, uint32_t interval, std::function<void(void)> callback_function ) : channel(static_cast<uint8_t>(channel)), interval(interval) {
         handlers.at(static_cast<uint8_t >(channel)) = std::move(callback_function);
     }
 
-    void init() {
-        PITEnable();
-        PIT->CHANNEL[channel].LDVAL = (maxPITCounter / interval) - 1; // set timer counting
-        PIT->CHANNEL[channel].TCTRL = 0;
-        enable();
+    void init();
 
-        switch (channel) {
-            case 0:
-                NVIC_ClearPendingIRQ(PIT0_IRQn);
-                NVIC_EnableIRQ(PIT0_IRQn);
-                break;
-            case 1:
-                NVIC_ClearPendingIRQ(PIT1_IRQn);
-                NVIC_EnableIRQ(PIT1_IRQn);
-                break;
-            case 2:
-                NVIC_ClearPendingIRQ(PIT2_IRQn);
-                NVIC_EnableIRQ(PIT2_IRQn);
-                break;
-            case 3:
-                NVIC_ClearPendingIRQ(PIT3_IRQn);
-                NVIC_EnableIRQ(PIT3_IRQn);
-                break;
-        }
-    }
+    void disable();
 
-    void disable() {
-        PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TIE_MASK; // timer disable interrupt
-        PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TEN_MASK; // timer disable
-    }
-
-    void enable() {
-        PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TIE_MASK; // timer enable interrupt
-        PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TEN_MASK; // timer enable
-    }
-
+    void enable();
 };
 
 
