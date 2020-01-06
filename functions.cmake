@@ -49,6 +49,20 @@ function(target_asm_listing TARGET)
             )
 endfunction(target_asm_listing)
 
+function(target_generate_elf TARGET)
+    set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+    set (ELF_OBJ ${EXEC_OBJ}.elf)
+
+    set_target_properties(${TARGET} PROPERTIES ELF_FILE ${ELF_OBJ})
+
+    add_custom_command(OUTPUT ${ELF_OBJ}
+            COMMAND ${CMAKE_OBJCOPY} ${EXEC_OBJ} ${ELF_OBJ}
+            DEPENDS ${TARGET}.size
+            )
+
+    add_custom_target (${TARGET}.elf ALL DEPENDS ${ELF_OBJ})
+endfunction(target_generate_elf)
+
 #function(ReadVariables MKFile VARIABLE_NAME)
 #    if (EXISTS "${MKFile}")
 #        file(READ "${MKFile}" FileContents)
