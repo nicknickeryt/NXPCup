@@ -27,7 +27,7 @@ void Kitty::init() {
 
 void Kitty::proc() {
     uartDebug.proc();
-    magicDiodComposition();
+//    magicDiodComposition();
     display.update();
 }
 
