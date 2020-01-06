@@ -15,6 +15,7 @@
 #include "NXP_servo.hpp"
 #include "NXP_motor.hpp"
 
+
 class Kitty{
 private:
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
@@ -35,16 +36,18 @@ private:
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
 
     NXP_PWM servoPwm = {*this, FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, BOARD_BOOTCLOCKRUN_CORE_CLOCK/64/50};
+
     NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
     NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
 
+    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
+    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 public:
     NXP_Uart uartDebug = {PORTA, UART0, 14U, 15U, 115200};
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
-    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
-    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+    NXP_Motors motors = {motorLeft, motorRight};
 private:
     Kitty() = default;
 
