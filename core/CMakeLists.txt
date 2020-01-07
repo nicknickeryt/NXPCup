@@ -21,3 +21,4 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_format_sources(${NAME} "${SOURCES}")
 
 add_subdirectory(external)
+add_subdirectory(command_terminal)
