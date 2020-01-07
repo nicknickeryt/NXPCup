@@ -18,16 +18,17 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
-    servo.set(1.0);
     motorLeft.init();
     motorRight.init();
-    motorLeft.setValue(2000);
-    motorRight.setValue(12000);
+    pit0.init();
+    pit1.init();
+    intr.init();
+    intl.init();
 }
 
 void Kitty::proc() {
     uartDebug.proc();
-//    magicDiodComposition();
+    magicDiodComposition();
     display.update();
 }
 

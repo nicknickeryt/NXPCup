@@ -14,7 +14,7 @@
 #include "NXP_display.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_motor.hpp"
-
+#include "NXP_PIT.hpp"
 
 class Kitty{
 private:
@@ -26,6 +26,8 @@ private:
     NXP_GPIO LED5 = NXP_GPIO(PORTA, GPIOA, 27U);
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
+    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
 
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
 
@@ -42,6 +44,10 @@ private:
 
     NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+
+    NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
+    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
+
 public:
     NXP_Uart uartDebug = {PORTA, UART0, 14U, 15U, 115200};
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
