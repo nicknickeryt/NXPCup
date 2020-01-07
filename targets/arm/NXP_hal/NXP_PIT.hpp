@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HALina.hpp"
 #include <device/MKV58F24.h>
 #include <functional>
 #include <utility>

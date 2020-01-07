@@ -30,7 +30,8 @@ private:
     NXP_GPIO uart0TxPin = {PORTA, GPIOA, 15U, halina::GPIO::Mode::OUTPUT};
     NXP_GPIO uart2RxPin = {PORTE, GPIOE, 17U, halina::GPIO::Mode::INPUT};
     NXP_GPIO uart2TxPin = {PORTE, GPIOE, 16U, halina::GPIO::Mode::OUTPUT};
-
+    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
 
     NXP_PORT servoPort = {PORTA, 7, 0x03};

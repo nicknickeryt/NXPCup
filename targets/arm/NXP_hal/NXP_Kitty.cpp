@@ -33,8 +33,10 @@ void Kitty::init() {
     uart2TxPin.init();
     uart2TXmux.setMux();
     uart2RXmux.setMux();
-//    leftMotor.init();
-//    rightMotor.init();
+    pit0.init();
+    pit1.init();
+    intr.init();
+    intl.init();
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
 }
