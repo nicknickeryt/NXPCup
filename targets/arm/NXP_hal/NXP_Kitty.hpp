@@ -26,10 +26,7 @@ private:
     NXP_GPIO LED5 = NXP_GPIO(PORTA, GPIOA, 27U);
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
-    NXP_GPIO uart0RxPin = {PORTA, GPIOA, 14U, halina::GPIO::Mode::INPUT};
-    NXP_GPIO uart0TxPin = {PORTA, GPIOA, 15U, halina::GPIO::Mode::OUTPUT};
-    NXP_GPIO uart2RxPin = {PORTE, GPIOE, 17U, halina::GPIO::Mode::INPUT};
-    NXP_GPIO uart2TxPin = {PORTE, GPIOE, 16U, halina::GPIO::Mode::OUTPUT};
+
     NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
@@ -39,6 +36,7 @@ private:
     NXP_PORT motorLeftPortMLF = {PORTE, 6, 0x06};
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
+
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
     NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
@@ -56,8 +54,9 @@ private:
     NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
 
 public:
-    NXP_Uart uartDebug = {UART0, 115200};
-    NXP_Uart uartCommunication = {UART2, 115200};
+    NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
+    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
+
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};

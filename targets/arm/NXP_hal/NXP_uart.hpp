@@ -10,10 +10,11 @@
 
 #include "HALina.hpp"
 #include "ring_buffer.h"
+#include "NXP_gpio.hpp"
 
 void loggerWriteChar(char c);
 
-class NXP_Uart : public halina::UART{
+class NXP_Uart : public halina::UART {
 private:
     constexpr static auto txBufferSize=1024;
     uint32_t baudrate;
@@ -23,9 +24,12 @@ private:
         TX_COMPLETE,
         RX_FULL
     };
-
 public:
     UART_Type* uart;
+private:
+    NXP_PORT& rxPin;
+    NXP_PORT& txPin;
+public:
     uint8_t txBuffer[txBufferSize] = {0};
     RingBuffer txRingBuffer = {nullptr, 0, 0, nullptr, nullptr};
 
@@ -35,7 +39,7 @@ private:
     void disableInterrupt(InterruptType interrupt);
 
 public:
-    NXP_Uart(UART_Type* uart, uint32_t baudrate);
+    NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin);
 
     void init() override;
 

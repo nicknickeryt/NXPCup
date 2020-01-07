@@ -12,18 +12,27 @@
 using namespace halina;
 
 NXP_Uart* nxpUart0Handler;
+NXP_Uart* nxpUart1Handler;
 NXP_Uart* nxpUart2Handler;
+NXP_Uart* nxpUart3Handler;
 
-NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate) : baudrate(baudrate), uart(uart){
+NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : baudrate(baudrate), uart(uart), rxPin(rxPin), txPin(txPin) {
     if(UART0 == uart){
         nxpUart0Handler = this;
+    } else if(UART1 == uart){
+        nxpUart1Handler = this;
     } else if(UART2 == uart){
         nxpUart2Handler = this;
+    } else if(UART3 == uart){
+        nxpUart3Handler = this;
     }
 
 }
 
 void NXP_Uart::init(){
+    rxPin.setMux();
+    txPin.setMux();
+
     uint16_t sbr = 0;
     uint32_t baudDiff = 0;
     uint32_t clock = 120000000;
@@ -144,28 +153,32 @@ void loggerWriteChar(const char c) {
     nxpUart0Handler->uart->C2 |= UART_C2_TIE_MASK;
 }
 
-extern "C" {
-void UART0_RX_TX_IRQHandler() {
-    if(UART0->S1 & UART_S1_TDRE_MASK){
-        UART0->S1 |= UART_S1_TDRE_MASK;
+void UART_IRQ(UART_Type* uart, NXP_Uart* nxpUartHandler) {
+    if(uart->S1 & UART_S1_TDRE_MASK){
+        uart->S1 |= UART_S1_TDRE_MASK;
         uint8_t c;
-        if (RingBuffer_GetChar(&(nxpUart0Handler->txRingBuffer), &c)) {
-            nxpUart0Handler->uart->D = c;
+        if (RingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &c)) {
+            nxpUartHandler->uart->D = c;
         } else {
-            nxpUart0Handler->uart->C2 &= ~(UART_C2_TIE_MASK);
+            nxpUartHandler->uart->C2 &= ~(UART_C2_TIE_MASK);
         }
     }
 }
 
+extern "C" {
+void UART0_RX_TX_IRQHandler() {
+    UART_IRQ(UART0, nxpUart0Handler);
+}
+
+void UART1_RX_TX_IRQHandler() {
+    UART_IRQ(UART1, nxpUart1Handler);
+}
+
 void UART2_RX_TX_IRQHandler() {
-    if(UART2->S1 & UART_S1_TDRE_MASK){
-        UART2->S1 |= UART_S1_TDRE_MASK;
-        uint8_t c;
-        if (RingBuffer_GetChar(&(nxpUart2Handler->txRingBuffer), &c)) {
-            nxpUart2Handler->uart->D = c;
-        } else {
-            nxpUart2Handler->uart->C2 &= ~(UART_C2_TIE_MASK);
-        }
-    }
+    UART_IRQ(UART2, nxpUart2Handler);
+}
+
+void UART3_RX_TX_IRQHandler() {
+    UART_IRQ(UART3, nxpUart3Handler);
 }
 }

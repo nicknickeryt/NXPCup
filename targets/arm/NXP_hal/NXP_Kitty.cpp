@@ -25,14 +25,7 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
-    uart0RxPin.init();
-    uart0TxPin.init();
-    uart0TXmux.setMux();
-    uart0RXmux.setMux();
-    uart2RxPin.init();
-    uart2TxPin.init();
-    uart2TXmux.setMux();
-    uart2RXmux.setMux();
+
     pit0.init();
     pit1.init();
     intr.init();
