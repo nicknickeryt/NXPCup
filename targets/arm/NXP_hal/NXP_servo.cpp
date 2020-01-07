@@ -15,12 +15,9 @@ void NXP_Servo::init(){
 }
 
 void NXP_Servo::set(float value){
-    if(value > 1.0){
-        value = 1.0;
-    } else if(value < -1.0){
-        value = -1.0;
-    }
-    value *= (static_cast<float>(servoMaxValue - servoMinValue))/2.0;
+    value = std::clamp(value, -1.0f, 1.0f);
+
+    value *= (static_cast<float>(servoMaxValue - servoMinValue))/2.0f;
     value += static_cast<float>(servoCenterValue);
     auto servoValue = int32_t(value);
     filter.runningAverage(&servoValue);

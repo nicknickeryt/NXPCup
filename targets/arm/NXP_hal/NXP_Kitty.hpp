@@ -14,7 +14,7 @@
 #include "NXP_display.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_motor.hpp"
-
+#include "NXP_PIT.hpp"
 
 class Kitty{
 private:
@@ -50,6 +50,10 @@ private:
 
     NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+
+    NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
+    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
+
 public:
     NXP_Uart uartDebug = {UART0, 115200};
     NXP_Uart uartCommunication = {UART2, 115200};
