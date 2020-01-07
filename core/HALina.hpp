@@ -23,3 +23,4 @@
 #include "HALina_led_line.hpp"
 #include "HALina_servo.hpp"
 #include "HALina_motor.hpp"
+#include "HALina_adc.hpp"

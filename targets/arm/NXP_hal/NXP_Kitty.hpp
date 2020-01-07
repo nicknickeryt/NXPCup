@@ -15,6 +15,7 @@
 #include "NXP_servo.hpp"
 #include "NXP_motor.hpp"
 #include "NXP_PIT.hpp"
+#include "NXP_adc.hpp"
 
 class Kitty{
 private:
@@ -54,6 +55,8 @@ private:
 
     NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
     NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
+
+    NXP_ADC adc = {HSADC0, NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
 
 public:
     NXP_Uart uartDebug = {UART0, 115200};

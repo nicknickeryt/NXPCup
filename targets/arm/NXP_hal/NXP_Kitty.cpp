@@ -37,6 +37,7 @@ void Kitty::init() {
     pit1.init();
     intr.init();
     intl.init();
+//    adc.init();
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
 }
