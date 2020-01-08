@@ -25,31 +25,15 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
-    pit1.init();
     camera.init();
-    uart0RxPin.init();
-    uart0TxPin.init();
-    uart0TXmux.setMux();
-    uart0RXmux.setMux();
-    uart2RxPin.init();
-    uart2TxPin.init();
-    uart2TXmux.setMux();
-    uart2RXmux.setMux();
-    //pit0.init();
-    //intr.init();
-    //intl.init();
-    log_notice("Witaj swiecie!");
-
     pit1.init();
     intr.init();
     intl.init();
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-
 }
 
 void Kitty::proc() {
-    uartDebug.proc();
     magicDiodComposition();
     display.update();
 }
