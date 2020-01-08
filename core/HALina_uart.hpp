@@ -21,7 +21,9 @@ namespace halina {
 
         virtual void write(void const* data, uint16_t length) = 0;
 
-        virtual char read() = 0;
+        virtual void write(uint8_t data) = 0;
+
+        virtual uint8_t read() = 0;
     };
 
 }

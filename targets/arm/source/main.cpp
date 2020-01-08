@@ -26,6 +26,8 @@ int main(){
     kitty.servo.set(0.0);
     kitty.display.print(6969);
 
+    log_notice("Application started");
+
     while (true){
         kitty.proc();
 
