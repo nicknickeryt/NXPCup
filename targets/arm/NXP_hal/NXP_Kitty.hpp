@@ -28,16 +28,10 @@ private:
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
 
-    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    NXP_GPIO uart0RxPin = {PORTA, GPIOA, 14U, halina::GPIO::Mode::INPUT};
-    NXP_GPIO uart0TxPin = {PORTA, GPIOA, 15U, halina::GPIO::Mode::OUTPUT};
-    NXP_GPIO uart2RxPin = {PORTE, GPIOE, 17U, halina::GPIO::Mode::INPUT};
-    NXP_GPIO uart2TxPin = {PORTE, GPIOE, 16U, halina::GPIO::Mode::OUTPUT};
     NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
     NXP_GPIO cameraSIPin = {PORTB, GPIOB, 5, halina::GPIO::Mode::OUTPUT};
-    //NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    //NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
 
     NXP_PORT servoPort = {PORTA, 7, 0x03};
