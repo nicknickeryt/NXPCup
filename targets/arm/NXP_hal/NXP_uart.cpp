@@ -8,34 +8,35 @@
 
 #include "HALina.hpp"
 #include "NXP_uart.hpp"
+#include <drivers/fsl_clock.h>
+#include "NXP_Kitty.hpp"
 
 using namespace halina;
 
-NXP_Uart* nxpUart0Handler;
-NXP_Uart* nxpUart1Handler;
-NXP_Uart* nxpUart2Handler;
-NXP_Uart* nxpUart3Handler;
+RingBuffer rxRingBuffer[6];
+RingBuffer txRingBuffer[6];
 
-NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : baudrate(baudrate), uart(uart), rxPin(rxPin), txPin(txPin) {
+NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
     if(UART0 == uart){
-        nxpUart0Handler = this;
+        setMyBuffers(&rxRingBuffer[0], &txRingBuffer[0]);
     } else if(UART1 == uart){
-        nxpUart1Handler = this;
+        setMyBuffers(&rxRingBuffer[1], &txRingBuffer[1]);
     } else if(UART2 == uart){
-        nxpUart2Handler = this;
+        setMyBuffers(&rxRingBuffer[2], &txRingBuffer[2]);
     } else if(UART3 == uart){
-        nxpUart3Handler = this;
+        setMyBuffers(&rxRingBuffer[3], &txRingBuffer[3]);
+    } else if(UART4 == uart){
+        setMyBuffers(&rxRingBuffer[4], &txRingBuffer[4]);
+    } else if(UART5 == uart){
+        setMyBuffers(&rxRingBuffer[5], &txRingBuffer[5]);
     }
-
 }
 
 void NXP_Uart::init(){
-    rxPin.setMux();
-    txPin.setMux();
-
     uint16_t sbr = 0;
     uint32_t baudDiff = 0;
-    uint32_t clock = 120000000;
+
+    uint32_t clock =  CLOCK_GetFreq(kCLOCK_FastPeriphClk);
 
     if(uart == UART0){
         SIM->SCGC4 |= SIM_SCGC4_UART0_MASK;
@@ -45,10 +46,17 @@ void NXP_Uart::init(){
         SIM->SCGC4 |= SIM_SCGC4_UART2_MASK;
     } else if(uart == UART3){
         SIM->SCGC4 |= SIM_SCGC4_UART3_MASK;
+    } else if(uart == UART4){
+        SIM->SCGC1 |= SIM_SCGC1_UART4_MASK;
+    } else if(uart == UART5){
+        SIM->SCGC1 |= SIM_SCGC1_UART5_MASK;
+    } else {
+        return;
     }
 
-    // initialize buffer
-    RingBuffer_Init(&txRingBuffer, txBuffer, txBufferSize);
+    // set mux as UART
+    rxPin.setMux();
+    txPin.setMux();
 
     sbr = clock / (baudrate * 16);
     if (sbr == 0){
@@ -60,14 +68,15 @@ void NXP_Uart::init(){
         sbr++;
     }
 
-    uart->C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
     uart->BDH = (uart->BDH & ~UART_BDH_SBR_MASK) | (uint8_t)(sbr >> 8);
     uart->BDL = (uint8_t)sbr;
+
     uart->C4 = (uart->C4 & ~UART_C4_BRFA_MASK) | (brfa & UART_C4_BRFA_MASK);
-    uart->C2 |= UART_C2_TE_MASK | UART_C2_RE_MASK;
+    uart->C2 |= UART_C2_TE_MASK | UART_C2_RE_MASK; //Transmitter on, Receiver on
 
     uart->C4 |= 9U;
-    uart->PFIFO = 0xAA;
+
+    enableInterrupt(InterruptType::RX_FULL);
 
     if(UART0 == uart){
         NVIC_ClearPendingIRQ(UART0_RX_TX_IRQn);
@@ -84,6 +93,9 @@ void NXP_Uart::init(){
     } else if(UART4 == uart){
         NVIC_ClearPendingIRQ(UART4_RX_TX_IRQn);
         NVIC_EnableIRQ(UART4_RX_TX_IRQn);
+    } else if(UART5 == uart){
+        NVIC_ClearPendingIRQ(UART5_RX_TX_IRQn);
+        NVIC_EnableIRQ(UART5_RX_TX_IRQn);
     }
 }
 
@@ -96,7 +108,7 @@ void NXP_Uart::write(void const* data, uint16_t length){
     __disable_irq();
     // put data to ring buffer
     for(uint16_t i=0; i<length; i++){
-        RingBuffer_PutChar(&txRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
+        RingBuffer_PutChar(myTxRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
     }
     // exit critical section
     __enable_irq();
@@ -104,81 +116,62 @@ void NXP_Uart::write(void const* data, uint16_t length){
     enableInterrupt(InterruptType::TX_EMPTY);
 }
 
-char NXP_Uart::read() {
-    // todo implement a read method
-    return '0';
+void NXP_Uart::write(uint8_t data) {
+    RingBuffer_PutChar(myTxRingBuffer, data);
+    enableInterrupt(InterruptType::TX_EMPTY);
+}
+
+uint8_t NXP_Uart::read() {
+    uint8_t c;
+    RingBuffer_GetChar(myRxRingBuffer, &c);
+    return c;
 }
 
 void NXP_Uart::enableInterrupt(InterruptType interrupt){
-    switch(interrupt){
-        case InterruptType::TX_EMPTY:
-            uart->C2 |= UART_C2_TIE_MASK;
-            break;
-        case InterruptType::TX_COMPLETE:
-            uart->C2 |= UART_C2_TCIE_MASK;
-            break;
-        case InterruptType::RX_FULL:
-            uart->C2 |= UART_C2_RIE_MASK;
-            break;
-        default:
-            break;
-    }
-
+    uart->C2 |= static_cast<uint8_t >(interrupt);
 }
 
 void NXP_Uart::disableInterrupt(InterruptType interrupt){
-    switch(interrupt){
-        case InterruptType::TX_EMPTY:
-            uart->C2 &= ~(UART_C2_TIE_MASK);
-            break;
-        case InterruptType::TX_COMPLETE:
-            uart->C2 &= ~(UART_C2_TCIE_MASK);
-            break;
-        case InterruptType::RX_FULL:
-            uart->C2 &= ~(UART_C2_RIE_MASK);
-            break;
-        default:
-            break;
-    }
+    uart->C2 &= ~(static_cast<uint8_t >(interrupt));
 }
 
-void loggerWriteChar(const char c) {
-    // enter critical section
-    __disable_irq();
-    // put data to ring buffer
-    RingBuffer_PutChar(&(nxpUart0Handler->txRingBuffer), (uint8_t)c);
-    // exit critical section
-    __enable_irq();
-    // enable TX empty interrupt
-    nxpUart0Handler->uart->C2 |= UART_C2_TIE_MASK;
-}
-
-void UART_IRQ(UART_Type* uart, NXP_Uart* nxpUartHandler) {
+void UART_IRQ(UART_Type* uart, RingBuffer* txRingBufferLocal, RingBuffer* rxRingBufferLocal) {
     if(uart->S1 & UART_S1_TDRE_MASK){
         uart->S1 |= UART_S1_TDRE_MASK;
         uint8_t c;
-        if (RingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &c)) {
-            nxpUartHandler->uart->D = c;
+        if (RingBuffer_GetChar(txRingBufferLocal, &c)) {
+            uart->D = c;
         } else {
-            nxpUartHandler->uart->C2 &= ~(UART_C2_TIE_MASK);
+            uart->C2 &= ~(UART_C2_TIE_MASK);
         }
+    } if (uart->S1 & UART_S1_RDRF_MASK) {
+        uart->S1 |= UART_S1_RDRF_MASK;
+        RingBuffer_PutChar(rxRingBufferLocal, uart->D);
     }
 }
 
 extern "C" {
 void UART0_RX_TX_IRQHandler() {
-    UART_IRQ(UART0, nxpUart0Handler);
+    UART_IRQ(UART0, &txRingBuffer[0], &rxRingBuffer[0]);
 }
 
 void UART1_RX_TX_IRQHandler() {
-    UART_IRQ(UART1, nxpUart1Handler);
+    UART_IRQ(UART1, &txRingBuffer[1], &rxRingBuffer[1]);
 }
 
 void UART2_RX_TX_IRQHandler() {
-    UART_IRQ(UART2, nxpUart2Handler);
+    UART_IRQ(UART2, &txRingBuffer[2], &rxRingBuffer[2]);
 }
 
 void UART3_RX_TX_IRQHandler() {
-    UART_IRQ(UART3, nxpUart3Handler);
+    UART_IRQ(UART3, &txRingBuffer[3], &rxRingBuffer[3]);
+}
+
+void UART4_RX_TX_IRQHandler() {
+    UART_IRQ(UART4, &txRingBuffer[4], &rxRingBuffer[4]);
+}
+
+void UART5_RX_TX_IRQHandler() {
+    UART_IRQ(UART5, &txRingBuffer[5], &rxRingBuffer[5]);
 }
 }

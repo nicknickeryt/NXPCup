@@ -55,7 +55,9 @@ private:
 
 public:
     NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
+
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
+
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
