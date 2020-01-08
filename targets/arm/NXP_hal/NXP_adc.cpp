@@ -17,23 +17,22 @@ void NXP_ADC::init() {
     hsadc_config_t  hsadcConfig;
     hsadc_converter_config_t  converterConfig;
     hsadc_sample_config_t sampleConfig;
+    pinMux.setMux();
 
+    HSADC_GetDefaultConfig(&hsadcConfig);
     hsadcConfig.enableSimultaneousMode = false;
+    HSADC_Init(adc, &hsadcConfig);
+
+    HSADC_GetDefaultConverterConfig(&converterConfig);
+    HSADC_SetConverterConfig(adc, (_hsadc_converter_id)converterType , &converterConfig);
+
+    HSADC_EnableConverterPower(adc, (_hsadc_converter_id)converterType, true);
+    while (( kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(adc))){;}
+    HSADC_EnableConverter(adc, (_hsadc_converter_id)converterType, true);
 
     sampleConfig.channelNumber = channel;
     sampleConfig.channel67MuxNumber = mux;
     sampleConfig.enableDifferentialPair = enableDifferentialPair;
-
-    HSADC_GetDefaultConfig(&hsadcConfig);
-    HSADC_GetDefaultConverterConfig(&converterConfig);
-    HSADC_SetConverterConfig(adc, (_hsadc_converter_id)converterType, &converterConfig);
-
-    HSADC_Init(adc, &hsadcConfig);
-
-    HSADC_EnableConverter(adc, (_hsadc_converter_id)converterType, true);
-    HSADC_EnableConverterPower(adc, (_hsadc_converter_id)converterType, true);
-    while (( kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(adc))){;}
-
     for (uint8_t i = 0; i < 16; i++) {
         HSADC_SetSampleConfig(adc, i, &sampleConfig);
         HSADC_EnableSample(adc, HSADC_SAMPLE_MASK(i), true);
@@ -76,6 +75,9 @@ void NXP_ADC::enableInterrupts() {
     } else if(converterType == Converter::CONVERTER_B){
         interruptType = kHSADC_ConverterBEndOfScanInterruptEnable;
     }
+
+    HSADC_ClearStatusFlags(adc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
+    HSADC_EnableSampleResultReadyInterrupts(adc, HSADC_SAMPLE_MASK(15), true);
 
     HSADC_EnableInterrupts(adc, interruptType);
 
@@ -139,7 +141,7 @@ void HSADC0_CCB_IRQHandler() {
     HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
 
     for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC0, i) >> 3U) & 0xFFF;
+        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC0, i) >> 3) & 0xFFF;
     }
 }
 
@@ -148,7 +150,7 @@ void HSADC1_CCA_IRQHandler(){
     HSADC1->STAT |= HSADC_STAT_EOSIB_MASK;
 
     for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i) >> 3U) & 0xFFF;
+        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i) >> 3) & 0xFFF;
     }
 }
 }

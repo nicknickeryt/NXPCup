@@ -44,6 +44,8 @@ private:
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
     NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
+    NXP_PORT adc0mux = {PORTB, 1U, 0x00};
+    NXP_PORT adc1mux = {PORTB, 0U, 0x00};
 
     NXP_PWM servoPwm = {*this, FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, BOARD_BOOTCLOCKRUN_CORE_CLOCK/64/50};
 
@@ -56,9 +58,9 @@ private:
     NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
     NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
 
-    NXP_ADC adc = {HSADC0, NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
 
 public:
+    NXP_ADC adc = {HSADC0, adc0mux,NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
     NXP_Uart uartDebug = {UART0, 115200};
     NXP_Uart uartCommunication = {UART2, 115200};
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};

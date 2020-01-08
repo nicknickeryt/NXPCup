@@ -10,6 +10,7 @@
 
 #include "HALina.hpp"
 #include "fsl_hsadc.h"
+#include "NXP_gpio.hpp"
 
 using ADC_Channel = uint16_t;
 using ADC_Mux = uint16_t;
@@ -26,6 +27,7 @@ private:
     Converter converterType;
     ADC_Channel channel;
     ADC_Mux mux;
+    NXP_PORT pinMux;
     bool enableDifferentialPair;
 
     uint32_t currentValue;
@@ -38,8 +40,8 @@ private:
     void disableInterrupts();
 
 public:
-    NXP_ADC(HSADC_Type* adc, Converter converterType, ADC_Channel channel, ADC_Mux mux, bool differentialPair) :
-                                    adc(adc), converterType(converterType), channel(channel), mux(mux),
+    NXP_ADC(HSADC_Type* adc, NXP_PORT pinMux, Converter converterType, ADC_Channel channel, ADC_Mux mux, bool differentialPair) :
+                                    adc(adc), converterType(converterType), channel(channel), mux(mux), pinMux(pinMux),
                                     enableDifferentialPair(differentialPair){ ; }
 
     void init() override;
