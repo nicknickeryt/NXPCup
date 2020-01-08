@@ -21,8 +21,8 @@ public:
         _3 = 3
     };
 
-    static void PITEnable();
-    static void PITDisable();
+    static void enable();
+    static void disable();
 
     NXP_PIT(CHANNEL channel, uint32_t interval, std::function<void(void)> callbackFunction ) : channel(static_cast<uint8_t>(channel)), interval(interval) {
         if (callbackFunction) {
@@ -33,9 +33,9 @@ public:
 
     bool init();
 
-    void disable();
+    void channelDisable();
 
-    void enable();
+    void channelEnable();
 };
 
 

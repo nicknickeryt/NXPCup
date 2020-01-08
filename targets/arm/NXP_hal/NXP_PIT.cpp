@@ -24,12 +24,12 @@ void PIT3_IRQHandler(void) {
 }
 }
 
-void NXP_PIT::PITEnable() {
+void NXP_PIT::enable() {
     SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
     PIT->MCR = 0x00U;                       // turn on PIT
 }
 
-void NXP_PIT::PITDisable() {
+void NXP_PIT::disable() {
     SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;       // Enable clock to the PIT
     PIT->MCR |= PIT_MCR_MDIS_MASK;          // turn on PIT
 }
@@ -39,10 +39,10 @@ bool NXP_PIT::init() {
         return false;
     }
 
-    PITEnable();
+    enable();
     PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / interval) - 1; // set timer counting
     PIT->CHANNEL[channel].TCTRL = 0;
-    enable();
+    channelEnable();
 
     switch (channel) {
         case 0:
@@ -65,12 +65,12 @@ bool NXP_PIT::init() {
     return true;
 }
 
-void NXP_PIT::disable() {
+void NXP_PIT::channelDisable() {
     PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TIE_MASK; // timer disable interrupt
     PIT->CHANNEL[channel].TCTRL &= ~PIT_TCTRL_TEN_MASK; // timer disable
 }
 
-void NXP_PIT::enable() {
+void NXP_PIT::channelEnable() {
     PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TIE_MASK; // timer enable interrupt
     PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TEN_MASK; // timer enable
 }
