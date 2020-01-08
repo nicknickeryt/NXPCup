@@ -36,7 +36,7 @@ set(SOURCES ${SOURCES_AUTO})
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 
 target_link_libraries(${NAME} core )
 
@@ -51,3 +51,5 @@ target_format_sources(${NAME} "${SOURCES_PROJECT}")
 target_jlink_flash(${NAME} 0x0000000)
 
 target_stlink_flash(${NAME})
+
+target_generate_elf(${NAME})

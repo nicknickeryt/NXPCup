@@ -8,6 +8,12 @@
 
 #include "NXP_Kitty.hpp"
 
+#define LOG_CHANNEL KITTY
+#define KITTY_LOG_CHANNEL 2
+#define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
+#include "logger.h"
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -15,14 +21,17 @@ void Kitty::init() {
 
     FTM_Init();
     uartDebug.init();
+    uartCommunication.init();
     ledLine.init();
     display.init();
     servo.init();
-    servo.set(1.0);
-    motorLeft.init();
-    motorRight.init();
-    motorLeft.setValue(2000);
-    motorRight.setValue(12000);
+
+    pit0.init();
+    pit1.init();
+    intr.init();
+    intl.init();
+    log_notice("Witaj swiecie!");
+    uartCommunication.write("Bejbi don't hurt me", 19);
 }
 
 void Kitty::proc() {

@@ -31,19 +31,19 @@
 #define REFRESH_RATE_HZ			10
 #define SYSTICK_RATE_HZ			1000
 
-#define DISPLAY_A1				((uint32_t)(1<<0))
-#define DISPLAY_A2				((uint32_t)(1<<1))
-#define DISPLAY_A3				((uint32_t)(1<<2))
-#define DISPLAY_A4				((uint32_t)(1<<5))
+constexpr uint32_t DISPLAY_A1 = ((uint32_t)(1u<<0u));
+constexpr uint32_t DISPLAY_A2 = ((uint32_t)(1u<<1u));
+constexpr uint32_t DISPLAY_A3 = ((uint32_t)(1u<<2u));
+constexpr uint32_t DISPLAY_A4 = ((uint32_t)(1u<<5u));
 
-#define DISPLAY_A				((uint32_t)(1<<8))
-#define DISPLAY_B				((uint32_t)(1<<9))
-#define DISPLAY_C				((uint32_t)(1<<11))
-#define DISPLAY_D				((uint32_t)(1<<14))
-#define DISPLAY_E				((uint32_t)(1<<13))
-#define DISPLAY_F				((uint32_t)(1<<10))
-#define DISPLAY_G				((uint32_t)(1<<15))
-#define DISPLAY_DP				((uint32_t)(1<<12))
+constexpr uint32_t DISPLAY_A = ((uint32_t)(1u<<8u));
+constexpr uint32_t  DISPLAY_B =	((uint32_t)(1u<<9u));
+constexpr uint32_t  DISPLAY_C =	((uint32_t)(1u<<11u));
+constexpr uint32_t  DISPLAY_D =	((uint32_t)(1u<<14u));
+constexpr uint32_t  DISPLAY_E =	((uint32_t)(1u<<13u));
+constexpr uint32_t  DISPLAY_F =	((uint32_t)(1u<<10u));
+constexpr uint32_t  DISPLAY_G =	((uint32_t)(1u<<15u));
+constexpr uint32_t  DISPLAY_DP = ((uint32_t)(1u<<12u));
 
 /////////////////////// MOTORS ///////////////////////
 #define MOTOR_CLOCK_PRESCALER 		1

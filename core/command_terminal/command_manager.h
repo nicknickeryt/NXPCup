@@ -1,54 +1,14 @@
-#ifndef ZUMO_COMMAND_MANAGER_H
-#define ZUMO_COMMAND_MANAGER_H
+#pragma once
 
 #include "cyclicBuffer.hpp"
 #include <functional>
 #include <utility>
 #include "Command.h"
 
-class PrintManager {
-public:
-    char buff[10] = {0};
-    virtual void print(char) = 0;
 
-    size_t print(const char *s) {
-        size_t size = 0;
-        char c;
-        while ((c = *s) != '\0') {
-            print(c);
-            s++;
-            size++;
-        }
-        return size;
-    }
-
-    void print(uint16_t value) {
-        sprintf(buff, "%d", value);
-        print(buff);
-    }
-
-    void print(uint32_t value) {
-        sprintf(buff, "%lu", value);
-        print(buff);
-    }
-
-    void print(int16_t value) {
-        sprintf(buff, "%d", value);
-        print(buff);
-    }
-
-    void print(float value) {
-        sprintf(buff, "%.2f", value);
-        print(buff);
-    }
-
-    virtual void deinit() = 0;
-};
-
-extern volatile bool print_flag;
 template <int size, char end_char, bool echo>
-class CommandManager : public PrintManager {
-
+class CommandManager {
+    char buff[10] = {0};
     constexpr static size_t buff_size = 50;
     CyclicBuffer_data<char, buff_size> buffer_rx;
     CyclicBuffer_data<char, buff_size> buffer_tx;
@@ -75,11 +35,42 @@ public:
         return false;
     }
 
-    void deinit() override {
+    void deinit()  {
         print_handler = nullptr;
     }
 
-    void print(char c) override {
+    size_t print(const char *s) {
+        size_t size_d = 0;
+        char c;
+        while ((c = *s) != '\0') {
+            print(c);
+            s++;
+            size_d++;
+        }
+        return size_d;
+    }
+
+    void print(uint16_t value) {
+        sprintf(buff, "%d", value);
+        print(buff);
+    }
+
+    void print(uint32_t value) {
+        sprintf(buff, "%lu", value);
+        print(buff);
+    }
+
+    void print(int16_t value) {
+        sprintf(buff, "%d", value);
+        print(buff);
+    }
+
+    void print(float value) {
+        sprintf(buff, "%.2f", value);
+        print(buff);
+    }
+
+    void print(char c) {
         buffer_tx.append(c);
     }
 
@@ -157,6 +148,3 @@ public:
         return cmd_buffer.data();
     }
 };
-
-
-#endif //ZUMO_COMMAND_MANAGER_H

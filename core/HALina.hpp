@@ -12,7 +12,6 @@
 #include "MKV58F24.h"
 #include "fsl_gpio.h"
 #include "fsl_port.h"
-#include "fsl_uart.h"
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"

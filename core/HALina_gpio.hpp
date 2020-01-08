@@ -25,6 +25,7 @@ namespace halina {
             INPUT,
             OUTPUT,
             TIMER,
+            INTERRUPT
         };
 
         virtual void set() = 0;

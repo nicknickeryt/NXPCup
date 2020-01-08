@@ -8,13 +8,14 @@
 #include <cstring>
 
 class Command {
-    const char * name;
+    const char* name;
     size_t  name_len = 0;
+    const char* description;
 public:
     std::function<void(const char*)> callback_handler;
 
 public:
-    Command(const char* name, std::function<void(const char*)> callback_handler ) : name(name), name_len(strlen(name)), callback_handler(std::move(callback_handler)) {
+    Command(const char* name, const char* description ,std::function<void(const char*)> callback_handler ) : name(name), name_len(strlen(name)), description(description), callback_handler(std::move(callback_handler)) {
 
     }
 

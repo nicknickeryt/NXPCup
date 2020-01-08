@@ -10,6 +10,12 @@
 #include "NXP_Kitty.hpp"
 #include "clock_config.h"
 
+#define LOG_CHANNEL APP
+#define APP_LOG_CHANNEL 1
+#define APP_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
+#include "logger.h"
+
 using namespace halina;
 
 int main(){
@@ -17,11 +23,14 @@ int main(){
     Kitty& kitty = Kitty::kitty();
 
     kitty.init();
-    kitty.uartDebug.write("Hello world xD\n");
-    kitty.servo.set(0.0f);
-    kitty.display.print(10.90f, 2);
+    kitty.servo.set(0.0);
+    kitty.display.print(6969);
 
     while (true){
         kitty.proc();
+
     }
 }
+
+
+
