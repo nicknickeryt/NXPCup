@@ -15,21 +15,24 @@ using namespace halina;
 
 RingBuffer rxRingBuffer[6];
 RingBuffer txRingBuffer[6];
+NXP_Uart* nxpUartHandlers[6];
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
     if(UART0 == uart){
-        setMyBuffers(&rxRingBuffer[0], &txRingBuffer[0]);
+        nxpUartHandlers[0] = this;
     } else if(UART1 == uart){
-        setMyBuffers(&rxRingBuffer[1], &txRingBuffer[1]);
+        nxpUartHandlers[1] = this;
     } else if(UART2 == uart){
-        setMyBuffers(&rxRingBuffer[2], &txRingBuffer[2]);
+        nxpUartHandlers[2] = this;
     } else if(UART3 == uart){
-        setMyBuffers(&rxRingBuffer[3], &txRingBuffer[3]);
+        nxpUartHandlers[3] = this;
     } else if(UART4 == uart){
-        setMyBuffers(&rxRingBuffer[4], &txRingBuffer[4]);
+        nxpUartHandlers[4] = this;
     } else if(UART5 == uart){
-        setMyBuffers(&rxRingBuffer[5], &txRingBuffer[5]);
+        nxpUartHandlers[5] = this;
     }
+    RingBuffer_Init(&rxRingBuffer, rxBuffer, rxBufferSize);
+    RingBuffer_Init(&txRingBuffer, txBuffer, txBufferSize);
 }
 
 void NXP_Uart::init(){
@@ -108,7 +111,7 @@ void NXP_Uart::write(void const* data, uint16_t length){
     __disable_irq();
     // put data to ring buffer
     for(uint16_t i=0; i<length; i++){
-        RingBuffer_PutChar(myTxRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
+        RingBuffer_PutChar(&txRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
     }
     // exit critical section
     __enable_irq();
@@ -117,13 +120,18 @@ void NXP_Uart::write(void const* data, uint16_t length){
 }
 
 void NXP_Uart::write(uint8_t data) {
-    RingBuffer_PutChar(myTxRingBuffer, data);
+    // enter critical section
+    __disable_irq();
+    // put data to ring buffer
+    RingBuffer_PutChar(&txRingBuffer, data);
+    // exit critical section
+    __enable_irq();
     enableInterrupt(InterruptType::TX_EMPTY);
 }
 
 uint8_t NXP_Uart::read() {
     uint8_t c;
-    RingBuffer_GetChar(myRxRingBuffer, &c);
+    RingBuffer_GetChar(&rxRingBuffer, &c);
     return c;
 }
 
@@ -135,43 +143,43 @@ void NXP_Uart::disableInterrupt(InterruptType interrupt){
     uart->C2 &= ~(static_cast<uint8_t >(interrupt));
 }
 
-void UART_IRQ(UART_Type* uart, RingBuffer* txRingBufferLocal, RingBuffer* rxRingBufferLocal) {
-    if(uart->S1 & UART_S1_TDRE_MASK){
-        uart->S1 |= UART_S1_TDRE_MASK;
+void UART_IRQ(NXP_Uart* nxpUartHandler) {
+    if(nxpUartHandler->uart->S1 & UART_S1_TDRE_MASK){
+        nxpUartHandler->uart->S1 |= UART_S1_TDRE_MASK;
         uint8_t c;
-        if (RingBuffer_GetChar(txRingBufferLocal, &c)) {
-            uart->D = c;
+        if (RingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &c)) {
+            nxpUartHandler->uart->D = c;
         } else {
-            uart->C2 &= ~(UART_C2_TIE_MASK);
+            nxpUartHandler->uart->C2 &= ~(UART_C2_TIE_MASK);
         }
-    } if (uart->S1 & UART_S1_RDRF_MASK) {
-        uart->S1 |= UART_S1_RDRF_MASK;
-        RingBuffer_PutChar(rxRingBufferLocal, uart->D);
+    } if (nxpUartHandler->uart->S1 & UART_S1_RDRF_MASK) {
+        nxpUartHandler->uart->S1 |= UART_S1_RDRF_MASK;
+        RingBuffer_PutChar(&(nxpUartHandler->rxRingBuffer), nxpUartHandler->uart->D);
     }
 }
 
 extern "C" {
 void UART0_RX_TX_IRQHandler() {
-    UART_IRQ(UART0, &txRingBuffer[0], &rxRingBuffer[0]);
+    UART_IRQ(nxpUartHandlers[0]);
 }
 
 void UART1_RX_TX_IRQHandler() {
-    UART_IRQ(UART1, &txRingBuffer[1], &rxRingBuffer[1]);
+    UART_IRQ(nxpUartHandlers[1]);
 }
 
 void UART2_RX_TX_IRQHandler() {
-    UART_IRQ(UART2, &txRingBuffer[2], &rxRingBuffer[2]);
+    UART_IRQ(nxpUartHandlers[2]);
 }
 
 void UART3_RX_TX_IRQHandler() {
-    UART_IRQ(UART3, &txRingBuffer[3], &rxRingBuffer[3]);
+    UART_IRQ(nxpUartHandlers[3]);
 }
 
 void UART4_RX_TX_IRQHandler() {
-    UART_IRQ(UART4, &txRingBuffer[4], &rxRingBuffer[4]);
+    UART_IRQ(nxpUartHandlers[4]);
 }
 
 void UART5_RX_TX_IRQHandler() {
-    UART_IRQ(UART5, &txRingBuffer[5], &rxRingBuffer[5]);
+    UART_IRQ(nxpUartHandlers[5]);
 }
 }
