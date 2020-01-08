@@ -13,8 +13,6 @@
 
 using namespace halina;
 
-RingBuffer rxRingBuffer[6];
-RingBuffer txRingBuffer[6];
 NXP_Uart* nxpUartHandlers[6];
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
