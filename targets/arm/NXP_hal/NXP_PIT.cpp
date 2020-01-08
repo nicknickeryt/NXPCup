@@ -40,7 +40,7 @@ bool NXP_PIT::init() {
     }
 
     enable();
-    PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / interval) - 1; // set timer counting
+    PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / frequency) - 1; // set timer counting
     PIT->CHANNEL[channel].TCTRL = 0;
     channelEnable();
 

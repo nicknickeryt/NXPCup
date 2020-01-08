@@ -15,6 +15,7 @@
 #include "NXP_servo.hpp"
 #include "NXP_motor.hpp"
 #include "NXP_PIT.hpp"
+#include "NXP_camera.hpp"
 
 class Kitty{
 private:
@@ -30,8 +31,10 @@ private:
     NXP_GPIO uart0TxPin = {PORTA, GPIOA, 15U, halina::GPIO::Mode::OUTPUT};
     NXP_GPIO uart2RxPin = {PORTE, GPIOE, 17U, halina::GPIO::Mode::INPUT};
     NXP_GPIO uart2TxPin = {PORTE, GPIOE, 16U, halina::GPIO::Mode::OUTPUT};
-    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
+    NXP_GPIO cameraSIPin = {PORTB, GPIOB, 5, halina::GPIO::Mode::OUTPUT};
+    //NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    //NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
 
     NXP_PORT servoPort = {PORTA, 7, 0x03};
@@ -52,8 +55,9 @@ private:
     NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
-    NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
-    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, 2, nullptr};
+    NXP_Camera camera = {270000, cameraClockPin, cameraSIPin};
+    //NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr};
+    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, camera.clockFrequencyInHz, [&](){camera.dummy();}};
 
 public:
     NXP_Uart uartDebug = {UART0, 115200};
@@ -62,6 +66,7 @@ public:
     NXP_Display display;
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
     NXP_Motors motors = {motorLeft, motorRight};
+
 private:
     Kitty() = default;
 

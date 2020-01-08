@@ -9,7 +9,7 @@
 class NXP_PIT {
 private:
     uint8_t channel;
-    uint32_t interval;
+    uint32_t frequency;
     bool callbackFunctionStatus = false;
 
 public:
@@ -24,7 +24,7 @@ public:
     static void enable();
     static void disable();
 
-    NXP_PIT(CHANNEL channel, uint32_t interval, std::function<void(void)> callbackFunction ) : channel(static_cast<uint8_t>(channel)), interval(interval) {
+    NXP_PIT(CHANNEL channel, uint32_t frequency, std::function<void(void)> callbackFunction ) : channel(static_cast<uint8_t>(channel)), frequency(frequency) {
         if (callbackFunction) {
             handlers.at(static_cast<uint8_t >(channel)) = std::move(callbackFunction);
             callbackFunctionStatus = true;
