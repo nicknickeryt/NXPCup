@@ -16,6 +16,8 @@ class NXP_Uart : public halina::UART {
 
 public:
     UART_Type* uart;
+    RingBuffer rxRingBuffer;
+    RingBuffer txRingBuffer;
 private:
     uint32_t baudrate;
     NXP_PORT& rxPin;
@@ -27,8 +29,6 @@ private:
     uint8_t txBuffer[txBufferSize] = {0};
     uint8_t rxBuffer[rxBufferSize] = {0};
 
-    RingBuffer* myTxRingBuffer = nullptr;
-    RingBuffer* myRxRingBuffer = nullptr;
 public:
     enum class InterruptType : uint8_t {
         TX_EMPTY = UART_C2_TIE_MASK,
@@ -40,13 +40,6 @@ public:
     void enableInterrupt(InterruptType interrupt);
 
     void disableInterrupt(InterruptType interrupt);
-
-    void setMyBuffers(RingBuffer* rxRingBuffer, RingBuffer* txRingBuffer) {
-        myRxRingBuffer = rxRingBuffer;
-        myTxRingBuffer = txRingBuffer;
-        RingBuffer_Init(rxRingBuffer, rxBuffer, rxBufferSize);
-        RingBuffer_Init(txRingBuffer, txBuffer, txBufferSize);
-    }
 
     NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin);
 
