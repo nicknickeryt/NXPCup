@@ -14,6 +14,7 @@ namespace fs = std::filesystem;
 
 #include "logger.h"
 #include "NXP_uart.hpp"
+#include "NXP_Kitty.hpp"
 
 static const char* const abbreviations[] = {"EMG", "ALT", "CRT ", "ERR", "WRN", "NOT", "INF", "DBG"};
 
@@ -42,6 +43,6 @@ void log_write(const uint8_t channel, const uint8_t level, const char* const cha
 static void writeFunctionWrapper(const char c, void* const context) {
     (void) context;
     if (c != '\0') {
-        loggerWriteChar(c);
+        Kitty::kitty().uartDebug.write(c);
     }
 }
