@@ -42,8 +42,8 @@ void Kitty::proc() {
     display.update();
     adc.startConversion();
     static int x = 0;
-    if(10000 == x++) {
-        log_notice("adc value: %d", uint16_t(adc.getValue()));
+    if(100000 == x++) {
+        log_notice("adc value: %d", int32_t(adc.getValue()));
         x = 0;
     }
 }

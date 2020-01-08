@@ -17,6 +17,8 @@ using ADC_Mux = uint16_t;
 
 class NXP_ADC : public halina::ADC{
 public:
+    constexpr static auto sampleMask = 15U;
+public:
     enum class Converter : uint16_t{
         CONVERTER_A = kHSADC_ConverterA,
         CONVERTER_B = kHSADC_ConverterB

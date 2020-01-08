@@ -27,7 +27,11 @@ void NXP_ADC::init() {
     HSADC_SetConverterConfig(adc, (_hsadc_converter_id)converterType , &converterConfig);
 
     HSADC_EnableConverterPower(adc, (_hsadc_converter_id)converterType, true);
-    while (( kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(adc))){;}
+    if(converterType == Converter::CONVERTER_A){
+        while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(adc))) { ; }
+    }else if(converterType == Converter::CONVERTER_B) {
+        while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(adc))) { ; }
+    }
     HSADC_EnableConverter(adc, (_hsadc_converter_id)converterType, true);
 
     sampleConfig.channelNumber = channel;
@@ -37,7 +41,7 @@ void NXP_ADC::init() {
         HSADC_SetSampleConfig(adc, i, &sampleConfig);
         HSADC_EnableSample(adc, HSADC_SAMPLE_MASK(i), true);
     }
-
+    //autoCalibration();
     enableInterrupts();
 }
 
@@ -55,17 +59,26 @@ void  NXP_ADC::startConversion() {
 }
 
 void NXP_ADC::autoCalibration() {
-    HSADC_DoAutoCalibration(adc, ( kHSADC_ConverterB),(kHSADC_CalibrationModeSingleEnded));
-    uint16_t interruptType = 0;
+    HSADC_ClearStatusFlags(adc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
     if(converterType == Converter::CONVERTER_A){
-        interruptType = kHSADC_ConverterAEndOfCalibrationInterruptEnable;
-    } else if(converterType == Converter::CONVERTER_B){
-        interruptType = kHSADC_ConverterBEndOfCalibrationInterruptEnable;
+        HSADC_EnableInterrupts(adc, kHSADC_ConverterAEndOfCalibrationInterruptEnable);
+    }else if(converterType == Converter::CONVERTER_B) {
+        HSADC_EnableInterrupts(adc, kHSADC_ConverterBEndOfCalibrationInterruptEnable);
     }
-    HSADC_EnableInterrupts(adc, interruptType);
-    while ((kHSADC_ConverterAEndOfCalibrationFlag) != ((kHSADC_ConverterAEndOfCalibrationFlag) & HSADC_GetStatusFlags(adc))){;}
+    NVIC_ClearPendingIRQ(HSADC_ERR_IRQn);
+    NVIC_EnableIRQ(HSADC_ERR_IRQn);
+    HSADC_DoAutoCalibration(adc, (_hsadc_converter_id)converterType,(kHSADC_CalibrationModeSingleEnded));
+    if(converterType == Converter::CONVERTER_A){
+        while ((kHSADC_ConverterAEndOfCalibrationFlag) != ((kHSADC_ConverterAEndOfCalibrationFlag) & HSADC_GetStatusFlags(adc))){;}
+    } else if(converterType == Converter::CONVERTER_B) {
+        while ((kHSADC_ConverterBEndOfCalibrationFlag) != ((kHSADC_ConverterBEndOfCalibrationFlag) & HSADC_GetStatusFlags(adc))){;}
+    }
     while (!isCalibFinished);
-    HSADC_DisableInterrupts(adc, interruptType);
+    if(converterType == Converter::CONVERTER_A){
+        HSADC_DisableInterrupts(adc, kHSADC_ConverterAEndOfCalibrationInterruptEnable);
+    }else if(converterType == Converter::CONVERTER_B) {
+        HSADC_DisableInterrupts(adc, kHSADC_ConverterBEndOfCalibrationInterruptEnable);
+    }
 }
 
 void NXP_ADC::enableInterrupts() {
@@ -77,7 +90,7 @@ void NXP_ADC::enableInterrupts() {
     }
 
     HSADC_ClearStatusFlags(adc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
-    HSADC_EnableSampleResultReadyInterrupts(adc, HSADC_SAMPLE_MASK(15), true);
+    HSADC_EnableSampleResultReadyInterrupts(adc, HSADC_SAMPLE_MASK(sampleMask), true);
 
     HSADC_EnableInterrupts(adc, interruptType);
 
@@ -126,7 +139,6 @@ void NXP_ADC::disableInterrupts() {
             NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
             NVIC_DisableIRQ(HSADC1_CCB_IRQn);
         }
-
     }
 }
 
@@ -141,8 +153,9 @@ void HSADC0_CCB_IRQHandler() {
     HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
 
     for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC0, i) >> 3) & 0xFFF;
+        hsadc0CurrentValue = (HSADC_GetSampleResultValue(HSADC0, i));
     }
+    hsadc0CurrentValue = (hsadc0CurrentValue << 4U) & 0xFFFF;
 }
 
 void HSADC1_CCA_IRQHandler(){
@@ -150,7 +163,8 @@ void HSADC1_CCA_IRQHandler(){
     HSADC1->STAT |= HSADC_STAT_EOSIB_MASK;
 
     for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i) >> 3) & 0xFFF;
+        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i));
     }
+    hsadc0CurrentValue /= 16;
 }
 }
