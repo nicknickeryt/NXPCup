@@ -40,7 +40,6 @@ void Kitty::init() {
     //intl.init();
     log_notice("Witaj swiecie!");
 
-    pit0.init();
     pit1.init();
     intr.init();
     intl.init();
