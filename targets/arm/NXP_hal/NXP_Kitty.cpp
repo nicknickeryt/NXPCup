@@ -29,6 +29,8 @@ void Kitty::init() {
     pit1.init();
     intr.init();
     intl.init();
+    adc.init();
+    log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 }
@@ -36,6 +38,12 @@ void Kitty::init() {
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
+    adc.startConversion();
+    static int x = 0;
+    if(100000 == x++) {
+        log_notice("adc value: %d", int32_t(adc.getValue()));
+        x = 0;
+    }
 }
 
 void Kitty::FTM_Init() {
