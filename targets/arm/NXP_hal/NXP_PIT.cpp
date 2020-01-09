@@ -1,6 +1,6 @@
 #include "NXP_PIT.hpp"
 
-std::array<std::function<void(void)>, 4> NXP_PIT::handlers;
+void (*NXP_PIT::handlers[4])();
 
 extern "C" {
 void PIT0_IRQHandler(void) {
