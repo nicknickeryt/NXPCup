@@ -13,7 +13,7 @@ private:
     bool callbackFunctionStatus = false;
 
 public:
-    static void (*handlers[4])();
+    static void (*handlers[4])(uint8_t);
     enum class CHANNEL : uint8_t {
         _0 = 0,
         _1 = 1,
@@ -24,7 +24,7 @@ public:
     static void enable();
     static void disable();
 
-    NXP_PIT(CHANNEL channel, uint32_t frequency, void(*callbackFunction)() ) : channel(static_cast<uint8_t>(channel)), frequency(frequency) {
+    NXP_PIT(CHANNEL channel, uint32_t frequency, void(*callbackFunction)(uint8_t) ) : channel(static_cast<uint8_t>(channel)), frequency(frequency) {
         if (callbackFunction) {
             handlers[static_cast<uint8_t >(channel)] = callbackFunction;
             callbackFunctionStatus = true;

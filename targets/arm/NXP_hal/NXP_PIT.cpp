@@ -1,26 +1,27 @@
 #include "NXP_PIT.hpp"
+#include "NXP_camera.hpp"
 
-void (*NXP_PIT::handlers[4])();
+void (*NXP_PIT::handlers[4])(uint8_t);
 
 extern "C" {
 void PIT0_IRQHandler(void) {
     PIT->CHANNEL[0].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[0]();
+    NXP_PIT::handlers[0](NXP_Camera::CAMERA_0);
 }
 
 void PIT1_IRQHandler(void) {
     PIT->CHANNEL[1].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[1]();
+    NXP_PIT::handlers[1](0);
 }
 
 void PIT2_IRQHandler(void) {
     PIT->CHANNEL[2].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[2]();
+    NXP_PIT::handlers[2](0);
 }
 
 void PIT3_IRQHandler(void) {
     PIT->CHANNEL[3].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[3]();
+    NXP_PIT::handlers[3](0);
 }
 }
 

@@ -2,20 +2,30 @@
 #include "NXP_gpio.hpp"
 #include "NXP_PIT.hpp"
 
+void camera0Callback();
+void camera1Callback();
+
 class NXP_Camera {
 public:
-    NXP_Camera(uint32_t clockFrequencyInHz, NXP_GPIO& clockPin, NXP_GPIO& SIPin) : clockFrequencyInHz(clockFrequencyInHz), clockPin(clockPin), SIPin(SIPin){}
+    enum CameraIndex {
+        CAMERA_0,
+        CAMERA_1
+    };
+
+    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
 
     void init();
 
-    void dummy();
+    static void dummy(uint8_t x);
 
 public:
+    CameraIndex index;
     uint32_t clockFrequencyInHz;
-
-private:
     NXP_GPIO& clockPin;
     NXP_GPIO& SIPin;
+
+private:
+
 
 
 };
