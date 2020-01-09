@@ -53,7 +53,7 @@ private:
     NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
-    NXP_Camera camera = {NXP_Camera::CameraIndex::CAMERA_0, 270000, cameraClockPin, cameraSIPin};
+    NXP_Camera camera = {NXP_Camera::CameraIndex::CAMERA_0, 270000,600, cameraClockPin, cameraSIPin};
     //NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 2, nullptr}; [&](){camera.dummy();}
     NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, camera.clockFrequencyInHz, NXP_Camera::dummy};
 

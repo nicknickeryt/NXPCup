@@ -12,7 +12,7 @@ public:
         CAMERA_1
     };
 
-    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
+    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, uint32_t siFrequencyInHz, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
 
     void init();
 
@@ -21,6 +21,9 @@ public:
 public:
     CameraIndex index;
     uint32_t clockFrequencyInHz;
+    uint32_t siFrequencyInHz;
+    uint16_t clockPeriodsToSIGeneration;
+    uint16_t clockPeriodsCounter;
     NXP_GPIO& clockPin;
     NXP_GPIO& SIPin;
 
