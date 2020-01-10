@@ -152,19 +152,23 @@ void HSADC0_CCB_IRQHandler() {
     HSADC0->STAT |= HSADC_STAT_EOSIA_MASK;
     HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
 
+    __disable_irq();
     for (auto i = 0; i < 16; i++) {
         hsadc0CurrentValue = (HSADC_GetSampleResultValue(HSADC0, i));
     }
     hsadc0CurrentValue = (hsadc0CurrentValue << 4U) & 0xFFFF;
+    __enable_irq();
 }
 
 void HSADC1_CCA_IRQHandler(){
     HSADC1->STAT |= HSADC_STAT_EOSIA_MASK;
     HSADC1->STAT |= HSADC_STAT_EOSIB_MASK;
 
+    __disable_irq();
     for (auto i = 0; i < 16; i++) {
         hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i));
     }
     hsadc0CurrentValue /= 16;
+    __enable_irq();
 }
 }

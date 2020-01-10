@@ -29,21 +29,15 @@ void Kitty::init() {
     pit1.init();
     intr.init();
     intl.init();
-    adc.init();
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
+    servo.set(0.4);
 }
 
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
-    adc.startConversion();
-    static int x = 0;
-    if(100000 == x++) {
-        log_notice("adc value: %d", int32_t(adc.getValue()));
-        x = 0;
-    }
 }
 
 void Kitty::FTM_Init() {
@@ -62,7 +56,7 @@ void Kitty::magicDiodComposition(){
     static uint8_t direction = 0;
     static uint8_t old_led = 0;
     licznik++;
-    if (licznik == 90000) {
+    if (licznik == 50000) {
         licznik = 0;
         if (direction == 0) {
             old_led = led_index;

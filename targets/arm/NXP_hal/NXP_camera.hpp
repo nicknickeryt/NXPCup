@@ -1,6 +1,7 @@
 #pragma once
 #include "NXP_gpio.hpp"
 #include "NXP_PIT.hpp"
+#include "NXP_adc.hpp"
 
 void camera0Callback();
 void camera1Callback();
@@ -12,7 +13,7 @@ public:
         CAMERA_1
     };
 
-    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, uint32_t siFrequencyInHz, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
+    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, uint32_t siFrequencyInHz, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
 
     void init();
 
@@ -22,6 +23,7 @@ public:
     CameraIndex index;
     uint32_t clockFrequencyInHz;
     uint32_t siFrequencyInHz;
+    NXP_ADC& adc;
     uint16_t clockPeriodsToSIGeneration;
     uint16_t clockPeriodsCounter;
     NXP_GPIO& clockPin;
