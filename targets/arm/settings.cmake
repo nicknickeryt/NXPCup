@@ -1,8 +1,8 @@
 set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror")
 set (CXXWARN "-Wall -Wextra")
 set(CTUNING "-fomit-frame-pointer -ffunction-sections -fdata-sections")
-
-set(CMCU "-mcpu=cortex-m7 -mthumb -mfloat-abi=soft")
+set (ARMFLOAT "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
+set(CMCU "-mcpu=cortex-m7 -mthumb ${ARMFLOAT}")
 
 # TODO MKV58
 set(RANDOM_DEFS "-DMKV58F1M0xxx24")
