@@ -20,7 +20,7 @@ void camera0Callback(){
     nxpCamera0Handler->adc.startConversion();
     static int x = 0;
     if(1000 == x++) {
-        log_notice("adc value: %d", int32_t(nxpCamera0Handler->adc.getValue()));
+//        log_notice("adc value: %d", int32_t(nxpCamera0Handler->adc.getValue()));
         x = 0;
     }
 }

@@ -16,8 +16,6 @@ namespace halina {
     public:
         virtual void init() = 0;
 
-        virtual int32_t getValue() = 0;
-
         virtual void startConversion() = 0;
     };
 }

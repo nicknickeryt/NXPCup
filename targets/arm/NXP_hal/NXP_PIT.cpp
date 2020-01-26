@@ -5,8 +5,8 @@ void (*NXP_PIT::handlers[4])(uint8_t);
 
 extern "C" {
 void PIT0_IRQHandler(void) {
-//    PIT->CHANNEL[0].TFLG = PIT_TFLG_TIF_MASK;
-//    NXP_PIT::handlers[0](NXP_Camera::CAMERA_0);
+    PIT->CHANNEL[0].TFLG = PIT_TFLG_TIF_MASK;
+    NXP_PIT::handlers[0](0);
 }
 
 void PIT1_IRQHandler(void) {
@@ -15,13 +15,13 @@ void PIT1_IRQHandler(void) {
 }
 
 void PIT2_IRQHandler(void) {
-//    PIT->CHANNEL[2].TFLG = PIT_TFLG_TIF_MASK;
-//    NXP_PIT::handlers[2](0);
+    PIT->CHANNEL[2].TFLG = PIT_TFLG_TIF_MASK;
+    NXP_PIT::handlers[2](0);
 }
 
 void PIT3_IRQHandler(void) {
-//    PIT->CHANNEL[3].TFLG = PIT_TFLG_TIF_MASK;
-//    NXP_PIT::handlers[3](0);
+    PIT->CHANNEL[3].TFLG = PIT_TFLG_TIF_MASK;
+    NXP_PIT::handlers[3](0);
 }
 }
 

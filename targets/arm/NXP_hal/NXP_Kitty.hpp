@@ -56,12 +56,12 @@ private:
     NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
-    NXP_Camera camera = {NXP_Camera::CameraIndex::CAMERA_0, 20000, 600, adc,  cameraClockPin, cameraSIPin};
+//    NXP_Camera camera = {NXP_Camera::CameraIndex::CAMERA_0, 20000, 600, adc,  cameraClockPin, cameraSIPin};
 //    NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 1000, [](uint8_t){}};
-    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, camera.clockFrequencyInHz, NXP_Camera::dummy};
+//    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, camera.clockFrequencyInHz, NXP_Camera::dummy};
 
 public:
-    NXP_ADC adc = {HSADC0, adc0mux,NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
+//    NXP_ADC adc = {HSADC0, adc0mux,NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
     NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
 
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};

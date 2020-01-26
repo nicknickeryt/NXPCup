@@ -9,166 +9,144 @@
 #include <drivers/fsl_hsadc.h>
 #include "NXP_adc.hpp"
 
-volatile bool isCalibFinished = false;
-static volatile uint32_t hsadc0CurrentValue = 0;
-static volatile uint32_t hsadc1CurrentValue = 0;
+NXP_ADC* HSADCInstances[2];
 
 void NXP_ADC::init() {
-    hsadc_config_t  hsadcConfig;
-    hsadc_converter_config_t  converterConfig;
-    hsadc_sample_config_t sampleConfig;
-    pinMux.setMux();
-
-    HSADC_GetDefaultConfig(&hsadcConfig);
-    hsadcConfig.enableSimultaneousMode = false;
-    HSADC_Init(adc, &hsadcConfig);
-
-    HSADC_GetDefaultConverterConfig(&converterConfig);
-    HSADC_SetConverterConfig(adc, (_hsadc_converter_id)converterType , &converterConfig);
-
-    HSADC_EnableConverterPower(adc, (_hsadc_converter_id)converterType, true);
-    if(converterType == Converter::CONVERTER_A){
-        while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(adc))) { ; }
-    }else if(converterType == Converter::CONVERTER_B) {
-        while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(adc))) { ; }
+    for (uint8_t i = 0; i < A.samplesCount; i++) {
+        A.samples.at(i)->init(baseAdc, i);
     }
-    HSADC_EnableConverter(adc, (_hsadc_converter_id)converterType, true);
 
-    sampleConfig.channelNumber = channel;
-    sampleConfig.channel67MuxNumber = mux;
-    sampleConfig.enableDifferentialPair = enableDifferentialPair;
-    for (uint8_t i = 0; i < 16; i++) {
-        HSADC_SetSampleConfig(adc, i, &sampleConfig);
-        HSADC_EnableSample(adc, HSADC_SAMPLE_MASK(i), true);
+    for (uint8_t i = 0; i < B.samplesCount; i++) {
+        B.samples.at(i)->init(baseAdc, i + 8);
     }
-    //autoCalibration();
-    enableInterrupts();
+
+    HSADC_ClearStatusFlags(baseAdc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
+    HSADC_EnableSampleResultReadyInterrupts(baseAdc, HSADC_SAMPLE_MASK(sampleMask), true);
+
+    if (baseAdc == HSADC0 && A.samplesCount > 0) {
+        SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
+        HSADCInstances[0] = this;
+        NVIC_ClearPendingIRQ(HSADC0_CCA_IRQn);
+        NVIC_EnableIRQ(HSADC0_CCA_IRQn);
+        HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
+    } else if (baseAdc == HSADC0 && B.samplesCount > 0) {
+        SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
+        HSADCInstances[0] = this;
+        NVIC_ClearPendingIRQ(HSADC0_CCB_IRQn);
+        NVIC_EnableIRQ(HSADC0_CCB_IRQn);
+        HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
+    } else if (baseAdc == HSADC1 && A.samplesCount > 0) {
+        SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
+        HSADCInstances[1] = this;
+        NVIC_ClearPendingIRQ(HSADC1_CCA_IRQn);
+        NVIC_EnableIRQ(HSADC1_CCA_IRQn);
+        HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
+    } else if (baseAdc == HSADC1 && B.samplesCount > 0) {
+        SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
+        HSADCInstances[1] = this;
+        NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
+        NVIC_EnableIRQ(HSADC1_CCB_IRQn);
+        HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
+    }
 }
 
-int32_t NXP_ADC::getValue(){
-    if(adc == HSADC0){
-        currentValue = hsadc0CurrentValue;
-    }else if(adc == HSADC1){
-        currentValue = hsadc1CurrentValue;
+bool NXP_ADC::appendSample(Sample *sample) {
+    if (sample->converterType == Converter::Type::A) {
+        A.appendSample(sample);
+        return true;
+    } else if (sample->converterType == Converter::Type::B) {
+        B.appendSample(sample);
+        return true;
     }
-    return currentValue;
+    return false;
+}
+
+void NXP_ADC::saveData(Converter::Type converterType) {
+    if (converterType == Converter::Type::A) {
+        for(uint8_t i = 0; i < 8; i ++) {
+            A.conversionValues[i] = HSADC_GetSampleResultValue(baseAdc, i);
+        }
+        A.converterHandler(0);
+    } else if (converterType == Converter::Type::B) {
+        for(uint8_t i = 0; i < 8; i ++) {
+            B.conversionValues[i] = HSADC_GetSampleResultValue(baseAdc, i + 8);
+        }
+        B.converterHandler(0);
+    }
+}
+
+uint16_t* NXP_ADC::getBufferValues(Converter::Type converterType){
+    if (converterType == Converter::Type::A) {
+        return A.conversionValues;
+    } else if (converterType == Converter::Type::B) {
+        return B.conversionValues;
+    }
 }
 
 void  NXP_ADC::startConversion() {
-    HSADC_DoSoftwareTriggerConverter(adc, (_hsadc_converter_id)converterType);
-}
-
-void NXP_ADC::autoCalibration() {
-    HSADC_ClearStatusFlags(adc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
-    if(converterType == Converter::CONVERTER_A){
-        HSADC_EnableInterrupts(adc, kHSADC_ConverterAEndOfCalibrationInterruptEnable);
-    }else if(converterType == Converter::CONVERTER_B) {
-        HSADC_EnableInterrupts(adc, kHSADC_ConverterBEndOfCalibrationInterruptEnable);
-    }
-    NVIC_ClearPendingIRQ(HSADC_ERR_IRQn);
-    NVIC_EnableIRQ(HSADC_ERR_IRQn);
-    HSADC_DoAutoCalibration(adc, (_hsadc_converter_id)converterType,(kHSADC_CalibrationModeSingleEnded));
-    if(converterType == Converter::CONVERTER_A){
-        while ((kHSADC_ConverterAEndOfCalibrationFlag) != ((kHSADC_ConverterAEndOfCalibrationFlag) & HSADC_GetStatusFlags(adc))){;}
-    } else if(converterType == Converter::CONVERTER_B) {
-        while ((kHSADC_ConverterBEndOfCalibrationFlag) != ((kHSADC_ConverterBEndOfCalibrationFlag) & HSADC_GetStatusFlags(adc))){;}
-    }
-    while (!isCalibFinished);
-    if(converterType == Converter::CONVERTER_A){
-        HSADC_DisableInterrupts(adc, kHSADC_ConverterAEndOfCalibrationInterruptEnable);
-    }else if(converterType == Converter::CONVERTER_B) {
-        HSADC_DisableInterrupts(adc, kHSADC_ConverterBEndOfCalibrationInterruptEnable);
-    }
-}
-
-void NXP_ADC::enableInterrupts() {
-    uint16_t interruptType = 0;
-    if(converterType == Converter::CONVERTER_A){
-        interruptType = kHSADC_ConverterAEndOfScanInterruptEnable;
-    } else if(converterType == Converter::CONVERTER_B){
-        interruptType = kHSADC_ConverterBEndOfScanInterruptEnable;
-    }
-
-    HSADC_ClearStatusFlags(adc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
-    HSADC_EnableSampleResultReadyInterrupts(adc, HSADC_SAMPLE_MASK(sampleMask), true);
-
-    HSADC_EnableInterrupts(adc, interruptType);
-
-    if(adc == HSADC0) {
-        if (converterType == Converter::CONVERTER_A) {
-            NVIC_ClearPendingIRQ(HSADC0_CCA_IRQn);
-            NVIC_EnableIRQ(HSADC0_CCA_IRQn);
-        } else if (converterType == Converter::CONVERTER_B) {
-            NVIC_ClearPendingIRQ(HSADC0_CCB_IRQn);
-            NVIC_EnableIRQ(HSADC0_CCB_IRQn);
-        }
-    }else if(adc == HSADC1){
-        if(converterType == Converter::CONVERTER_A) {
-            NVIC_ClearPendingIRQ(HSADC1_CCA_IRQn);
-            NVIC_EnableIRQ(HSADC1_CCA_IRQn);
-        }else if(converterType == Converter::CONVERTER_B){
-            NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
-            NVIC_EnableIRQ(HSADC1_CCB_IRQn);
-        }
-    }
-}
-
-void NXP_ADC::disableInterrupts() {
-    uint16_t interruptType = 0;
-    if(converterType == Converter::CONVERTER_A){
-        interruptType = kHSADC_ConverterAEndOfScanInterruptEnable;
-    } else if(converterType == Converter::CONVERTER_B){
-        interruptType = kHSADC_ConverterBEndOfScanInterruptEnable;
-    }
-
-    HSADC_DisableInterrupts(adc, interruptType);
-
-    if(adc == HSADC0) {
-        if (converterType == Converter::CONVERTER_A) {
-            NVIC_ClearPendingIRQ(HSADC0_CCA_IRQn);
-            NVIC_DisableIRQ(HSADC0_CCA_IRQn);
-        } else if (converterType == Converter::CONVERTER_B) {
-            NVIC_ClearPendingIRQ(HSADC0_CCB_IRQn);
-            NVIC_DisableIRQ(HSADC0_CCB_IRQn);
-        }
-    }else if (adc == HSADC1) {
-        if (converterType == Converter::CONVERTER_A) {
-            NVIC_ClearPendingIRQ(HSADC1_CCA_IRQn);
-            NVIC_DisableIRQ(HSADC1_CCA_IRQn);
-        } else if (converterType == Converter::CONVERTER_B) {
-            NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
-            NVIC_DisableIRQ(HSADC1_CCB_IRQn);
-        }
+    if (A.samplesCount > 0) {
+        HSADC_DoSoftwareTriggerConverter(baseAdc, kHSADC_ConverterA);
+    } else if (B.samplesCount > 0) {
+        HSADC_DoSoftwareTriggerConverter(baseAdc, kHSADC_ConverterB);
     }
 }
 
 extern "C" {
 void HSADC_ERR_IRQHandler() {
     HSADC0->STAT |= HSADC_STAT_EOCALIA_MASK;
-    isCalibFinished = true;
+//    isCalibFinished = true;
+}
+
+void HSADC0_CCA_IRQHandler() {
+    HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
+    HSADCInstances[0]->saveData(NXP_ADC::Converter::Type::A);
 }
 
 void HSADC0_CCB_IRQHandler() {
-    HSADC0->STAT |= HSADC_STAT_EOSIA_MASK;
     HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
-
-    __disable_irq();
-    for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue = (HSADC_GetSampleResultValue(HSADC0, i));
-    }
-    hsadc0CurrentValue = (hsadc0CurrentValue << 4U) & 0xFFFF;
-    __enable_irq();
+    HSADCInstances[0]->saveData(NXP_ADC::Converter::Type::B);
 }
 
-void HSADC1_CCA_IRQHandler(){
-    HSADC1->STAT |= HSADC_STAT_EOSIA_MASK;
-    HSADC1->STAT |= HSADC_STAT_EOSIB_MASK;
-
-    __disable_irq();
-    for (auto i = 0; i < 16; i++) {
-        hsadc0CurrentValue += (HSADC_GetSampleResultValue(HSADC1, i));
-    }
-    hsadc0CurrentValue /= 16;
-    __enable_irq();
+void HSADC1_CCA_IRQHandler() {
+    HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
+    HSADCInstances[1]->saveData(NXP_ADC::Converter::Type::A);
 }
+
+void HSADC1_CCB_IRQHandler() {
+    HSADC0->STAT |= HSADC_STAT_EOSIB_MASK;
+    HSADCInstances[1]->saveData(NXP_ADC::Converter::Type::B);
+}
+}
+
+void NXP_ADC::Sample::init(HSADC_Type* baseAdc, uint8_t indexInRegisterSample) {
+    if (!initialised) {
+        pinMux.setMux();
+        hsadc_config_t  hsadcConfig;
+        hsadc_converter_config_t  converterConfig;
+
+        HSADC_GetDefaultConfig(&hsadcConfig);
+        HSADC_GetDefaultConverterConfig(&converterConfig);
+
+        hsadcConfig.enableSimultaneousMode = false;
+        HSADC_Init(baseAdc, &hsadcConfig);
+        HSADC_SetConverterConfig(baseAdc, (_hsadc_converter_id)converterType , &converterConfig);
+
+        HSADC_EnableConverterPower(baseAdc, (_hsadc_converter_id)converterType, true);
+        if (converterType == Converter::Type::A) {
+            while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+        } else if (converterType == Converter::Type::B) {
+            while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+        }
+        initialised = true;
+    }
+
+    hsadc_sample_config_t sampleConfig;
+    HSADC_GetDefaultSampleConfig(&sampleConfig);
+    HSADC_EnableConverter(baseAdc, (_hsadc_converter_id)converterType, true);
+
+    sampleConfig.channelNumber = static_cast<uint8_t>(channel) >> 4u;
+    sampleConfig.channel67MuxNumber = static_cast<uint8_t>(channel) & 0xFFu;
+
+    HSADC_SetSampleConfig(baseAdc, indexInRegisterSample, &sampleConfig);
+    HSADC_EnableSample(baseAdc, HSADC_SAMPLE_MASK(indexInRegisterSample), true);
 }
