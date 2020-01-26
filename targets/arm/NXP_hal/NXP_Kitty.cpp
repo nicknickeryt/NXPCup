@@ -19,19 +19,19 @@ void Kitty::init() {
     BOARD_InitBootClocks();
 
     FTM_Init();
-//    uartDebug.init();
-//    uartCommunication.init();
+    uartDebug.init();
+    uartCommunication.init();
     ledLine.init();
-//    display.init();
-//    servo.init();
-////    camera.init();
-////    pit1.init();
-//    intr.init();
-//    intl.init();
-//    log_notice("Witaj swiecie!");
-//    uartCommunication.write("Bejbi don't hurt me", 19);
-//    log_notice("KiTTy init finished");
-////    servo.set(0.4);
+    display.init();
+    servo.init();
+    camera.init();
+    pitCamera.init();
+    intr.init();
+    intl.init();
+    log_notice("Witaj swiecie!");
+    uartCommunication.write("Bejbi don't hurt me", 19);
+    log_notice("KiTTy init finished");
+//    servo.set(0.4);
 }
 
 void Kitty::proc() {

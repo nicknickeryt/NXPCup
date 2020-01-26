@@ -3,35 +3,52 @@
 #include "NXP_PIT.hpp"
 #include "NXP_adc.hpp"
 
-void camera0Callback();
-void camera1Callback();
-
 class NXP_Camera {
 public:
-    enum CameraIndex {
-        CAMERA_0,
-        CAMERA_1
+    uint16_t buffer1Data [128] = {0};
+    uint16_t buffer2Data [128] = {0};
+
+    int16_t currentPixelIndex = 0; // must be int
+
+    enum class Type : uint8_t {
+        CAMERA_1,
+        CAMERA_2,
+        BOTH
     };
 
-    NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, uint32_t siFrequencyInHz, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin);
+    enum class CameraState : uint8_t {
+        STOPPED = 0,
+        START,
+        SET_SI_PIN,
+        RESET_SI_PIN,
+
+        SET_CLOCK_PIN,
+        RESET_CLOCK_PIN,
+
+        GET_DATA_FROM_ADC,
+    };
+
+    NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2);
+
+    CameraState cameraState = CameraState::STOPPED;
 
     void init();
 
-    static void dummy(uint8_t x);
+    static void adcInterruptEndOfMeasurementStatic(uint8_t);
 
+    static void pitInterruptStatic(uint8_t);
+
+    void adcInterruptEndOfMeasurement();
+
+    void pitInterrupt();
 public:
-    CameraIndex index;
-    uint32_t clockFrequencyInHz;
-    uint32_t siFrequencyInHz;
+    Type type;
     NXP_ADC& adc;
-    uint16_t clockPeriodsToSIGeneration;
-    uint16_t clockPeriodsCounter;
+
     NXP_GPIO& clockPin;
     NXP_GPIO& SIPin;
 
-private:
-
-
-
+    NXP_ADC::Sample& sampleCamera1;
+    NXP_ADC::Sample& sampleCamera2;
 };
 

@@ -64,13 +64,25 @@ public:
             }
             return false;
         }
+
+        void init(HSADC_Type* baseAdc)  {
+            hsadc_converter_config_t  converterConfig;
+            HSADC_GetDefaultConverterConfig(&converterConfig);
+            HSADC_SetConverterConfig(baseAdc, (_hsadc_converter_id)type , &converterConfig);
+
+            HSADC_EnableConverterPower(baseAdc, (_hsadc_converter_id)type, true);
+            if (type == Converter::Type::A) {
+                while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+            } else if (type == Converter::Type::B) {
+                while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+            }
+        }
     };
 
     class Sample {
         bool initialised = false;
         NXP_PORT pinMux;
         ChannelSingleEnded channel;
-        uint32_t currentValue;
     public:
         Converter::Type converterType;
 

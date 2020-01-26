@@ -23,27 +23,36 @@ void NXP_ADC::init() {
     HSADC_ClearStatusFlags(baseAdc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
     HSADC_EnableSampleResultReadyInterrupts(baseAdc, HSADC_SAMPLE_MASK(sampleMask), true);
 
+    hsadc_config_t  hsadcConfig;
+    HSADC_GetDefaultConfig(&hsadcConfig);
+    hsadcConfig.enableSimultaneousMode = false;
+    HSADC_Init(baseAdc, &hsadcConfig);
+
     if (baseAdc == HSADC0 && A.samplesCount > 0) {
         SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
         HSADCInstances[0] = this;
+        A.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC0_CCA_IRQn);
         NVIC_EnableIRQ(HSADC0_CCA_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC0 && B.samplesCount > 0) {
         SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
         HSADCInstances[0] = this;
+        B.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC0_CCB_IRQn);
         NVIC_EnableIRQ(HSADC0_CCB_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC1 && A.samplesCount > 0) {
         SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
         HSADCInstances[1] = this;
+        A.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC1_CCA_IRQn);
         NVIC_EnableIRQ(HSADC1_CCA_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC1 && B.samplesCount > 0) {
         SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
         HSADCInstances[1] = this;
+        B.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
         NVIC_EnableIRQ(HSADC1_CCB_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
@@ -81,6 +90,7 @@ uint16_t* NXP_ADC::getBufferValues(Converter::Type converterType){
     } else if (converterType == Converter::Type::B) {
         return B.conversionValues;
     }
+    return {};
 }
 
 void  NXP_ADC::startConversion() {
@@ -121,22 +131,6 @@ void HSADC1_CCB_IRQHandler() {
 void NXP_ADC::Sample::init(HSADC_Type* baseAdc, uint8_t indexInRegisterSample) {
     if (!initialised) {
         pinMux.setMux();
-        hsadc_config_t  hsadcConfig;
-        hsadc_converter_config_t  converterConfig;
-
-        HSADC_GetDefaultConfig(&hsadcConfig);
-        HSADC_GetDefaultConverterConfig(&converterConfig);
-
-        hsadcConfig.enableSimultaneousMode = false;
-        HSADC_Init(baseAdc, &hsadcConfig);
-        HSADC_SetConverterConfig(baseAdc, (_hsadc_converter_id)converterType , &converterConfig);
-
-        HSADC_EnableConverterPower(baseAdc, (_hsadc_converter_id)converterType, true);
-        if (converterType == Converter::Type::A) {
-            while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
-        } else if (converterType == Converter::Type::B) {
-            while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
-        }
         initialised = true;
     }
 

@@ -20,6 +20,7 @@
 
 class Kitty{
 private:
+    // LEDS
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
     NXP_GPIO LED1 = NXP_GPIO(PORTA, GPIOA, 17U);
     NXP_GPIO LED2 = NXP_GPIO(PORTA, GPIOA, 24U);
@@ -29,39 +30,46 @@ private:
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
 
-    NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
-    NXP_GPIO cameraSIPin = {PORTB, GPIOB, 5, halina::GPIO::Mode::OUTPUT};
+    // ENCODERS
     NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
 
-    NXP_PORT servoPort = {PORTA, 7, 0x03};
+    // MOTORS
+    NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
     NXP_PORT motorLeftPortMLB = {PORTE, 5, 0x06};
     NXP_PORT motorLeftPortMLF = {PORTE, 6, 0x06};
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
 
+    NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+    NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
+    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+
+    // UARTS
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
     NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
-    NXP_PORT adc0mux = {PORTB, 1U, 0x00};
-    NXP_PORT adc1mux = {PORTB, 0U, 0x00};
 
+    // SERVO
+    NXP_PORT servoPort = {PORTA, 7, 0x03};
     NXP_PWM servoPwm = {*this, FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, BOARD_BOOTCLOCKRUN_CORE_CLOCK/64/50};
 
-    NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
-    NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+    // CAMERA
+    NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
+    NXP_GPIO cameraSIPin = {PORTB, GPIOB, 5, halina::GPIO::Mode::OUTPUT};
+    NXP_PORT adc0mux = {PORTB, 0U, 0x00};
+    NXP_PORT adc1mux = {PORTB, 1U, 0x00};
 
-    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
-    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+    NXP_ADC adc = {HSADC0, nullptr, NXP_Camera::adcInterruptEndOfMeasurementStatic};
+    NXP_ADC::Sample camera1Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
+    NXP_ADC::Sample camera2Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
+    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
 
-//    NXP_Camera camera = {NXP_Camera::CameraIndex::CAMERA_0, 20000, 600, adc,  cameraClockPin, cameraSIPin};
-//    NXP_PIT pit0 = {NXP_PIT::CHANNEL::_0, 1000, [](uint8_t){}};
-//    NXP_PIT pit1 = {NXP_PIT::CHANNEL::_1, camera.clockFrequencyInHz, NXP_Camera::dummy};
+    NXP_PIT pitCamera= {NXP_PIT::CHANNEL::_0, 10000, NXP_Camera::pitInterruptStatic};
 
 public:
-//    NXP_ADC adc = {HSADC0, adc0mux,NXP_ADC::Converter::CONVERTER_B, 10, 0, false};
     NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
 
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
@@ -87,5 +95,4 @@ public:
     void init();
 
     void proc();
-
 };

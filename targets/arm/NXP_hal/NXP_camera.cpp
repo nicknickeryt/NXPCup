@@ -5,56 +5,106 @@
 #include "NXP_camera.hpp"
 #include "logger.h"
 
-NXP_Camera* nxpCamera0Handler;
-NXP_Camera* nxpCamera1Handler;
+NXP_Camera* cameraHandler = nullptr;
 
-void camera0Callback(){
-    // check if it is time to generate SI impulse
-    if(nxpCamera0Handler->clockPeriodsCounter == nxpCamera0Handler->clockPeriodsToSIGeneration){
-        nxpCamera0Handler->clockPeriodsCounter = 0;
-        nxpCamera0Handler->SIPin.set();
-    } else{
-        nxpCamera0Handler->SIPin.reset();
-    }
-    nxpCamera0Handler->clockPeriodsCounter++;
-    nxpCamera0Handler->adc.startConversion();
-    static int x = 0;
-    if(1000 == x++) {
-//        log_notice("adc value: %d", int32_t(nxpCamera0Handler->adc.getValue()));
-        x = 0;
-    }
-}
-void camera1Callback(){
-
+NXP_Camera::NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2) :
+    type(type), adc(adc), clockPin(clockPin), SIPin(SIPin), sampleCamera1(sampleCamera1), sampleCamera2(sampleCamera2) {
+    cameraHandler = this;
 }
 
-NXP_Camera::NXP_Camera(CameraIndex index, uint32_t clockFrequencyInHz, uint32_t siFrequencyInHz, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin) :
-                    index(index),
-                    clockFrequencyInHz(clockFrequencyInHz),
-                    siFrequencyInHz(siFrequencyInHz),
-                    adc(adc),
-                    clockPin(clockPin),
-                    SIPin(SIPin){
-    if(index == CameraIndex::CAMERA_0){
-        nxpCamera0Handler = this;
-    } else if(index == CameraIndex::CAMERA_1){
-        nxpCamera1Handler = this;
-    }
-    clockPeriodsToSIGeneration = clockFrequencyInHz/siFrequencyInHz;
-}
-
-void NXP_Camera::init(){
+void NXP_Camera::init() {
     clockPin.init();
     SIPin.init();
+
+    if (type == NXP_Camera::Type::BOTH) {
+        adc.appendSample(&sampleCamera1);
+        adc.appendSample(&sampleCamera1);
+        adc.appendSample(&sampleCamera1);
+        adc.appendSample(&sampleCamera1);
+
+        adc.appendSample(&sampleCamera2);
+        adc.appendSample(&sampleCamera2);
+        adc.appendSample(&sampleCamera2);
+        adc.appendSample(&sampleCamera2);
+    } else if (type == NXP_Camera::Type::CAMERA_1) {
+        for (uint8_t i = 0; i < 8; i ++) {
+            adc.appendSample(&sampleCamera1);
+        }
+    } else if (type == NXP_Camera::Type::CAMERA_2) {
+        for (uint8_t i = 0; i < 8; i ++) {
+            adc.appendSample(&sampleCamera2);
+        }
+    }
+
     adc.init();
     clockPin.reset();
     SIPin.reset();
 };
 
-void NXP_Camera::dummy(uint8_t cameraIndex){
-    if(cameraIndex == CAMERA_0){
-        camera0Callback();
-    } else if(cameraIndex == CAMERA_1){
-        camera1Callback();
+
+void NXP_Camera::adcInterruptEndOfMeasurementStatic(uint8_t) {
+    cameraHandler->adcInterruptEndOfMeasurement();
+}
+
+void NXP_Camera::pitInterruptStatic(uint8_t) {
+    cameraHandler->pitInterrupt();
+}
+
+void NXP_Camera::adcInterruptEndOfMeasurement() {
+    if (type == NXP_Camera::Type::BOTH) {
+        uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
+        uint32_t result = 0;
+        for (uint8_t i = 0; i < 4; i++) {
+            result += data[i];
+        }
+        buffer1Data[currentPixelIndex] = result / 4;
+        result = 0;
+        for (uint8_t i = 4; i < 8; i++) {
+            result += data[i];
+        }
+        buffer2Data[currentPixelIndex] = result / 4;
+    } else if (type == NXP_Camera::Type::CAMERA_1) {
+        uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
+        uint32_t result = 0;
+        for (uint8_t i = 0; i < 8; i++) {
+            result += data[i];
+        }
+        buffer1Data[currentPixelIndex] = result / 8;
+    } else if (type == NXP_Camera::Type::CAMERA_2) {
+        uint16_t* data = adc.getBufferValues(sampleCamera2.converterType);
+        uint32_t result = 0;
+        for (uint8_t i = 0; i < 8; i++) {
+            result += data[i];
+        }
+        buffer2Data[currentPixelIndex] = result / 8;
+    }
+}
+
+void NXP_Camera::pitInterrupt() {
+    if (cameraState == CameraState::START) {
+        cameraState = CameraState::SET_SI_PIN;
+    }
+
+    if (cameraState == CameraState::SET_SI_PIN) {
+        SIPin.set();
+        cameraState = CameraState::RESET_SI_PIN;
+    } else if (cameraState == CameraState::RESET_SI_PIN) {
+        SIPin.reset();
+        currentPixelIndex = -1; // because increment is next
+        cameraState = CameraState::SET_CLOCK_PIN;
+    } else if (cameraState == CameraState::SET_CLOCK_PIN) {
+        currentPixelIndex++;
+        clockPin.set();
+
+        if (currentPixelIndex == 129) {
+            cameraState = CameraState::STOPPED;
+            clockPin.reset();
+        } else {
+            cameraState = CameraState::RESET_CLOCK_PIN;
+        }
+    } else if (cameraState == CameraState::RESET_CLOCK_PIN) {
+        adc.startConversion();
+        clockPin.reset();
+        cameraState = CameraState::SET_CLOCK_PIN;
     }
 }
