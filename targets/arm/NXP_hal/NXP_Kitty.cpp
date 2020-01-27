@@ -28,14 +28,14 @@ void Kitty::init() {
     pitCamera.init();
     intr.init();
     intl.init();
-    log_notice("Witaj swiecie!");
-    uartCommunication.write("Bejbi don't hurt me", 19);
-    log_notice("KiTTy init finished");
-//    servo.set(0.4);
+//    log_notice("Witaj swiecie!");
+//    uartCommunication.write("Bejbi don't hurt me", 19);
+//    log_notice("KiTTy init finished");
+    servo.set(0.0f);
 }
 
 void Kitty::proc() {
-    magicDiodComposition();
+//    magicDiodComposition();
     display.update();
 }
 

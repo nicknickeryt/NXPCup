@@ -11,7 +11,23 @@
 
 NXP_ADC* HSADCInstances[2];
 
+NXP_ADC::NXP_ADC(HSADC_Type* baseAdc, void (*converterAHandler)(uint8_t), void (*converterBHandler)(uint8_t)) : baseAdc(baseAdc) {
+        A.converterHandler = converterAHandler; // should it be here? or in init?
+        B.converterHandler = converterBHandler;
+
+        if (baseAdc == HSADC0) {
+            HSADCInstances[0] = this;
+        } else if (baseAdc == HSADC1) {
+            HSADCInstances[1] = this;
+        }
+}
+
 void NXP_ADC::init() {
+    hsadc_config_t  hsadcConfig;
+    HSADC_GetDefaultConfig(&hsadcConfig);
+    hsadcConfig.enableSimultaneousMode = false;
+    HSADC_Init(baseAdc, &hsadcConfig);
+
     for (uint8_t i = 0; i < A.samplesCount; i++) {
         A.samples.at(i)->init(baseAdc, i);
     }
@@ -23,35 +39,28 @@ void NXP_ADC::init() {
     HSADC_ClearStatusFlags(baseAdc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
     HSADC_EnableSampleResultReadyInterrupts(baseAdc, HSADC_SAMPLE_MASK(sampleMask), true);
 
-    hsadc_config_t  hsadcConfig;
-    HSADC_GetDefaultConfig(&hsadcConfig);
-    hsadcConfig.enableSimultaneousMode = false;
-    HSADC_Init(baseAdc, &hsadcConfig);
+
 
     if (baseAdc == HSADC0 && A.samplesCount > 0) {
         SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
-        HSADCInstances[0] = this;
         A.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC0_CCA_IRQn);
         NVIC_EnableIRQ(HSADC0_CCA_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC0 && B.samplesCount > 0) {
         SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
-        HSADCInstances[0] = this;
         B.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC0_CCB_IRQn);
         NVIC_EnableIRQ(HSADC0_CCB_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC1 && A.samplesCount > 0) {
         SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
-        HSADCInstances[1] = this;
         A.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC1_CCA_IRQn);
         NVIC_EnableIRQ(HSADC1_CCA_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterAEndOfScanInterruptEnable);
     } else if (baseAdc == HSADC1 && B.samplesCount > 0) {
         SIM->SCGC2 |= SIM_SCGC2_HSADC1_MASK;
-        HSADCInstances[1] = this;
         B.init(baseAdc);
         NVIC_ClearPendingIRQ(HSADC1_CCB_IRQn);
         NVIC_EnableIRQ(HSADC1_CCB_IRQn);

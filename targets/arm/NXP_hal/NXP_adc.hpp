@@ -103,12 +103,9 @@ private:
 
     Converter A = {Converter::Type::A};
     Converter B = {Converter::Type::B};
-public:
 
-    NXP_ADC(HSADC_Type* baseAdc, void (*converterAHandler)(uint8_t), void (*converterBHandler)(uint8_t)) : baseAdc(baseAdc) {
-        A.converterHandler = converterAHandler;
-        B.converterHandler = converterBHandler;
-    }
+public:
+    NXP_ADC(HSADC_Type* baseAdc, void (*converterAHandler)(uint8_t), void (*converterBHandler)(uint8_t));
 
     bool appendSample(Sample *sample);
 

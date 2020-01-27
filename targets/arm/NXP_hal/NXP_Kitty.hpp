@@ -65,11 +65,12 @@ private:
     NXP_ADC adc = {HSADC0, nullptr, NXP_Camera::adcInterruptEndOfMeasurementStatic};
     NXP_ADC::Sample camera1Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
     NXP_ADC::Sample camera2Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
-    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
 
-    NXP_PIT pitCamera= {NXP_PIT::CHANNEL::_0, 10000, NXP_Camera::pitInterruptStatic};
+    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 100000, NXP_Camera::pitInterruptStatic};
 
 public:
+    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
+
     NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
 
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};

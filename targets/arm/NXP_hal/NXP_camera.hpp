@@ -41,6 +41,10 @@ public:
     void adcInterruptEndOfMeasurement();
 
     void pitInterrupt();
+
+    void start() {
+        cameraState = CameraState::START;
+    }
 public:
     Type type;
     NXP_ADC& adc;

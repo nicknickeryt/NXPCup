@@ -4,6 +4,7 @@
 
 #include "NXP_camera.hpp"
 #include "logger.h"
+#include "NXP_Kitty.hpp"
 
 NXP_Camera* cameraHandler = nullptr;
 
@@ -51,6 +52,7 @@ void NXP_Camera::pitInterruptStatic(uint8_t) {
 }
 
 void NXP_Camera::adcInterruptEndOfMeasurement() {
+    Kitty::kitty().ledLine.at(0).toggle();
     if (type == NXP_Camera::Type::BOTH) {
         uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
         uint32_t result = 0;
@@ -81,6 +83,8 @@ void NXP_Camera::adcInterruptEndOfMeasurement() {
 }
 
 void NXP_Camera::pitInterrupt() {
+//    Kitty::kitty().ledLine.at(0).toggle();
+
     if (cameraState == CameraState::START) {
         cameraState = CameraState::SET_SI_PIN;
     }
@@ -96,9 +100,10 @@ void NXP_Camera::pitInterrupt() {
         currentPixelIndex++;
         clockPin.set();
 
-        if (currentPixelIndex == 129) {
+        if (currentPixelIndex == 128) {
             cameraState = CameraState::STOPPED;
             clockPin.reset();
+            cameraState = CameraState::START;
         } else {
             cameraState = CameraState::RESET_CLOCK_PIN;
         }
