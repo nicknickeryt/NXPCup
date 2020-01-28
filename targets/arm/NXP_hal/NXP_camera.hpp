@@ -5,8 +5,8 @@
 
 class NXP_Camera {
 public:
-    uint16_t buffer1Data [128] = {0};
-    uint16_t buffer2Data [128] = {0};
+    uint16_t buffer1Data [130] = {0};
+    uint16_t buffer2Data [130] = {0};
 
     int16_t currentPixelIndex = 0; // must be int
 
@@ -20,11 +20,22 @@ public:
         STOPPED = 0,
         START,
         SET_SI_PIN,
+        SET_FIRST_CLOCK_PIN,
         RESET_SI_PIN,
+        RESET_FIRST_CLOCK_PIN,
+        WAIT_1,
+        WAIT_2,
 
         SET_CLOCK_PIN,
         RESET_CLOCK_PIN,
 
+        WAIT_END_1,
+        WAIT_END_2,
+        WAIT_END_3,
+        WAIT_END_4,
+        WAIT_END_5,
+        WAIT_END_6,
+        WAIT_END_7,
         GET_DATA_FROM_ADC,
     };
 

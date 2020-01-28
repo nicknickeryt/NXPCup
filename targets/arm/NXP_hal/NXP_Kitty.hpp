@@ -66,7 +66,7 @@ private:
     NXP_ADC::Sample camera1Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
     NXP_ADC::Sample camera2Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
-    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 100000, NXP_Camera::pitInterruptStatic};
+    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic};
 
 public:
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};

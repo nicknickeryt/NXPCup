@@ -84,17 +84,28 @@ void NXP_Camera::adcInterruptEndOfMeasurement() {
 
 void NXP_Camera::pitInterrupt() {
 //    Kitty::kitty().ledLine.at(0).toggle();
-
+static uint8_t waitEnd = 0;
     if (cameraState == CameraState::START) {
         cameraState = CameraState::SET_SI_PIN;
     }
-
     if (cameraState == CameraState::SET_SI_PIN) {
         SIPin.set();
+        cameraState = CameraState::SET_FIRST_CLOCK_PIN;
+    } else if (cameraState == CameraState::SET_FIRST_CLOCK_PIN) {
+        clockPin.set();
         cameraState = CameraState::RESET_SI_PIN;
     } else if (cameraState == CameraState::RESET_SI_PIN) {
         SIPin.reset();
+        cameraState = CameraState::RESET_FIRST_CLOCK_PIN;
+    } else if (cameraState == CameraState::RESET_FIRST_CLOCK_PIN) {
+        clockPin.reset();
         currentPixelIndex = -1; // because increment is next
+        waitEnd = 0;
+        cameraState = CameraState::WAIT_1;
+    } else if (cameraState == CameraState::WAIT_1) {
+        cameraState = CameraState::WAIT_2;
+    } else if (cameraState == CameraState::WAIT_2) {
+
         cameraState = CameraState::SET_CLOCK_PIN;
     } else if (cameraState == CameraState::SET_CLOCK_PIN) {
         currentPixelIndex++;
@@ -103,7 +114,7 @@ void NXP_Camera::pitInterrupt() {
         if (currentPixelIndex == 128) {
             cameraState = CameraState::STOPPED;
             clockPin.reset();
-            cameraState = CameraState::START;
+            cameraState = CameraState::WAIT_END_1;
         } else {
             cameraState = CameraState::RESET_CLOCK_PIN;
         }
@@ -111,5 +122,11 @@ void NXP_Camera::pitInterrupt() {
         adc.startConversion();
         clockPin.reset();
         cameraState = CameraState::SET_CLOCK_PIN;
+    } else if (cameraState == CameraState::WAIT_END_1) {
+        waitEnd++;
+        if (waitEnd > 7) {
+            waitEnd = 0;
+            cameraState = CameraState::START;
+        }
     }
 }
