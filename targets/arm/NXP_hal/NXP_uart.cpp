@@ -13,7 +13,53 @@
 
 using namespace halina;
 
+uint8_t buffer[] = {'A', 'B', 'C', 'D', 'E'};
 NXP_Uart* nxpUartHandlers[6];
+
+void NXP_Uart::appendDMA(uint8_t* dataPointer, uint32_t dataSize) {
+    if (DMAenable) {
+        dmaData.append(DMAData<uint8_t>(dataPointer, dataSize));
+        if (!DMAworking && RingBuffer_IsEmpty(&txRingBuffer)) {
+            sendDma();
+        }
+    }
+}
+
+void NXP_Uart::DMAcallback(uint32_t* args) {
+    auto handler = (NXP_Uart*)args;
+    handler->DMAworking = false;
+    handler->uart->C5 &= ~ UART_C5_TDMAS_MASK; // disable DMA in UART
+}
+
+bool NXP_Uart::sendDma() {
+    DMAworking = true;
+    uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
+    enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
+    DMAData lastData = dmaData.get();
+    dmaTX.TCD->SADDR = (uint32_t)lastData.dataPointer; // defines source data address
+    dmaTX.TCD->CITER_ELINKNO = lastData.dataSize;
+    dmaTX.TCD->BITER_ELINKNO = lastData.dataSize;
+    dmaTX.enableRequest();
+    return true;
+}
+
+
+void NXP_Uart::DMAinit() {
+    DMAenable = true;
+
+    dmaTX.init(DMAcallback, (uint32_t*)this);
+
+    dmaTX.TCD->SADDR = (uint32_t)buffer;//defines source data address
+    dmaTX.TCD->SOFF = 1;//Source address signed offset
+    dmaTX.TCD->DADDR = (uint32_t)(&UART0->D);//defines destination data address
+    dmaTX.TCD->CITER_ELINKNO = 0x00;//CITER=1
+    dmaTX.TCD->BITER_ELINKNO = 0x00;//BITER=1
+    dmaTX.TCD->NBYTES_MLNO = 1;//byte number
+    dmaTX.TCD->DOFF = 0;//destination address signed offset
+    dmaTX.TCD->ATTR =  0;//8 bit transfer size, register default value is undefined
+    dmaTX.TCD->SLAST = 0;//restores the source address to the initial value
+    dmaTX.TCD->DLAST_SGA = 0;//restores the destination address to the initial value
+}
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX) {
 //NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
@@ -82,8 +128,6 @@ void NXP_Uart::init(){
     uart->PFIFO = 0xAA;
 
     enableInterrupt(InterruptType::RX_FULL);
-    enableInterrupt(InterruptType::TX_EMPTY);
-    uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
 
     if(UART0 == uart){
         NVIC_ClearPendingIRQ(UART0_RX_TX_IRQn);
@@ -119,7 +163,7 @@ void NXP_Uart::write(void const* data, uint16_t length){
     }
     // exit critical section
     __enable_irq();
-    if (!DMAenable) {
+    if (!DMAworking) {
         // enable TX empty interrupt
         enableInterrupt(InterruptType::TX_EMPTY);
     }
@@ -133,7 +177,7 @@ void NXP_Uart::write(uint8_t data) {
     RingBuffer_PutChar(&txRingBuffer, data);
     // exit critical section
     __enable_irq();
-    if (!DMAenable) {
+    if (!DMAworking) {
         // enable TX empty interrupt
         enableInterrupt(InterruptType::TX_EMPTY);
     }
@@ -160,10 +204,14 @@ void UART_IRQ(NXP_Uart* nxpUartHandler) {
         if (RingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &c)) {
             nxpUartHandler->uart->D = c;
         } else {
-            nxpUartHandler->disableInterrupt(NXP_Uart::InterruptType::TX_EMPTY);
-
+            if (nxpUartHandler->dmaData.isEmpty()) {
+                nxpUartHandler->disableInterrupt(NXP_Uart::InterruptType::TX_EMPTY);
+            } else {
+                nxpUartHandler->sendDma();
+            }
         }
-    } if (nxpUartHandler->uart->S1 & UART_S1_RDRF_MASK) {
+    }
+    if (nxpUartHandler->uart->S1 & UART_S1_RDRF_MASK) {
         nxpUartHandler->uart->S1 |= UART_S1_RDRF_MASK;
         RingBuffer_PutChar(&(nxpUartHandler->rxRingBuffer), nxpUartHandler->uart->D);
     }

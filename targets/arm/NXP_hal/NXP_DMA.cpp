@@ -6,7 +6,7 @@ uint8_t NXP_DMA::DMAIndexChannel = 0;
 
 static const IRQn_Type DMA_IRQn[] = {DMA0_DMA16_IRQn, DMA1_DMA17_IRQn, DMA2_DMA18_IRQn, DMA3_DMA19_IRQn, DMA4_DMA20_IRQn, DMA5_DMA21_IRQn, DMA6_DMA22_IRQn, DMA7_DMA23_IRQn, DMA8_DMA24_IRQn, DMA9_DMA25_IRQn, DMA10_DMA26_IRQn, DMA11_DMA27_IRQn, DMA12_DMA28_IRQn, DMA13_DMA29_IRQn, DMA14_DMA30_IRQn, DMA15_DMA31_IRQn};
 
-uint8_t buffer[] = {'A', 'B', 'C', 'D', 'E'};
+
 
 NXP_DMA::NXP_DMA(int channel, dma_request_source_t source) {
     if (channel == -1) return;
@@ -40,21 +40,6 @@ void NXP_DMA::init(void (*callbackHandler)(uint32_t* args), uint32_t* args) {
         NVIC_ClearPendingIRQ(DMA_IRQn[channel - 16]);
         NVIC_EnableIRQ(DMA_IRQn[channel - 16]);
     }
-
-    TCD->SADDR = (uint32_t)buffer;//defines source data address
-    TCD->SOFF = 1;//Source address signed offset
-    TCD->DADDR = (uint32_t)(&UART0->D);//defines destination data address
-    TCD->CITER_ELINKNO = 0x05;//CITER=1
-    TCD->BITER_ELINKNO = 0x05;//BITER=1
-    TCD->NBYTES_MLNO = 1;//byte number
-    TCD->DOFF = 0;//destination address signed offset
-    TCD->ATTR =  0;//8 bit transfer size, register default value is undefined
-    TCD->SLAST = 0;//restores the source address to the initial value
-    TCD->DLAST_SGA = 0;//restores the destination address to the initial value
-
-    DMA0->TCD[0].CSR = DMA_CSR_INTMAJOR_MASK | DMA_CSR_DREQ_MASK | DMA_CSR_START_MASK;//The end-of-major loop interrupt is enabled
-
-    DMA0->INT |= (1u << channel);
 }
 
 
