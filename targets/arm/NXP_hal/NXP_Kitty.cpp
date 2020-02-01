@@ -19,8 +19,8 @@ void Kitty::init() {
     BOARD_InitBootClocks();
 
     FTM_Init();
-    uartDebug.init();
-    uartCommunication.init();
+//    uartDebug.init();
+//    uartCommunication.init();
     ledLine.init();
     display.init();
     servo.init();

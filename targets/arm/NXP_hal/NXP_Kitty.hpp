@@ -47,10 +47,10 @@ private:
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
     // UARTS
-    NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
-    NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
-    NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
-    NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
+//    NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
+//    NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
+//    NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
+//    NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
     NXP_PORT servoPort = {PORTA, 7, 0x03};
@@ -71,9 +71,9 @@ private:
 public:
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
 
-    NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
+//    NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
 
-    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
+//    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
 
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};

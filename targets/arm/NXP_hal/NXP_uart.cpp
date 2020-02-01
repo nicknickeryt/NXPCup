@@ -15,7 +15,8 @@ using namespace halina;
 
 NXP_Uart* nxpUartHandlers[6];
 
-NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
+NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX) {
+//NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
     if(UART0 == uart){
         nxpUartHandlers[0] = this;
     } else if(UART1 == uart){
@@ -63,6 +64,7 @@ void NXP_Uart::init(){
     if (sbr == 0){
         sbr = 1;
     }
+
     baudDiff = (clock / (sbr * 16)) - baudrate;
     uint16_t brfa = (2 * clock / (baudrate)) - 32 * sbr;
     if (baudDiff > (baudrate - (clock / (16 * (sbr + 1))))) {
@@ -72,12 +74,16 @@ void NXP_Uart::init(){
     uart->BDH = (uart->BDH & ~UART_BDH_SBR_MASK) | (uint8_t)(sbr >> 8);
     uart->BDL = (uint8_t)sbr;
 
-    uart->C4 = (uart->C4 & ~UART_C4_BRFA_MASK) | (brfa & UART_C4_BRFA_MASK);
     uart->C2 |= UART_C2_TE_MASK | UART_C2_RE_MASK; //Transmitter on, Receiver on
-
+    uart->C1 = 0;
     uart->C4 |= 9U;
 
+    //FIFO on
+    uart->PFIFO = 0xAA;
+
     enableInterrupt(InterruptType::RX_FULL);
+    enableInterrupt(InterruptType::TX_EMPTY);
+    uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
 
     if(UART0 == uart){
         NVIC_ClearPendingIRQ(UART0_RX_TX_IRQn);
@@ -113,8 +119,11 @@ void NXP_Uart::write(void const* data, uint16_t length){
     }
     // exit critical section
     __enable_irq();
-    // enable TX empty interrupt
-    enableInterrupt(InterruptType::TX_EMPTY);
+    if (!DMAenable) {
+        // enable TX empty interrupt
+        enableInterrupt(InterruptType::TX_EMPTY);
+    }
+
 }
 
 void NXP_Uart::write(uint8_t data) {
@@ -124,7 +133,10 @@ void NXP_Uart::write(uint8_t data) {
     RingBuffer_PutChar(&txRingBuffer, data);
     // exit critical section
     __enable_irq();
-    enableInterrupt(InterruptType::TX_EMPTY);
+    if (!DMAenable) {
+        // enable TX empty interrupt
+        enableInterrupt(InterruptType::TX_EMPTY);
+    }
 }
 
 uint8_t NXP_Uart::read() {
@@ -148,7 +160,8 @@ void UART_IRQ(NXP_Uart* nxpUartHandler) {
         if (RingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &c)) {
             nxpUartHandler->uart->D = c;
         } else {
-            nxpUartHandler->uart->C2 &= ~(UART_C2_TIE_MASK);
+            nxpUartHandler->disableInterrupt(NXP_Uart::InterruptType::TX_EMPTY);
+
         }
     } if (nxpUartHandler->uart->S1 & UART_S1_RDRF_MASK) {
         nxpUartHandler->uart->S1 |= UART_S1_RDRF_MASK;

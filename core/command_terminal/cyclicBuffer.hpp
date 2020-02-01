@@ -136,7 +136,7 @@ template <class T> class CyclicBuffer {
         if (isNotEmpty()) {
             return get_unsafe();
         }
-        return 0;
+        return {};
     }
     inline T get_unsafe(void) noexcept __attribute__((always_inline)) {
         count--;
