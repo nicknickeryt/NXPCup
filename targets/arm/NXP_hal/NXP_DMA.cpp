@@ -29,6 +29,13 @@ void NXP_DMA::init(void (*callbackHandler)(uint32_t* args), uint32_t* args) {
 //    TCD = &DMA0->TCD[channel];
 
 //    DMA0->ERQ |= (1u << channel);//enables p request
+//    DMA0->CR = 0;
+//    DMA0->ES = 0;
+//    DMA0->ERQ = 0;
+//    DMA0->EEI = 0;
+//    DMA0->INT = 0;
+//    DMA0->EARS = 0;
+//    DMA0->ERR = 0xFFFF;
 
     DMAMUX0->CHCFG[channel] = 0; //clears register for changing source and trigger
     DMAMUX0->CHCFG[channel] = DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE(source);

@@ -29,7 +29,10 @@ public:
     void init(void (*callbackHandler)(uint32_t* args), uint32_t* args) ;
 
     void enableRequest() {
-        DMA0->SERQ = DMA_SERQ_SERQ(channel);
+        DMA0->ERQ |= (1u << channel);
+
+//        DMA0->SERQ = DMA_SERQ_SERQ(channel);
+//        DMA0->SSRT = DMA_SSRT_SSRT(channel);
     }
 
     void setInitialValues() {
@@ -43,6 +46,7 @@ public:
         DMA0->TCD[channel].ATTR =  0;//8 bit transfer size, register default value is undefined
         DMA0->TCD[channel].SLAST = 0;//restores the source address to the initial value
         DMA0->TCD[channel].DLAST_SGA = 0;//restores the destination address to the initial value
+        DMA0->TCD[channel].CSR = DMA_CSR_INTMAJOR_MASK | DMA_CSR_DREQ_MASK | DMA_CSR_START_MASK;
     }
 
     void setDestinationAddress(uint32_t address) {

@@ -51,9 +51,11 @@ void NXP_Uart::DMAinit() {
     DMAenable = true;
 
     dmaTX.init(DMAcallback, (uint32_t*)this);
-    dmaTX.setInitialValues();
     dmaTX.setDestinationAddress((uint32_t)(&uart->D));
     dmaTX.setSourceAddress((uint32_t)buffer, 0);
+    dmaTX.setInitialValues();
+
+
 
 
 //    dmaTX.TCD->SADDR = (uint32_t)buffer;//defines source data address
@@ -214,7 +216,9 @@ void UART_IRQ(NXP_Uart* nxpUartHandler) {
             if (nxpUartHandler->dmaData.isEmpty()) {
                 nxpUartHandler->disableInterrupt(NXP_Uart::InterruptType::TX_EMPTY);
             } else {
+//                __disable_irq();
                 nxpUartHandler->sendDma();
+//                __enable_irq();
             }
         }
     }
