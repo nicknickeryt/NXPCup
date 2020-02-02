@@ -9,7 +9,6 @@
 #include "HALina.hpp"
 #include "NXP_uart.hpp"
 #include <drivers/fsl_clock.h>
-#include "NXP_Kitty.hpp"
 
 using namespace halina;
 
@@ -38,10 +37,6 @@ bool NXP_Uart::sendDma() {
     enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
     DMAData lastData = dmaData.get();
     dmaTX.setSourceAddress((uint32_t)lastData.dataPointer, lastData.dataSize);
-
-//    dmaTX.TCD->SADDR = (uint32_t)lastData.dataPointer; // defines source data address
-//    dmaTX.TCD->CITER_ELINKNO = lastData.dataSize;
-//    dmaTX.TCD->BITER_ELINKNO = lastData.dataSize;
     dmaTX.enableRequest();
     return true;
 }
@@ -54,24 +49,9 @@ void NXP_Uart::DMAinit() {
     dmaTX.setDestinationAddress((uint32_t)(&uart->D));
     dmaTX.setSourceAddress((uint32_t)buffer, 0);
     dmaTX.setInitialValues();
-
-
-
-
-//    dmaTX.TCD->SADDR = (uint32_t)buffer;//defines source data address
-//    dmaTX.TCD->SOFF = 1;//Source address signed offset
-//    dmaTX.TCD->DADDR = (uint32_t)(&uart->D);//defines destination data address
-//    dmaTX.TCD->CITER_ELINKNO = 0x00;//CITER=1
-//    dmaTX.TCD->BITER_ELINKNO = 0x00;//BITER=1
-//    dmaTX.TCD->NBYTES_MLNO = 1;//byte number
-//    dmaTX.TCD->DOFF = 0;//destination address signed offset
-//    dmaTX.TCD->ATTR =  0;//8 bit transfer size, register default value is undefined
-//    dmaTX.TCD->SLAST = 0;//restores the source address to the initial value
-//    dmaTX.TCD->DLAST_SGA = 0;//restores the destination address to the initial value
 }
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX) {
-//NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin) {
     if(UART0 == uart){
         nxpUartHandlers[0] = this;
     } else if(UART1 == uart){

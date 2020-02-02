@@ -34,13 +34,13 @@ int main(){
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 
-    NXP_DMA uartDMA = NXP_DMA(0, kDmaRequestMux0UART0Tx);
-//    NXP_DMA uartDMA = NXP_DMA(NXP_DMA::getDMAChannel(), kDmaRequestMux0UART0Tx);
+    NXP_DMA uartDMA = NXP_DMA(kDmaRequestMux0UART0Tx);
 
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uartDMA};
     uartCommunication.init();
+
     uartCommunication.DMAinit();
     uartCommunication.appendDMA(witek, sizeof(witek));
     uartCommunication.appendDMA(witek, sizeof(witek));
