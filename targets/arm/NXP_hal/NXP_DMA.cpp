@@ -26,9 +26,9 @@ void NXP_DMA::init(void (*callbackHandler)(uint32_t* args), uint32_t* args) {
     SIM->SCGC6 |= SIM_SCGC6_DMAMUX_MASK; //enables DMA McUX clock gate
     SIM->SCGC7 |= SIM_SCGC7_DMA_MASK;//enables DMA clock gate, default value is enable
 
-    TCD = &DMA0->TCD[channel];
+//    TCD = &DMA0->TCD[channel];
 
-    DMA0->ERQ |= (1u << channel);//enables p request
+//    DMA0->ERQ |= (1u << channel);//enables p request
 
     DMAMUX0->CHCFG[channel] = 0; //clears register for changing source and trigger
     DMAMUX0->CHCFG[channel] = DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE(source);

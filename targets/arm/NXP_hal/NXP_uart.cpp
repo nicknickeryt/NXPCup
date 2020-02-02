@@ -29,6 +29,7 @@ void NXP_Uart::DMAcallback(uint32_t* args) {
     auto handler = (NXP_Uart*)args;
     handler->DMAworking = false;
     handler->uart->C5 &= ~ UART_C5_TDMAS_MASK; // disable DMA in UART
+    handler->enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
 }
 
 bool NXP_Uart::sendDma() {
@@ -36,9 +37,11 @@ bool NXP_Uart::sendDma() {
     uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
     enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
     DMAData lastData = dmaData.get();
-    dmaTX.TCD->SADDR = (uint32_t)lastData.dataPointer; // defines source data address
-    dmaTX.TCD->CITER_ELINKNO = lastData.dataSize;
-    dmaTX.TCD->BITER_ELINKNO = lastData.dataSize;
+    dmaTX.setSourceAddress((uint32_t)lastData.dataPointer, lastData.dataSize);
+
+//    dmaTX.TCD->SADDR = (uint32_t)lastData.dataPointer; // defines source data address
+//    dmaTX.TCD->CITER_ELINKNO = lastData.dataSize;
+//    dmaTX.TCD->BITER_ELINKNO = lastData.dataSize;
     dmaTX.enableRequest();
     return true;
 }
@@ -48,17 +51,21 @@ void NXP_Uart::DMAinit() {
     DMAenable = true;
 
     dmaTX.init(DMAcallback, (uint32_t*)this);
+    dmaTX.setInitialValues();
+    dmaTX.setDestinationAddress((uint32_t)(&uart->D));
+    dmaTX.setSourceAddress((uint32_t)buffer, 0);
 
-    dmaTX.TCD->SADDR = (uint32_t)buffer;//defines source data address
-    dmaTX.TCD->SOFF = 1;//Source address signed offset
-    dmaTX.TCD->DADDR = (uint32_t)(&UART0->D);//defines destination data address
-    dmaTX.TCD->CITER_ELINKNO = 0x00;//CITER=1
-    dmaTX.TCD->BITER_ELINKNO = 0x00;//BITER=1
-    dmaTX.TCD->NBYTES_MLNO = 1;//byte number
-    dmaTX.TCD->DOFF = 0;//destination address signed offset
-    dmaTX.TCD->ATTR =  0;//8 bit transfer size, register default value is undefined
-    dmaTX.TCD->SLAST = 0;//restores the source address to the initial value
-    dmaTX.TCD->DLAST_SGA = 0;//restores the destination address to the initial value
+
+//    dmaTX.TCD->SADDR = (uint32_t)buffer;//defines source data address
+//    dmaTX.TCD->SOFF = 1;//Source address signed offset
+//    dmaTX.TCD->DADDR = (uint32_t)(&uart->D);//defines destination data address
+//    dmaTX.TCD->CITER_ELINKNO = 0x00;//CITER=1
+//    dmaTX.TCD->BITER_ELINKNO = 0x00;//BITER=1
+//    dmaTX.TCD->NBYTES_MLNO = 1;//byte number
+//    dmaTX.TCD->DOFF = 0;//destination address signed offset
+//    dmaTX.TCD->ATTR =  0;//8 bit transfer size, register default value is undefined
+//    dmaTX.TCD->SLAST = 0;//restores the source address to the initial value
+//    dmaTX.TCD->DLAST_SGA = 0;//restores the destination address to the initial value
 }
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX) {
