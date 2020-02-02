@@ -13,6 +13,10 @@ public:
     void (*callbackHandler)(uint32_t* args) = nullptr;
 
     NXP_DMA(dma_request_source_t source);
+
+    inline bool getStatus() {
+        return initialised;
+    }
     void init(void (*callbackHandler)(uint32_t* args), uint32_t* args) ;
     void enableRequest();
     void setInitialValues();

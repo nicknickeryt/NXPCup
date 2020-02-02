@@ -26,7 +26,6 @@ using namespace halina;
 #include "NXP_DMA.h"
 
 uint8_t witek [] = {'w', 'i', 't', 'e', 'k'};
-uint8_t fitek [] = {'f', 'i', 't', 'e', 'k'};
 
 
 int main(){
@@ -41,10 +40,9 @@ int main(){
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uartDMA};
     uartCommunication.init();
 
-    uartCommunication.DMAinit();
+    uartCommunication.initDMA();
     uartCommunication.appendDMA(witek, sizeof(witek));
     uartCommunication.appendDMA(witek, sizeof(witek));
-    uartCommunication.appendDMA(fitek, sizeof(witek));
 
     uartCommunication.write('d');
 

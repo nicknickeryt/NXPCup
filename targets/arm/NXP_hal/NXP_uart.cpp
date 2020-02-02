@@ -32,17 +32,19 @@ void NXP_Uart::DMAcallback(uint32_t* args) {
 }
 
 bool NXP_Uart::sendDma() {
-    DMAworking = true;
-    uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
-    enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
-    DMAData lastData = dmaData.get();
-    dmaTX.setSourceAddress((uint32_t)lastData.dataPointer, lastData.dataSize);
-    dmaTX.enableRequest();
-    return true;
+    if (DMAenable) {
+        DMAworking = true;
+        uart->C5 |= UART_C5_TDMAS_MASK; // enable DMA in UART
+        enableInterrupt(InterruptType::TX_EMPTY); // enable DMA in UART
+        DMAData lastData = dmaData.get();
+        dmaTX.setSourceAddress((uint32_t)lastData.dataPointer, lastData.dataSize);
+        dmaTX.enableRequest();
+        return true;
+    }
+    return false;
 }
 
-
-void NXP_Uart::DMAinit() {
+void NXP_Uart::initDMA() {
     DMAenable = true;
 
     dmaTX.init(DMAcallback, (uint32_t*)this);

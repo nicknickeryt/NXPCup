@@ -63,6 +63,11 @@ public:
         RX_FULL = UART_C2_RIE_MASK
     };
 
+    enum class ActionDMA {
+        PAUSE,
+        RESUME
+    };
+
 public:
     void enableInterrupt(InterruptType interrupt);
 
@@ -74,11 +79,22 @@ public:
 
     static void DMAcallback(uint32_t* args);
 
-    void DMAinit() ;
+    void initDMA() ;
 
     void appendDMA(uint8_t* dataPointer, uint32_t dataSize);
 
     bool sendDma();
+    
+    bool actionDMA(ActionDMA action) {
+        if (action == ActionDMA::RESUME) {
+            if (dmaTX.getStatus()) {
+                DMAenable = true;
+            }
+        } else if (action == ActionDMA::PAUSE) {
+            DMAenable = false;
+        }
+
+    }
 
     void write(void const* data, uint16_t length) override;
     void write(uint8_t data) override;
