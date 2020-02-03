@@ -84,8 +84,8 @@ public:
     void appendDMA(uint8_t* dataPointer, uint32_t dataSize);
 
     bool sendDma();
-    
-    bool actionDMA(ActionDMA action) {
+
+    void actionDMA(ActionDMA action) {
         if (action == ActionDMA::RESUME) {
             if (dmaTX.getStatus()) {
                 DMAenable = true;
@@ -93,7 +93,6 @@ public:
         } else if (action == ActionDMA::PAUSE) {
             DMAenable = false;
         }
-
     }
 
     void write(void const* data, uint16_t length) override;

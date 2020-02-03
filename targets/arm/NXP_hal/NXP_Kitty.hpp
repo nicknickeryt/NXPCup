@@ -17,6 +17,10 @@
 #include "NXP_PIT.hpp"
 #include "NXP_adc.hpp"
 #include "NXP_camera.hpp"
+#include "NXP_DMA.h"
+
+
+void pit_sendCameraData(uint8_t);
 
 class Kitty{
 private:
@@ -47,10 +51,10 @@ private:
     NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
     // UARTS
-//    NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
-//    NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
-//    NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
-//    NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
+    NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
+    NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
+    NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
+    NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
     NXP_PORT servoPort = {PORTA, 7, 0x03};
@@ -63,18 +67,20 @@ private:
     NXP_PORT adc1mux = {PORTB, 1U, 0x00};
 
     NXP_ADC adc = {HSADC0, nullptr, NXP_Camera::adcInterruptEndOfMeasurementStatic};
-    NXP_ADC::Sample camera1Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
-    NXP_ADC::Sample camera2Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
+    NXP_ADC::Sample camera2Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
+    NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
     NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic};
 
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 19, pit_sendCameraData};
+
+    NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 public:
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
 
-//    NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux};
+    NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
 
-//    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux};
-
+    NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;

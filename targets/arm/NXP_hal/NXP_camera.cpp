@@ -52,7 +52,6 @@ void NXP_Camera::pitInterruptStatic(uint8_t) {
 }
 
 void NXP_Camera::adcInterruptEndOfMeasurement() {
-    Kitty::kitty().ledLine.at(0).toggle();
     if (type == NXP_Camera::Type::BOTH) {
         uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
         uint32_t result = 0;
@@ -83,8 +82,7 @@ void NXP_Camera::adcInterruptEndOfMeasurement() {
 }
 
 void NXP_Camera::pitInterrupt() {
-//    Kitty::kitty().ledLine.at(0).toggle();
-static uint8_t waitEnd = 0;
+    static uint8_t waitEnd = 0;
     if (cameraState == CameraState::START) {
         cameraState = CameraState::SET_SI_PIN;
     }
