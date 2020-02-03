@@ -103,7 +103,7 @@ void NXP_Uart::init(){
     }
 
     baudDiff = (clock / (sbr * 16)) - baudrate;
-    uint16_t brfa = (2 * clock / (baudrate)) - 32 * sbr;
+//    uint16_t brfa = (2 * clock / (baudrate)) - 32 * sbr;
     if (baudDiff > (baudrate - (clock / (16 * (sbr + 1))))) {
         sbr++;
     }
@@ -175,7 +175,7 @@ void NXP_Uart::write(uint8_t data) {
 }
 
 uint8_t NXP_Uart::read() {
-    uint8_t c;
+    static uint8_t c;
     RingBuffer_GetChar(&rxRingBuffer, &c);
     return c;
 }
