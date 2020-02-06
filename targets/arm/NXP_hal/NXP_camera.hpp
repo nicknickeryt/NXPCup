@@ -5,8 +5,8 @@
 
 class NXP_Camera {
 public:
-    uint16_t buffer1Data [130] = {0};
-    uint16_t buffer2Data [130] = {0};
+    uint16_t buffer1Data [128] = {0};
+    uint16_t buffer2Data [128] = {0};
 
     int16_t currentPixelIndex = 0; // must be int
 

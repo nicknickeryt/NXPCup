@@ -72,7 +72,7 @@ private:
 
     NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic};
 
-    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 19, pit_sendCameraData};
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData};
 
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 public:
