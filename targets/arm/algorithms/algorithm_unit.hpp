@@ -9,10 +9,33 @@
 #pragma once
 
 #include "HALina.hpp"
+#include "track_lines_detector.hpp"
+#include "obstacle_detector.hpp"
+#include "patterns_detector.hpp"
 
 class AlgorithmUnit{
     private:
         static constexpr auto cameraDataBufferSize = 128;
+        // factor used to spread normalization output from range(0,1) to wider (0,8192)
+        static constexpr auto cameraDataNormalizationFactor = 8192;
+
+        enum class DataType{
+            CAMERA_DATA,
+            ENCODERS_DATA,
+            // fixme: other data
+        };
+
+        enum class State{
+            CAMERA_DATA_PREPROCESSING,
+            FINDING_TRACK_LINES,
+            OBSTACLE_AVOIDING,
+            PATTERN_DETECTION,
+        };
+
+        State state;
+        TrackLinesDetector trackLinesDetector;
+        ObstacleDetector obstacleDetector;
+        PatternsDetector patternsDetector;
 
     public:
         class AlgorithmData{
@@ -25,6 +48,18 @@ class AlgorithmUnit{
         AlgorithmData algorithmData;
 
     private:
+        /**
+         * Method normalizes given data using min-max normalization algorithm
+         * It works by given equation:
+         * f(x) = (x- min(x))/(max(x)-min(x))
+         * This is the traditional min-max algorithm but it gives output in range(0,1).
+         * For spreading this values, the normalization factor is used (look at cameraDataNormalizationFactor)
+         * This type of normalization is called normalization by linear function
+         *
+         * @param dataType type of data to normalize
+         * @param data pointer to data buffer to normalize
+         */
+        void normalize(DataType dataType, void* data);
 
     public:
         AlgorithmUnit(){}
