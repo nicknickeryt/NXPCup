@@ -23,7 +23,7 @@ void AlgorithmUnit::analyze() {
     if(trackLinesDetector.leftLine.isDetected){
         log_notice("I've found left line!");
     }
-    if(trackLinesDetector.leftLine.isDetected){
+    if(trackLinesDetector.rightLine.isDetected){
         log_notice("I've found right line!");
     }
 
