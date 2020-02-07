@@ -39,10 +39,12 @@ void Kitty::init() {
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-//    servo.set(-1.0f);
-//    motorRight.init();
-//    motorRight.run();
 
+    motorRight.init();
+    motorRight.run();
+
+//    motorRight.setValue(-0.5f);
+//
     camera1DataBuffer[0] = 'A';
     camera1DataBuffer[1] = 'B';
     camera.start();
@@ -69,7 +71,7 @@ void Kitty::proc() {
     static bool direction = true;
     if(50000 == x++) {
         servo.set(value);
-//        motorRight.setValue(value);
+        motorRight.setValue(value);
         display.print(value, 2);
         if(direction){
             value += 0.01;

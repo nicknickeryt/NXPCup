@@ -23,7 +23,19 @@ using namespace halina;
 int main(){
     BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
+
+
     kitty.init();
+//    Kitty::kitty().motorLeft.init();
+//    Kitty::kitty().motorRight.init();
+//
+//    Kitty::kitty().motorLeftPwm.init();
+//    Kitty::kitty().motorLeftPwm.setDutyCycle(0.2, Kitty::kitty().motorLeftPwm.channelFirst);
+//    Kitty::kitty().motorLeftPwm.setDutyCycle(0.4, Kitty::kitty().motorLeftPwm.channelSecond);
+//
+//    Kitty::kitty().motorRightPwm.init();
+//    Kitty::kitty().motorRightPwm.setDutyCycle(0.6, Kitty::kitty().motorRightPwm.channelFirst);
+//    Kitty::kitty().motorRightPwm.setDutyCycle(0.8, Kitty::kitty().motorRightPwm.channelSecond);
 
 //    Kitty::kitty().servoPwm.init();
 //    NXP_Single_PWM mojepwm = {FTM0, 200,Kitty::kitty().servoPort};

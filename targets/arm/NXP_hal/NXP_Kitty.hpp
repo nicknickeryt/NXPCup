@@ -37,7 +37,7 @@ private:
     // ENCODERS
     NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-
+public:
     // MOTORS
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
     NXP_PORT motorLeftPortMLB = {PORTE, 5, 0x06};
@@ -45,10 +45,10 @@ private:
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
 
-//    NXP_PWM motorLeftPwm = {FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, 200};
-//    NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, 200};
-//    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
-//    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+    NXP_PWM motorLeftPwm = {FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, 200};
+    NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, 200};
+    NXP_Motor motorLeft = {motorLeftPwm, motorEnablePin};
+    NXP_Motor motorRight = {motorRightPwm, motorEnablePin};
 
     // UARTS
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
@@ -57,7 +57,7 @@ private:
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
-public:
+// public:
     NXP_PORT servoPort = {PORTA, 7, 0x03};
     NXP_PWM servoPwm = {FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, 200};
 
