@@ -28,9 +28,9 @@
  * BSD license, all text here must be included in any redistribution.
  *
  */
-#define LOG_CHANNEL APP
-#define APP_LOG_CHANNEL 1
-#define APP_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define LOG_CHANNEL VL53L0X
+#define VL53L0X_LOG_CHANNEL 1
+#define VL53L0X_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 #include "Adafruit_VL53L0X.h"
 #include "logger.h"
 
@@ -63,9 +63,10 @@ bool Adafruit_VL53L0X::begin(uint8_t i2c_addr) {
   pMyDevice->I2cDevAddr      =  VL53L0X_I2C_ADDR;  // default
   pMyDevice->comms_type      =  1;
   pMyDevice->comms_speed_khz =  400;
-//  pMyDevice->i2c = i2c;
+  pMyDevice->i2c = i2c;
 
-//  pMyDevice->i2c->begin();     // VL53L0X_i2c_init();
+  pMyDevice->i2c->init();
+  log_notice("Adafruit_VL53L0X: Finished inits")
 
   // unclear if this is even needed:
   if( VL53L0X_IMPLEMENTATION_VER_MAJOR != VERSION_REQUIRED_MAJOR ||
@@ -82,9 +83,10 @@ bool Adafruit_VL53L0X::begin(uint8_t i2c_addr) {
   Status = VL53L0X_DataInit( &MyDevice );         // Data initialization
 
   if (! setAddress(i2c_addr) ) {
+      log_error("Adafruit_VL53L0X::begin Wrong i2c address");
     return false;
   }
-
+    return false;
   Status = VL53L0X_GetDeviceInfo( &MyDevice, &DeviceInfo );
 
   if( Status == VL53L0X_ERROR_NONE )  {

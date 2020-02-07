@@ -1,57 +1,46 @@
+#define LOG_CHANNEL VL53L0X
+#define VL53L0X_LOG_CHANNEL 1
+#define VL53L0X_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
 #include "vl53l0x_i2c_platform.h"
 #include "vl53l0x_def.h"
-
-//#define I2C_DEBUG
+#include "logger.h"
 
 int VL53L0X_i2c_init(NXP_I2C *i2c) {
-//  i2c->begin();
+ i2c->init();
   return VL53L0X_ERROR_NONE;
 }
 
 int VL53L0X_write_multi(uint8_t deviceAddress, uint8_t index, uint8_t *pdata, uint32_t count, NXP_I2C *i2c) {
-//  i2c->beginTransmission(deviceAddress);
-//  i2c->write(index);
-#ifdef I2C_DEBUG
-  Serial.print("\tWriting "); Serial.print(count); Serial.print(" to addr 0x"); Serial.print(index, HEX); Serial.print(": ");
-#endif
+  i2c->beginTransmission(deviceAddress);
+  i2c->write(index);
+  log_notice("\tWriting %d to addr 0x%x: ", count, index);
   while(count--) {
-//    i2c->write((uint8_t)pdata[0]);
-#ifdef I2C_DEBUG
-    Serial.print("0x"); Serial.print(pdata[0], HEX); Serial.print(", ");
-#endif
+    i2c->write((uint8_t)pdata[0]);
+    log_notice("0x%x",pdata[0]);
     pdata++;
   }
-#ifdef I2C_DEBUG
-  Serial.println();
-#endif
-//  i2c->endTransmission();
+  i2c->endTransmission();
   return VL53L0X_ERROR_NONE;
 }
 
 int VL53L0X_read_multi(uint8_t deviceAddress, uint8_t index, uint8_t *pdata, uint32_t count, NXP_I2C *i2c) {
-//  i2c->beginTransmission(deviceAddress);
-//  i2c->write(index);
-//  i2c->endTransmission();
-//  i2c->requestFrom(deviceAddress, (byte)count);
-#ifdef I2C_DEBUG
-  Serial.print("\tReading "); Serial.print(count); Serial.print(" from addr 0x"); Serial.print(index, HEX); Serial.print(": ");
-#endif
+  i2c->beginTransmission(deviceAddress);
+  i2c->write(index);
+  i2c->endTransmission();
+  i2c->requestFrom(deviceAddress, count);
+  log_notice("\tReading %d  from addr 0x%x:", count, index);
 
   while (count--) {
-//    pdata[0] = i2c->read();
-#ifdef I2C_DEBUG
-    Serial.print("0x"); Serial.print(pdata[0], HEX); Serial.print(", ");
-#endif
+    pdata[0] = i2c->read();
+    log_info("0x%x ", pdata[0]);
     pdata++;
   }
-#ifdef I2C_DEBUG
-  Serial.println();
-#endif
   return VL53L0X_ERROR_NONE;
 }
 
 int VL53L0X_write_byte(uint8_t deviceAddress, uint8_t index, uint8_t data, NXP_I2C *i2c) {
-  return VL53L0X_write_multi(deviceAddress, index, &data, 1, i2c);
+    return VL53L0X_write_multi(deviceAddress, index, &data, 1, i2c);
 }
 
 int VL53L0X_write_word(uint8_t deviceAddress, uint8_t index, uint16_t data, NXP_I2C *i2c) {

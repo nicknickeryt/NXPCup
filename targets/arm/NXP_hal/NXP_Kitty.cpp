@@ -39,12 +39,23 @@ void Kitty::init() {
     log_notice("KiTTy init finished");
     servo.set(0.1);
     camera.start();
+    i2c.init();
+
 }
 
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
     camera.proc(cameraTrigger);
+
+    static int x;
+    if(100000 == x++) {
+        log_info("Sending i2c request");
+        i2c.beginTransmission(0x8);
+        i2c.write(5);
+        i2c.endTransmission();
+        x = 0;
+    }
 }
 
 void Kitty::FTM_Init() {

@@ -32,18 +32,8 @@
 /**************************************************************************/
 class Adafruit_VL53L0X
 {
-    /**************************************************************************/
-    /*! 
-        @brief  get a ranging measurement from the device
-        @param  pRangingMeasurementData the pointer to the struct the data will be stored in
-        @param debug Optional debug flag. If true debug information will print via Serial.print during execution. Defaults to false.
-        @returns True if address was set successfully, False otherwise
-    */
-    /**************************************************************************/
-    VL53L0X_Error rangingTest(VL53L0X_RangingMeasurementData_t* pRangingMeasurementData){ return getSingleRangingMeasurement(pRangingMeasurementData); };
 
-    VL53L0X_Error getSingleRangingMeasurement( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData);
-    void          printRangeStatus( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData );
+
 
     VL53L0X_Error                     Status      = VL53L0X_ERROR_NONE; ///< indicates whether or not the sensor has encountered an error
 
@@ -54,13 +44,25 @@ class Adafruit_VL53L0X
   VL53L0X_Version_t                   *pVersion   = &Version;
   VL53L0X_DeviceInfo_t                DeviceInfo;
 
-    NXP_I2C& i2c;
+  NXP_I2C* i2c;
 
 
 public:
-    Adafruit_VL53L0X(NXP_I2C& i2c) : i2c(i2c){}
+    Adafruit_VL53L0X(NXP_I2C* i2c) : i2c(i2c){}
     bool       begin(uint8_t i2c_addr = VL53L0X_I2C_ADDR);
     bool       setAddress(uint8_t newAddr);
+
+    /**************************************************************************/
+    /*!
+        @brief  get a ranging measurement from the device
+        @param  pRangingMeasurementData the pointer to the struct the data will be stored in
+        @param debug Optional debug flag. If true debug information will print via Serial.print during execution. Defaults to false.
+        @returns True if address was set successfully, False otherwise
+    */
+    /**************************************************************************/
+    VL53L0X_Error rangingTest(VL53L0X_RangingMeasurementData_t* pRangingMeasurementData){ return getSingleRangingMeasurement(pRangingMeasurementData); };
+    VL53L0X_Error getSingleRangingMeasurement( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData);
+    void          printRangeStatus( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData );
 };
 
 #endif

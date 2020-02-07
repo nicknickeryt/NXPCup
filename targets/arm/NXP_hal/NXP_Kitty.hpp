@@ -18,6 +18,8 @@
 #include "NXP_adc.hpp"
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
+#include "NXP_I2C.hpp"
+#include "Adafruit_VL53L0X.h"
 
 
 void pit_sendCameraData(uint8_t);
@@ -74,12 +76,18 @@ private:
     NXP_ADC::Sample camera2Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
     NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
+    // I2C
+    NXP_PORT sdaPort = {PORTE, 0, 6};
+    NXP_PORT sclPort = {PORTE, 1, 6};
+    NXP_I2C i2c = {I2C1, NXP_I2C::Mode::MASTER, sdaPort, sclPort};
+
+
 public:
     // CAMERA
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
     // UART
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART0, 1382400, uart0RXmux, uart0TXmux, uart0DMA};
     // LEDS
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     // DISPLAY
@@ -88,6 +96,8 @@ public:
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+    // DISTANCE SENSOR
+    Adafruit_VL53L0X distanceSensor = {&i2c};
 
 private:
     Kitty() = default;
