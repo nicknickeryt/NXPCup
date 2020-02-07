@@ -78,8 +78,8 @@ public:
     // CAMERA
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
     // UART
-    NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartDebug = {UART2, 1382400, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartCommunication = {UART0, 1382400, uart0RXmux, uart0TXmux, uart0DMA};
     // LEDS
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     // DISPLAY
