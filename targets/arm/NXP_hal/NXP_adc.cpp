@@ -12,7 +12,7 @@
 NXP_ADC* HSADCInstances[2];
 
 NXP_ADC::NXP_ADC(HSADC_Type* baseAdc, void (*converterAHandler)(uint8_t), void (*converterBHandler)(uint8_t)) : baseAdc(baseAdc) {
-        A.converterHandler = converterAHandler; // should it be here? or in init?
+        A.converterHandler = converterAHandler;
         B.converterHandler = converterBHandler;
 
         if (baseAdc == HSADC0) {
@@ -39,8 +39,6 @@ void NXP_ADC::init() {
     HSADC_ClearStatusFlags(baseAdc,  kHSADC_ConverterBEndOfScanFlag | kHSADC_ConverterBEndOfCalibrationFlag);
     HSADC_EnableSampleResultReadyInterrupts(baseAdc, HSADC_SAMPLE_MASK(sampleMask), true);
 
-
-
     if (baseAdc == HSADC0 && A.samplesCount > 0) {
         SIM->SCGC5 |= SIM_SCGC5_HSADC0_MASK;
         A.init(baseAdc);
@@ -66,6 +64,28 @@ void NXP_ADC::init() {
         NVIC_EnableIRQ(HSADC1_CCB_IRQn);
         HSADC_EnableInterrupts(baseAdc, kHSADC_ConverterBEndOfScanInterruptEnable);
     }
+}
+
+void NXP_ADC::Converter::init(HSADC_Type* baseAdc)  {
+    hsadc_converter_config_t  converterConfig;
+    HSADC_GetDefaultConverterConfig(&converterConfig);
+    HSADC_SetConverterConfig(baseAdc, (_hsadc_converter_id)type , &converterConfig);
+
+    HSADC_EnableConverterPower(baseAdc, (_hsadc_converter_id)type, true);
+    if (type == Converter::Type::A) {
+        while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+    } else if (type == Converter::Type::B) {
+        while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
+    }
+}
+
+bool NXP_ADC::Converter::appendSample(Sample *sample) {
+    if (samplesCount < samples.size()) {
+        samples.at(samplesCount) = sample;
+        samplesCount++;
+        return true;
+    }
+    return false;
 }
 
 bool NXP_ADC::appendSample(Sample *sample) {
@@ -113,7 +133,6 @@ void  NXP_ADC::startConversion() {
 extern "C" {
 void HSADC_ERR_IRQHandler() {
     HSADC0->STAT |= HSADC_STAT_EOCALIA_MASK;
-//    isCalibFinished = true;
 }
 
 void HSADC0_CCA_IRQHandler() {

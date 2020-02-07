@@ -38,8 +38,8 @@ public:
         DMAData() : dataPointer(nullptr), dataSize(0), dataTypeInRegister(0) { }
     };
     UART_Type* uart;
-    RingBuffer rxRingBuffer;
-    RingBuffer txRingBuffer;
+    RingBuffer rxRingBuffer{};
+    RingBuffer txRingBuffer{};
 
 private:
     uint32_t baudrate;

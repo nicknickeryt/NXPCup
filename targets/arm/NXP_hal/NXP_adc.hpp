@@ -40,52 +40,36 @@ public:
     class Sample;
 
     class Converter {
+        friend class NXP_ADC;
     public:
         enum class Type : uint16_t {
             A = kHSADC_ConverterA,
             B = kHSADC_ConverterB
         };
 
+    private:
         Type type;
         uint8_t samplesCount = 0;
         std::array<Sample *, 8> samples{};
         uint16_t conversionValues[8] = {0};
         void (*converterHandler)(uint8_t){};
 
-        Converter(Type type) : type(type) {
+    public:
+        Converter(Type type) : type(type) { }
 
-        }
-
-        bool appendSample(Sample *sample) {
-            if (samplesCount < samples.size()) {
-                samples.at(samplesCount) = sample;
-                samplesCount++;
-                return true;
-            }
-            return false;
-        }
-
-        void init(HSADC_Type* baseAdc)  {
-            hsadc_converter_config_t  converterConfig;
-            HSADC_GetDefaultConverterConfig(&converterConfig);
-            HSADC_SetConverterConfig(baseAdc, (_hsadc_converter_id)type , &converterConfig);
-
-            HSADC_EnableConverterPower(baseAdc, (_hsadc_converter_id)type, true);
-            if (type == Converter::Type::A) {
-                while ((kHSADC_ConverterAPowerDownFlag) == ((kHSADC_ConverterAPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
-            } else if (type == Converter::Type::B) {
-                while ((kHSADC_ConverterBPowerDownFlag) == ((kHSADC_ConverterBPowerDownFlag) & HSADC_GetStatusFlags(baseAdc))) { ; }
-            }
-        }
+        bool appendSample(Sample *sample);
+        void init(HSADC_Type* baseAdc);
     };
 
     class Sample {
+    private:
         bool initialised = false;
         NXP_PORT pinMux;
         ChannelSingleEnded channel;
     public:
         Converter::Type converterType;
 
+    public:
         Sample (NXP_PORT& pinMux, ChannelSingleEnded channel): pinMux(pinMux), channel(channel){
             if (static_cast<uint8_t>(channel) <= static_cast<uint8_t>(ChannelSingleEnded::A_CH18)) {
                 converterType = Converter::Type::A;

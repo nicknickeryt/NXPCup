@@ -5,6 +5,7 @@
 #include "HALinia_DMA.h"
 
 class NXP_DMA : HALina_DMA {
+private:
     int8_t channel = 0;
     dma_request_source_t source;
     bool initialised = false;
@@ -12,6 +13,7 @@ public:
     uint32_t* args;
     void (*callbackHandler)(uint32_t* args) = nullptr;
 
+public:
     NXP_DMA(dma_request_source_t source);
 
     inline bool getStatus() {
