@@ -17,6 +17,7 @@
 #define APP_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
+#include "Adafruit_VL53L0X.h"
 
 using namespace halina;
 
