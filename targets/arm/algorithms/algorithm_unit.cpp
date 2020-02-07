@@ -19,6 +19,13 @@ void AlgorithmUnit::analyze() {
 
     state = State::FINDING_TRACK_LINES;
     // find track lines
+    trackLinesDetector.detect(algorithmData.cameraData);
+    if(trackLinesDetector.leftLine.isDetected){
+        log_notice("I've found left line!");
+    }
+    if(trackLinesDetector.leftLine.isDetected){
+        log_notice("I've found right line!");
+    }
 
     state = State::OBSTACLE_AVOIDING;
     // avoid obstacle if any

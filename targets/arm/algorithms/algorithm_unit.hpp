@@ -62,7 +62,7 @@ class AlgorithmUnit{
         void normalize(DataType dataType, void* data);
 
     public:
-        AlgorithmUnit(){}
+        AlgorithmUnit() : trackLinesDetector(cameraDataBufferSize, 7){}
 
         void analyze();
 };
