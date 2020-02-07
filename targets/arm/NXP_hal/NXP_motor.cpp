@@ -27,5 +27,6 @@ void NXP_Motor::setValue(float value) {
 
 float NXP_Motor::getValue() {
     // todo write conversion form int32_t to float
+    return 0.0f;
 //    return static_cast<float>(pwm.getDutyCycle());
 }

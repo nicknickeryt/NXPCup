@@ -45,8 +45,8 @@ private:
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
 
-//    NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
-//    NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+//    NXP_PWM motorLeftPwm = {FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, 200};
+//    NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, 200};
 //    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
 //    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
@@ -85,7 +85,7 @@ public:
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
-//    NXP_Servo servo = {*this, servoPwm, 1400, 4400};
+    NXP_Servo servo = {servoPwm, 70, 2.0f};
 //    NXP_Motors motors = {motorLeft, motorRight};
 private:
     Kitty() = default;

@@ -18,8 +18,6 @@ private:
     FTM_Type* ftm;
     NXP_PORT& portFirst;
     NXP_PORT& portSecond;
-    uint8_t channelFirst;
-    uint8_t channelSecond;
 
     uint32_t frequency;
     uint8_t dividerIndex = 0;
@@ -27,8 +25,11 @@ private:
 
     constexpr static uint8_t dividers[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 public:
+    uint8_t channelFirst;
+    uint8_t channelSecond;
+
     NXP_PWM(FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t frequency) :
-            ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), frequency(frequency) { }
+            ftm(ftm), portFirst(portFirst), portSecond(portSecond),frequency(frequency), channelFirst(channelFirst), channelSecond(channelSecond) { }
 
     void setDutyCycle(float dutyCycle, uint8_t channel);
 
@@ -36,6 +37,10 @@ public:
 
     uint32_t getTicksPerSecond() {
         return CLOCK_GetFreq(kCLOCK_FastPeriphClk) / dividers[dividerIndex];
+    }
+
+    void setRawPeriod( uint16_t period, uint8_t channel) {
+        ftm->CONTROLS[channel].CnV = FTM_CnV_VAL(std::clamp(period, (uint16_t)0, modulo));
     }
 
 };

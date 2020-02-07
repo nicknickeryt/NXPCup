@@ -15,17 +15,16 @@ class Kitty;
 
 class NXP_Servo : public halina::Servo{
 private:
-    Kitty& kitty;
+    uint16_t centerTicks;
     NXP_PWM& pwm;
-    PWM_Filter filter;
+    uint8_t maxDegreeDeviation;
+    uint32_t maxTicksDeviation;
+    float servoMultiplier;
 
 public:
-    int32_t servoMinValue;
-    int32_t servoMaxValue;
-    int32_t servoCenterValue;
-
-public:
-    NXP_Servo(Kitty& kitty_, NXP_PWM& pwm, int32_t minValue, int32_t maxValue) : kitty(kitty_), pwm(pwm), servoMinValue(minValue), servoMaxValue(maxValue), servoCenterValue((maxValue + minValue)/2) { }
+    NXP_Servo(NXP_PWM& pwm, uint8_t maxDegreeDeviation, float servoMultiplier) :  pwm(pwm), servoMultiplier(servoMultiplier) {
+        this->maxDegreeDeviation = std::clamp(maxDegreeDeviation, (uint8_t)0, (uint8_t)90);
+    }
 
     void init() override;
 

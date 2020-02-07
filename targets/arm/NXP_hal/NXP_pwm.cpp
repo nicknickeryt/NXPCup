@@ -13,8 +13,7 @@
 void NXP_PWM::setDutyCycle(float dutyCycle, uint8_t channel){
     dutyCycle = std::clamp(dutyCycle, 0.0f, 1.0f);
 
-    float period = dutyCycle * modulo;
-    ftm->CONTROLS[channel].CnV = FTM_CnV_VAL((uint16_t)period);
+    setRawPeriod((uint16_t)(dutyCycle * modulo), channel);
 }
 
 void NXP_PWM::init() {
@@ -42,7 +41,7 @@ void NXP_PWM::init() {
             break;
         }
     }
-    
+
     if (ftm == FTM0) {
         SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
     } else if (ftm == FTM1) {
