@@ -40,11 +40,16 @@ void Kitty::init() {
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 
-    motorRight.init();
-    motorRight.run();
 
-    motorLeft.init();
-    motorLeft.run();
+    motors.init();
+    motors.run();
+
+
+//    motorRight.init();
+//    motorRight.run();
+//
+//    motorLeft.init();
+//    motorLeft.run();
 
 //    motorRight.setValue(-0.5f);
 //
@@ -74,8 +79,10 @@ void Kitty::proc() {
     static bool direction = true;
     if(50000 == x++) {
         servo.set(value);
-        motorRight.setValue(value);
-        motorLeft.setValue(value);
+//        motorRight.setValue(value);
+//        motorLeft.setValue(value);
+
+        motors.setValue(value, value);
         display.print(value, 2);
         if(direction){
             value += 0.01;
