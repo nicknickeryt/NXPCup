@@ -37,7 +37,7 @@ void Kitty::init() {
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-
+    servo.set(0.1);
     camera.start();
 }
 

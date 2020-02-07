@@ -15,7 +15,7 @@ class Kitty;
 
 class NXP_PWM : public halina::PWM{
 private:
-    int32_t dutyCycle;
+    int32_t dutyCycle = 0;
     Kitty& kitty;
     FTM_Type* ftm;
     NXP_PORT& portFirst;

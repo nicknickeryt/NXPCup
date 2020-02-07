@@ -18,8 +18,6 @@ private:
     Kitty& kitty;
     NXP_PWM& pwm;
     PWM_Filter filter;
-
-public:
     int32_t servoMinValue;
     int32_t servoMaxValue;
     int32_t servoCenterValue;

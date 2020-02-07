@@ -14,9 +14,10 @@ class NXP_GPIO : public halina::GPIO {
 private:
     PORT_Type* port_base;
     GPIO_Type* base;
+    uint32_t pin;
     halina::GPIO::Mode mode;
     port_interrupt_t configInterrupt;
-    uint32_t pin;
+
 
 public:
     class Interrupt {
