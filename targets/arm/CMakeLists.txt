@@ -32,7 +32,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO})
+set(SOURCES ${SOURCES_AUTO} algorithms/algorithm_unit.hpp algorithms/algorithm_unit.cpp)
 
 add_executable(${NAME} ${SOURCES})
 

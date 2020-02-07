@@ -18,6 +18,7 @@
 #include "NXP_adc.hpp"
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
+#include "algorithm_unit.hpp"
 
 
 void pit_sendCameraData(uint8_t);
@@ -88,6 +89,8 @@ public:
     NXP_Servo servo = {*this, servoPwm, 1400, 4400};
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+    // ALGORITHM
+    AlgorithmUnit algorithmUnit;
 
 private:
     Kitty() = default;

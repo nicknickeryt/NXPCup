@@ -6,6 +6,7 @@
  *
  */
 
+#include <algorithms/algorithm_unit.hpp>
 #include "NXP_Kitty.hpp"
 
 #define LOG_CHANNEL KITTY
@@ -45,6 +46,9 @@ void Kitty::proc() {
     magicDiodComposition();
     display.update();
     camera.proc(cameraTrigger);
+    // feeding algorithm unit with data
+    camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
+    algorithmUnit.analyze();
 }
 
 void Kitty::FTM_Init() {

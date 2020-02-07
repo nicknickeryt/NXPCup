@@ -62,6 +62,7 @@ public:
     void start() {
         cameraState = CameraState::START;
     }
+    bool getData(Type camera, uint16_t* dataBuffer);
 
 
 };
