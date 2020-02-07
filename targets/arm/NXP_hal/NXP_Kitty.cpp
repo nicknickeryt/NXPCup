@@ -30,7 +30,7 @@ void Kitty::init() {
     uartCommunication.initDMA();
     ledLine.init();
     display.init();
-    servo.init();
+//    servo.init();
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
@@ -39,9 +39,9 @@ void Kitty::init() {
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-    servo.set(0.0f);
-    motorRight.init();
-    motorRight.run();
+//    servo.set(0.0f);
+//    motorRight.init();
+//    motorRight.run();
 
     camera1DataBuffer[0] = 'A';
     camera1DataBuffer[1] = 'B';
@@ -59,7 +59,7 @@ void Kitty::proc() {
         memcpy(&camera1DataBuffer[2], camera.buffer1Data, 256);
         __enable_irq();
 
-        //uartCommunication.appendDMA(camera1DataBuffer, 258);
+//        uartCommunication.appendDMA(camera1DataBuffer, 258);
 
         uartCommunication.write(camera1DataBuffer, sizeof(camera1DataBuffer));
     }
@@ -68,7 +68,7 @@ void Kitty::proc() {
     static int x;
     static bool direction = true;
     if(1000000 == x++) {
-        motorRight.setValue(value);
+//        motorRight.setValue(value);
         display.print(value, 2);
         if(direction){
             value += 0.01;

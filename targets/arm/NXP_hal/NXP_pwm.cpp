@@ -10,22 +10,17 @@
 #include "NXP_pwm.hpp"
 #include "NXP_Kitty.hpp"
 
-//char buffer[50];
+void NXP_PWM::setDutyCycle(float dutyCycle, uint8_t channel){
+    dutyCycle = std::clamp(dutyCycle, 0.0f, 1.0f);
 
-void NXP_PWM::setDutyCycle(int32_t value){
-    dutyCycle = value;
-    if (portFirst.checkPort() && dutyCycle > 0) {
-        ftm->CONTROLS[channelFirst].CnV = FTM_CnV_VAL(dutyCycle);
-    }
-    if (portFirst.checkPort() && value < 0) {
-        ftm->CONTROLS[channelSecond].CnV = FTM_CnV_VAL(dutyCycle);
-    }
+    float period = dutyCycle * modulo;
+    ftm->CONTROLS[channel].CnV = FTM_CnV_VAL((uint16_t)period);
 }
 
 void NXP_PWM::init() {
-    ftm->MODE = (FTM_MODE_FAULTM(0x00) | FTM_MODE_WPDIS_MASK);
-    ftm->MOD = FTM_MOD_MOD(clockPrescaler - 1);
 
+
+    ftm->MODE = (FTM_MODE_FAULTM(0x00) | FTM_MODE_WPDIS_MASK);
     if (portFirst.checkPort()) {
         ftm->CONTROLS[channelFirst].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
         portFirst.setMux();
@@ -35,11 +30,41 @@ void NXP_PWM::init() {
         portSecond.setMux();
     }
 
-    setDutyCycle(0);
-    ftm->SC = (FTM_SC_CLKS(0x01) | FTM_SC_PS(0x01));
+    ftm->SC = FTM_SC_CLKS(0x01); // System clock
+    uint32_t period = CLOCK_GetFreq(kCLOCK_FastPeriphClk) / frequency;
+
+    for (uint8_t i = 0; i < uint8_t(sizeof(dividers)); i++) {
+        uint32_t mod = 0;
+        mod = period / dividers[i];
+        if (mod < std::numeric_limits<uint16_t>::max()) {
+            dividerIndex = i;
+            modulo = mod;
+            break;
+        }
+    }
+    
+    if (ftm == FTM0) {
+        SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
+    } else if (ftm == FTM1) {
+        SIM->SCGC6 |= SIM_SCGC6_FTM1_MASK;
+    } else if (ftm == FTM2) {
+        SIM->SCGC6 |= SIM_SCGC6_FTM2_MASK;
+    } else if (ftm == FTM3) {
+        SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
+    }
+    ftm->SC |= FTM_SC_PS(dividerIndex);
+    ftm->CNT = 0;
+    ftm->MOD = FTM_MOD_MOD(modulo);
+
+    if (portFirst.checkPort()) {
+        setDutyCycle(0.0f, channelFirst);
+    }
+    if (portSecond.checkPort()) {
+        setDutyCycle(0.0f, channelSecond);
+    }
 }
 
-int32_t NXP_PWM::getDutyCycle(){
-    return dutyCycle;
-}
+//int32_t NXP_PWM::getDutyCycle(){
+//    return dutyCycle;
+//}
 

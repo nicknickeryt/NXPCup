@@ -21,10 +21,10 @@ void NXP_Servo::set(float value){
     value += static_cast<float>(servoCenterValue);
     auto servoValue = int32_t(value);
     filter.runningAverage(&servoValue);
-    pwm.setDutyCycle(servoValue);
+//    pwm.setDutyCycle(servoValue);
 }
 
 float NXP_Servo::get(){
     // todo write conversion form int32_t to float
-    return static_cast<float>(pwm.getDutyCycle());
+//    return static_cast<float>(pwm.getDutyCycle());
 }

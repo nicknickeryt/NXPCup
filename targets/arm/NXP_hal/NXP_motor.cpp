@@ -21,11 +21,11 @@ void NXP_Motor::setValue(float value) {
     value += static_cast<float>(centerValue);
     auto motorValue = int32_t(value);
     filter.runningAverage(&motorValue);
-    pwm.setDutyCycle(motorValue);
+//    pwm.setDutyCycle(motorValue);
 }
 
 
 float NXP_Motor::getValue() {
     // todo write conversion form int32_t to float
-    return static_cast<float>(pwm.getDutyCycle());
+//    return static_cast<float>(pwm.getDutyCycle());
 }

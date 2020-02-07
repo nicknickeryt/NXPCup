@@ -25,6 +25,12 @@ int main(){
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 
+//    Kitty::kitty().servoPwm.init();
+//    NXP_Single_PWM mojepwm = {FTM0, 200,Kitty::kitty().servoPort};
+//    mojepwm.init();
+
+//Kitty::kitty().servoPwm.init();
+
     while (true){
         kitty.proc();
     }

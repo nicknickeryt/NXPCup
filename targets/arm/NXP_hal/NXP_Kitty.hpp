@@ -45,10 +45,10 @@ private:
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
 
-    NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
-    NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
-    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
-    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
+//    NXP_PWM motorLeftPwm = {*this, FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+//    NXP_PWM motorRightPwm = {*this, FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, BOARD_BOOTCLOCKRUN_CORE_CLOCK/1/10000};
+//    NXP_Motor motorLeft = {*this, motorLeftPwm, motorEnablePin, -5000, 5000};
+//    NXP_Motor motorRight = {*this, motorRightPwm, motorEnablePin, -5000, 5000};
 
     // UARTS
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
@@ -57,8 +57,9 @@ private:
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
+public:
     NXP_PORT servoPort = {PORTA, 7, 0x03};
-    NXP_PWM servoPwm = {*this, FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, BOARD_BOOTCLOCKRUN_CORE_CLOCK/64/50};
+    NXP_PWM servoPwm = {FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, 200};
 
     // CAMERA
     NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
@@ -84,8 +85,8 @@ public:
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
-    NXP_Servo servo = {*this, servoPwm, 1400, 4400};
-    NXP_Motors motors = {motorLeft, motorRight};
+//    NXP_Servo servo = {*this, servoPwm, 1400, 4400};
+//    NXP_Motors motors = {motorLeft, motorRight};
 private:
     Kitty() = default;
 

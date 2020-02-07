@@ -13,27 +13,30 @@
 
 class Kitty;
 
-class NXP_PWM : public halina::PWM{
+class NXP_PWM {
 private:
-    int32_t dutyCycle;
-    Kitty& kitty;
     FTM_Type* ftm;
     NXP_PORT& portFirst;
     NXP_PORT& portSecond;
     uint8_t channelFirst;
     uint8_t channelSecond;
-    uint32_t clockPrescaler;
 
+    uint32_t frequency;
+    uint8_t dividerIndex = 0;
+    uint16_t modulo = 0;
 
+    constexpr static uint8_t dividers[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 public:
-    NXP_PWM(Kitty& kitty, FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t clockPrescaler) :
-            kitty(kitty), ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), clockPrescaler(clockPrescaler) { }
+    NXP_PWM(FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t frequency) :
+            ftm(ftm), portFirst(portFirst), portSecond(portSecond), channelFirst(channelFirst), channelSecond(channelSecond), frequency(frequency) { }
 
-    void setDutyCycle(int32_t value) override;
+    void setDutyCycle(float dutyCycle, uint8_t channel);
 
-    void init() override;
+    void init();
 
-    int32_t getDutyCycle() override;
+    uint32_t getTicksPerSecond() {
+        return CLOCK_GetFreq(kCLOCK_FastPeriphClk) / dividers[dividerIndex];
+    }
 
 };
 
