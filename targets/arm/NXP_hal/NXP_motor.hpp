@@ -41,15 +41,18 @@ public:
 class NXP_Motors {
     NXP_Motor& left;
     NXP_Motor& right;
+
 public:
     void init() {
         left.init();
         right.init();
     }
+
     void setValue(float leftValue, float rightValue) {
         left.setValue(leftValue);
         right.setValue(rightValue);
     }
+
     std::pair<float, float> getValue() {
         std::pair<float, float> ret;
         ret.first = left.getValue();

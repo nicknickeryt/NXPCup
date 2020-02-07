@@ -16,9 +16,6 @@ namespace halina {
         virtual void init() = 0;
 
         virtual void set(float position) = 0;
-
-        virtual float get() = 0;
-
     };
 
 }

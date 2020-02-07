@@ -29,7 +29,5 @@ public:
     void init() override;
 
     void set(float) override;
-
-    float get() override;
-};
+    };
 

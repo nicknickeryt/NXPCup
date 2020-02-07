@@ -43,6 +43,9 @@ void Kitty::init() {
     motorRight.init();
     motorRight.run();
 
+    motorLeft.init();
+    motorLeft.run();
+
 //    motorRight.setValue(-0.5f);
 //
     camera1DataBuffer[0] = 'A';
@@ -72,6 +75,7 @@ void Kitty::proc() {
     if(50000 == x++) {
         servo.set(value);
         motorRight.setValue(value);
+        motorLeft.setValue(value);
         display.print(value, 2);
         if(direction){
             value += 0.01;

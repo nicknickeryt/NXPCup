@@ -8,7 +8,6 @@
 
 #include "fsl_pwm.h"
 #include "NXP_pwm.hpp"
-#include "NXP_Kitty.hpp"
 
 void NXP_PWM::setDutyCycle(float dutyCycle, uint8_t channel){
     dutyCycle = std::clamp(dutyCycle, 0.0f, 1.0f);
@@ -17,8 +16,6 @@ void NXP_PWM::setDutyCycle(float dutyCycle, uint8_t channel){
 }
 
 void NXP_PWM::init() {
-
-
     ftm->MODE = (FTM_MODE_FAULTM(0x00) | FTM_MODE_WPDIS_MASK);
     if (portFirst.checkPort()) {
         ftm->CONTROLS[channelFirst].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
@@ -62,8 +59,3 @@ void NXP_PWM::init() {
         setDutyCycle(0.0f, channelSecond);
     }
 }
-
-//int32_t NXP_PWM::getDutyCycle(){
-//    return dutyCycle;
-//}
-

@@ -7,7 +7,6 @@
  */
 
 #include "NXP_servo.hpp"
-#include "NXP_Kitty.hpp"
 
 void NXP_Servo::init(){
     pwm.init();
@@ -26,9 +25,4 @@ void NXP_Servo::set(float value){
     value = (float)maxTicksDeviation * value * servoMultiplier;
 
     pwm.setRawPeriod(centerTicks + value, pwm.channelFirst);
-}
-
-float NXP_Servo::get(){
-    // todo write conversion form int32_t to float
-//    return static_cast<float>(pwm.getDutyCycle());
 }

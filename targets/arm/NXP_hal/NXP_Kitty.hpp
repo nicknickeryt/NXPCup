@@ -37,7 +37,7 @@ private:
     // ENCODERS
     NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
     NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-public:
+
     // MOTORS
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
     NXP_PORT motorLeftPortMLB = {PORTE, 5, 0x06};
@@ -57,7 +57,7 @@ public:
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
-// public:
+
     NXP_PORT servoPort = {PORTA, 7, 0x03};
     NXP_PWM servoPwm = {FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, 200};
 
@@ -72,9 +72,7 @@ public:
     NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
     NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic};
-
     NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData};
-
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 public:
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
@@ -86,7 +84,7 @@ public:
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;
     NXP_Servo servo = {servoPwm, 70, 2.0f};
-//    NXP_Motors motors = {motorLeft, motorRight};
+    NXP_Motors motors = {motorLeft, motorRight};
 private:
     Kitty() = default;
 
