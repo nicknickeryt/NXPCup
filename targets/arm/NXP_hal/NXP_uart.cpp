@@ -12,7 +12,7 @@
 
 using namespace halina;
 
-uint8_t buffer[] = {'A', 'B', 'C', 'D', 'E'};
+uint8_t dmaInitBuffer[] = {'A', 'B', 'C', 'D', 'E'};
 NXP_Uart* nxpUartHandlers[6];
 
 void NXP_Uart::appendDMA(uint8_t* dataPointer, uint32_t dataSize) {
@@ -49,7 +49,7 @@ void NXP_Uart::initDMA() {
 
     dmaTX.init(DMAcallback, (uint32_t*)this);
     dmaTX.setDestinationAddress((uint32_t)(&uart->D));
-    dmaTX.setSourceAddress((uint32_t)buffer, 0);
+    dmaTX.setSourceAddress((uint32_t)dmaInitBuffer, 0);
     dmaTX.setInitialValues();
 }
 
@@ -103,7 +103,6 @@ void NXP_Uart::init(){
     }
 
     baudDiff = (clock / (sbr * 16)) - baudrate;
-//    uint16_t brfa = (2 * clock / (baudrate)) - 32 * sbr;
     if (baudDiff > (baudrate - (clock / (16 * (sbr + 1))))) {
         sbr++;
     }

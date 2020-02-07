@@ -19,10 +19,10 @@ void NXP_DMA::init(void (*callbackHandler_m)(uint32_t* args), uint32_t* args_m) 
     this->args = args_m;
     this->callbackHandler = callbackHandler_m;
 
-    SIM->SCGC6 |= SIM_SCGC6_DMAMUX_MASK; //enables DMA McUX clock gate
-    SIM->SCGC7 |= SIM_SCGC7_DMA_MASK;//enables DMA clock gate, default value is enable
+    SIM->SCGC6 |= SIM_SCGC6_DMAMUX_MASK;
+    SIM->SCGC7 |= SIM_SCGC7_DMA_MASK;
 
-    DMAMUX0->CHCFG[channel] = 0; //clears register for changing source and trigger
+    DMAMUX0->CHCFG[channel] = 0;
     DMAMUX0->CHCFG[channel] = DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE(source);
 
     if (channel <= 15) {
@@ -52,23 +52,23 @@ void NXP_DMA::enableRequest() {
 
 void NXP_DMA::setInitialValues() {
     if (!initialised) return;
-    DMA0->TCD[channel].SOFF = 1;//Source address signed offset
-    DMA0->TCD[channel].NBYTES_MLNO = 1;//byte number
-    DMA0->TCD[channel].DOFF = 0;//destination address signed offset
-    DMA0->TCD[channel].ATTR =  0;//8 bit transfer size, register default value is undefined
-    DMA0->TCD[channel].SLAST = 0;//restores the source address to the initial value
-    DMA0->TCD[channel].DLAST_SGA = 0;//restores the destination address to the initial value
+    DMA0->TCD[channel].SOFF = 1;
+    DMA0->TCD[channel].NBYTES_MLNO = 1;
+    DMA0->TCD[channel].DOFF = 0;
+    DMA0->TCD[channel].ATTR =  0;
+    DMA0->TCD[channel].SLAST = 0;
+    DMA0->TCD[channel].DLAST_SGA = 0;
     DMA0->TCD[channel].CSR = DMA_CSR_INTMAJOR_MASK | DMA_CSR_DREQ_MASK | DMA_CSR_START_MASK;
 }
 
 void NXP_DMA::setDestinationAddress(uint32_t address) {
     if (!initialised) return;
-    DMA0->TCD[channel].DADDR = address;//defines destination data address
+    DMA0->TCD[channel].DADDR = address;
 }
 
 void NXP_DMA::setSourceAddress(uint32_t address, uint32_t bytesCount) {
     if (!initialised) return;
-    DMA0->TCD[channel].SADDR = address;//defines source data address
+    DMA0->TCD[channel].SADDR = address;
     DMA0->TCD[channel].BITER_ELINKNO = bytesCount;
     DMA0->TCD[channel].CITER_ELINKNO = bytesCount;
 }

@@ -16,7 +16,7 @@
 #define APP_LOG_CHANNEL 1
 #define APP_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
-//#include "logger.h"
+#include "logger.h"
 
 using namespace halina;
 

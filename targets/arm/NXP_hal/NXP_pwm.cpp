@@ -10,8 +10,6 @@
 #include "NXP_pwm.hpp"
 #include "NXP_Kitty.hpp"
 
-//char buffer[50];
-
 void NXP_PWM::setDutyCycle(int32_t value){
     dutyCycle = value;
     if (portFirst.checkPort() && dutyCycle > 0) {

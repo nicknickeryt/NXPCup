@@ -8,8 +8,8 @@
 
 NXP_Camera* cameraHandler = nullptr;
 
-NXP_Camera::NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2) :
-    type(type), adc(adc), clockPin(clockPin), SIPin(SIPin), sampleCamera1(sampleCamera1), sampleCamera2(sampleCamera2) {
+NXP_Camera::NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2, NXP_Uart& debug) :
+    type(type), adc(adc), clockPin(clockPin), SIPin(SIPin), sampleCamera1(sampleCamera1), sampleCamera2(sampleCamera2), debug(debug) {
     cameraHandler = this;
 }
 
@@ -22,7 +22,6 @@ void NXP_Camera::init() {
         adc.appendSample(&sampleCamera1);
         adc.appendSample(&sampleCamera1);
         adc.appendSample(&sampleCamera1);
-
         adc.appendSample(&sampleCamera2);
         adc.appendSample(&sampleCamera2);
         adc.appendSample(&sampleCamera2);
@@ -42,6 +41,17 @@ void NXP_Camera::init() {
     SIPin.reset();
 };
 
+void NXP_Camera::proc(bool& trigger){
+    if(trigger){
+        trigger = false;
+        __disable_irq();
+        camera1DataBuffer[0] = 'A';
+        camera2DataBuffer[1] = 'B';
+        memcpy(&camera1DataBuffer[2], buffer1Data, 256);
+        __enable_irq();
+        debug.appendDMA(camera1DataBuffer, 258);
+    }
+}
 
 void NXP_Camera::adcInterruptEndOfMeasurementStatic(uint8_t) {
     cameraHandler->adcInterruptEndOfMeasurement();
@@ -97,7 +107,7 @@ void NXP_Camera::pitInterrupt() {
         cameraState = CameraState::RESET_FIRST_CLOCK_PIN;
     } else if (cameraState == CameraState::RESET_FIRST_CLOCK_PIN) {
         clockPin.reset();
-        currentPixelIndex = -1; // because increment is next
+        currentPixelIndex = -1;
         waitEnd = 0;
         cameraState = CameraState::WAIT_1;
     } else if (cameraState == CameraState::WAIT_1) {

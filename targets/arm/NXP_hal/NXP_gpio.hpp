@@ -11,13 +11,13 @@
 #include "HALina.hpp"
 
 class NXP_GPIO : public halina::GPIO {
+private:
     PORT_Type* port_base;
     GPIO_Type* base;
-public:
     uint32_t pin;
-private:
     halina::GPIO::Mode mode;
     port_interrupt_t configInterrupt;
+
 
 public:
     class Interrupt {
@@ -34,6 +34,7 @@ public:
 
     std::function<void(void)> callbackHandler;
 
+public:
     NXP_GPIO(PORT_Type* port_base, GPIO_Type *base, uint32_t pin, halina::GPIO::Mode mode = halina::GPIO::Mode::OUTPUT, port_interrupt_t configInterrupt = kPORT_InterruptOrDMADisabled, std::function<void(void)> callbackHandler = nullptr):
             port_base(port_base),
             base(base),

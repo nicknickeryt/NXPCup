@@ -2,14 +2,10 @@
 #include "NXP_gpio.hpp"
 #include "NXP_PIT.hpp"
 #include "NXP_adc.hpp"
+#include "NXP_uart.hpp"
 
 class NXP_Camera {
 public:
-    uint16_t buffer1Data [128] = {0};
-    uint16_t buffer2Data [128] = {0};
-
-    int16_t currentPixelIndex = 0; // must be int
-
     enum class Type : uint8_t {
         CAMERA_1,
         CAMERA_2,
@@ -39,31 +35,34 @@ public:
         GET_DATA_FROM_ADC,
     };
 
-    NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2);
-
+private:
+    uint16_t buffer1Data [128] = {0};
+    uint16_t buffer2Data [128] = {0};
+    int16_t currentPixelIndex = 0;
+    uint8_t camera1DataBuffer [258];
+    uint8_t camera2DataBuffer [258];
     CameraState cameraState = CameraState::STOPPED;
+    Type type;
+    NXP_ADC& adc;
+    NXP_GPIO& clockPin;
+    NXP_GPIO& SIPin;
+    NXP_ADC::Sample& sampleCamera1;
+    NXP_ADC::Sample& sampleCamera2;
+    NXP_Uart& debug;
 
+public:
+    NXP_Camera(Type type, NXP_ADC& adc, NXP_GPIO& clockPin, NXP_GPIO& SIPin,  NXP_ADC::Sample& sampleCamera1, NXP_ADC::Sample& sampleCamera2, NXP_Uart& debug);
+
+    void proc(bool& trigger);
     void init();
-
     static void adcInterruptEndOfMeasurementStatic(uint8_t);
-
     static void pitInterruptStatic(uint8_t);
-
     void adcInterruptEndOfMeasurement();
-
     void pitInterrupt();
-
     void start() {
         cameraState = CameraState::START;
     }
-public:
-    Type type;
-    NXP_ADC& adc;
 
-    NXP_GPIO& clockPin;
-    NXP_GPIO& SIPin;
 
-    NXP_ADC::Sample& sampleCamera1;
-    NXP_ADC::Sample& sampleCamera2;
 };
 

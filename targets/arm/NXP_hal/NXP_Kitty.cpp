@@ -13,12 +13,10 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
-bool sendCameraData = false;
+bool cameraTrigger = false;
 void pit_sendCameraData(uint8_t) {
-    sendCameraData = true;
+    cameraTrigger = true;
 }
-uint8_t camera1DataBuffer [258];
-
 
 void Kitty::init() {
     BOARD_InitBootPins();
@@ -39,47 +37,14 @@ void Kitty::init() {
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-    servo.set(0.0f);
-    motorRight.init();
-    motorRight.run();
-
-    camera1DataBuffer[0] = 'A';
-    camera1DataBuffer[1] = 'B';
+    servo.set(0.1);
     camera.start();
 }
 
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
-
-    if (sendCameraData) {
-        sendCameraData = false;
-        __disable_irq();
-        //memset(camera.buffer1Data, 666, 128);
-        memcpy(&camera1DataBuffer[2], camera.buffer1Data, 256);
-        __enable_irq();
-
-        //uartCommunication.appendDMA(camera1DataBuffer, 258);
-
-        uartCommunication.write(camera1DataBuffer, sizeof(camera1DataBuffer));
-    }
-
-    static float value = 0.0;
-    static int x;
-    static bool direction = true;
-    if(1000000 == x++) {
-        motorRight.setValue(value);
-        display.print(value, 2);
-        if(direction){
-            value += 0.01;
-        }else{
-            value -= 0.01;
-        }
-        if(value >= 0.1 || value <= 0.0) {
-            direction = !direction;
-        }
-        x = 0;
-    }
+    camera.proc(cameraTrigger);
 }
 
 void Kitty::FTM_Init() {
