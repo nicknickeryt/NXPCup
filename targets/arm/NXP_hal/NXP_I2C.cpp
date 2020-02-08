@@ -5,72 +5,190 @@
  * NXP HALina implementation of I2C driver
  *
  */
+
+#define LOG_CHANNEL I2C
+#define I2C_LOG_CHANNEL 2
+#define I2C_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+
 #include "NXP_I2C.hpp"
+#include "logger.h"
 
-void NXP_I2C::init() {
-    // enable clock
-    if(base == I2C0) SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
-    else if(base == I2C1) SIM->SCGC4 |= SIM_SCGC4_I2C1_MASK;
+i2c_master_handle_t handle;
+i2c_master_transfer_t transfer;
 
-    // set muxes
-    sda.setMux();
-    scl.setMux();
+void i2c_callback(I2C_Type *base,
+                  i2c_master_handle_t *handle,
+                  status_t status,
+                  void *userData){
 
-    // set freqyency
-    base->F |= I2C_F_MULT(0);
-    base->F |= I2C_F_ICR(0x12);
-
-    // enable i2c module
-//    base->C1 |= I2C_C1_IICEN_MASK;
-
-
-    // chose master / slave mode:
-    if (mode == Mode::MASTER) {
-        base->C1 &= ~I2C_C1_TX_MASK;
-        base->C1 |= I2C_C1_MST_MASK;
-    }
-    else if (mode == Mode::SLAVE) {
-        base->C1 |= I2C_C1_TX_MASK;
-        base->C1 &= ~I2C_C1_MST_MASK;
-    }
-//
-//    if(base == I2C0) NVIC_EnableIRQ(I2C0_IRQn);
-//    else if(base == I2C1) NVIC_EnableIRQ(I2C1_IRQn);
 }
 
-void NXP_I2C::beginTransmission(uint8_t deviceAddress){
+
+void NXP_I2C::init() {
+    if (base == I2C0){ SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK; }
+    else if (base == I2C1){ SIM->SCGC4 |= SIM_SCGC4_I2C1_MASK; }
+    base->F |= I2C_F_MULT(0) | I2C_F_ICR(0x12);
+    base->C1 |= I2C_C1_IICEN_MASK;
+    sda.setMux();
+    scl.setMux();
+}
+
+void NXP_I2C::beginTransmission(uint8_t deviceAddress) {
     address = deviceAddress;
 }
 
-void NXP_I2C::endTransmission(){
+void NXP_I2C::endTransmission() {
     address = 0;
 }
 
-#define I2C_WRITE_ADDRESS(slaveAddress) 	((uint8_t)((slaveAddress << 1) | 0))
-
-void NXP_I2C::write(uint8_t data){
-//    waitWhileBusy();
-    sendStart();
-//    sendBlocking( I2C_WRITE_ADDRESS(address));
-//    sendBlocking( address);
-//    sendBlocking(data);
-//    sendStop();
+void NXP_I2C::write(uint8_t data) {
+    address = (address << 1)| MWSR;
+    /* send start signal */
+    start();
+    /* send ID with W/R bit */
+    writeByte(address);
+    wait();
+    // write the data to the register
+    writeByte(data);
+    wait();
+    stop();
 }
 
-void NXP_I2C::requestFrom([[maybe_unused]]uint8_t deviceAddress, [[maybe_unused]]size_t size){
-    enterReceiveModeWithoutAck();
+void NXP_I2C::write(uint8_t address, uint8_t data) {
+    address = (address << 1)| MWSR;
+    /* send start signal */
+    start();
+    /* send ID with W/R bit */
+    writeByte(address);
+    wait();
+    // write the data to the register
+    writeByte(data);
+    wait();
+    stop();
 }
 
-uint8_t NXP_I2C::read(){
-    waitWhileBusy();
-    sendStart();
-    sendBlocking(address);
-    sendRepeatedStart();
-    enterReceiveModeWithoutAck();
-    sendStop();
+void NXP_I2C::write(uint8_t address, uint8_t* data, size_t size) {
+}
 
-    register uint8_t result = I2C0->D;
-    return result;
+void NXP_I2C::write(uint8_t* data, size_t length) {
+}
+
+void NXP_I2C::requestFrom([[maybe_unused]]uint8_t deviceAddress, [[maybe_unused]]size_t size) {
+}
+
+uint8_t NXP_I2C::read() {
+    uint8_t read = 0;
+    I2C_MasterReadBlocking(base, &read, 1, kI2C_TransferDefaultFlag);
+    return read;
+}
+
+void NXP_I2C::writeRegister(uint8_t address, uint8_t deviceRegister, uint8_t data){
+    address = (address << 1)| MWSR;
+    /* send start signal */
+    start();
+    /* send ID with W/R bit */
+    writeByte(address);
+    wait();
+    // write the register address
+    writeByte(deviceRegister);
+    wait();
+    // write the data to the register
+    writeByte(data);
+    wait();
+    stop();
+}
+
+void NXP_I2C::writeRegister(uint8_t deviceRegister, uint8_t data){
+    address = (address << 1)| MWSR;
+    /* send start signal */
+    start();
+    /* send ID with W/R bit */
+    writeByte(address);
+    wait();
+    // write the register address
+    writeByte(deviceRegister);
+
+    wait();
+    // write the data to the register
+    writeByte(data);
+    wait();
+    stop();
+}
+
+uint8_t NXP_I2C::readRegister(uint8_t deviceRegister){
+    uint8_t data;
+    uint8_t addressWrite, addressRead;
+    addressWrite = (address << 1U) | MWSR; // Write Address
+    addressRead = (address << 1U) | MRSW; // Read Address
+    /* send start signal */
+    start();
+    /* send ID with Write bit */
+    writeByte(addressWrite);
+    wait();
+    // send Register address
+    writeByte(deviceRegister);
+    wait();
+    // send repeated start to switch to read mode
+    repeatedStart();
+    // re send device address with read bit
+    writeByte(addressRead);
+    wait();
+    // set K40 in read mode
+    enterRxMode();
+    data = readByte();
+    // send stop signal so we only read 8 bits
+    stop();
+    return data;
+}
+
+uint8_t NXP_I2C::readRegister(uint8_t address, uint8_t deviceRegister){
+    uint8_t data;
+    uint8_t addressWrite, addressRead;
+    addressWrite = (address << 1U) | MWSR; // Write Address
+    addressRead = (address << 1U) | MRSW; // Read Address
+    /* send start signal */
+    start();
+    /* send ID with Write bit */
+    writeByte(addressWrite);
+    wait();
+    // send Register address
+    writeByte(deviceRegister);
+    wait();
+    // send repeated start to switch to read mode
+    repeatedStart();
+    // re send device address with read bit
+    writeByte(addressRead);
+    wait();
+    // set K40 in read mode
+    enterRxMode();
+    data = readByte();
+    // send stop signal so we only read 8 bits
+    stop();
+    return data;
+}
+
+void NXP_I2C::readRegister(uint8_t address, uint8_t deviceRegister, uint8_t* data){
+    uint8_t addressWrite, addressRead;
+    addressWrite = (address << 1U) | MWSR; // Write Address
+    addressRead = (address << 1U) | MRSW; // Read Address
+    /* send start signal */
+    start();
+    /* send ID with Write bit */
+    writeByte(addressWrite);
+    wait();
+    // send Register address
+    writeByte(deviceRegister);
+    wait();
+    // send repeated start to switch to read mode
+    repeatedStart();
+    // re send device address with read bit
+    writeByte(addressRead);
+    wait();
+    // set K40 in read mode
+    enterRxMode();
+    *data = readByte();
+    // send stop signal so we only read 8 bits
+    stop();
 }
 
 extern "C"{
@@ -82,5 +200,3 @@ void I2C1_IRQHandler(){
 
 }
 }
-
-

@@ -49,15 +49,12 @@ void Kitty::proc() {
     camera.proc(cameraTrigger);
 
     static int x;
-    if(100000 == x++) {
-        log_info("Sending i2c request");
-        i2c.beginTransmission(0x8);
-        i2c.write(5);
-        i2c.endTransmission();
+    if(10000 == x++) {
+        i2c.beginTransmission(0x27);
+        i2c.writeRegister(0x20, 'x');
         x = 0;
     }
 }
-
 void Kitty::FTM_Init() {
         SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
         SIM->SOPT2 |= SIM_SOPT2_TIMESRC(1);
@@ -99,3 +96,4 @@ void Kitty::magicDiodComposition(){
         }
     }
 }
+

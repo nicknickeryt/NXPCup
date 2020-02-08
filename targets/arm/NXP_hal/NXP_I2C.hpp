@@ -9,6 +9,7 @@
 #pragma once
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
+#include "fsl_i2c.h"
 
 class NXP_I2C{
 public:
@@ -16,6 +17,10 @@ public:
         MASTER,
         SLAVE
     };
+
+private:
+    constexpr static auto MWSR = 0x00; // Master write mask
+    constexpr static auto MRSW = 0x01; // Master read mask
 
 private:
     I2C_Type* base;
@@ -35,94 +40,33 @@ public:
     void endTransmission();
 
     void write(uint8_t index);
+    void write(uint8_t* data, size_t length);
+    void write(uint8_t address, uint8_t* data, size_t size);
 
     void requestFrom(uint8_t deviceAddress, size_t size);
 
     uint8_t read();
 
+    uint8_t readRegister(uint8_t address, uint8_t deviceRegister);
+    void readRegister(uint8_t address, uint8_t deviceRegister, uint8_t* data);
+    void writeRegister(uint8_t address, uint8_t deviceRegister, uint8_t data);
+    void writeRegister(uint8_t deviceRegister, uint8_t data);
+    uint8_t readRegister(uint8_t deviceRegister);
+
 private:
     void wait(){
-
-        while((I2C0->S & I2C_S_IICIF_MASK)==0) {}
-
-        I2C0->S |= I2C_S_IICIF_MASK; /* clear interrupt flag */
+        while((base->S & I2C_S_IICIF_MASK)==0) {}
+        base->S |= I2C_S_IICIF_MASK; /* clear interrupt flag */
     }
+    void start(){ base->C1 |= I2C_C1_MST_MASK | I2C_C1_TX_MASK; }
+    void repeatedStart(){base->C1 |= I2C_C1_RSTA_MASK; }
+    void stop(){ base->C1 &= ~(I2C_C1_MST_MASK | I2C_C1_TX_MASK); }
+    void enterRxMode(){ base->C1 &= ~I2C_C1_TX_MASK; base->C1 |= I2C_C1_TXAK_MASK; }
+    void enableAck(){base->C1 &= ~I2C_C1_TXAK_MASK; }
+    void disableAck(){base->C1 |= I2C_C1_TXAK_MASK; }
+    void writeByte(uint8_t data){base->D = data; }
+    uint8_t readByte(){return base->D; }
 
-    void waitWhileBusy(){
 
-        while((I2C0->S & I2C_S_BUSY_MASK)!=0) {}
-    }
-
-    void sendStart(){
-
-        I2C0->C1 |= (I2C_C1_MST_MASK | I2C_C1_TX_MASK);
-    }
-
-    void sendStop(){
-
-        I2C0->C1 &= ~(I2C_C1_MST_MASK | I2C_C1_TX_MASK);
-    }
-
-    void enterTransmitMode(){
-
-        I2C0->C1 |= I2C_C1_TX_MASK;
-    }
-
-    void enterReceiveMode(){
-
-        I2C0->C1 &= ~I2C_C1_TX_MASK;
-    }
-
-    void enterReceiveModeWithAck(){
-
-        I2C0->C1 &= ~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK);
-    }
-
-    void enterReceiveModeWithoutAck(){
-
-        register uint8_t reg = I2C0->C1;
-        reg &= ~((1 << I2C_C1_TX_SHIFT) & I2C_C1_TX_MASK);
-        reg |=  ((1 << I2C_C1_TXAK_SHIFT) & I2C_C1_TXAK_MASK);
-        I2C0->C1 = reg;
-    }
-
-    void sendRepeatedStart(){
-
-        I2C0->C1 |= (I2C_C1_RSTA_MASK | I2C_C1_TX_MASK);
-    }
-
-    void enableAck(){
-
-        I2C0->C1 &= ~I2C_C1_TXAK_MASK;
-    }
-
-    void disableAck(){
-
-        I2C0->C1 |= I2C_C1_TXAK_MASK;
-    }
-
-    void sendBlocking( const uint8_t value){
-
-        I2C0->D = value;
-    }
-
-    uint8_t receiveDriving(){
-
-        register uint8_t value = I2C0->D;
-        wait();
-        return value;
-    }
-
-     uint8_t receiveDrivingWithNack(){
-
-        disableAck();
-        return receiveDriving();
-    }
-
-    uint8_t receiveAndStop(){
-
-        sendStop();
-        return I2C0->D;
-    }
 
 };

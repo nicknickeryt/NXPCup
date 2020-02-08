@@ -86,7 +86,6 @@ bool Adafruit_VL53L0X::begin(uint8_t i2c_addr) {
       log_error("Adafruit_VL53L0X::begin Wrong i2c address");
     return false;
   }
-    return false;
   Status = VL53L0X_GetDeviceInfo( &MyDevice, &DeviceInfo );
 
   if( Status == VL53L0X_ERROR_NONE )  {
