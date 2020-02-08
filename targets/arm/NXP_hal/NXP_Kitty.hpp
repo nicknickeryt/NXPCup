@@ -35,8 +35,13 @@ private:
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
 
     // ENCODERS
-    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+public:
+    NXP_PORT encoderRightA = {PORTB, 18, 0x06};
+    NXP_PORT encoderRightB = {PORTB, 19, 0x06};
+private:
+
+//    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+//    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
 
     // MOTORS
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);

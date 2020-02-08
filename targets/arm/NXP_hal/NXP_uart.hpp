@@ -56,6 +56,7 @@ private:
     uint8_t txBuffer[txBufferSize] = {0};
     uint8_t rxBuffer[rxBufferSize] = {0};
 public:
+    void (*redirectHandler)(uint8_t);
     CyclicBuffer_data<DMAData<uint8_t>, 20> dmaData;
     enum class InterruptType : uint8_t {
         TX_EMPTY = UART_C2_TIE_MASK,
@@ -69,6 +70,9 @@ public:
     };
 
 public:
+    void setRedirectHandler( void (*redirectHandler)(uint8_t)) {
+        this->redirectHandler = redirectHandler;
+    }
     void enableInterrupt(InterruptType interrupt);
 
     void disableInterrupt(InterruptType interrupt);

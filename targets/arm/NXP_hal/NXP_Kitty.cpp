@@ -15,7 +15,7 @@
 #include "logger.h"
 bool sendCameraData = false;
 void pit_sendCameraData(uint8_t) {
-    sendCameraData = true;
+//    sendCameraData = true;
 }
 uint8_t camera1DataBuffer [258];
 
@@ -34,8 +34,8 @@ void Kitty::init() {
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
-    intr.init();
-    intl.init();
+//    intr.init();
+//    intl.init();
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
@@ -82,8 +82,8 @@ void Kitty::proc() {
 //        motorRight.setValue(value);
 //        motorLeft.setValue(value);
 
-        motors.setValue(value, value);
-        display.print(value, 2);
+//        motors.setValue(value, value);
+//        display.print(value, 2);m 1
         if(direction){
             value += 0.01;
         }else{
