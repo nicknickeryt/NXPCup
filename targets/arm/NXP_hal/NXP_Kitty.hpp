@@ -18,9 +18,10 @@
 #include "NXP_adc.hpp"
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
+#include "NXP_encoder.hpp"
 
 
-void pit_sendCameraData(uint8_t);
+void pit_sendCameraData(uint32_t*);
 
 class Kitty{
 private:
@@ -35,13 +36,11 @@ private:
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
 
     // ENCODERS
-public:
     NXP_PORT encoderRightA = {PORTB, 18, 0x06};
     NXP_PORT encoderRightB = {PORTB, 19, 0x06};
-private:
 
-//    NXP_GPIO intr = {PORTA, GPIOA, 13, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
-//    NXP_GPIO intl = {PORTB, GPIOB, 19, halina::GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, nullptr};
+    NXP_PORT encoderLeftA = {PORTA, 12, 0x07};
+    NXP_PORT encoderLeftB = {PORTA, 13, 0x07};
 
     // MOTORS
     NXP_GPIO motorEnablePin = NXP_GPIO(PORTE, GPIOE, 4U);
@@ -62,7 +61,6 @@ private:
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
 
     // SERVO
-
     NXP_PORT servoPort = {PORTA, 7, 0x03};
     NXP_PWM servoPwm = {FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, 200};
 
@@ -76,15 +74,20 @@ private:
     NXP_ADC::Sample camera2Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
     NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
-    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic};
-    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData};
+    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData, nullptr};
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
+
+    NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 100, nullptr, nullptr};
 public:
+    NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
+    NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
+
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
 
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
 
-    NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART0, 1382400, uart0RXmux, uart0TXmux, uart0DMA};
 
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     NXP_Display display;

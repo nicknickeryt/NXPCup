@@ -47,7 +47,7 @@ public:
 
     static void adcInterruptEndOfMeasurementStatic(uint8_t);
 
-    static void pitInterruptStatic(uint8_t);
+    static void pitInterruptStatic(uint32_t*);
 
     void adcInterruptEndOfMeasurement();
 

@@ -13,6 +13,7 @@
 #include "clock_config.h"
 #include "command_terminal/command_manager.h"
 #include "commandManager.h"
+#include "NXP_encoder.hpp"
 
 #define LOG_CHANNEL APP
 #define APP_LOG_CHANNEL 1
@@ -32,32 +33,17 @@ void printCommandManager(char data) {
     Kitty::kitty().uartCommunication.write(data);
 }
 
-CommandManager<1,'\n',false> commandManager (enableInterrupts, disableInterrupts, {
-    Command("m", "", motorsCallback)
+CommandManager<3,'\n',false> commandManager (enableInterrupts, disableInterrupts, {
+    Command("m", "", motorsCallback),
+    Command("s", "", servoCallback),
+    Command("st", "", stopCallback)
 });
-
-
 
 using namespace halina;
 
-
-int32_t EncoderGetChLeft() {
-    int32_t tmp = (uint16_t)FTM2->CNT;
-    FTM2->CNT = 0;
-    if(tmp>0x7FFF){
-        tmp=(int32_t)(tmp-(int32_t) 0x0000FFFF);
-    }
-//	tmp /= 2;
-    return tmp;
-}
-
-volatile uint16_t dataaa = 0;
-
 bool printflag = false;
 
-void pitttt(uint8_t) {
-    dataaa = FTM2->CNT;
-    FTM2->CNT = 0;
+void printFlagFunction(uint32_t*) {
     printflag = true;
 }
 
@@ -65,46 +51,22 @@ int main(){
     BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
 
-
     kitty.init();
 
-    Kitty::kitty().encoderRightA.setMux();
-    Kitty::kitty().encoderRightB.setMux();
-
-    NXP_PIT ssssss = {NXP_PIT::CHANNEL::_2, 200, pitttt};
-    ssssss.init();
+    NXP_PIT dddd = {NXP_PIT::CHANNEL::_3, 100, printFlagFunction, nullptr};
+    dddd.init();
 
     Kitty::kitty().uartCommunication.setRedirectHandler([](uint8_t ch) {commandManager.put_char(ch);});
     commandManager.init(printCommandManager);
-
-    SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
-    SIM->SCGC6 |= SIM_SCGC6_FTM2_MASK;
-
-    FTM2->MOD = 0xFFFF;
-    FTM2->CNTIN = 0;
-
-    FTM2->MODE |= FTM_MODE_WPDIS_MASK;
-    FTM2->MODE |= FTM_MODE_FTMEN_MASK;
-
-    FTM2->QDCTRL &= ~FTM_QDCTRL_QUADMODE_MASK;
-    FTM2->QDCTRL |= FTM_QDCTRL_QUADEN_MASK;
-    FTM2->QDCTRL |= FTM_QDCTRL_QUADMODE_MASK;
-
-    FTM2->SC |= FTM_SC_CLKS(3);
-
-volatile uint32_t licznik = 0;
 
     while (true){
         commandManager.run();
         kitty.proc();
 
-
-    if (printflag) {
-        printflag = false;
-        log_info("%d\n\r", dataaa);
-    }
-
-
+        if (printflag) {
+            printflag = false;
+            log_info("%d %d\n\r", Kitty::kitty().encoderLeft.getTicks(), Kitty::kitty().encoderRight.getTicks());
+        }
     }
 }
 

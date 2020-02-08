@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <bits/algorithmfwd.h>
 #include "HALina.hpp"
 #include "NXP_pwm.hpp"
 
@@ -29,5 +30,9 @@ public:
     void init() override;
 
     void set(float) override;
-    };
+
+    void disable() {
+        pwm.setRawPeriod(0, pwm.channelFirst);
+    }
+};
 

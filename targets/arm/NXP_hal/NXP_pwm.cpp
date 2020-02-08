@@ -6,6 +6,8 @@
  *
  */
 
+#include <limits>
+#include <bits/algorithmfwd.h>
 #include "fsl_pwm.h"
 #include "NXP_pwm.hpp"
 

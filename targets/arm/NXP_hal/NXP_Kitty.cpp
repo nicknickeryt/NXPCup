@@ -14,7 +14,7 @@
 
 #include "logger.h"
 bool sendCameraData = false;
-void pit_sendCameraData(uint8_t) {
+void pit_sendCameraData(uint32_t* ) {
 //    sendCameraData = true;
 }
 uint8_t camera1DataBuffer [258];
@@ -34,25 +34,20 @@ void Kitty::init() {
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
-//    intr.init();
-//    intl.init();
+
+    encoderRight.init();
+    encoderLeft.init();
+    encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
+    encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
+    encodersPit.init();
+
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 
-
     motors.init();
     motors.run();
 
-
-//    motorRight.init();
-//    motorRight.run();
-//
-//    motorLeft.init();
-//    motorLeft.run();
-
-//    motorRight.setValue(-0.5f);
-//
     camera1DataBuffer[0] = 'A';
     camera1DataBuffer[1] = 'B';
     camera.start();
@@ -65,12 +60,9 @@ void Kitty::proc() {
     if (sendCameraData) {
         sendCameraData = false;
         __disable_irq();
-        //memset(camera.buffer1Data, 666, 128);
         memcpy(&camera1DataBuffer[2], camera.buffer1Data, 256);
         __enable_irq();
-
 //        uartCommunication.appendDMA(camera1DataBuffer, 258);
-
         uartCommunication.write(camera1DataBuffer, sizeof(camera1DataBuffer));
     }
 
@@ -78,12 +70,6 @@ void Kitty::proc() {
     static int x;
     static bool direction = true;
     if(50000 == x++) {
-        servo.set(value);
-//        motorRight.setValue(value);
-//        motorLeft.setValue(value);
-
-//        motors.setValue(value, value);
-//        display.print(value, 2);m 1
         if(direction){
             value += 0.01;
         }else{
