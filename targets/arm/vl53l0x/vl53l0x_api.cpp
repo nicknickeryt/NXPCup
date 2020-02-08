@@ -356,7 +356,7 @@ VL53L0X_Error VL53L0X_DataInit(VL53L0X_DEV Dev)
 	/* read WHO_AM_I */
 	uint8_t b;
 	Status = VL53L0X_RdByte(Dev, 0xC0, &b);
-	//Serial.print("WHOAMI: 0x"); Serial.println(b, HEX);
+	log_error("WHOAMI: 0x%x", b);
 	   
 	/* read WHO_AM_I */
 
@@ -2319,7 +2319,7 @@ VL53L0X_Error VL53L0X_GetRangingMeasurementData([[maybe_unused]] VL53L0X_DEV Dev
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	uint8_t DeviceRangeStatus;
 	uint8_t RangeFractionalEnable;
-	uint8_t PalRangeStatus;
+	uint8_t PalRangeStatus = 0;
 	uint8_t XTalkCompensationEnable;
 	uint16_t AmbientRate;
 	FixPoint1616_t SignalRate;

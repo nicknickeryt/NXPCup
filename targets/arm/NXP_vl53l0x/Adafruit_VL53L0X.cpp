@@ -30,7 +30,7 @@
  */
 #define LOG_CHANNEL VL53L0X
 #define VL53L0X_LOG_CHANNEL 1
-#define VL53L0X_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define VL53L0X_LOG_CHANNEL_LEVEL LOG_LEVEL_ERROR
 #include "Adafruit_VL53L0X.h"
 #include "logger.h"
 
@@ -66,14 +66,14 @@ bool Adafruit_VL53L0X::begin(uint8_t i2c_addr) {
   pMyDevice->i2c = i2c;
 
   pMyDevice->i2c->init();
-  log_notice("Adafruit_VL53L0X: Finished inits")
+  log_error("Adafruit_VL53L0X: Finished inits")
 
   // unclear if this is even needed:
   if( VL53L0X_IMPLEMENTATION_VER_MAJOR != VERSION_REQUIRED_MAJOR ||
       VL53L0X_IMPLEMENTATION_VER_MINOR != VERSION_REQUIRED_MINOR ||
       VL53L0X_IMPLEMENTATION_VER_SUB != VERSION_REQUIRED_BUILD )  {
-          log_notice( "Found %d.%d.%d rev", VL53L0X_IMPLEMENTATION_VER_MAJOR, VL53L0X_IMPLEMENTATION_VER_MINOR, VL53L0X_IMPLEMENTATION_VER_SUB, VL53L0X_IMPLEMENTATION_VER_REVISION);
-          log_notice( "Requires %d.%d.%d", VERSION_REQUIRED_MAJOR, VERSION_REQUIRED_MINOR, VERSION_REQUIRED_BUILD );
+          log_error( "Found %d.%d.%d rev", VL53L0X_IMPLEMENTATION_VER_MAJOR, VL53L0X_IMPLEMENTATION_VER_MINOR, VL53L0X_IMPLEMENTATION_VER_SUB, VL53L0X_IMPLEMENTATION_VER_REVISION);
+          log_error( "Requires %d.%d.%d", VERSION_REQUIRED_MAJOR, VERSION_REQUIRED_MINOR, VERSION_REQUIRED_BUILD );
 
       Status = VL53L0X_ERROR_NOT_SUPPORTED;
 
@@ -81,13 +81,16 @@ bool Adafruit_VL53L0X::begin(uint8_t i2c_addr) {
   }
 
   Status = VL53L0X_DataInit( &MyDevice );         // Data initialization
-
+    log_error("Status %d", Status);
   if (! setAddress(i2c_addr) ) {
       log_error("Adafruit_VL53L0X::begin Wrong i2c address");
     return false;
   }
-  Status = VL53L0X_GetDeviceInfo( &MyDevice, &DeviceInfo );
 
+
+  Status = VL53L0X_GetDeviceInfo( &MyDevice, &DeviceInfo );
+    log_error("Status 2 %d", Status);
+    while(1){;}
   if( Status == VL53L0X_ERROR_NONE )  {
           log_notice("VL53L0X Info:" );
           log_notice("Device Name: %s", DeviceInfo.Name);

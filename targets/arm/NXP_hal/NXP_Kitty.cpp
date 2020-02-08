@@ -18,6 +18,7 @@ void pit_sendCameraData(uint8_t) {
     cameraTrigger = true;
 }
 
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -39,8 +40,8 @@ void Kitty::init() {
     log_notice("KiTTy init finished");
     servo.set(0.1);
     camera.start();
-    i2c.init();
-
+    distanceSensor.begin();
+//    i2c.init();
 }
 
 void Kitty::proc() {
@@ -49,9 +50,19 @@ void Kitty::proc() {
     camera.proc(cameraTrigger);
 
     static int x;
-    if(10000 == x++) {
-        i2c.beginTransmission(0x27);
-        i2c.writeRegister(0x20, 'x');
+    if(100000 == x++) {
+//        i2c.beginTransmission(0x29);
+//        auto y = i2c.readRegister(0x00c0);
+//        i2c.endTransmission();
+//        log_notice("result: %d", y);
+        VL53L0X_RangingMeasurementData_t measure;
+        distanceSensor.rangingTest(&measure);
+        log_notice("try to read");
+        if(measure.RangeStatus != 4){
+            log_notice("Distance (mm):", measure.RangeMilliMeter);
+        }else{
+            log_notice("out of range");
+        }
         x = 0;
     }
 }

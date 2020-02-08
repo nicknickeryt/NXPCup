@@ -79,7 +79,7 @@ private:
     // I2C
     NXP_PORT sdaPort = {PORTE, 0, 6};
     NXP_PORT sclPort = {PORTE, 1, 6};
-    NXP_I2C i2c = {I2C1, NXP_I2C::Mode::MASTER, sdaPort, sclPort};
+    NXP_I2C i2c = {I2C1, NXP_I2C::Mode::MASTER, sdaPort, sclPort, 100000};
 
 
 public:
