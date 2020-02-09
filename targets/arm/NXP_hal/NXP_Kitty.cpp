@@ -52,17 +52,21 @@ void Kitty::proc() {
     static int x;
     if(100000 == x++) {
 //        i2c.beginTransmission(0x29);
+//        uint8_t data[2] = {4, 6};
+//        i2c.writeRegister(5, data, 2);
+//        i2c.endTransmission();
+//        i2c.beginTransmission(0x29);
 //        auto y = i2c.readRegister(0x00c0);
 //        i2c.endTransmission();
 //        log_notice("result: %d", y);
-        VL53L0X_RangingMeasurementData_t measure;
-        distanceSensor.rangingTest(&measure);
-        log_notice("try to read");
-        if(measure.RangeStatus != 4){
-            log_notice("Distance (mm):", measure.RangeMilliMeter);
-        }else{
-            log_notice("out of range");
-        }
+//        VL53L0X_RangingMeasurementData_t measure;
+//        distanceSensor.rangingTest(&measure);
+//        log_notice("try to read");
+//        if(measure.RangeStatus != 4){
+//            log_notice("Distance (mm):", measure.RangeMilliMeter);
+//        }else{
+//            log_notice("out of range");
+//        }
         x = 0;
     }
 }

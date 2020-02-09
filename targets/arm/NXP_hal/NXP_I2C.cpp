@@ -174,13 +174,14 @@ void NXP_I2C::readRequest(uint8_t deviceRegister, uint8_t* data, size_t length){
         writeByte(deviceRegister);
         wait();
         if (getAck()) {
+            repeatedStart();
             writeByte(addressRead);
             wait();
             if (getAck()) {
                 enterRxModeWithAck();
                 giveNack();
                 int i = 0;
-                while(length--){
+                while((length--)-1){
                     data[i] = readByte();
                     wait();
                     i++;

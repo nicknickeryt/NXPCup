@@ -29,7 +29,7 @@
 #define USE_I2C_2V8
 #define LOG_CHANNEL VL53L0XAPI
 #define VL53L0XAPI_LOG_CHANNEL 1
-#define VL53L0XAPI_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define VL53L0XAPI_LOG_CHANNEL_LEVEL LOG_LEVEL_ERROR
 
 #include "vl53l0x_api.h"
 #include "vl53l0x_tuning.h"
@@ -40,6 +40,7 @@
 #include "logger.h"
 
 #include <stdlib.h>
+#undef USE_I2C_2V8
 
 /* Group PAL General Functions */
 
@@ -352,15 +353,15 @@ VL53L0X_Error VL53L0X_DataInit(VL53L0X_DEV Dev)
 	/* Set I2C standard mode */
 	if (Status == VL53L0X_ERROR_NONE)
 		Status = VL53L0X_WrByte(Dev, 0x88, 0x00);
-
+    log_error("status: %d", Status);
 	/* read WHO_AM_I */
 	uint8_t b;
 	Status = VL53L0X_RdByte(Dev, 0xC0, &b);
-	log_error("WHOAMI: 0x%x", b);
-	   
+	log_error("WHOAMI: 0x%x status: %d", b, Status);
 	/* read WHO_AM_I */
 
 	VL53L0X_SETDEVICESPECIFICPARAMETER(Dev, ReadDataFromDeviceDone, 0);
+
 
 #ifdef USE_IQC_STATION
 	if (Status == VL53L0X_ERROR_NONE)
@@ -384,7 +385,6 @@ VL53L0X_Error VL53L0X_DataInit(VL53L0X_DEV Dev)
 
 	/* Get default parameters */
 	Status = VL53L0X_GetDeviceParameters(Dev, &CurrentParameters);
-
 	if (Status == VL53L0X_ERROR_NONE) {
 		/* initialize PAL values */
 		CurrentParameters.DeviceMode = VL53L0X_DEVICEMODE_SINGLE_RANGING;
