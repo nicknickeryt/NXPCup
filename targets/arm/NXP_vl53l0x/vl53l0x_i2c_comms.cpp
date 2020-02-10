@@ -13,14 +13,14 @@ int VL53L0X_i2c_init(NXP_I2C *i2c) {
 
 int VL53L0X_write_multi(uint8_t deviceAddress, uint8_t index, uint8_t *pdata, uint32_t count, NXP_I2C *i2c) {
     i2c->beginTransmission(deviceAddress);
-    i2c->writeRegister(index, pdata, count);
+    i2c->write(index, pdata, count);
     i2c->endTransmission();
     return VL53L0X_ERROR_NONE;
 }
 
 int VL53L0X_read_multi(uint8_t deviceAddress, uint8_t index, uint8_t *pdata, uint32_t count, NXP_I2C *i2c) {
     i2c->beginTransmission(deviceAddress);
-    i2c->readRequest(index, pdata, count);
+    i2c->read(index, pdata, count);
     i2c->endTransmission();
     return VL53L0X_ERROR_NONE;
 }
