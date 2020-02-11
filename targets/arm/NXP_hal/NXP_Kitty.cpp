@@ -15,8 +15,10 @@
 
 #include "logger.h"
 bool cameraTrigger = false;
+bool algorithmTrigger = false;
 void pit_sendCameraData(uint8_t) {
     cameraTrigger = true;
+    algorithmTrigger = true;
 }
 
 void Kitty::init() {
@@ -45,10 +47,15 @@ void Kitty::init() {
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
-    camera.proc(cameraTrigger);
+    //camera.proc(cameraTrigger);
     // feeding algorithm unit with data
-    camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
-    algorithmUnit.analyze();
+    if(algorithmTrigger){
+        algorithmTrigger = false;
+        camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
+        algorithmUnit.analyze();
+
+    }
+
 }
 
 void Kitty::FTM_Init() {

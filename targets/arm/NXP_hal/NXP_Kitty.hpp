@@ -90,7 +90,7 @@ public:
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
     // ALGORITHM
-    AlgorithmUnit algorithmUnit;
+    AlgorithmUnit algorithmUnit = {uartCommunication};
 
 private:
     Kitty() = default;

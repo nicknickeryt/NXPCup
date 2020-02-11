@@ -33,6 +33,12 @@ class TrackLinesDetector{
         // value of convolution with camera data to assume that line is detected
         constexpr static uint32_t lineConvolutionThreshold = 9000000;
 
+        enum class LineType{
+            LEFT,
+            RIGHT
+        };
+
+    public:
         class Line{
             public:
                 bool isDetected;
@@ -41,12 +47,6 @@ class TrackLinesDetector{
                 uint8_t rightBorderIndex;
         };
 
-        enum class LineType{
-            LEFT,
-            RIGHT
-        };
-
-    public:
         Line leftLine;
         Line rightLine;
 

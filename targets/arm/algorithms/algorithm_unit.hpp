@@ -12,6 +12,7 @@
 #include "track_lines_detector.hpp"
 #include "obstacle_detector.hpp"
 #include "patterns_detector.hpp"
+#include "NXP_uart.hpp"
 
 class AlgorithmUnit{
     private:
@@ -37,6 +38,8 @@ class AlgorithmUnit{
         ObstacleDetector obstacleDetector;
         PatternsDetector patternsDetector;
 
+        NXP_Uart& debug;
+
     public:
         class AlgorithmData{
             public:
@@ -59,10 +62,12 @@ class AlgorithmUnit{
          * @param dataType type of data to normalize
          * @param data pointer to data buffer to normalize
          */
-        void normalize(DataType dataType, void* data);
+        void normalize(DataType dataType, uint16_t* data);
 
     public:
-        AlgorithmUnit() : trackLinesDetector(cameraDataBufferSize, 7){}
+        AlgorithmUnit(NXP_Uart& debug) : trackLinesDetector(cameraDataBufferSize, 7),
+                                         patternsDetector(trackLinesDetector.leftLine, trackLinesDetector.rightLine),
+                                         debug(debug){}
 
         void analyze();
 };

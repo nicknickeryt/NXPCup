@@ -17,6 +17,15 @@ void AlgorithmUnit::analyze() {
     // preprocessing data from camera
     normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
 
+    // fixme: DEBUG
+    uint8_t camera1DataBuffer[260];
+    camera1DataBuffer[0] = 0xff;
+    camera1DataBuffer[1] = 0xff;
+    camera1DataBuffer[2] = 0xff;
+    camera1DataBuffer[3] = 0xff;
+    memcpy(&camera1DataBuffer[4], algorithmData.cameraData, 256);
+    debug.write(camera1DataBuffer, 260);
+
     state = State::FINDING_TRACK_LINES;
     // find track lines
     trackLinesDetector.detect(algorithmData.cameraData);
@@ -32,17 +41,18 @@ void AlgorithmUnit::analyze() {
 
     state = State::PATTERN_DETECTION;
     // detect patterns
+    patternsDetector.detect(algorithmData.cameraData);
 }
 
-void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, void *data) {
+void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) {
     // normalize data in other way depending on its type
     switch(dataType){
         case DataType::CAMERA_DATA: {
-            int32_t maximalPixelBrightness = 0;
-            int32_t minimalPixelBrightness = 65535;
-            int32_t meanPixelBrightness = 0;
-            int32_t summaryValue = 0;
-            int32_t *cameraValues = reinterpret_cast<int32_t *>(data);
+            uint32_t maximalPixelBrightness = 0;
+            uint32_t minimalPixelBrightness = 65535;
+            uint32_t meanPixelBrightness = 0;
+            uint32_t summaryValue = 0;
+            uint16_t *cameraValues = data;
 
             //Find minimum  and maximum brightness of pixels
             for (auto i = 0; i < cameraDataBufferSize; i++) {
@@ -54,17 +64,22 @@ void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, void *data) {
                 }
                 summaryValue += cameraValues[i];
             }
-            // calculate mean value
-            meanPixelBrightness = summaryValue / cameraDataBufferSize;
-            meanPixelBrightness = ((meanPixelBrightness - minimalPixelBrightness) * (cameraDataNormalizationFactor)) /
-                                  (maximalPixelBrightness - minimalPixelBrightness);
 
-            // normalize
-            for (auto i = 0; i < cameraDataBufferSize; i++) {
-                //Normalisation
-                cameraValues[i] = ((cameraValues[i] - minimalPixelBrightness) * cameraDataNormalizationFactor) /
-                                  (maximalPixelBrightness - minimalPixelBrightness)
-                                  - meanPixelBrightness;
+            const uint16_t minMaxDelta = maximalPixelBrightness - minimalPixelBrightness;
+
+            if(minMaxDelta != 0){
+                // calculate mean value
+                meanPixelBrightness = summaryValue / cameraDataBufferSize;
+                meanPixelBrightness = ((meanPixelBrightness - minimalPixelBrightness) * (cameraDataNormalizationFactor)) /
+                                      (maximalPixelBrightness - minimalPixelBrightness);
+
+                // normalize
+                for (auto i = 0; i < cameraDataBufferSize; i++) {
+                    //Normalisation
+                    cameraValues[i] = ((cameraValues[i] - minimalPixelBrightness) * cameraDataNormalizationFactor) /
+                                      (maximalPixelBrightness - minimalPixelBrightness)
+                                      - meanPixelBrightness;
+                }
             }
             }
             break;
