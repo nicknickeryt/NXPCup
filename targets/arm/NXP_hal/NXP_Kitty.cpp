@@ -14,11 +14,11 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
-bool cameraTrigger = false;
 bool algorithmTrigger = false;
-void pit_sendCameraData(uint8_t) {
-    cameraTrigger = true;
+bool commandTerminalTrigger = false;
+void pit_generalHandler(uint32_t*) {
     algorithmTrigger = true;
+    commandTerminalTrigger = true;
 }
 
 void Kitty::init() {
@@ -57,6 +57,10 @@ void Kitty::init() {
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
+    if(commandTerminalTrigger){
+        commandManager.run();
+        commandTerminalTrigger = false;
+    }
     if(algorithmTrigger){
         algorithmTrigger = false;
         camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);

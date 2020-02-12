@@ -23,7 +23,7 @@
 #include "command_terminal/command_manager.h"
 #include "algorithm_unit.hpp"
 
-void pit_sendCameraData(uint32_t*);
+void pit_generalHandler(uint32_t*);
 
 class Kitty{
 private:
@@ -80,7 +80,7 @@ private:
 
     // PIT
     NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
-    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData, nullptr};
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_generalHandler, nullptr};
     NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 100, nullptr, nullptr};
 
     // COMMAND TERMINAL

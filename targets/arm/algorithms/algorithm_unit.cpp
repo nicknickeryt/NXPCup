@@ -14,7 +14,6 @@
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
-    // preprocessing data from camera
     normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
     quantization(algorithmData.cameraData);
 
@@ -84,8 +83,7 @@ void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) 
             }
             }
             break;
-        case DataType::ENCODERS_DATA:
-            break;
+
         default:
             break;
     }
