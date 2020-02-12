@@ -65,6 +65,7 @@ void Kitty::proc() {
         algorithmTrigger = false;
         camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
         algorithmUnit.analyze();
+
     }
 
 }

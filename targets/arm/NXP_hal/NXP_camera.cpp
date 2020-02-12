@@ -45,11 +45,13 @@ void NXP_Camera::proc(bool& trigger){
     if(trigger){
         trigger = false;
         __disable_irq();
-        camera1DataBuffer[0] = 'A';
-        camera1DataBuffer[1] = 'B';
-        memcpy(&camera1DataBuffer[2], buffer1Data, 256);
+        camera1DataBuffer[0] = 0xff;
+        camera1DataBuffer[1] = 0xff;
+        camera1DataBuffer[2] = 0xff;
+        camera1DataBuffer[3] = 0xff;
+        memcpy(&camera1DataBuffer[4], buffer1Data, 256);
         __enable_irq();
-        debug.write(camera1DataBuffer, 258);
+        debug.write(camera1DataBuffer, 260);
     }
 }
 
