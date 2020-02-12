@@ -32,12 +32,20 @@ void Kitty::init() {
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
-    intr.init();
-    intl.init();
+
+    encoderRight.init();
+    encoderLeft.init();
+    encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
+    encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
+    encodersPit.init();
+
     log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
-    servo.set(0.1);
+
+    motors.init();
+    motors.run();
+
     camera.start();
 }
 

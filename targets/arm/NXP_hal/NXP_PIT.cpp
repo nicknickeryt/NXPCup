@@ -1,27 +1,26 @@
 #include "NXP_PIT.hpp"
-#include "NXP_camera.hpp"
 
-void (*NXP_PIT::handlers[4])(uint8_t);
+NXP_PIT* pits[4];
 
 extern "C" {
 void PIT0_IRQHandler(void) {
     PIT->CHANNEL[0].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[0](0);
+    pits[0]->runCallback();
 }
 
 void PIT1_IRQHandler(void) {
     PIT->CHANNEL[1].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[1](0);
+    pits[1]->runCallback();
 }
 
 void PIT2_IRQHandler(void) {
     PIT->CHANNEL[2].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[2](0);
+    pits[2]->runCallback();
 }
 
 void PIT3_IRQHandler(void) {
     PIT->CHANNEL[3].TFLG = PIT_TFLG_TIF_MASK;
-    NXP_PIT::handlers[3](0);
+    pits[3]->runCallback();
 }
 }
 
@@ -36,7 +35,7 @@ void NXP_PIT::disable() {
 }
 
 bool NXP_PIT::init() {
-    if (!callbackFunctionStatus) {
+    if (!callbackNumber) {
         return false;
     }
 
@@ -49,18 +48,22 @@ bool NXP_PIT::init() {
         case 0:
             NVIC_ClearPendingIRQ(PIT0_IRQn);
             NVIC_EnableIRQ(PIT0_IRQn);
+            pits[0] = this;
             break;
         case 1:
             NVIC_ClearPendingIRQ(PIT1_IRQn);
             NVIC_EnableIRQ(PIT1_IRQn);
+            pits[1] = this;
             break;
         case 2:
             NVIC_ClearPendingIRQ(PIT2_IRQn);
             NVIC_EnableIRQ(PIT2_IRQn);
+            pits[2] = this;
             break;
         case 3:
             NVIC_ClearPendingIRQ(PIT3_IRQn);
             NVIC_EnableIRQ(PIT3_IRQn);
+            pits[3] = this;
             break;
     }
     return true;

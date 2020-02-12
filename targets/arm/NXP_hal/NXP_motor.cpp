@@ -17,15 +17,19 @@ void NXP_Motor::init(){
 
 void NXP_Motor::setValue(float value) {
     value = std::clamp(value, -1.0f, 1.0f);
-    value *= (static_cast<float>(maxValue - minValue))/2.0f;
-    value += static_cast<float>(centerValue);
-    auto motorValue = int32_t(value);
-    filter.runningAverage(&motorValue);
-    pwm.setDutyCycle(motorValue);
+
+    if (value >= 0.0f) {
+        pwm.setDutyCycle(value, pwm.channelFirst);
+        pwm.setDutyCycle(0.0f, pwm.channelSecond);
+    } else {
+        pwm.setDutyCycle(-value, pwm.channelSecond);
+        pwm.setDutyCycle(0.0f, pwm.channelFirst);
+    }
 }
 
 
 float NXP_Motor::getValue() {
     // todo write conversion form int32_t to float
-    return static_cast<float>(pwm.getDutyCycle());
+    return 0.0f;
+//    return static_cast<float>(pwm.getDutyCycle());
 }

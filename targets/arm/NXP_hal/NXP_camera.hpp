@@ -6,6 +6,11 @@
 
 class NXP_Camera {
 public:
+    uint16_t buffer1Data [128] = {0};
+    uint16_t buffer2Data [128] = {0};
+
+    int16_t currentPixelIndex = 0; // must be int
+
     enum class Type : uint8_t {
         CAMERA_1,
         CAMERA_2,
@@ -56,7 +61,9 @@ public:
     void proc(bool& trigger);
     void init();
     static void adcInterruptEndOfMeasurementStatic(uint8_t);
-    static void pitInterruptStatic(uint8_t);
+
+    static void pitInterruptStatic(uint32_t*);
+
     void adcInterruptEndOfMeasurement();
     void pitInterrupt();
     void start() {

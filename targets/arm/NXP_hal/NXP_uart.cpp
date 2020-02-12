@@ -53,7 +53,8 @@ void NXP_Uart::initDMA() {
     dmaTX.setInitialValues();
 }
 
-NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) : uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX) {
+NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin, NXP_DMA& dmaTX) :
+    uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), dmaTX(dmaTX), redirectHandler(nullptr) {
     if(UART0 == uart){
         nxpUartHandlers[0] = this;
     } else if(UART1 == uart){
@@ -205,7 +206,11 @@ void UART_IRQ(NXP_Uart* nxpUartHandler) {
     }
     if (nxpUartHandler->uart->S1 & UART_S1_RDRF_MASK) {
         nxpUartHandler->uart->S1 |= UART_S1_RDRF_MASK;
-        RingBuffer_PutChar(&(nxpUartHandler->rxRingBuffer), nxpUartHandler->uart->D);
+        if (nxpUartHandler->redirectHandler) {
+            nxpUartHandler->redirectHandler(nxpUartHandler->uart->D);
+        } else {
+            RingBuffer_PutChar(&(nxpUartHandler->rxRingBuffer), nxpUartHandler->uart->D);
+        }
     }
 }
 

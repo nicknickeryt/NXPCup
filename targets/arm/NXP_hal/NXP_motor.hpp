@@ -18,17 +18,13 @@ class NXP_Motors;
 class NXP_Motor : public halina::Motor{
     friend class NXP_Motors;
 private:
-    Kitty& kitty;
     int32_t speed = 0;
     NXP_PWM& pwm;
     PWM_Filter filter;
     NXP_GPIO enablePin;
-    int32_t minValue;
-    int32_t maxValue;
-    int32_t centerValue;
 public:
-    NXP_Motor(Kitty& kitty_, NXP_PWM& pwm, NXP_GPIO enablePin, int32_t minValue, int32_t maxValue) :
-        kitty(kitty_), pwm(pwm), enablePin(enablePin), minValue(minValue), maxValue(maxValue), centerValue((maxValue - minValue)/2) {}
+    NXP_Motor(NXP_PWM& pwm, NXP_GPIO& enablePin) :
+        pwm(pwm), enablePin(enablePin) { }
 
     void init() override;
 
@@ -45,15 +41,18 @@ public:
 class NXP_Motors {
     NXP_Motor& left;
     NXP_Motor& right;
+
 public:
     void init() {
         left.init();
         right.init();
     }
+
     void setValue(float leftValue, float rightValue) {
         left.setValue(leftValue);
         right.setValue(rightValue);
     }
+
     std::pair<float, float> getValue() {
         std::pair<float, float> ret;
         ret.first = left.getValue();

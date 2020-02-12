@@ -15,7 +15,7 @@ namespace halina {
         public:
             virtual void init() = 0;
 
-            virtual void setDutyCycle(int32_t value) = 0;
+//            virtual void setDutyCycle(int32_t value) = 0;
 
             virtual int32_t getDutyCycle() = 0;
         };

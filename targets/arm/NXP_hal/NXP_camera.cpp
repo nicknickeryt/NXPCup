@@ -57,7 +57,7 @@ void NXP_Camera::adcInterruptEndOfMeasurementStatic(uint8_t) {
     cameraHandler->adcInterruptEndOfMeasurement();
 }
 
-void NXP_Camera::pitInterruptStatic(uint8_t) {
+void NXP_Camera::pitInterruptStatic(uint32_t*) {
     cameraHandler->pitInterrupt();
 }
 
