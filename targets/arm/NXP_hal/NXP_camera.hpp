@@ -35,13 +35,12 @@ public:
         GET_DATA_FROM_ADC,
     };
 
-    uint16_t buffer1Data [128]{};
-    uint16_t buffer2Data [128]{};
-
 private:
+    uint16_t buffer1Data [128] = {0};
+    uint16_t buffer2Data [128] = {0};
     int16_t currentPixelIndex = 0;
-    uint8_t camera1DataBuffer [258]{};
-    uint8_t camera2DataBuffer [258]{};
+    uint8_t camera1DataBuffer [258];
+    uint8_t camera2DataBuffer [258];
     CameraState cameraState = CameraState::STOPPED;
     Type type;
     NXP_ADC& adc;
@@ -57,14 +56,13 @@ public:
     void proc(bool& trigger);
     void init();
     static void adcInterruptEndOfMeasurementStatic(uint8_t);
-
     static void pitInterruptStatic(uint32_t*);
-
     void adcInterruptEndOfMeasurement();
     void pitInterrupt();
     void start() {
         cameraState = CameraState::START;
     }
+    bool getData(Type camera, uint16_t* dataBuffer);
 
 
 };

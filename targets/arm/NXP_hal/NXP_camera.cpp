@@ -138,3 +138,19 @@ void NXP_Camera::pitInterrupt() {
         }
     }
 }
+
+bool NXP_Camera::getData(Type camera, uint16_t* dataBuffer){
+    bool result = false;
+    if(nullptr != dataBuffer){
+        if(camera == Type::CAMERA_1){
+            __disable_irq();
+            memcpy(dataBuffer, buffer1Data, 256);
+            __enable_irq();
+        } else if(camera == Type::CAMERA_2){
+            __disable_irq();
+            memcpy(dataBuffer, buffer2Data, 256);
+            __enable_irq();
+        }
+    }
+    return result;
+}

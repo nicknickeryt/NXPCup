@@ -21,6 +21,7 @@
 #include "NXP_encoder.hpp"
 #include "commandManager.h"
 #include "command_terminal/command_manager.h"
+#include "algorithm_unit.hpp"
 
 void pit_sendCameraData(uint32_t*);
 
@@ -110,7 +111,8 @@ public:
     NXP_Servo servo = {servoPwm, 70, 2.0f};
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
-
+    // ALGORITHM
+    AlgorithmUnit algorithmUnit = {uartCommunication};
 
 private:
     Kitty() = default;

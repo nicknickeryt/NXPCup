@@ -50,7 +50,7 @@ private:
     bool DMAenable = false;
     bool DMAworking = false;
 
-    constexpr static auto txBufferSize = 1024;
+    constexpr static auto txBufferSize = 2048;
     constexpr static auto rxBufferSize = 1024;
 
     uint8_t txBuffer[txBufferSize] = {0};

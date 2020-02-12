@@ -6,6 +6,7 @@
  *
  */
 
+#include <algorithms/algorithm_unit.hpp>
 #include "NXP_Kitty.hpp"
 
 #define LOG_CHANNEL KITTY
@@ -13,13 +14,12 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
-
-bool sendCameraData = false;
-void pit_sendCameraData(uint32_t* ) {
-    sendCameraData = true;
+bool cameraTrigger = false;
+bool algorithmTrigger = false;
+void pit_sendCameraData(uint8_t) {
+    cameraTrigger = true;
+    algorithmTrigger = true;
 }
-uint8_t cameraDataBuffer [258];
-
 
 void Kitty::init() {
     BOARD_InitBootPins();
@@ -52,23 +52,17 @@ void Kitty::init() {
     camera.start();
     uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
     commandManager.init(printCommandManager);
-
-    cameraDataBuffer[0] = 'A';
-    cameraDataBuffer[1] = 'B';
 }
 
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
-    if (sendCameraData) {
-        commandManager.run();
-        sendCameraData = false;
-        __disable_irq();
-        memcpy(&cameraDataBuffer[2], camera.buffer1Data, 256);
-        __enable_irq();
-//        uartCommunication.appendDMA(camera1DataBuffer, 258);
-        uartCommunication.write(cameraDataBuffer, sizeof(cameraDataBuffer));
+    if(algorithmTrigger){
+        algorithmTrigger = false;
+        camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
+        algorithmUnit.analyze();
     }
+
 }
 
 void Kitty::FTM_Init() {
