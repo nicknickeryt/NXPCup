@@ -46,10 +46,10 @@ void NXP_Camera::proc(bool& trigger){
         trigger = false;
         __disable_irq();
         camera1DataBuffer[0] = 'A';
-        camera2DataBuffer[1] = 'B';
+        camera1DataBuffer[1] = 'B';
         memcpy(&camera1DataBuffer[2], buffer1Data, 256);
         __enable_irq();
-        debug.appendDMA(camera1DataBuffer, 258);
+        debug.write(camera1DataBuffer, 258);
     }
 }
 

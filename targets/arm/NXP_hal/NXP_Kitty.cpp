@@ -13,10 +13,13 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
-bool cameraTrigger = false;
-void pit_sendCameraData(uint8_t) {
-    cameraTrigger = true;
+
+bool sendCameraData = false;
+void pit_sendCameraData(uint32_t* ) {
+    sendCameraData = true;
 }
+uint8_t cameraDataBuffer [258];
+
 
 void Kitty::init() {
     BOARD_InitBootPins();
@@ -47,12 +50,25 @@ void Kitty::init() {
     motors.run();
 
     camera.start();
+    uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
+    commandManager.init(printCommandManager);
+
+    cameraDataBuffer[0] = 'A';
+    cameraDataBuffer[1] = 'B';
 }
 
 void Kitty::proc() {
     magicDiodComposition();
     display.update();
-    camera.proc(cameraTrigger);
+    if (sendCameraData) {
+        commandManager.run();
+        sendCameraData = false;
+        __disable_irq();
+        memcpy(&cameraDataBuffer[2], camera.buffer1Data, 256);
+        __enable_irq();
+//        uartCommunication.appendDMA(camera1DataBuffer, 258);
+        uartCommunication.write(cameraDataBuffer, sizeof(cameraDataBuffer));
+    }
 }
 
 void Kitty::FTM_Init() {

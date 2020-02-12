@@ -19,7 +19,8 @@
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
 #include "NXP_encoder.hpp"
-
+#include "commandManager.h"
+#include "command_terminal/command_manager.h"
 
 void pit_sendCameraData(uint32_t*);
 
@@ -38,7 +39,6 @@ private:
     // ENCODERS
     NXP_PORT encoderRightA = {PORTB, 18, 0x06};
     NXP_PORT encoderRightB = {PORTB, 19, 0x06};
-
     NXP_PORT encoderLeftA = {PORTA, 12, 0x07};
     NXP_PORT encoderLeftB = {PORTA, 13, 0x07};
 
@@ -48,7 +48,6 @@ private:
     NXP_PORT motorLeftPortMLF = {PORTE, 6, 0x06};
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
-
     NXP_PWM motorLeftPwm = {FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, 200};
     NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, 200};
     NXP_Motor motorLeft = {motorLeftPwm, motorEnablePin};
@@ -75,21 +74,35 @@ private:
     NXP_ADC::Sample camera2Sample = {adc0mux, NXP_ADC::ChannelSingleEnded::B_CH2};
     NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
-    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
-    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData, nullptr};
+    // DMA
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 
+    // PIT
+    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 120, pit_sendCameraData, nullptr};
     NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 100, nullptr, nullptr};
+
+    // COMMAND TERMINAL
+    CommandManager<3, '\n', false> commandManager{__enable_irq, __disable_irq,
+                                                    {
+                                                            Command("m", "", motorsCallback),
+                                                            Command("s", "", servoCallback),
+                                                            Command("st", "", stopCallback)
+                                                    }};
+
 public:
+    // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
 
-    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample};
+    // KAMERA
+    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
 
+    // UART
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
 
+    // LEDS
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
     // DISPLAY
     NXP_Display display;
@@ -97,6 +110,7 @@ public:
     NXP_Servo servo = {servoPwm, 70, 2.0f};
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+
 
 private:
     Kitty() = default;
@@ -114,4 +128,8 @@ public:
     void init();
 
     void proc();
+
+    static void printCommandManager(char data){
+        Kitty::kitty().uartCommunication.write(data);
+    }
 };
