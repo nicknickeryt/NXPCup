@@ -30,7 +30,6 @@ class PatternsDetector{
         TrackLinesDetector::Line& rightTrackLine;
 
     private:
-        uint16_t findMaximalCameraValue(uint16_t* cameraData);
 
     public:
         PatternsDetector(TrackLinesDetector::Line& leftTrackLine, TrackLinesDetector::Line& rightTrackLine) : leftTrackLine(leftTrackLine), rightTrackLine(rightTrackLine){}

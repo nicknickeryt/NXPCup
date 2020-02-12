@@ -16,10 +16,8 @@
 
 void TrackLinesDetector::detect(uint16_t* cameraData){
     if(cameraData != nullptr){
-        uint16_t correlationResultsBuffer[convolutionWindowSize];
-        computeDataAndLinePatternsCorrelation(cameraData, correlationResultsBuffer);
-        findLine(LineType::LEFT, correlationResultsBuffer);
-        findLine(LineType::RIGHT, correlationResultsBuffer);
+        findLine(LineType::LEFT, cameraData);
+        findLine(LineType::RIGHT, cameraData);
 
         // make sure than found lines are not outside of the window (too close to the camera window edge)
         if(leftLine.leftBorderIndex < lineSearchingMargin){
@@ -33,25 +31,13 @@ void TrackLinesDetector::detect(uint16_t* cameraData){
     }
 }
 
-void TrackLinesDetector::computeDataAndLinePatternsCorrelation(uint16_t* cameraData, uint16_t* correlationResults){
-    int32_t summary=0;
-    // calculate convolution of camera data and line pattern
-    for(auto i=0; i<convolutionWindowSize; i++){
-        summary += cameraData[i] * linePattern[0];
-        summary += cameraData[i + 1] * linePattern[1];
-        summary += cameraData[i + 2] * linePattern[2];
-        summary += cameraData[i + 3] * linePattern[3];
-        summary += cameraData[i + 4] * linePattern[4];
-        summary += cameraData[i + 4] * linePattern[5];
-        summary += cameraData[i + 6] * linePattern[6];
-        correlationResults[i] = summary;
-        //log_notice("%d");
-    }
-}
-
-void TrackLinesDetector::findLine(LineType lineType, uint16_t* correlationDataBuffer){
+void TrackLinesDetector::findLine(LineType lineType, uint16_t* data){
     Line* line;
-    if(correlationDataBuffer != nullptr){
+    bool wasPreviousPixelBlack = false;
+    // index of first black pixel found
+    uint8_t firstBlackPixelIndex = 0;
+    uint16_t blackPixelsCounter = 0;
+    if(data != nullptr){
         switch(lineType){
             case LineType::LEFT:
                 line = &leftLine;
@@ -64,23 +50,32 @@ void TrackLinesDetector::findLine(LineType lineType, uint16_t* correlationDataBu
         }
 
         line->isDetected = false;
-        float tempValue = 0;
-        uint16_t tempIndex;
         if(line->rightBorderIndex != line->leftBorderIndex){
             // iterate through the all values from left to right border to find maximum, it is a center
             for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
-                if(correlationDataBuffer[i] >= tempValue){
-                    tempValue = correlationDataBuffer[i];
-                    tempIndex = i;
+                // check if given pixel is black or white (1 or 0)
+                if(data[i] == 1){
+                    // check if previous one was also black
+                    if(wasPreviousPixelBlack) {
+                        blackPixelsCounter++;
+                    } else {
+                        // if it wasn't start counting black pixels start
+                        blackPixelsCounter = 1;
+                        // remember first black pixel index
+                        firstBlackPixelIndex = i;
+                        wasPreviousPixelBlack = true;
+                    }
+                } else{
+                    wasPreviousPixelBlack = false;
+                }
+                // if you found enough black pixels and another one is white (black line ended), break
+                if((blackPixelsCounter >= 3) && (!wasPreviousPixelBlack)){
+                    line->isDetected = true;
+                    line->centerIndex = firstBlackPixelIndex + (blackPixelsCounter/2);
+                    break;
                 }
             }
-            //log_notice("Tempval: %d", tempValue);
-            // checking if found maximum is bigger than convolution threshold to assume line is detected
-            if ((tempValue >= lineConvolutionThreshold)) {
-                line->centerIndex = (line->centerIndex + tempIndex) >> 1;
-                line->isDetected = true;
-                lineSearchingWindow = standardLineSearchingWindow;
-            }
+
         }
     }
 }

@@ -18,7 +18,9 @@ class AlgorithmUnit{
     private:
         static constexpr auto cameraDataBufferSize = 128;
         // factor used to spread normalization output from range(0,1) to wider (0,8192)
-        static constexpr auto cameraDataNormalizationFactor = 8192;
+        static constexpr auto cameraDataNormalizationFactor = 1000; //8192;
+        //
+        static constexpr auto blackOrWhitePixelThreshold = 55000;
 
         enum class DataType{
             CAMERA_DATA,
@@ -63,6 +65,8 @@ class AlgorithmUnit{
          * @param data pointer to data buffer to normalize
          */
         void normalize(DataType dataType, uint16_t* data);
+
+        void quantization(uint16_t* data);
 
     public:
         AlgorithmUnit(NXP_Uart& debug) : trackLinesDetector(cameraDataBufferSize, 7),

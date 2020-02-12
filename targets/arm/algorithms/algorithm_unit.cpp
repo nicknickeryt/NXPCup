@@ -16,6 +16,7 @@ void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
     // preprocessing data from camera
     normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
+    quantization(algorithmData.cameraData);
 
     // fixme: DEBUG
     uint8_t camera1DataBuffer[260];
@@ -30,10 +31,10 @@ void AlgorithmUnit::analyze() {
     // find track lines
     trackLinesDetector.detect(algorithmData.cameraData);
     if(trackLinesDetector.leftLine.isDetected){
-        log_notice("I've found left line!");
+        log_notice("Left line - centerIndex: %d", trackLinesDetector.leftLine.centerIndex);
     }
     if(trackLinesDetector.rightLine.isDetected){
-        log_notice("I've found right line!");
+        log_notice("Right line - centerIndex: %d", trackLinesDetector.rightLine.centerIndex);
     }
 
     state = State::OBSTACLE_AVOIDING;
@@ -70,7 +71,7 @@ void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) 
             if(minMaxDelta != 0){
                 // calculate mean value
                 meanPixelBrightness = summaryValue / cameraDataBufferSize;
-                meanPixelBrightness = ((meanPixelBrightness - minimalPixelBrightness) * (cameraDataNormalizationFactor)) /
+                meanPixelBrightness = ((meanPixelBrightness - minimalPixelBrightness) * cameraDataNormalizationFactor) /
                                       (maximalPixelBrightness - minimalPixelBrightness);
 
                 // normalize
@@ -87,5 +88,16 @@ void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) 
             break;
         default:
             break;
+    }
+}
+
+void AlgorithmUnit::quantization(uint16_t *data) {
+    // iterate through the data and assign 1 to the values above threshold and 0 to values below
+    for (auto i = 0; i < cameraDataBufferSize; i++) {
+        if (data[i] >= blackOrWhitePixelThreshold) {
+            data[i] = 1;
+        } else{
+            data[i] = 0;
+        }
     }
 }

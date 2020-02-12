@@ -22,16 +22,13 @@ class TrackLinesDetector{
         //          |               x                  |                ok          ok                  |                         x             |
         constexpr static uint8_t lineSearchingMargin = 20;
 
-        // fixme: UWAGA ODTAD W DOL MAMY MAGICZNE PARAMTERY, KTORYCH RACZEJ NIE MOZEMY RUSZAC
-        constexpr static int32_t linePattern[] ={ 3847, 1005, -2679, -4344, -2679, 1005, 3847 };
+        // MAGIC NUMBERS: values used to configure line searching window
         // number of pixels between lines centers
         constexpr static uint8_t spaceBetweenLinesInPixels = 63;
         // number of pixels around start line position, where it will be searched
         constexpr static uint8_t standardLineSearchingWindow = 24;
         constexpr static uint8_t widerLineSearchingWindow = 54;
         uint8_t lineSearchingWindow = standardLineSearchingWindow;
-        // value of convolution with camera data to assume that line is detected
-        constexpr static uint32_t lineConvolutionThreshold = 9000000;
 
         enum class LineType{
             LEFT,
@@ -51,21 +48,11 @@ class TrackLinesDetector{
         Line rightLine;
 
     private:
-        /**
-         * Method calculates correlation between camera data and some fixed lines patterns.
-         * It uses convolution operation to get correlation results. If some areas have high enough
-         * correlation factor, they are assumed as lines.
-         *
-         * @param cameraData - pointer to buffer with camera data
-         * @param correlationResults - pointer to buffer where correlation results will be stored
-         */
-        void computeDataAndLinePatternsCorrelation(uint16_t* cameraData, uint16_t* correlationResults);
-
         void findLine(LineType line, uint16_t* correlationDataBuffer);
 
     public:
         TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels) : cameraDataSize(cameraDataSize), lineWidth(lineWidthInPixels){
-            // magic initialization of start lines states
+            // magic initialization of start lines states - NIE RUSZAC, SPRAWDZONE, MA SENS
             leftLine.isDetected = false;
             leftLine.centerIndex = (cameraDataSize >> 1) - (spaceBetweenLinesInPixels >> 1);
             leftLine.leftBorderIndex = (cameraDataSize >> 1) - (spaceBetweenLinesInPixels >> 1) - (lineSearchingWindow >> 1);
