@@ -69,7 +69,7 @@ void TrackLinesDetector::findLine(LineType lineType, uint16_t* data){
                     wasPreviousPixelBlack = false;
                 }
                 // if you found enough black pixels and another one is white (black line ended), break
-                if((blackPixelsCounter >= 3) && (!wasPreviousPixelBlack)){
+                if((blackPixelsCounter >= blackPixelsNumberToDetectLine) && (!wasPreviousPixelBlack)){
                     line->isDetected = true;
                     line->centerIndex = firstBlackPixelIndex + (blackPixelsCounter/2);
                     break;

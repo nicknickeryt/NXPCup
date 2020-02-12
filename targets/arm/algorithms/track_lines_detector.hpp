@@ -14,6 +14,7 @@ class TrackLinesDetector{
     private:
         uint8_t cameraDataSize;
         uint8_t lineWidth;
+
         // width of window used in correlation computing
         uint8_t convolutionWindowSize = cameraDataSize-lineWidth;
         // margin in pixels - if the line is found closer than this value to the boarder of camera width, line is invalid
@@ -28,6 +29,7 @@ class TrackLinesDetector{
         // number of pixels around start line position, where it will be searched
         constexpr static uint8_t standardLineSearchingWindow = 24;
         constexpr static uint8_t widerLineSearchingWindow = 54;
+
         uint8_t lineSearchingWindow = standardLineSearchingWindow;
 
         enum class LineType{
@@ -47,11 +49,16 @@ class TrackLinesDetector{
         Line leftLine;
         Line rightLine;
 
+        uint8_t blackPixelsNumberToDetectLine;
+
     private:
         void findLine(LineType line, uint16_t* correlationDataBuffer);
 
     public:
-        TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels) : cameraDataSize(cameraDataSize), lineWidth(lineWidthInPixels){
+        TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels, uint8_t blackPixelsNumberToDetectLine) :
+                                                                                cameraDataSize(cameraDataSize),
+                                                                                lineWidth(lineWidthInPixels),
+                                                                                blackPixelsNumberToDetectLine(blackPixelsNumberToDetectLine){
             // magic initialization of start lines states - NIE RUSZAC, SPRAWDZONE, MA SENS
             leftLine.isDetected = false;
             leftLine.centerIndex = (cameraDataSize >> 1) - (spaceBetweenLinesInPixels >> 1);

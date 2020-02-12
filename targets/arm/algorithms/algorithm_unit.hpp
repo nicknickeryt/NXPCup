@@ -69,7 +69,7 @@ class AlgorithmUnit{
         void quantization(uint16_t* data);
 
     public:
-        AlgorithmUnit(NXP_Uart& debug) : trackLinesDetector(cameraDataBufferSize, 7),
+        AlgorithmUnit(NXP_Uart& debug) : trackLinesDetector(cameraDataBufferSize, 7, 3),
                                          patternsDetector(trackLinesDetector.leftLine, trackLinesDetector.rightLine),
                                          debug(debug){}
 
