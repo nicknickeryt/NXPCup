@@ -112,7 +112,7 @@ public:
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
     // ALGORITHM
-    AlgorithmUnit algorithmUnit = {uartCommunication};
+    AlgorithmUnit algorithmUnit = {servo, uartCommunication};
 
 private:
     Kitty() = default;

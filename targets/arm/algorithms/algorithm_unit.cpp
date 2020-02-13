@@ -29,12 +29,9 @@ void AlgorithmUnit::analyze() {
     state = State::FINDING_TRACK_LINES;
     // find track lines
     trackLinesDetector.detect(algorithmData.cameraData);
-    if(trackLinesDetector.leftLine.isDetected){
-        log_notice("Left line - centerIndex: %d", trackLinesDetector.leftLine.centerIndex);
-    }
-    if(trackLinesDetector.rightLine.isDetected){
-        log_notice("Right line - centerIndex: %d", trackLinesDetector.rightLine.centerIndex);
-    }
+
+    auto result = computeCarPositionOnTrack();
+    setServo(result);
 
     state = State::OBSTACLE_AVOIDING;
     // avoid obstacle if any
@@ -97,5 +94,36 @@ void AlgorithmUnit::quantization(uint16_t *data) {
         } else{
             data[i] = 0;
         }
+    }
+}
+
+int8_t AlgorithmUnit::computeCarPositionOnTrack(){
+    uint8_t carPosition;
+    // both lines are detected
+    if(trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
+        carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.rightLine.centerIndex)/2;
+    } // only left line is detected
+    else if(trackLinesDetector.leftLine.isDetected && !trackLinesDetector.rightLine.isDetected){
+        carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.lineWidth + (cameraDataBufferSize/4) - lostLineOffset);
+    }// only right line is detected
+    else if(!trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
+        carPosition = (trackLinesDetector.rightLine.centerIndex - trackLinesDetector.lineWidth - (cameraDataBufferSize/4) + lostLineOffset);
+    } // no line is detected
+    else{
+
+    }
+    return carPosition;
+}
+
+void AlgorithmUnit::setServo(int8_t value){
+    int16_t converted = value - (cameraDataBufferSize/2);
+    if(converted > 0){
+        auto val = float(converted/(float(cameraDataBufferSize)/2.0));
+        servo.set(val);
+    }else if(converted < 0){
+        auto val = float(converted/(float(cameraDataBufferSize)/2.0));
+        servo.set(val);
+    }else{
+        servo.set(0.0);
     }
 }

@@ -11,6 +11,7 @@
 #include "HALina.hpp"
 
 class TrackLinesDetector{
+    friend class AlgorithmUnit;
     private:
         uint8_t cameraDataSize;
         uint8_t lineWidth;

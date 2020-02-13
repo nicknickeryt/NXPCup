@@ -26,3 +26,4 @@ void NXP_Servo::set(float value){
 
     pwm.setRawPeriod(centerTicks + value, pwm.channelFirst);
 }
+
