@@ -30,7 +30,7 @@ class TrackLinesDetector{
         // number of pixels around start line position, where it will be searched
         constexpr static uint8_t standardLineSearchingWindow = 24;
         constexpr static uint8_t widerLineSearchingWindow = 54;
-        constexpr static int16_t treshold = 2000;
+        constexpr static int16_t lineDetectedthreshold = 2000;
 
         uint8_t lineSearchingWindow = standardLineSearchingWindow;
 

@@ -54,6 +54,7 @@ void TrackLinesDetector::findLine(LineType lineType, int16_t* data){
                 break;
         }
 
+        // find max value
         for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
             if(data[i] > maxValue){
                 maxValue = data[i];
@@ -61,12 +62,14 @@ void TrackLinesDetector::findLine(LineType lineType, int16_t* data){
             }
         }
 
+        // get average from all pixels
         for(auto i = startIndex; i <= stopIndex; i++){
             sum += data[i];
         }
         average = sum / cameraDataSize;
 
-        if((maxValue - average) > treshold){
+        // decide if value is higher than current average
+        if((maxValue - average) > lineDetectedthreshold){
             line->isDetected = true;
             line->centerIndex = maxValueIndex;
             lineSearchingWindow = standardLineSearchingWindow;

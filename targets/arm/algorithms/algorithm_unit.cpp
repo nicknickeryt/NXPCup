@@ -11,16 +11,12 @@
 #define ALGORITHM_LOG_CHANNEL 3
 #define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 #include "logger.h"
-#define ARM_MATH_CM7 1
-#include "arm_math.h"
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
     filter(algorithmData.cameraData, 3);
     diff(algorithmData.cameraData);
     diff(algorithmData.cameraData);
-//    normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
-//    quantization(algorithmData.cameraData);
 
     // fixme: DEBUG
     uint8_t camera1DataBuffer[260];
