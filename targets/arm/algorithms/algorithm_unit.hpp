@@ -40,6 +40,7 @@ class AlgorithmUnit{
         TrackLinesDetector trackLinesDetector;
         ObstacleDetector obstacleDetector;
         PatternsDetector patternsDetector;
+        uint8_t carPosition{cameraDataBufferSize / 2};
 
         NXP_Servo& servo;
         NXP_Uart& debug;
@@ -69,6 +70,8 @@ class AlgorithmUnit{
         void normalize(DataType dataType, uint16_t* data);
 
         void quantization(uint16_t* data);
+
+        void filter(uint16_t* data, uint8_t maxCount);
 
         int8_t computeCarPositionOnTrack();
 

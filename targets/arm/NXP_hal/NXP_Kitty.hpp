@@ -79,7 +79,7 @@ private:
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 
     // PIT
-    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
+    NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 25000, NXP_Camera::pitInterruptStatic, nullptr};
     NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 19, pit_generalHandler, nullptr};
     NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 100, nullptr, nullptr};
 

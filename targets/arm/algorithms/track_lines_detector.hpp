@@ -22,13 +22,13 @@ class TrackLinesDetector{
         // example:
         //   cam left boarder  invalid line  lineSearchingMargin   valid line  valid line cameraDataSize-lineSearchingMargin invalid line cam right boarder
         //          |               x                  |                ok          ok                  |                         x             |
-        constexpr static uint8_t lineSearchingMargin = 20;
+        constexpr static uint8_t lineSearchingMargin = 10;
 
         // MAGIC NUMBERS: values used to configure line searching window
         // number of pixels between lines centers
         constexpr static uint8_t spaceBetweenLinesInPixels = 63;
         // number of pixels around start line position, where it will be searched
-        constexpr static uint8_t standardLineSearchingWindow = 24;
+        constexpr static uint8_t standardLineSearchingWindow = 32;
         constexpr static uint8_t widerLineSearchingWindow = 54;
 
         uint8_t lineSearchingWindow = standardLineSearchingWindow;

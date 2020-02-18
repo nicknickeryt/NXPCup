@@ -14,6 +14,7 @@
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
+    filter(algorithmData.cameraData, 3);
     normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
     quantization(algorithmData.cameraData);
 
@@ -39,6 +40,23 @@ void AlgorithmUnit::analyze() {
     state = State::PATTERN_DETECTION;
     // detect patterns
     patternsDetector.detect(algorithmData.cameraData);
+}
+
+void AlgorithmUnit::filter(uint16_t* data, uint8_t maxCount){
+    uint16_t filteredData[cameraDataBufferSize]{};
+    uint32_t sum = 0;
+    for(auto i = 0; i < cameraDataBufferSize; i++){
+        sum = 0;
+        if(((i + maxCount/2) <= (cameraDataBufferSize - 1)) && ((i - maxCount/2) >= 0)) {
+            for (auto j = i-(maxCount/2); j < i + (maxCount/2); j++) {
+                sum += data[j];
+            }
+            filteredData[i] = sum / maxCount;
+        }else{
+            filteredData[i] = data[i];
+        }
+    }
+    memcpy(data, filteredData, sizeof(filteredData));
 }
 
 void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) {
@@ -98,7 +116,6 @@ void AlgorithmUnit::quantization(uint16_t *data) {
 }
 
 int8_t AlgorithmUnit::computeCarPositionOnTrack(){
-    uint8_t carPosition;
     // both lines are detected
     if(trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
         carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.rightLine.centerIndex)/2;
@@ -110,7 +127,10 @@ int8_t AlgorithmUnit::computeCarPositionOnTrack(){
         carPosition = (trackLinesDetector.rightLine.centerIndex - trackLinesDetector.lineWidth - (cameraDataBufferSize/4) + lostLineOffset);
     } // no line is detected
     else{
-
+        carPosition = ((carPosition - (cameraDataBufferSize >> 1)) >> 1) + (cameraDataBufferSize >> 1);
+        trackLinesDetector.lineSearchingWindow = trackLinesDetector.widerLineSearchingWindow;
+        trackLinesDetector.leftLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) - (trackLinesDetector.spaceBetweenLinesInPixels >> 1);
+        trackLinesDetector.rightLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) + (trackLinesDetector.spaceBetweenLinesInPixels >> 1);
     }
     return carPosition;
 }

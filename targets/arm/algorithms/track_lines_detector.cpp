@@ -22,11 +22,9 @@ void TrackLinesDetector::detect(uint16_t* cameraData){
         // make sure than found lines are not outside of the window (too close to the camera window edge)
         if(leftLine.leftBorderIndex < lineSearchingMargin){
             leftLine.isDetected = false;
-            log_debug("Found left line");
         }
         if(rightLine.rightBorderIndex > cameraDataSize-lineSearchingMargin){
             rightLine.isDetected = false;
-            log_debug("Found right line");
         }
     }
 }
@@ -72,6 +70,7 @@ void TrackLinesDetector::findLine(LineType lineType, uint16_t* data){
                 if((blackPixelsCounter >= blackPixelsNumberToDetectLine) && (!wasPreviousPixelBlack)){
                     line->isDetected = true;
                     line->centerIndex = firstBlackPixelIndex + (blackPixelsCounter/2);
+                    lineSearchingWindow = standardLineSearchingWindow;
                     break;
                 }
             }
