@@ -35,6 +35,9 @@ void Kitty::init() {
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
+//    menu.init();
+    BUTTON3.init();
+    BUTTON2.init();
 
     encoderRight.init();
     encoderLeft.init();
@@ -55,6 +58,7 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
+//    menu.proc();
     magicDiodComposition();
     display.update();
     if(commandTerminalTrigger){

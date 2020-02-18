@@ -24,3 +24,5 @@
 #include "HALina_servo.hpp"
 #include "HALina_motor.hpp"
 #include "HALina_adc.hpp"
+#include "HALina_switches.hpp"
+#include "HALina_buttons.hpp"

@@ -18,6 +18,7 @@
 #include "NXP_adc.hpp"
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
+#include "NXP_menu.hpp"
 #include "NXP_encoder.hpp"
 #include "commandManager.h"
 #include "command_terminal/command_manager.h"
@@ -36,6 +37,23 @@ private:
     NXP_GPIO LED5 = NXP_GPIO(PORTA, GPIOA, 27U);
     NXP_GPIO LED6 = NXP_GPIO(PORTA, GPIOA, 28U);
     NXP_GPIO LED7 = NXP_GPIO(PORTA, GPIOA, 29U);
+
+    // SWITCHES
+    NXP_GPIO SWITCH0 = {PORTB, GPIOB, 20U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO SWITCH1 = {PORTB, GPIOB, 21U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO SWITCH2 = {PORTB, GPIOB, 22U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO SWITCH3 = {PORTB, GPIOB, 23U, NXP_GPIO::Mode::INPUT};
+    halina::Switches switches = {SWITCH0, SWITCH1, SWITCH2, SWITCH3};
+
+    // BUTTONS
+//    NXP_GPIO BUTTON0 = {PORTC, GPIOC, 16U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button0InterruptHandler};
+//    NXP_GPIO BUTTON1 = {PORTC, GPIOC, 17U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button1InterruptHandler};
+    NXP_GPIO BUTTON2 = {PORTC, GPIOC, 18U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button2InterruptHandler};
+    NXP_GPIO BUTTON3 = {PORTC, GPIOC, 19U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button3InterruptHandler};
+    //halina::Buttons buttons = {BUTTON0, BUTTON1, BUTTON2, BUTTON3};
+
+    // LEDS
+    halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
 
     // ENCODERS
     NXP_PORT encoderRightA = {PORTB, 18, 0x06};
@@ -103,16 +121,20 @@ public:
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
 
-    // LEDS
-    halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
-    // DISPLAY
+   // DISPLAY
     NXP_Display display;
+
     // SERVO
     NXP_Servo servo = {servoPwm, 70, 2.0f};
+
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+
     // ALGORITHM
     AlgorithmUnit algorithmUnit = {servo, uartCommunication};
+
+    // MENU
+//    NXP_Menu menu = {buttons, switches, display};
 
 private:
     Kitty() = default;
