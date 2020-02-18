@@ -11,12 +11,16 @@
 #define ALGORITHM_LOG_CHANNEL 3
 #define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 #include "logger.h"
+#define ARM_MATH_CM7 1
+#include "arm_math.h"
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
     filter(algorithmData.cameraData, 3);
-    normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
-    quantization(algorithmData.cameraData);
+    diff(algorithmData.cameraData);
+    diff(algorithmData.cameraData);
+//    normalize(DataType::CAMERA_DATA, algorithmData.cameraData);
+//    quantization(algorithmData.cameraData);
 
     // fixme: DEBUG
     uint8_t camera1DataBuffer[260];
@@ -29,7 +33,7 @@ void AlgorithmUnit::analyze() {
 
     state = State::FINDING_TRACK_LINES;
     // find track lines
-    trackLinesDetector.detect(algorithmData.cameraData);
+    trackLinesDetector.detect((int16_t*)algorithmData.cameraData);
 
     auto result = computeCarPositionOnTrack();
     setServo(result);
@@ -40,6 +44,16 @@ void AlgorithmUnit::analyze() {
     state = State::PATTERN_DETECTION;
     // detect patterns
     patternsDetector.detect(algorithmData.cameraData);
+}
+
+void AlgorithmUnit::diff(uint16_t* data){
+    int16_t diff[cameraDataBufferSize];
+    for(auto i=0; i<cameraDataBufferSize; i++){
+        diff[i] = (int16_t)data[i] - (int16_t)data[i+1];
+    }
+    diff[cameraDataBufferSize-1] = 0;
+
+    memcpy(data, diff, sizeof(diff));
 }
 
 void AlgorithmUnit::filter(uint16_t* data, uint8_t maxCount){
@@ -118,16 +132,24 @@ void AlgorithmUnit::quantization(uint16_t *data) {
 int8_t AlgorithmUnit::computeCarPositionOnTrack(){
     // both lines are detected
     if(trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
+        log_notice("both %d, %d", trackLinesDetector.leftLine.centerIndex, trackLinesDetector.rightLine.centerIndex);
         carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.rightLine.centerIndex)/2;
     } // only left line is detected
     else if(trackLinesDetector.leftLine.isDetected && !trackLinesDetector.rightLine.isDetected){
+        log_notice("left, %d", trackLinesDetector.leftLine.centerIndex);
         carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.lineWidth + (cameraDataBufferSize/4) - lostLineOffset);
     }// only right line is detected
     else if(!trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
+        log_notice("right, %d", trackLinesDetector.rightLine.centerIndex);
         carPosition = (trackLinesDetector.rightLine.centerIndex - trackLinesDetector.lineWidth - (cameraDataBufferSize/4) + lostLineOffset);
     } // no line is detected
     else{
-        carPosition = ((carPosition - (cameraDataBufferSize >> 1)) >> 1) + (cameraDataBufferSize >> 1);
+        log_notice("none");
+        if(keepPreviousPositionCounter > keepPreviousPositionTime){
+            carPosition = ((carPosition - (cameraDataBufferSize >> 1)) >> 1) + (cameraDataBufferSize >> 1);
+            keepPreviousPositionCounter = 0;
+        }
+        keepPreviousPositionCounter++;
         trackLinesDetector.lineSearchingWindow = trackLinesDetector.widerLineSearchingWindow;
         trackLinesDetector.leftLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) - (trackLinesDetector.spaceBetweenLinesInPixels >> 1);
         trackLinesDetector.rightLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) + (trackLinesDetector.spaceBetweenLinesInPixels >> 1);

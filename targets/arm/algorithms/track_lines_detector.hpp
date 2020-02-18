@@ -28,8 +28,9 @@ class TrackLinesDetector{
         // number of pixels between lines centers
         constexpr static uint8_t spaceBetweenLinesInPixels = 63;
         // number of pixels around start line position, where it will be searched
-        constexpr static uint8_t standardLineSearchingWindow = 32;
+        constexpr static uint8_t standardLineSearchingWindow = 24;
         constexpr static uint8_t widerLineSearchingWindow = 54;
+        constexpr static int16_t treshold = 2000;
 
         uint8_t lineSearchingWindow = standardLineSearchingWindow;
 
@@ -53,7 +54,7 @@ class TrackLinesDetector{
         uint8_t blackPixelsNumberToDetectLine;
 
     private:
-        void findLine(LineType line, uint16_t* correlationDataBuffer);
+        void findLine(LineType line, int16_t* correlationDataBuffer);
 
     public:
         TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels, uint8_t blackPixelsNumberToDetectLine) :
@@ -72,6 +73,6 @@ class TrackLinesDetector{
             rightLine.rightBorderIndex = (cameraDataSize >> 1) + (spaceBetweenLinesInPixels >> 1) + (lineSearchingWindow >> 1);
         }
 
-        void detect(uint16_t* cameraData);
+        void detect(int16_t* cameraData);
 
 };

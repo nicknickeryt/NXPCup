@@ -14,7 +14,7 @@
 
 #include "logger.h"
 
-void TrackLinesDetector::detect(uint16_t* cameraData){
+void TrackLinesDetector::detect(int16_t* cameraData){
     if(cameraData != nullptr){
         findLine(LineType::LEFT, cameraData);
         findLine(LineType::RIGHT, cameraData);
@@ -29,52 +29,49 @@ void TrackLinesDetector::detect(uint16_t* cameraData){
     }
 }
 
-void TrackLinesDetector::findLine(LineType lineType, uint16_t* data){
+void TrackLinesDetector::findLine(LineType lineType, int16_t* data){
     Line* line;
-    bool wasPreviousPixelBlack = false;
-    // index of first black pixel found
-    uint8_t firstBlackPixelIndex = 0;
-    uint16_t blackPixelsCounter = 0;
+    uint8_t startIndex = 0;
+    uint8_t stopIndex = 128;
+    int16_t maxValue = 0;
+    int32_t sum = 0;
+    int32_t average = 0;
+    uint8_t maxValueIndex = 0;
+
     if(data != nullptr){
         switch(lineType){
             case LineType::LEFT:
+                startIndex = 0;
+                stopIndex = 63;
                 line = &leftLine;
                 break;
             case LineType::RIGHT:
+                startIndex = 64;
+                stopIndex = 127;
                 line = &rightLine;
                 break;
             default:
                 break;
         }
 
-        line->isDetected = false;
-        if(line->rightBorderIndex != line->leftBorderIndex){
-            // iterate through the all values from left to right border to find maximum, it is a center
-            for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
-                // check if given pixel is black or white (1 or 0)
-                if(data[i] == 1){
-                    // check if previous one was also black
-                    if(wasPreviousPixelBlack) {
-                        blackPixelsCounter++;
-                    } else {
-                        // if it wasn't start counting black pixels start
-                        blackPixelsCounter = 1;
-                        // remember first black pixel index
-                        firstBlackPixelIndex = i;
-                        wasPreviousPixelBlack = true;
-                    }
-                } else{
-                    wasPreviousPixelBlack = false;
-                }
-                // if you found enough black pixels and another one is white (black line ended), break
-                if((blackPixelsCounter >= blackPixelsNumberToDetectLine) && (!wasPreviousPixelBlack)){
-                    line->isDetected = true;
-                    line->centerIndex = firstBlackPixelIndex + (blackPixelsCounter/2);
-                    lineSearchingWindow = standardLineSearchingWindow;
-                    break;
-                }
+        for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
+            if(data[i] > maxValue){
+                maxValue = data[i];
+                maxValueIndex = i;
             }
+        }
 
+        for(auto i = startIndex; i <= stopIndex; i++){
+            sum += data[i];
+        }
+        average = sum / cameraDataSize;
+
+        if((maxValue - average) > treshold){
+            line->isDetected = true;
+            line->centerIndex = maxValueIndex;
+            lineSearchingWindow = standardLineSearchingWindow;
+        }else{
+            line->isDetected = false;
         }
     }
 }

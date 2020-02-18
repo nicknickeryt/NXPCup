@@ -18,10 +18,11 @@
 class AlgorithmUnit{
     private:
         static constexpr auto cameraDataBufferSize = 128;
-        // factor used to spread normalization output from range(0,1) to wider (0,8192)
-        static constexpr auto cameraDataNormalizationFactor = 1000; //8192;
+        // factor used to spread normalization output from range(0,1) to wider (0,1000)
+        static constexpr auto cameraDataNormalizationFactor = 1000;
         static constexpr auto blackOrWhitePixelThreshold = 55000;
         static constexpr auto lostLineOffset = 5;
+        static constexpr auto keepPreviousPositionTime = 500;
 
         enum class DataType{
             CAMERA_DATA,
@@ -41,6 +42,8 @@ class AlgorithmUnit{
         ObstacleDetector obstacleDetector;
         PatternsDetector patternsDetector;
         uint8_t carPosition{cameraDataBufferSize / 2};
+        uint16_t keepPreviousPositionCounter{0};
+
 
         NXP_Servo& servo;
         NXP_Uart& debug;
@@ -72,6 +75,8 @@ class AlgorithmUnit{
         void quantization(uint16_t* data);
 
         void filter(uint16_t* data, uint8_t maxCount);
+
+        void diff(uint16_t* data);
 
         int8_t computeCarPositionOnTrack();
 
