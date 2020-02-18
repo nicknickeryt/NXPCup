@@ -10,7 +10,7 @@ file(GLOB_RECURSE SOURCES
 message("SOURCES: ${SOURCES}")
 
 add_library(${NAME}
-	${SOURCES} core.cpp HALina_gpio.hpp HALina_pwm.hpp HALina_motor.hpp HALina_adc.hpp HALina_buttons.hpp HALina_switches.hpp)
+	${SOURCES} core.cpp HALina_gpio.hpp HALina_pwm.hpp HALina_motor.hpp HALina_adc.hpp HALina_buttons.hpp HALina_switches.hpp state_machine.hpp)
 
 target_link_libraries(${NAME}
 	msftgsl

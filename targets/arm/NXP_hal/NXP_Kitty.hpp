@@ -46,11 +46,11 @@ private:
     halina::Switches switches = {SWITCH0, SWITCH1, SWITCH2, SWITCH3};
 
     // BUTTONS
-//    NXP_GPIO BUTTON0 = {PORTC, GPIOC, 16U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button0InterruptHandler};
-//    NXP_GPIO BUTTON1 = {PORTC, GPIOC, 17U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button1InterruptHandler};
+    NXP_GPIO BUTTON0 = {PORTC, GPIOC, 16U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button0InterruptHandler};
+    NXP_GPIO BUTTON1 = {PORTC, GPIOC, 17U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button1InterruptHandler};
     NXP_GPIO BUTTON2 = {PORTC, GPIOC, 18U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button2InterruptHandler};
     NXP_GPIO BUTTON3 = {PORTC, GPIOC, 19U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptFallingEdge, NXP_Menu::button3InterruptHandler};
-    //halina::Buttons buttons = {BUTTON0, BUTTON1, BUTTON2, BUTTON3};
+    halina::Buttons buttons = {BUTTON0, BUTTON1, BUTTON2, BUTTON3};
 
     // LEDS
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
@@ -134,7 +134,7 @@ public:
     AlgorithmUnit algorithmUnit = {servo, uartCommunication};
 
     // MENU
-//    NXP_Menu menu = {buttons, switches, display};
+    NXP_Menu menu = {buttons, switches, display};
 
 private:
     Kitty() = default;
