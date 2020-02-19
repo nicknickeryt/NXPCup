@@ -110,6 +110,12 @@ private:
                                                     }};
 
 public:
+    uint32_t jakisParameter32 = 51;
+    uint16_t jakisParameter16 = 321;
+    uint8_t jakisParameter8 = 124;
+
+    std::vector<uint32_t*> menuParameters;
+
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
@@ -134,7 +140,7 @@ public:
     AlgorithmUnit algorithmUnit = {servo, uartCommunication};
 
     // MENU
-    NXP_Menu menu = {buttons, switches, display};
+    NXP_Menu menu = {buttons, switches, display, menuParameters};
 
 private:
     Kitty() = default;

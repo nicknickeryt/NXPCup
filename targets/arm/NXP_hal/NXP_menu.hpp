@@ -10,7 +10,8 @@
 #include "HALina_buttons.hpp"
 #include "NXP_display.hpp"
 #include "state_machine.hpp"
-#include <Vector>
+#include <vector>
+#include <variant>
 
 #pragma once
 
@@ -46,6 +47,8 @@ namespace fsm{
     struct Parameters : public Transitions<
             On<ChangeParameterUp, Parameters>,
             On<ChangeParameterDown, Parameters>,
+            On<ValueUp, Parameters>,
+            On<ValueDown, Parameters>,
             On<StartRace, Race>>{
     private:
         NXP_Menu& menu;
@@ -75,6 +78,7 @@ class NXP_Menu {
     halina::Switches& switches;
     NXP_Display& display;
     bool isMenuRunning = true;
+    std::vector<uint32_t*> &parameters;
 
 private:
     using StateMachine = fsm::StateMachine<fsm::Idle, fsm::Parameters, fsm::Race>;
@@ -87,7 +91,7 @@ public:
     static void button2InterruptHandler();
     static void button3InterruptHandler();
 
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display) : buttons(buttons), switches(switches), display(display){}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display, std::vector<uint32_t*> &parameters) : buttons(buttons), switches(switches), display(display), parameters(parameters){}
 
     void init();
 

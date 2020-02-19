@@ -45,6 +45,7 @@ namespace fsm {
     void Parameters::on_entry(ChangeParameterUp const&) {
         log_debug("Parameters::on_entry::ChangeParameter")
         parametersCounter++;
+        menu.display.print(parametersCounter);
         log_debug("Current parameter: %d", parametersCounter);
     }
 
@@ -56,10 +57,20 @@ namespace fsm {
 
     void Parameters::on_entry(ValueUp const&) const {
         log_debug("Parameters::on_entry::ValueUp");
+        if(menu.parameters[parametersCounter] != nullptr){
+            *menu.parameters[parametersCounter] = *menu.parameters[parametersCounter] + 1;
+            menu.display.print(*menu.parameters[parametersCounter]);
+            log_debug("parameter: %d, value: %d ", parametersCounter, *menu.parameters[parametersCounter]);
+        }
     }
 
     void Parameters::on_entry(ValueDown const&) const {
         log_debug("Parameters::on_entry::ValueDown");
+        if(menu.parameters[parametersCounter] != nullptr){
+            *menu.parameters[parametersCounter] = *menu.parameters[parametersCounter] - 1;
+            menu.display.print(*menu.parameters[parametersCounter]);
+            log_debug("parameter: %d, value: %d ", parametersCounter, *menu.parameters[parametersCounter]);
+        }
     }
 
     void Race::on_entry(const StartRace &) const {

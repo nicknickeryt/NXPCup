@@ -51,7 +51,9 @@ void Kitty::init() {
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 
-
+    menuParameters.emplace_back((uint32_t*)jakisParameter32);
+    menuParameters.emplace_back((uint32_t*)jakisParameter16);
+    menuParameters.emplace_back((uint32_t*)jakisParameter8);
 }
 
 void Kitty::proc() {
@@ -68,7 +70,6 @@ void Kitty::proc() {
             algorithmUnit.analyze();
         }
     }
-
 }
 
 void Kitty::FTM_Init() {
