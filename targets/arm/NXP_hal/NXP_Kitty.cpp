@@ -35,40 +35,38 @@ void Kitty::init() {
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
-    menu.init();
-
-
     encoderRight.init();
     encoderLeft.init();
+    encodersPit.init();
+    menu.init();
+    motors.init();
+    commandManager.init(printCommandManager);
+
+    motors.run();
+    camera.start();
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
-    encodersPit.init();
+    uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
 
-    log_notice("Witaj swiecie!");
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 
-    motors.init();
-    motors.run();
 
-    camera.start();
-    uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
-    commandManager.init(printCommandManager);
 }
 
 void Kitty::proc() {
-    menu.proc();
-    magicDiodComposition();
-    display.update();
-    if(commandTerminalTrigger){
-        commandManager.run();
-        commandTerminalTrigger = false;
-    }
-    if(algorithmTrigger){
-        algorithmTrigger = false;
-        camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
-        algorithmUnit.analyze();
-
+    if(!menu.proc()) {
+        magicDiodComposition();
+        display.update();
+        if (commandTerminalTrigger) {
+            commandManager.run();
+            commandTerminalTrigger = false;
+        }
+        if (algorithmTrigger) {
+            algorithmTrigger = false;
+            camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
+            algorithmUnit.analyze();
+        }
     }
 
 }

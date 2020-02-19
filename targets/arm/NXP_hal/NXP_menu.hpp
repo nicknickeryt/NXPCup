@@ -19,20 +19,22 @@ class Kitty;
 namespace fsm{
     using namespace ::fsm;
     struct StartMenu{};
-    struct ChangeParameter{};
+    struct ChangeParameterUp{};
+    struct ChangeParameterDown{};
     struct ValueUp{};
     struct ValueDown{};
     struct StartRace{};
     struct EmergencyBreak{};
+    template<typename T>
     struct AddParameter{
-        void* parameter;
+        T parameter;
     };
 
     struct Idle;
     struct Parameters;
     struct Race;
 
-    struct Idle : public Transitions<On<ChangeParameter, Parameters>>{
+    struct Idle : public Transitions<On<ChangeParameterUp, Parameters>, On<ChangeParameterDown, Parameters>>{
     private:
         NXP_Menu& menu;
     public:
@@ -41,17 +43,19 @@ namespace fsm{
         void on_entry(StartMenu const&) const;
     };
 
-    struct Parameters : public Transitions<On<ChangeParameter, Parameters>, On<AddParameter, Parameters>, On<StartRace, Race>>{
+    struct Parameters : public Transitions<
+            On<ChangeParameterUp, Parameters>,
+            On<ChangeParameterDown, Parameters>,
+            On<StartRace, Race>>{
     private:
         NXP_Menu& menu;
-        std::vector<void*> parameters;
         uint8_t parametersCounter = 0;
     public:
         Parameters(NXP_Menu& menu) : menu(menu){}
-        void on_entry(ChangeParameter const&);
+        void on_entry(ChangeParameterUp const&);
+        void on_entry(ChangeParameterDown const&);
         void on_entry(ValueUp const&) const;
         void on_entry(ValueDown const&) const;
-        void on_entry(AddParameter const&);
     };
 
     struct Race : public Transitions<On<EmergencyBreak, Idle>>{
@@ -70,6 +74,7 @@ class NXP_Menu {
     halina::Buttons& buttons;
     halina::Switches& switches;
     NXP_Display& display;
+    bool isMenuRunning = true;
 
 private:
     using StateMachine = fsm::StateMachine<fsm::Idle, fsm::Parameters, fsm::Race>;
@@ -86,7 +91,6 @@ public:
 
     void init();
 
-    void proc();
+    bool proc();
 
-    void addParameter(void* parameter){stateMachine.handle(fsm::AddParameter{parameter});};
 };
