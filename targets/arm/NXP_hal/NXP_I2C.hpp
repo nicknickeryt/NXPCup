@@ -12,77 +12,64 @@
 #include "fsl_i2c.h"
 
 class NXP_I2C{
-public:
-    enum class Mode{
-        MASTER,
-        SLAVE
-    };
+    // TX
+    uint8_t txBuffer [20];
+    uint8_t dataInTxBuffer = 0;
+    uint8_t txAddress = 0;
 
-private:
-    constexpr static auto MWSR = 0x00; // Master write mask
-    constexpr static auto MRSW = 0x01; // Master read mask
+    // RX
+    uint8_t rxBuffer [20];
+    uint8_t dataToRead = 0;
+    uint8_t rxAddress = 0;
+    I2C_Type *base;
 
-private:
-    constexpr static uint32_t dividerTable[64] = {
-        20,  22,  24,  26,   28,   30,   34,   40,   28,   32,   36,   40,   44,   48,   56,   68,
-                48,  56,  64,  72,   80,   88,   104,  128,  80,   96,   112,  128,  144,  160,  192,  240,
-                160, 192, 224, 256,  288,  320,  384,  480,  320,  384,  448,  512,  576,  640,  768,  960,
-                640, 768, 896, 1024, 1152, 1280, 1536, 1920, 1280, 1536, 1792, 2048, 2304, 2560, 3072, 3840};
+    NXP_PORT& sdaPort;
+    NXP_PORT& sclPort;
 
-    I2C_Type* base;
-    Mode mode{Mode::MASTER};
-    NXP_PORT& sda;
-    NXP_PORT& scl;
-    uint8_t address;
-    uint32_t baudrate;
+    uint32_t baudrade = 0;
+    public:
 
+    NXP_I2C(I2C_Type *base, NXP_PORT& sdaPort, NXP_PORT& sclPort, uint32_t baudrade) : base(base), sdaPort(sdaPort), sclPort(sclPort), baudrade(baudrade) {
 
-public:
-    NXP_I2C(I2C_Type* base, Mode mode, NXP_PORT& sda, NXP_PORT& scl, uint32_t baudrate) : base(base), mode(mode), sda(sda), scl(scl), baudrate(baudrate){}
+    }
 
-    void init();
+    void init() {
+        sdaPort.setMux();
+        sclPort.setMux();
 
-    void beginTransmission(uint8_t deviceAddress);
+        i2c_master_config_t masterConfig;
+        I2C_MasterGetDefaultConfig(&masterConfig);
+        masterConfig.baudRate_Bps = baudrade;
+        I2C_MasterInit(base,  &masterConfig, CLOCK_GetBusClkFreq());
+        I2C_MasterClearStatusFlags(base, 0xFF);
+        I2C_Enable(base, true);
+    }
 
-    void endTransmission();
-
-    void write(uint8_t data);
-    void write(uint8_t* data, size_t length);
-
-    void readRegister( uint8_t deviceRegister, uint8_t* data);
-    uint8_t readRegister(uint8_t deviceRegister);
-
-    void readRequest(uint8_t deviceRegister, uint8_t* data, size_t length);
-
-    void writeRegister(uint8_t deviceRegister, uint8_t *data, size_t length);
-    void writeRegister(uint8_t deviceRegister, uint8_t data);
-
-
-private:
-    void wait(){
-        while((base->S & I2C_S_IICIF_MASK) == 0) {
+        void beginTransmission(uint8_t address) {
+            txAddress = address << 1;
+            txBuffer[0] = txAddress;
+            dataInTxBuffer = 1;
         }
-        base->S |= I2C_S_IICIF_MASK; /* clear interrupt flag */
-    }
 
-    bool getAck(){ return (base->S & I2C_S_RXAK_MASK) == 0; }
-    void giveAck(){base->C1 &= ~I2C_C1_TXAK_MASK; }
-    void giveNack(){base->C1 |= I2C_C1_TXAK_MASK; }
+        void write(uint8_t reg) {
+            txBuffer[dataInTxBuffer++] = reg;
+        }
 
-    void start(){ base->C1 |= I2C_C1_MST_MASK | I2C_C1_TX_MASK; }
-    void repeatedStart(){base->C1 |= I2C_C1_RSTA_MASK; }
-    void stop(){ base->C1 &= ~(I2C_C1_MST_MASK | I2C_C1_TX_MASK); }
-    void enterRxModeWithAck(){ base->C1 &= ~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK); }
-    void enterRxModeWithoutAck(){
-        register uint8_t reg = base->C1;
-        reg &= ~((1 << I2C_C1_TX_SHIFT) & I2C_C1_TX_MASK);
-        reg |=  ((1 << I2C_C1_TXAK_SHIFT) & I2C_C1_TXAK_MASK);
-        base->C1 = reg;
-    }
-    void enableAck(){base->C1 &= ~I2C_C1_TXAK_MASK; }
-    void disableAck(){base->C1 |= I2C_C1_TXAK_MASK; }
-    void writeByte(uint8_t data){base->D = data; }
-    uint8_t readByte(){return base->D; }
-    void setBaudrate();
+        void endTransmission() {
+            I2C_MasterWriteBlocking(base, txBuffer, dataInTxBuffer, kI2C_TransferDefaultFlag);
+            dataInTxBuffer = 0;
+        }
 
-};
+        void requestFrom(uint8_t address, uint8_t count) {
+            dataToRead = 0;
+            rxAddress = address << 1 | 1u;
+
+            I2C_MasterWriteBlocking(base, &rxAddress, 1, kI2C_TransferDefaultFlag | kI2C_TransferNoStopFlag);
+            I2C_MasterReadBlocking(base, rxBuffer, count, kI2C_TransferDefaultFlag | kI2C_TransferNoStartFlag);
+        }
+
+        uint8_t read() {
+            return rxBuffer[dataToRead++];
+        }
+
+    };

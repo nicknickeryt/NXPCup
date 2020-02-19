@@ -38,24 +38,19 @@
 // PLL_period_ps = 1655; macro_period_vclks = 2304
 #define calcMacroPeriod(vcsel_period_pclks) ((((uint32_t)2304 * (vcsel_period_pclks) * 1655) + 500) / 1000)
 
+extern uint32_t millis();
 
-volatile uint32_t ticks = 0;
-void startTimeout() {
-	ticks = 0;
+void VL53L0X::startTimeout() {
+    timeout_start_ms = millis();
 }
 
-bool checkTimeoutExpired() {
-	ticks ++;
-	if (ticks > 2000000000) {
-		ticks = 0;
-		return true;
-	}
-	return false;
+bool VL53L0X::checkTimeoutExpired() {
+    return io_timeout > 0 && ((uint16_t)(millis() - timeout_start_ms) > io_timeout);
 }
 
 // Constructors ////////////////////////////////////////////////////////////////
 
-VL53L0X::VL53L0X(i2c& Wire)
+VL53L0X::VL53L0X(NXP_I2C& Wire)
 
   :  Wire(Wire), address(ADDRESS_DEFAULT)
   , io_timeout(0) // no timeout
@@ -81,6 +76,7 @@ void VL53L0X::setAddress(uint8_t new_addr)
 // mode.
 bool VL53L0X::init(bool io_2v8)
 {
+    Wire.init();
   // check model ID register (value specified in datasheet)
   if (readReg(IDENTIFICATION_MODEL_ID) != 0xEE) { return false; }
 
@@ -101,7 +97,6 @@ bool VL53L0X::init(bool io_2v8)
   writeReg(0xFF, 0x01);
   writeReg(0x00, 0x00);
   stop_variable = readReg(0x91);
-  log_info("StopVariable: %d ", stop_variable);
   writeReg(0x00, 0x01);
   writeReg(0xFF, 0x00);
   writeReg(0x80, 0x00);
@@ -1047,19 +1042,11 @@ bool VL53L0X::performSingleRefCalibration(uint8_t vhv_init_byte)
 {
   writeReg(SYSRANGE_START, 0x01 | vhv_init_byte); // VL53L0X_REG_SYSRANGE_MODE_START_STOP
 
-  for (volatile uint16_t i = 0; i < 100; i++) {
-
-	  uint8_t data = readReg(RESULT_INTERRUPT_STATUS);
-	  if (data & 0x07) {
-		  break;
-	  }
+  startTimeout();
+  while ((readReg(RESULT_INTERRUPT_STATUS) & 0x07) == 0)
+  {
+    if (checkTimeoutExpired()) { return false; }
   }
-
-//  startTimeout();
-//  while ((readReg(RESULT_INTERRUPT_STATUS) & 0x07) == 0)
-//  {
-//    if (checkTimeoutExpired()) { return false; }
-//  }
 
   writeReg(SYSTEM_INTERRUPT_CLEAR, 0x01);
 

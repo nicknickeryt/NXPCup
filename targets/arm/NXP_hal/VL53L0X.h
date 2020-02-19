@@ -3,7 +3,7 @@
 
 //#include <Arduino.h>
 #include <stdio.h>
-#include "i2c.hpp"
+#include "NXP_I2C.hpp"
 
 class VL53L0X
 {
@@ -98,8 +98,8 @@ class VL53L0X
 
     uint8_t last_status; // status of last I2C transmission
 
-    VL53L0X(i2c& Wire);
-    i2c& Wire;
+    VL53L0X(NXP_I2C& Wire);
+    NXP_I2C& Wire;
     void setAddress(uint8_t new_addr);
     inline uint8_t getAddress(void) { return address; }
 
@@ -170,6 +170,9 @@ class VL53L0X
     static uint16_t encodeTimeout(uint32_t timeout_mclks);
     static uint32_t timeoutMclksToMicroseconds(uint16_t timeout_period_mclks, uint8_t vcsel_period_pclks);
     static uint32_t timeoutMicrosecondsToMclks(uint32_t timeout_period_us, uint8_t vcsel_period_pclks);
+
+    void startTimeout();
+    bool checkTimeoutExpired();
 };
 
 #endif
