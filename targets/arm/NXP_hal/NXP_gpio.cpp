@@ -16,7 +16,8 @@ NXP_GPIO::Interrupt NXP_GPIO::portEInterrupts[32];
 
 void callFunction(PORT_Type* port_base, NXP_GPIO::Interrupt* portInterrupts) {
     uint32_t ifsr = port_base->ISFR;
-    for(uint32_t i = 0; i < 32; i++) {
+    static uint32_t i;
+    for(i = 0; i < 32; i++) {
         if (portInterrupts[i].mask & ifsr) {
             port_base->ISFR = portInterrupts[i].mask;
             portInterrupts[i].callbackHandler();
@@ -88,23 +89,23 @@ void NXP_GPIO::init() {
         }
 
         if (port_base == PORTA) {
-            NXP_GPIO::appendInterrupt(portAInterrupts, *this);
+            NXP_GPIO::appendInterrupt(portAInterrupts, this);
             NVIC_ClearPendingIRQ(PORTA_IRQn);
             NVIC_EnableIRQ(PORTA_IRQn);
         } else if (port_base == PORTB) {
-            NXP_GPIO::appendInterrupt(portBInterrupts, *this);
+            NXP_GPIO::appendInterrupt(portBInterrupts, this);
             NVIC_ClearPendingIRQ(PORTB_IRQn);
             NVIC_EnableIRQ(PORTB_IRQn);
         } else if (port_base == PORTC) {
-            NXP_GPIO::appendInterrupt(portCInterrupts, *this);
+            NXP_GPIO::appendInterrupt(portCInterrupts, this);
             NVIC_ClearPendingIRQ(PORTC_IRQn);
             NVIC_EnableIRQ(PORTC_IRQn);
         } else if (port_base == PORTD) {
-            NXP_GPIO::appendInterrupt(portDInterrupts, *this);
+            NXP_GPIO::appendInterrupt(portDInterrupts, this);
             NVIC_ClearPendingIRQ(PORTD_IRQn);
             NVIC_EnableIRQ(PORTD_IRQn);
         } else if (port_base == PORTE) {
-            NXP_GPIO::appendInterrupt(portEInterrupts, *this);
+            NXP_GPIO::appendInterrupt(portEInterrupts, this);
             NVIC_ClearPendingIRQ(PORTE_IRQn);
             NVIC_EnableIRQ(PORTE_IRQn);
         }

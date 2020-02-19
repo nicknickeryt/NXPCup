@@ -32,7 +32,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO} NXP_hal/i2c.h)
+set(SOURCES ${SOURCES_AUTO} )
 
 add_executable(${NAME} ${SOURCES})
 

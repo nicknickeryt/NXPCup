@@ -40,7 +40,26 @@ void Kitty::init() {
     log_notice("KiTTy init finished");
     servo.set(0.1);
     camera.start();
-    distanceSensor.begin();
+//    distanceSensor.begin();
+
+    sdaPort.setMux();
+    sclPort.setMux();
+
+    i2c_master_config_t masterConfig;
+    I2C_MasterGetDefaultConfig(&masterConfig);
+    masterConfig.baudRate_Bps = 100000;
+    I2C_MasterInit(My_I2C,  &masterConfig, 24000000);
+    I2C_MasterClearStatusFlags(My_I2C, 0xFF);
+    I2C_Enable(My_I2C, true);
+//
+    if (!sensor.init()) {
+        log_error("Failed to detect and initialize sensor!");
+//        while (1) {}
+    } else {
+        log_notice("Czujnik ok");
+    }
+
+
 //    i2c.init();
 }
 
@@ -50,19 +69,10 @@ void Kitty::proc() {
     camera.proc(cameraTrigger);
 
     static int x;
-    if(100000 == x++) {
-//        i2c.beginTransmission(0x29);
-//        auto y = i2c.readRegister(0x00c0);
-//        i2c.endTransmission();
-//        log_notice("result: %d", y);
-        VL53L0X_RangingMeasurementData_t measure;
-        distanceSensor.rangingTest(&measure);
-        log_notice("try to read");
-        if(measure.RangeStatus != 4){
-            log_notice("Distance (mm):", measure.RangeMilliMeter);
-        }else{
-            log_notice("out of range");
-        }
+    if(100000 <= x++) {
+
+        uint16_t y = sensor.readRangeSingleMillimeters();
+        log_notice("result: %d", y);
         x = 0;
     }
 }
