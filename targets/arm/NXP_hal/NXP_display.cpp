@@ -54,57 +54,64 @@ void NXP_Display::update() {
     //      x       x       x       x
     // <------------------------------->
     // 				y
+    if(displayEnable) {
+        if (refreshCounter++ < (((SYSTICK_RATE_HZ / REFRESH_RATE_HZ) / 4) - 1)) {
+            return;
+        } else {
+            refreshCounter = 0;
+        }
 
-    if(refreshCounter++ <  (((SYSTICK_RATE_HZ / REFRESH_RATE_HZ) / 4) - 1)) {
-        return;
-    } else {
-        refreshCounter = 0;
+        updateISR(1);
+    }else{
+        segmentsOff();
     }
-
-    updateISR(1);
 }
 
-void NXP_Display::updateISR(uint8_t prescaler){
-    static int refreshCnt;
-    static int bufferCounter;
-
-    if(prescaler <= refreshCnt++) {
-        digitsOff();
-        segmentsOff();
-        if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::DASH)) {
-            DISPLAY_GPIO->PCOR = displayCharacters[10];
-        } else if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::SPACE)) {
+void NXP_Display::updateISR(uint32_t prescaler){
+    static uint32_t refreshCnt;
+    static uint32_t bufferCounter;
+    if(displayEnable) {
+        if (prescaler <= refreshCnt++) {
             digitsOff();
-        } else {
-            uint8_t character = displayBuffer[bufferCounter];
-            if (character <= 9) {
-                if (dot[bufferCounter]) {
-                    DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
-                } else {
-                    DISPLAY_GPIO->PCOR = displayCharacters[character];
+            segmentsOff();
+            if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::DASH)) {
+                DISPLAY_GPIO->PCOR = displayCharacters[10];
+            } else if (displayBuffer[bufferCounter] ==
+                       static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::SPACE)) {
+                digitsOff();
+            } else {
+                uint8_t character = displayBuffer[bufferCounter];
+                if (character <= 9) {
+                    if (dot[bufferCounter]) {
+                        DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
+                    } else {
+                        DISPLAY_GPIO->PCOR = displayCharacters[character];
+                    }
                 }
             }
-        }
 
 
-        switch (bufferCounter) {
-            case 0:
-                digitOn(DIGIT::A1);
-                bufferCounter++;;
-                break;
-            case 1:
-                digitOn(DIGIT::A2);
-                bufferCounter++;
-                break;
-            case 2:
-                digitOn(DIGIT::A3);
-                bufferCounter++;
-                break;
-            case 3:
-                digitOn(DIGIT::A4);
-                bufferCounter = 0;
-                break;
+            switch (bufferCounter) {
+                case 0:
+                    digitOn(DIGIT::A1);
+                    bufferCounter++;;
+                    break;
+                case 1:
+                    digitOn(DIGIT::A2);
+                    bufferCounter++;
+                    break;
+                case 2:
+                    digitOn(DIGIT::A3);
+                    bufferCounter++;
+                    break;
+                case 3:
+                    digitOn(DIGIT::A4);
+                    bufferCounter = 0;
+                    break;
+            }
+            refreshCnt = 0;
         }
-        refreshCnt = 0;
+    }else{
+        segmentsOff();
     }
 }

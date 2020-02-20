@@ -9,7 +9,7 @@
 
 #define LOG_CHANNEL ALGORITHM
 #define ALGORITHM_LOG_CHANNEL 3
-#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
 #include "logger.h"
 
 void AlgorithmUnit::analyze() {
@@ -128,19 +128,19 @@ void AlgorithmUnit::quantization(uint16_t *data) {
 int8_t AlgorithmUnit::computeCarPositionOnTrack(){
     // both lines are detected
     if(trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
-        log_notice("both %d, %d", trackLinesDetector.leftLine.centerIndex, trackLinesDetector.rightLine.centerIndex);
+        log_debug("both %d, %d", trackLinesDetector.leftLine.centerIndex, trackLinesDetector.rightLine.centerIndex);
         carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.rightLine.centerIndex)/2;
     } // only left line is detected
     else if(trackLinesDetector.leftLine.isDetected && !trackLinesDetector.rightLine.isDetected){
-        log_notice("left, %d", trackLinesDetector.leftLine.centerIndex);
+        log_debug("left, %d", trackLinesDetector.leftLine.centerIndex);
         carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.lineWidth + (cameraDataBufferSize/4) - lostLineOffset);
     }// only right line is detected
     else if(!trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
-        log_notice("right, %d", trackLinesDetector.rightLine.centerIndex);
+        log_debug("right, %d", trackLinesDetector.rightLine.centerIndex);
         carPosition = (trackLinesDetector.rightLine.centerIndex - trackLinesDetector.lineWidth - (cameraDataBufferSize/4) + lostLineOffset);
     } // no line is detected
     else{
-        log_notice("none");
+        log_debug("none");
         if(keepPreviousPositionCounter > keepPreviousPositionTime){
             carPosition = ((carPosition - (cameraDataBufferSize >> 1)) >> 1) + (cameraDataBufferSize >> 1);
             keepPreviousPositionCounter = 0;

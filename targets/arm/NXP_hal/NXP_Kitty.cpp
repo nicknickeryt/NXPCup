@@ -59,18 +59,15 @@ void Kitty::init() {
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
     uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
+    display.enable();
 
     uartCommunication.write("Bejbi don't hurt me", 19);
     log_notice("KiTTy init finished");
 
-    menuParameters.emplace_back(&jakisParameter32);
-    menuParameters.emplace_back(&jakisParameter16);
-    menuParameters.emplace_back(&jakisParameter8);
+    menu.addParameter(&jakisParameter32, 10);
     servo.set(0.1);
     camera.start();
-
     sensor.setTimeout(500);
-
     if (!sensor.init()) {
         log_error("Failed to detect and initialize sensor!");
     } else {
@@ -79,20 +76,7 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
-    magicDiodComposition();
-    camera.proc(cameraTrigger);
-    if(systickTrigger){
-        static uint32_t counter;
-        systickTrigger = false;
-        display.updateISR(5);
-        if(200 <= counter++){
-            uint16_t y = sensor.readRangeSingleMillimeters();
-            log_notice("result: %d", y);
-            counter = 0;
-        }
-    }
-    if(!menu.proc()) {
-        magicDiodComposition();
+    if(!menu.proc(systickTrigger)) {
         if (commandTerminalTrigger) {
             commandManager.run();
             commandTerminalTrigger = false;
@@ -102,7 +86,17 @@ void Kitty::proc() {
             camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
             algorithmUnit.analyze();
         }
+        if(systickTrigger){
+            static uint32_t counter;
+            systickTrigger = false;
+            if(200 <= counter++){
+                uint16_t y = sensor.readRangeSingleMillimeters();
+                log_notice("result: %d", y);
+                counter = 0;
+            }
+        }
     }
+    magicDiodComposition();
 }
 
 void Kitty::FTM_Init() {

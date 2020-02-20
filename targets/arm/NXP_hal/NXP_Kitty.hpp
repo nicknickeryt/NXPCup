@@ -53,10 +53,10 @@ private:
     halina::Switches switches = {SWITCH0, SWITCH1, SWITCH2, SWITCH3};
 
     // BUTTONS
-    NXP_GPIO BUTTON0 = {PORTC, GPIOC, 16U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, NXP_Menu::button0InterruptHandler};
-    NXP_GPIO BUTTON1 = {PORTC, GPIOC, 17U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, NXP_Menu::button1InterruptHandler};
-    NXP_GPIO BUTTON2 = {PORTC, GPIOC, 18U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, NXP_Menu::button2InterruptHandler};
-    NXP_GPIO BUTTON3 = {PORTC, GPIOC, 19U, NXP_GPIO::Mode::INTERRUPT, kPORT_InterruptRisingEdge, NXP_Menu::button3InterruptHandler};
+    NXP_GPIO BUTTON0 = {PORTC, GPIOC, 16U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO BUTTON1 = {PORTC, GPIOC, 17U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO BUTTON2 = {PORTC, GPIOC, 18U, NXP_GPIO::Mode::INPUT};
+    NXP_GPIO BUTTON3 = {PORTC, GPIOC, 19U, NXP_GPIO::Mode::INPUT};
     halina::Buttons buttons = {BUTTON0, BUTTON1, BUTTON2, BUTTON3};
 
     // LEDS
@@ -127,8 +127,6 @@ public:
     uint16_t jakisParameter16 = 321;
     uint8_t jakisParameter8 = 124;
 
-    std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> menuParameters;
-
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
@@ -155,7 +153,8 @@ public:
     AlgorithmUnit algorithmUnit = {servo, uartCommunication};
 
     // MENU
-    NXP_Menu menu = {buttons, switches, display, menuParameters};
+    NXP_Menu::MenuParameters menuParameters;
+    NXP_Menu menu = {buttons, switches, display};
 
 private:
     Kitty() = default;

@@ -13,11 +13,14 @@
 #include "HALina_config.hpp"
 
 class NXP_Display : public HALina_Display{
-
+private:
+    bool displayEnable = false;
 public:
     void update() override;
-    void updateISR(uint8_t prescaler);
+    void updateISR(uint32_t prescaler);
     void init() override;
+    void enable(){displayEnable = true;}
+    void disable(){displayEnable = false; segmentsOff();}
 
     NXP_Display() {
         SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;

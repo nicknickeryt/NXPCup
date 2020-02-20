@@ -13,79 +13,105 @@
 #include "NXP_Kitty.hpp"
 #include "logger.h"
 
-void NXP_Menu::button0InterruptHandler(){Kitty::kitty().menu.stateMachine.handle(fsm::ChangeParameterDown{});};
-void NXP_Menu::button1InterruptHandler(){Kitty::kitty().menu.stateMachine.handle(fsm::ChangeParameterUp{});};
-void NXP_Menu::button2InterruptHandler(){Kitty::kitty().menu.stateMachine.handle(fsm::ValueDown{});};
-void NXP_Menu::button3InterruptHandler(){Kitty::kitty().menu.stateMachine.handle(fsm::ValueUp{});};
+void NXP_Menu::buttonHandler() {}
 
 void NXP_Menu::init() {
     buttons.init();
     switches.init();
     stateMachine.handle(fsm::StartMenu{});
-    display.print("----");
+    display.print(0);
 }
 
-bool NXP_Menu::proc(){
-    display.update();
+bool NXP_Menu::proc(bool &systickTrigger){
+    if(isMenuRunning) {
+        display.update();
+        if (!buttons.at(0).get()) {
+            if (systickTrigger) {
+                if (buttonCompare <= buttonCounter++) {
+                    stateMachine.handle(fsm::ChangeParameterUp{});
+                    buttonCounter = 0;
+                    buttonCompare /= 1.1;
+                }
+                systickTrigger = false;
+            }
+        } else if (!buttons.at(1).get()) {
+            if (systickTrigger) {
+                if (buttonCompare <= buttonCounter++) {
+                    stateMachine.handle(fsm::ValueDown{});
+                    buttonCounter = 0;
+                    buttonCompare /= 1.1;
+                }
+                systickTrigger = false;
+            }
+        } else if (!buttons.at(2).get()) {
+            if (systickTrigger) {
+                if (buttonCompare <= buttonCounter++) {
+                    stateMachine.handle(fsm::ValueUp{});
+                    buttonCounter = 0;
+                    buttonCompare /= 1.1;
+                }
+                systickTrigger = false;
+            }
+        } else if (!buttons.at(3).get()) {
+            stateMachine.handle(fsm::StartRace{});
+        } else {buttonCompare = defaultDelay;}
+    }
     return isMenuRunning;
 }
 
 namespace fsm {
     void Idle::on_entry(const StartMenu &) const {
-        log_debug("Idle::on_entry::StartMenu");
-        menu.display.print("----");
+        menu.display.print(0);
     }
 
     void Idle::on_entry(const EmergencyBreak &) const {
-        log_debug("Idle::on_entry::EmergencyBreak");
-        menu.display.print("----");
-
+        Kitty::kitty().servo.disable();
+        Kitty::kitty().motors.block();
+        menu.isMenuRunning = true;
+        menu.display.print(0);
+        menu.display.enable();
     }
 
     void Parameters::on_entry(ChangeParameterUp const&) {
-        log_debug("Parameters::on_entry::ChangeParameter")
         parametersCounter++;
-        menu.display.print(parametersCounter);
-        log_debug("Current parameter: %d", parametersCounter);
-    }
-
-    void Parameters::on_entry(ChangeParameterDown const&) {
-        log_debug("Parameters::on_entry::ChangeParameter")
-        parametersCounter--;
+        if((uint8_t)parametersCounter >= menu.parameters.parameters.size()){
+            parametersCounter = 0;
+        }
         menu.display.print(parametersCounter);
         log_debug("Current parameter: %d", parametersCounter);
     }
 
     void Parameters::on_entry(ValueUp const&) const {
         log_debug("Parameters::on_entry::ValueUp");
-        if(parametersCounter < menu.parameters.size()){
-            if(auto pval = get_if<uint32_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval)))); }
-            if(auto pval = get_if<uint16_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<uint8_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<float*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(*(*pval), 2);}
-            if(auto pval = get_if<int32_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int16_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int8_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+        if((uint8_t)parametersCounter < menu.parameters.parameters.size()){
+            if(auto pval = get_if<uint32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval)))); }
+            if(auto pval = get_if<uint16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<uint8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<float*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(*(*pval), 2);}
+            if(auto pval = get_if<int32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
         }
     }
 
     void Parameters::on_entry(ValueDown const&) const {
         log_debug("Parameters::on_entry::ValueDown");
-        if(parametersCounter < menu.parameters.size()){
-            if(auto pval = get_if<uint32_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval)))); }
-            if(auto pval = get_if<uint16_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<uint8_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<float*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(*(*pval), 2);}
-            if(auto pval = get_if<int32_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int16_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int8_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<int*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+        if((uint8_t)parametersCounter < menu.parameters.parameters.size()){
+            if(auto pval = get_if<uint32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval)))); }
+            if(auto pval = get_if<uint16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<uint8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<float*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(*(*pval), 2);}
+            if(auto pval = get_if<int32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
         }
     }
 
     void Race::on_entry(const StartRace &) const {
         log_debug("Race::on_entry::StartRace");
         menu.isMenuRunning = false;
+        menu.display.disable();
     }
 }

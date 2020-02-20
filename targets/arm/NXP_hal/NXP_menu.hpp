@@ -21,7 +21,6 @@ namespace fsm{
     using namespace ::fsm;
     struct StartMenu{};
     struct ChangeParameterUp{};
-    struct ChangeParameterDown{};
     struct ValueUp{};
     struct ValueDown{};
     struct StartRace{};
@@ -30,7 +29,7 @@ namespace fsm{
     struct Parameters;
     struct Race;
 
-    struct Idle : public Transitions<On<ChangeParameterUp, Parameters>, On<ChangeParameterDown, Parameters>>{
+    struct Idle : public Transitions<On<ChangeParameterUp, Parameters>, On<StartRace, Race>>{
     private:
         NXP_Menu& menu;
     public:
@@ -41,17 +40,15 @@ namespace fsm{
 
     struct Parameters : public Transitions<
             On<ChangeParameterUp, Parameters>,
-            On<ChangeParameterDown, Parameters>,
             On<ValueUp, Parameters>,
             On<ValueDown, Parameters>,
             On<StartRace, Race>>{
     private:
         NXP_Menu& menu;
-        uint8_t parametersCounter = 0;
+        int8_t parametersCounter = 0;
     public:
         Parameters(NXP_Menu& menu) : menu(menu){}
         void on_entry(ChangeParameterUp const&);
-        void on_entry(ChangeParameterDown const&);
         void on_entry(ValueUp const&) const;
         void on_entry(ValueDown const&) const;
     };
@@ -69,26 +66,40 @@ class NXP_Menu {
     friend fsm::Parameters;
     friend fsm::Idle;
     friend fsm::Race;
+    constexpr static auto defaultDelay = 200.;
+private:
     halina::Buttons& buttons;
     halina::Switches& switches;
+    float buttonCounter = 0.;
+    float buttonCompare = defaultDelay;
     NXP_Display& display;
     bool isMenuRunning = true;
-    std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> &parameters;
-
+    bool button1Pressed = false, button2Pressed = false, button3Pressed = false, button4Pressed = false;
+public:
+    struct MenuParameters {
+        std::vector<std::variant<uint32_t *, uint16_t *, uint8_t *, float *, int32_t *, int16_t *, int8_t *, int *>> parameters;
+        std::vector<uint8_t> divider;
+    };
 private:
+    MenuParameters parameters;
     using StateMachine = fsm::StateMachine<fsm::Idle, fsm::Parameters, fsm::Race>;
     StateMachine stateMachine{*this, *this, *this};
 
 public:
-    static void button0InterruptHandler();
-    static void button1InterruptHandler();
-    static void button2InterruptHandler();
-    static void button3InterruptHandler();
-
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display, std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> &parameters) : buttons(buttons), switches(switches), display(display), parameters(parameters){}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display) : buttons(buttons), switches(switches), display(display){}
 
     void init();
 
-    bool proc();
+    bool proc(bool &systickTrigger);
 
+    void addParameter(uint32_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(uint16_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(uint8_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(int32_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(int16_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(int8_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(float* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(int* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+
+    static void buttonHandler();
 };
