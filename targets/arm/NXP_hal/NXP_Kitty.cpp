@@ -13,15 +13,28 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
+
 bool cameraTrigger = false;
+
 void pit_sendCameraData(uint8_t) {
     cameraTrigger = true;
 }
 
+uint_fast64_t Kitty::milliseconds = 0;
+extern "C" {
+bool systickTrigger = false;
+void SysTick_Handler(void) {
+    Kitty::millisIncrease();
+    systickTrigger = true;
+}
+}
 
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
+    SysTick_Config(SystemCoreClock / 1000);
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
 
     FTM_Init();
     uartDebug.init();
@@ -48,22 +61,20 @@ void Kitty::init() {
     } else {
         log_notice("Czujnik ok");
     }
-
-
-//    i2c.init();
 }
 
 void Kitty::proc() {
     magicDiodComposition();
-    display.update();
     camera.proc(cameraTrigger);
-
-    static int x;
-    if(100000 <= x++) {
-
-        uint16_t y = sensor.readRangeSingleMillimeters();
-        log_notice("result: %d", y);
-        x = 0;
+    if(systickTrigger){
+        static uint32_t counter;
+        systickTrigger = false;
+        display.updateISR(5);
+        if(200 <= counter++){
+            uint16_t y = sensor.readRangeSingleMillimeters();
+            log_notice("result: %d", y);
+            counter = 0;
+        }
     }
 }
 void Kitty::FTM_Init() {

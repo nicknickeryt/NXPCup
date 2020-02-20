@@ -25,6 +25,9 @@ void pit_sendCameraData(uint8_t);
 
 class Kitty{
 private:
+    // SYSTICK
+    static uint_fast64_t milliseconds;
+
     // LEDS
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
     NXP_GPIO LED1 = NXP_GPIO(PORTA, GPIOA, 17U);
@@ -114,4 +117,12 @@ public:
     void init();
 
     void proc();
+
+    static void millisIncrease(){
+        milliseconds++;
+    }
+
+    static uint32_t millis(){
+        return milliseconds;
+    }
 };

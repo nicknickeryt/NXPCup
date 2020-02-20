@@ -18,31 +18,9 @@
 
 #include "logger.h"
 
-using namespace halina;
-
-static uint_fast64_t milliseconds = 0;
-void millisIncrease() {
-    milliseconds++;
-}
-
-uint32_t millis() {
-    return milliseconds;
-}
-
-extern "C" {
-    void SysTick_Handler(void) {
-        millisIncrease();
-    }
-}
-
 int main(){
     BOARD_BootClockRUN();
 
-    // init SysTick
-    SysTick_Config(SystemCoreClock / 1000);
-    NVIC_ClearPendingIRQ(SysTick_IRQn);
-    NVIC_EnableIRQ(SysTick_IRQn);
-    //
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 

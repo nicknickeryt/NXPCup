@@ -27,49 +27,12 @@ class NXP_I2C{
     NXP_PORT& sclPort;
 
     uint32_t baudrade = 0;
-    public:
-
-    NXP_I2C(I2C_Type *base, NXP_PORT& sdaPort, NXP_PORT& sclPort, uint32_t baudrade) : base(base), sdaPort(sdaPort), sclPort(sclPort), baudrade(baudrade) {
-
-    }
-
-    void init() {
-        sdaPort.setMux();
-        sclPort.setMux();
-
-        i2c_master_config_t masterConfig;
-        I2C_MasterGetDefaultConfig(&masterConfig);
-        masterConfig.baudRate_Bps = baudrade;
-        I2C_MasterInit(base,  &masterConfig, CLOCK_GetBusClkFreq());
-        I2C_MasterClearStatusFlags(base, 0xFF);
-        I2C_Enable(base, true);
-    }
-
-        void beginTransmission(uint8_t address) {
-            txAddress = address << 1;
-            txBuffer[0] = txAddress;
-            dataInTxBuffer = 1;
-        }
-
-        void write(uint8_t reg) {
-            txBuffer[dataInTxBuffer++] = reg;
-        }
-
-        void endTransmission() {
-            I2C_MasterWriteBlocking(base, txBuffer, dataInTxBuffer, kI2C_TransferDefaultFlag);
-            dataInTxBuffer = 0;
-        }
-
-        void requestFrom(uint8_t address, uint8_t count) {
-            dataToRead = 0;
-            rxAddress = address << 1 | 1u;
-
-            I2C_MasterWriteBlocking(base, &rxAddress, 1, kI2C_TransferDefaultFlag | kI2C_TransferNoStopFlag);
-            I2C_MasterReadBlocking(base, rxBuffer, count, kI2C_TransferDefaultFlag | kI2C_TransferNoStartFlag);
-        }
-
-        uint8_t read() {
-            return rxBuffer[dataToRead++];
-        }
-
-    };
+public:
+    NXP_I2C(I2C_Type *base, NXP_PORT& sdaPort, NXP_PORT& sclPort, uint32_t baudrade) : base(base), sdaPort(sdaPort), sclPort(sclPort), baudrade(baudrade) {}
+    void init();
+    void beginTransmission(uint8_t address);
+    void write(uint8_t reg);
+    void endTransmission();
+    void requestFrom(uint8_t address, uint8_t count);
+    uint8_t read();
+};

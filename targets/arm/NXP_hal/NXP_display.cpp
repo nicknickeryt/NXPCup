@@ -46,7 +46,6 @@ void NXP_Display::init() {
 
 void NXP_Display::update() {
     static int refreshCounter;
-    static int bufferCounter;
 
     // y = SYSTICK_RATE_HZ/REFRESH_RATE_HZ
     // x = (y/4)-1
@@ -62,41 +61,50 @@ void NXP_Display::update() {
         refreshCounter = 0;
     }
 
-    digitsOff();
-    segmentsOff();
+    updateISR(1);
+}
 
-    if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::DASH)) {
-        DISPLAY_GPIO->PCOR = displayCharacters[10];
-    } else if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::SPACE)) {
+void NXP_Display::updateISR(uint8_t prescaler){
+    static int refreshCnt;
+    static int bufferCounter;
+
+    if(prescaler <= refreshCnt++) {
         digitsOff();
-    } else {
-        uint8_t character = displayBuffer[bufferCounter];
-        if (character <= 9) {
-            if (dot[bufferCounter]) {
-                DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
-            } else {
-                DISPLAY_GPIO->PCOR = displayCharacters[character];
+        segmentsOff();
+        if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::DASH)) {
+            DISPLAY_GPIO->PCOR = displayCharacters[10];
+        } else if (displayBuffer[bufferCounter] == static_cast<uint8_t>(HALina_Display::SPECIAL_CHARACTERS::SPACE)) {
+            digitsOff();
+        } else {
+            uint8_t character = displayBuffer[bufferCounter];
+            if (character <= 9) {
+                if (dot[bufferCounter]) {
+                    DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
+                } else {
+                    DISPLAY_GPIO->PCOR = displayCharacters[character];
+                }
             }
         }
-    }
 
 
-    switch (bufferCounter) {
-        case 0:
-            digitOn(DIGIT::A1);
-            bufferCounter++;;
-            break;
-        case 1:
-            digitOn(DIGIT::A2);
-            bufferCounter++;
-            break;
-        case 2:
-            digitOn(DIGIT::A3);
-            bufferCounter++;
-            break;
-        case 3:
-            digitOn(DIGIT::A4);
-            bufferCounter = 0;
-            break;
+        switch (bufferCounter) {
+            case 0:
+                digitOn(DIGIT::A1);
+                bufferCounter++;;
+                break;
+            case 1:
+                digitOn(DIGIT::A2);
+                bufferCounter++;
+                break;
+            case 2:
+                digitOn(DIGIT::A3);
+                bufferCounter++;
+                break;
+            case 3:
+                digitOn(DIGIT::A4);
+                bufferCounter = 0;
+                break;
+        }
+        refreshCnt = 0;
     }
 }

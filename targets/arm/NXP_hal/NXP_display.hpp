@@ -16,6 +16,7 @@ class NXP_Display : public HALina_Display{
 
 public:
     void update() override;
+    void updateISR(uint8_t prescaler);
     void init() override;
 
     NXP_Display() {

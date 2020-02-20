@@ -4,6 +4,7 @@
 // VL53L0X datasheet.
 
 #include "VL53L0X.h"
+#include "NXP_Kitty.hpp"
 //#include <Wire.h>
 
 #define LOG_CHANNEL SENSOR
@@ -41,11 +42,11 @@
 extern uint32_t millis();
 
 void VL53L0X::startTimeout() {
-    timeout_start_ms = millis();
+    timeout_start_ms = Kitty::millis();
 }
 
 bool VL53L0X::checkTimeoutExpired() {
-    return io_timeout > 0 && ((uint16_t)(millis() - timeout_start_ms) > io_timeout);
+    return io_timeout > 0 && ((uint16_t)(Kitty::millis() - timeout_start_ms) > io_timeout);
 }
 
 // Constructors ////////////////////////////////////////////////////////////////
