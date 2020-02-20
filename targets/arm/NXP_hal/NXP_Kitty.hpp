@@ -114,7 +114,7 @@ public:
     uint16_t jakisParameter16 = 321;
     uint8_t jakisParameter8 = 124;
 
-    std::vector<uint32_t*> menuParameters;
+    std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> menuParameters;
 
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};

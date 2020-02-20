@@ -26,11 +26,6 @@ namespace fsm{
     struct ValueDown{};
     struct StartRace{};
     struct EmergencyBreak{};
-    template<typename T>
-    struct AddParameter{
-        T parameter;
-    };
-
     struct Idle;
     struct Parameters;
     struct Race;
@@ -78,12 +73,11 @@ class NXP_Menu {
     halina::Switches& switches;
     NXP_Display& display;
     bool isMenuRunning = true;
-    std::vector<uint32_t*> &parameters;
+    std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> &parameters;
 
 private:
     using StateMachine = fsm::StateMachine<fsm::Idle, fsm::Parameters, fsm::Race>;
     StateMachine stateMachine{*this, *this, *this};
-
 
 public:
     static void button0InterruptHandler();
@@ -91,7 +85,7 @@ public:
     static void button2InterruptHandler();
     static void button3InterruptHandler();
 
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display, std::vector<uint32_t*> &parameters) : buttons(buttons), switches(switches), display(display), parameters(parameters){}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display &display, std::vector<std::variant<uint32_t*, uint16_t*, uint8_t*, float*, int32_t*, int16_t*, int8_t*, int*>> &parameters) : buttons(buttons), switches(switches), display(display), parameters(parameters){}
 
     void init();
 

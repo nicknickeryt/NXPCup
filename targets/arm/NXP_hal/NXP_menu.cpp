@@ -52,24 +52,35 @@ namespace fsm {
     void Parameters::on_entry(ChangeParameterDown const&) {
         log_debug("Parameters::on_entry::ChangeParameter")
         parametersCounter--;
+        menu.display.print(parametersCounter);
         log_debug("Current parameter: %d", parametersCounter);
     }
 
     void Parameters::on_entry(ValueUp const&) const {
         log_debug("Parameters::on_entry::ValueUp");
-        if(menu.parameters[parametersCounter] != nullptr){
-            *menu.parameters[parametersCounter] = *menu.parameters[parametersCounter] + 1;
-            menu.display.print(*menu.parameters[parametersCounter]);
-            log_debug("parameter: %d, value: %d ", parametersCounter, *menu.parameters[parametersCounter]);
+        if(parametersCounter < menu.parameters.size()){
+            if(auto pval = get_if<uint32_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval)))); }
+            if(auto pval = get_if<uint16_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<uint8_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<float*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(*(*pval), 2);}
+            if(auto pval = get_if<int32_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int16_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int8_t*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int*>(&menu.parameters[parametersCounter])){ ++(*(*pval)); menu.display.print(int((*(*pval))));}
         }
     }
 
     void Parameters::on_entry(ValueDown const&) const {
         log_debug("Parameters::on_entry::ValueDown");
-        if(menu.parameters[parametersCounter] != nullptr){
-            *menu.parameters[parametersCounter] = *menu.parameters[parametersCounter] - 1;
-            menu.display.print(*menu.parameters[parametersCounter]);
-            log_debug("parameter: %d, value: %d ", parametersCounter, *menu.parameters[parametersCounter]);
+        if(parametersCounter < menu.parameters.size()){
+            if(auto pval = get_if<uint32_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval)))); }
+            if(auto pval = get_if<uint16_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<uint8_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<float*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(*(*pval), 2);}
+            if(auto pval = get_if<int32_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int16_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int8_t*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
+            if(auto pval = get_if<int*>(&menu.parameters[parametersCounter])){ --(*(*pval)); menu.display.print(int((*(*pval))));}
         }
     }
 
