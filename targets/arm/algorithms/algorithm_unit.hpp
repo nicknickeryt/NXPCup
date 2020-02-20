@@ -20,7 +20,6 @@ class AlgorithmUnit{
         static constexpr auto cameraDataBufferSize = 128;
         // factor used to spread normalization output from range(0,1) to wider (0,1000)
         static constexpr auto cameraDataNormalizationFactor = 1000;
-        static constexpr auto blackOrWhitePixelThreshold = 55000;
         static constexpr auto lostLineOffset = 5;
         static constexpr auto keepPreviousPositionTime = 500;
 
@@ -43,7 +42,7 @@ class AlgorithmUnit{
         PatternsDetector patternsDetector;
         uint8_t carPosition{cameraDataBufferSize / 2};
         uint16_t keepPreviousPositionCounter{0};
-
+        uint16_t threshold = 0;
 
         NXP_Servo& servo;
         NXP_Uart& debug;
@@ -77,6 +76,8 @@ class AlgorithmUnit{
         void filter(uint16_t* data, uint8_t maxCount);
 
         void diff(uint16_t* data);
+
+        void setThreshold(uint16_t* data);
 
         int8_t computeCarPositionOnTrack();
 

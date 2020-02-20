@@ -76,7 +76,7 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
-    if(!menu.proc(systickTrigger)) {
+   // if(!menu.proc(systickTrigger)) {
         if (commandTerminalTrigger) {
             commandManager.run();
             commandTerminalTrigger = false;
@@ -95,7 +95,7 @@ void Kitty::proc() {
                 counter = 0;
             }
         }
-    }
+  //  }
     magicDiodComposition();
 }
 

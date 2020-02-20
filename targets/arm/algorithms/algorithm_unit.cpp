@@ -9,13 +9,15 @@
 
 #define LOG_CHANNEL ALGORITHM
 #define ALGORITHM_LOG_CHANNEL 3
-#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
+#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 #include "logger.h"
+#include <algorithm>
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
     filter(algorithmData.cameraData, 3);
-    diff(algorithmData.cameraData);
+    setThreshold(algorithmData.cameraData);
+    quantization(algorithmData.cameraData);
     diff(algorithmData.cameraData);
 
     // fixme: DEBUG
@@ -29,7 +31,7 @@ void AlgorithmUnit::analyze() {
 
     state = State::FINDING_TRACK_LINES;
     // find track lines
-    trackLinesDetector.detect((int16_t*)algorithmData.cameraData);
+    trackLinesDetector.detect(algorithmData.cameraData);
 
     auto result = computeCarPositionOnTrack();
     setServo(result);
@@ -42,10 +44,19 @@ void AlgorithmUnit::analyze() {
     patternsDetector.detect(algorithmData.cameraData);
 }
 
+void AlgorithmUnit::setThreshold(uint16_t* data){
+    uint32_t thresholdLocal = 0;
+    for(auto i = 0; i < cameraDataBufferSize; i++){
+        thresholdLocal += data[i];
+    }
+    thresholdLocal /= cameraDataBufferSize;
+    threshold = uint16_t(thresholdLocal);
+}
+
 void AlgorithmUnit::diff(uint16_t* data){
     int16_t diff[cameraDataBufferSize];
     for(auto i=0; i<cameraDataBufferSize; i++){
-        diff[i] = (int16_t)data[i] - (int16_t)data[i+1];
+        diff[i] = (data[i+1] >= data[i]) ? (int32_t(data[i+1]) - data[i]) : (int32_t(data[i]) - data[i+1]);
     }
     diff[cameraDataBufferSize-1] = 0;
 
@@ -117,8 +128,8 @@ void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) 
 void AlgorithmUnit::quantization(uint16_t *data) {
     // iterate through the data and assign 1 to the values above threshold and 0 to values below
     for (auto i = 0; i < cameraDataBufferSize; i++) {
-        if (data[i] >= blackOrWhitePixelThreshold) {
-            data[i] = 1;
+        if (data[i] >= threshold) {
+            data[i] = UINT16_MAX;
         } else{
             data[i] = 0;
         }
