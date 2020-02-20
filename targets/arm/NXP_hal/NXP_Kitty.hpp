@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <NXP_hal/VL53L0X.h>
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
@@ -19,8 +20,6 @@
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
 #include "NXP_I2C.hpp"
-#include "Adafruit_VL53L0X.h"
-
 
 void pit_sendCameraData(uint8_t);
 
@@ -77,10 +76,10 @@ private:
     NXP_ADC::Sample camera1Sample = {adc1mux, NXP_ADC::ChannelSingleEnded::B_CH3};
 
     // I2C
-    NXP_PORT sdaPort = {PORTE, 0, 6};
-    NXP_PORT sclPort = {PORTE, 1, 6};
-    NXP_I2C i2c = {I2C1, NXP_I2C::Mode::MASTER, sdaPort, sclPort, 100000};
+    NXP_PORT sdaPort = {PORTE, 0, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+    NXP_PORT sclPort = {PORTE, 1, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
 
+    NXP_I2C i2c = {I2C1, sdaPort, sclPort, 400000};
 
 public:
     // CAMERA
@@ -97,7 +96,7 @@ public:
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
     // DISTANCE SENSOR
-    Adafruit_VL53L0X distanceSensor = {&i2c};
+    VL53L0X sensor = {i2c};
 
 private:
     Kitty() = default;

@@ -140,11 +140,11 @@ typedef enum _i2c_slave_transfer_event
     kI2C_SlaveGenaralcallEvent = 0x40U, /*!< Received the general call address after a start or repeated start. */
 
     /*! A bit mask of all available events. */
-    kI2C_SlaveAllEvents = kI2C_SlaveAddressMatchEvent | kI2C_SlaveTransmitEvent | kI2C_SlaveReceiveEvent |
-#if defined(FSL_FEATURE_I2C_HAS_START_STOP_DETECT) && FSL_FEATURE_I2C_HAS_START_STOP_DETECT
-                          kI2C_SlaveStartEvent |
-#endif
-                          kI2C_SlaveCompletionEvent | kI2C_SlaveGenaralcallEvent,
+            kI2C_SlaveAllEvents = kI2C_SlaveAddressMatchEvent | kI2C_SlaveTransmitEvent | kI2C_SlaveReceiveEvent |
+                                  #if defined(FSL_FEATURE_I2C_HAS_START_STOP_DETECT) && FSL_FEATURE_I2C_HAS_START_STOP_DETECT
+                                  kI2C_SlaveStartEvent |
+                                  #endif
+                                  kI2C_SlaveCompletionEvent | kI2C_SlaveGenaralcallEvent,
 } i2c_slave_transfer_event_t;
 
 /*! @brief I2C master user configuration. */
@@ -176,7 +176,7 @@ typedef struct _i2c_slave_config
     uint16_t slaveAddress;  /*!< A slave address configuration. */
     uint16_t upperAddress;  /*!< A maximum boundary slave address used in a range matching mode. */
     i2c_slave_address_mode_t
-        addressingMode;          /*!< An addressing mode configuration of i2c_slave_address_mode_config_t. */
+            addressingMode;          /*!< An addressing mode configuration of i2c_slave_address_mode_config_t. */
     uint32_t sclStopHoldTime_ns; /*!< the delay from the rising edge of SCL (I2C clock) to the rising edge of SDA (I2C
                                     data) while SCL is high (stop condition), SDA hold time and SCL start hold time
                                     are also configured according to the SCL stop hold time. */

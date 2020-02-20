@@ -118,10 +118,10 @@ static void *s_i2cHandle[FSL_FEATURE_SOC_I2C_COUNT] = {NULL};
 
 /*! @brief SCL clock divider used to calculate baudrate. */
 static const uint16_t s_i2cDividerTable[] = {
-    20,  22,  24,  26,   28,   30,   34,   40,   28,   32,   36,   40,   44,   48,   56,   68,
-    48,  56,  64,  72,   80,   88,   104,  128,  80,   96,   112,  128,  144,  160,  192,  240,
-    160, 192, 224, 256,  288,  320,  384,  480,  320,  384,  448,  512,  576,  640,  768,  960,
-    640, 768, 896, 1024, 1152, 1280, 1536, 1920, 1280, 1536, 1792, 2048, 2304, 2560, 3072, 3840};
+        20,  22,  24,  26,   28,   30,   34,   40,   28,   32,   36,   40,   44,   48,   56,   68,
+        48,  56,  64,  72,   80,   88,   104,  128,  80,   96,   112,  128,  144,  160,  192,  240,
+        160, 192, 224, 256,  288,  320,  384,  480,  320,  384,  448,  512,  576,  640,  768,  960,
+        640, 768, 896, 1024, 1152, 1280, 1536, 1920, 1280, 1536, 1792, 2048, 2304, 2560, 3072, 3840};
 
 /*! @brief Pointers to i2c IRQ number for each instance. */
 static const IRQn_Type s_i2cIrqs[] = I2C_IRQS;
@@ -191,7 +191,7 @@ static void I2C_SetHoldTime(I2C_Type *base, uint32_t sclStopHoldTime_ns, uint32_
             /* Assume SCL hold(stop) value = s_i2cDividerTable[i]/2. */
             computedSclHoldTime = ((multiplier * s_i2cDividerTable[i]) * 500000U) / (sourceClock_Hz / 1000U);
             absError = sclStopHoldTime_ns > computedSclHoldTime ? (sclStopHoldTime_ns - computedSclHoldTime) :
-                                                                  (computedSclHoldTime - sclStopHoldTime_ns);
+                       (computedSclHoldTime - sclStopHoldTime_ns);
 
             if (absError < bestError)
             {
@@ -265,7 +265,7 @@ static status_t I2C_InitTransferStateMachine(I2C_Type *base, i2c_master_handle_t
         }
         I2C_MasterTransferHandleIRQ(base, handle);
     }
-    /* If repeated start is requested, send repeated start. */
+        /* If repeated start is requested, send repeated start. */
     else if (handle->transfer.flags & kI2C_TransferRepeatedStartFlag)
     {
         result = I2C_MasterRepeatedStart(base, handle->transfer.slaveAddress, direction);
@@ -289,7 +289,7 @@ static status_t I2C_CheckAndClearError(I2C_Type *base, uint32_t status)
         base->S = kI2C_ArbitrationLostFlag;
         result = kStatus_I2C_ArbitrationLost;
     }
-    /* Check NAK */
+        /* Check NAK */
     else if (status & kI2C_ReceiveNakFlag)
     {
         result = kStatus_I2C_Nak;
@@ -396,7 +396,7 @@ static status_t I2C_MasterTransferRunStateMachine(I2C_Type *base, i2c_master_han
             }
             break;
 
-        /* Send I2C data. */
+            /* Send I2C data. */
         case kSendDataState:
             /* Send one byte of data. */
             if (handle->transfer.dataSize > 0)
@@ -411,7 +411,7 @@ static status_t I2C_MasterTransferRunStateMachine(I2C_Type *base, i2c_master_han
             }
             break;
 
-        /* Start I2C data receive. */
+            /* Start I2C data receive. */
         case kReceiveDataBeginState:
             base->C1 &= ~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK);
 
@@ -428,7 +428,7 @@ static status_t I2C_MasterTransferRunStateMachine(I2C_Type *base, i2c_master_han
             handle->state = kReceiveDataState;
             break;
 
-        /* Receive I2C data. */
+            /* Receive I2C data. */
         case kReceiveDataState:
             /* Receive one byte of data. */
             if (handle->transfer.dataSize--)
@@ -783,7 +783,7 @@ status_t I2C_MasterStart(I2C_Type *base, uint8_t address, i2c_direction_t direct
         base->C1 |= I2C_C1_MST_MASK | I2C_C1_TX_MASK;
 
 #if defined(FSL_FEATURE_I2C_HAS_DOUBLE_BUFFERING) && FSL_FEATURE_I2C_HAS_DOUBLE_BUFFERING
-#if I2C_WAIT_TIMEOUT
+        #if I2C_WAIT_TIMEOUT
         uint32_t waitTimes = I2C_WAIT_TIMEOUT;
         while ((!(base->S2 & I2C_S2_EMPTY_MASK)) && (--waitTimes))
         {
@@ -844,7 +844,7 @@ status_t I2C_MasterRepeatedStart(I2C_Type *base, uint8_t address, i2c_direction_
         }
 
 #if defined(FSL_FEATURE_I2C_HAS_DOUBLE_BUFFERING) && FSL_FEATURE_I2C_HAS_DOUBLE_BUFFERING
-#if I2C_WAIT_TIMEOUT
+        #if I2C_WAIT_TIMEOUT
         uint32_t waitTimes = I2C_WAIT_TIMEOUT;
         while ((!(base->S2 & I2C_S2_EMPTY_MASK)) && (--waitTimes))
         {
@@ -967,7 +967,7 @@ status_t I2C_MasterWriteBlocking(I2C_Type *base, const uint8_t *txBuff, size_t t
     base->S = kI2C_IntPendingFlag;
 
     /* Setup the I2C peripheral to transmit data. */
-    base->C1 |= I2C_C1_TX_MASK;
+    base->C1 |= I2C_C1_TX_MASK | I2C_C1_MST_MASK;
 
     while (txSize--)
     {
@@ -1187,7 +1187,7 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
             return kStatus_InvalidArgument;
         }
     }
-    /* If repeated start is requested, send repeated start. */
+        /* If repeated start is requested, send repeated start. */
     else if (xfer->flags & kI2C_TransferRepeatedStartFlag)
     {
         result = I2C_MasterRepeatedStart(base, xfer->slaveAddress, direction);
@@ -2149,7 +2149,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
 #endif /* !FSL_FEATURE_I2C_HAS_START_STOP_DETECT or !FSL_FEATURE_I2C_HAS_STOP_DETECT */
         }
     }
-    /* Check address match. */
+        /* Check address match. */
     else if (status & kI2C_AddressMatchFlag)
     {
         handle->isBusy = true;
@@ -2182,7 +2182,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
             handle->callback(base, xfer, handle->userData);
         }
     }
-    /* Check transfer complete flag. */
+        /* Check transfer complete flag. */
     else if (status & kI2C_TransferCompleteFlag)
     {
         /* Slave transmit, master reading from slave. */
