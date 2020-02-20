@@ -156,6 +156,8 @@ class VL53L0X
     bool did_timeout;
     uint16_t timeout_start_ms;
 
+    bool initialised = false;
+
     uint8_t stop_variable; // read by init and used when starting measurement; is StopVariable field of VL53L0X_DevData_t structure in API
     uint32_t measurement_timing_budget_us;
 

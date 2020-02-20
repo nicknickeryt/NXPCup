@@ -298,6 +298,8 @@ bool VL53L0X::init(bool io_2v8)
 
   // VL53L0X_PerformRefCalibration() end
 
+
+    initialised = true;
   return true;
 }
 
@@ -859,6 +861,8 @@ uint16_t VL53L0X::readRangeContinuousMillimeters(void)
 // based on VL53L0X_PerformSingleRangingMeasurement()
 uint16_t VL53L0X::readRangeSingleMillimeters(void)
 {
+    if (!initialised) return 0;
+
   writeReg(0x80, 0x01);
   writeReg(0xFF, 0x01);
   writeReg(0x00, 0x00);
