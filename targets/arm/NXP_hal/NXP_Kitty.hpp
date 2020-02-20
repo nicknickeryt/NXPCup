@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <NXP_hal/VL53L0X.h>
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
@@ -16,6 +17,7 @@
 #include "NXP_motor.hpp"
 #include "NXP_PIT.hpp"
 #include "NXP_adc.hpp"
+#include "NXP_I2C.hpp"
 #include "NXP_camera.hpp"
 #include "NXP_DMA.h"
 #include "NXP_menu.hpp"
@@ -26,8 +28,13 @@
 
 void pit_generalHandler(uint32_t*);
 
+void pit_sendCameraData(uint8_t);
+
 class Kitty{
 private:
+    // SYSTICK
+    static uint_fast64_t milliseconds;
+
     // LEDS
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
     NXP_GPIO LED1 = NXP_GPIO(PORTA, GPIOA, 17U);
@@ -109,6 +116,12 @@ private:
                                                             Command("st", "", stopCallback)
                                                     }};
 
+    // I2C
+    NXP_PORT sdaPort = {PORTE, 0, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+    NXP_PORT sclPort = {PORTE, 1, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+
+    NXP_I2C i2c = {I2C1, sdaPort, sclPort, 400000};
+
 public:
     uint32_t jakisParameter32 = 51;
     uint16_t jakisParameter16 = 321;
@@ -127,7 +140,7 @@ public:
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
 
-   // DISPLAY
+    // DISPLAY
     NXP_Display display;
 
     // SERVO
@@ -135,6 +148,8 @@ public:
 
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+    // DISTANCE SENSOR
+    VL53L0X sensor = {i2c};
 
     // ALGORITHM
     AlgorithmUnit algorithmUnit = {servo, uartCommunication};
@@ -158,6 +173,14 @@ public:
     void init();
 
     void proc();
+
+    static void millisIncrease(){
+        milliseconds++;
+    }
+
+    static uint32_t millis(){
+        return milliseconds;
+    }
 
     static void printCommandManager(char data){
         Kitty::kitty().uartCommunication.write(data);

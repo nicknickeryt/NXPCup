@@ -21,9 +21,21 @@ void pit_generalHandler(uint32_t*) {
     commandTerminalTrigger = true;
 }
 
+uint_fast64_t Kitty::milliseconds = 0;
+extern "C" {
+bool systickTrigger = false;
+void SysTick_Handler(void) {
+    Kitty::millisIncrease();
+    systickTrigger = true;
+}
+}
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
+    SysTick_Config(SystemCoreClock / 1000);
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
 
     FTM_Init();
     uartDebug.init();
@@ -54,12 +66,33 @@ void Kitty::init() {
     menuParameters.emplace_back(&jakisParameter32);
     menuParameters.emplace_back(&jakisParameter16);
     menuParameters.emplace_back(&jakisParameter8);
+    servo.set(0.1);
+    camera.start();
+
+    sensor.setTimeout(500);
+
+    if (!sensor.init()) {
+        log_error("Failed to detect and initialize sensor!");
+    } else {
+        log_notice("Czujnik ok");
+    }
 }
 
 void Kitty::proc() {
+    magicDiodComposition();
+    camera.proc(cameraTrigger);
+    if(systickTrigger){
+        static uint32_t counter;
+        systickTrigger = false;
+        display.updateISR(5);
+        if(200 <= counter++){
+            uint16_t y = sensor.readRangeSingleMillimeters();
+            log_notice("result: %d", y);
+            counter = 0;
+        }
+    }
     if(!menu.proc()) {
         magicDiodComposition();
-        display.update();
         if (commandTerminalTrigger) {
             commandManager.run();
             commandTerminalTrigger = false;

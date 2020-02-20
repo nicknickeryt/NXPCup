@@ -32,7 +32,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO} algorithms/algorithm_unit.hpp algorithms/algorithm_unit.cpp algorithms/track_lines_detector.hpp algorithms/track_lines_detector.cpp algorithms/obstacle_detector.hpp algorithms/obstacle_detector.cpp algorithms/patterns_detector.cpp algorithms/patterns_detector.hpp NXP_hal/NXP_menu.cpp NXP_hal/NXP_menu.hpp)
+set(SOURCES ${SOURCES_AUTO} )
 
 add_executable(${NAME} ${SOURCES})
 
