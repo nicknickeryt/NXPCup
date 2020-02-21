@@ -37,6 +37,7 @@ void Kitty::init() {
     NVIC_EnableIRQ(SysTick_IRQn);
 
     uartCommunication.init();
+    uartDebug.init();
     sensor.init();
     log_notice("Procek wstal pomyslnie!");
 
