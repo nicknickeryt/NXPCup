@@ -12,6 +12,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++2a -Dregister=\"/**/\" -fconce
 
 set(PLATFORM_LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/MKL25Z128xxx4_Project_Release.ld)
 
-set(PROJECT_DIRECTORIES "board CMSIS drivers source startup")
+set(PROJECT_DIRECTORIES "board CMSIS drivers source startup NXP_hal")
 
 
