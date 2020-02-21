@@ -124,8 +124,6 @@ private:
 
 public:
     uint32_t jakisParameter32 = 51;
-    uint16_t jakisParameter16 = 321;
-    uint8_t jakisParameter8 = 124;
 
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};

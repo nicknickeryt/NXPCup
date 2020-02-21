@@ -85,8 +85,7 @@ class AlgorithmUnit{
 
     public:
         AlgorithmUnit(NXP_Servo& servo, NXP_Uart& debug) : trackLinesDetector(cameraDataBufferSize, 7, 3),
-                                         patternsDetector(trackLinesDetector.leftLine, trackLinesDetector.rightLine), servo(servo),
-                                         debug(debug){}
+                                         patternsDetector(trackLinesDetector.leftLine, trackLinesDetector.rightLine), servo(servo), debug(debug){}
 
         void analyze();
 };

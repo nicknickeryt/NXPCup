@@ -50,16 +50,13 @@ class TrackLinesDetector{
         Line leftLine;
         Line rightLine;
 
-        uint8_t blackPixelsNumberToDetectLine;
-
     private:
         void findLine(LineType line, uint16_t const* correlationDataBuffer);
 
     public:
         TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels, uint8_t blackPixelsNumberToDetectLine) :
                                                                                 cameraDataSize(cameraDataSize),
-                                                                                lineWidth(lineWidthInPixels),
-                                                                                blackPixelsNumberToDetectLine(blackPixelsNumberToDetectLine){
+                                                                                lineWidth(lineWidthInPixels){
             // magic initialization of start lines states - NIE RUSZAC, SPRAWDZONE, MA SENS
             leftLine.isDetected = false;
             leftLine.centerIndex = (cameraDataSize >> 1) - (spaceBetweenLinesInPixels >> 1);

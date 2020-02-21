@@ -55,7 +55,7 @@ void TrackLinesDetector::findLine(LineType lineType, uint16_t const* data){
         for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
             if(data[i] != 0){
                 line->isDetected = true;
-                line->centerIndex = i;
+                line->centerIndex = i - (lineWidth/2);
                 lineSearchingWindow = standardLineSearchingWindow;
                 break;
             }
