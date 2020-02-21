@@ -54,7 +54,7 @@ class TrackLinesDetector{
         void findLine(LineType line, uint16_t const* correlationDataBuffer);
 
     public:
-        TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels, uint8_t blackPixelsNumberToDetectLine) :
+        TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels) :
                                                                                 cameraDataSize(cameraDataSize),
                                                                                 lineWidth(lineWidthInPixels){
             // magic initialization of start lines states - NIE RUSZAC, SPRAWDZONE, MA SENS

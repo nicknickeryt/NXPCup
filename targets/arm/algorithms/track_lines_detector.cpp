@@ -31,19 +31,13 @@ void TrackLinesDetector::detect(uint16_t const* cameraData){
 
 void TrackLinesDetector::findLine(LineType lineType, uint16_t const* data){
     Line* line;
-    uint8_t startIndex = 0;
-    uint8_t stopIndex = 128;
 
     if(data != nullptr){
         switch(lineType){
             case LineType::LEFT:
-                startIndex = 0;
-                stopIndex = 63;
                 line = &leftLine;
                 break;
             case LineType::RIGHT:
-                startIndex = 64;
-                stopIndex = 127;
                 line = &rightLine;
                 break;
             default:
