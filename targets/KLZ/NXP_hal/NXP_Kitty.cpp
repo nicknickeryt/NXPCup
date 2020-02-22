@@ -37,18 +37,21 @@ void Kitty::init() {
 
     uartCommunication.init();
     uartDebug.init();
-//    sensor.init();
+    log_debug("uarts ready");
+    if(!sensor.init()){
+        log_error("Sensor was not initialized");
+    }
     log_notice("Procek wstal pomyslnie!");
 }
 
 void Kitty::proc() {
 //    if(systickTrigger){
-//        static uint32_t counter;
+        static uint32_t counter;
 //        systickTrigger = false;
-//        if(200 <= counter++){
-//            uint16_t y = sensor.readRangeSingleMillimeters();
-//            log_notice("result: %d", y);
-//            counter = 0;
-//        }
+        if(100000 <= counter++){
+            uint16_t y = sensor.readRangeSingleMillimeters();
+            log_notice("result: %d", y);
+            counter = 0;
+        }
 //    }
 }

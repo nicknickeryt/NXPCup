@@ -6,7 +6,12 @@
  *
  */
 
+#define LOG_CHANNEL SENSOR
+#define SENSOR_LOG_CHANNEL 2
+#define SENSOR_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
+
 #include "NXP_I2C.hpp"
+#include "logger.h"
 
 void NXP_I2C::init() {
     sdaPort.setMux();
@@ -21,21 +26,25 @@ void NXP_I2C::init() {
 }
 
 void NXP_I2C::beginTransmission(uint8_t address) {
+    log_debug("begin Transmission");
     txAddress = address << 1;
     txBuffer[0] = txAddress;
     dataInTxBuffer = 1;
 }
 
 void NXP_I2C::write(uint8_t reg) {
+    log_debug("write");
     txBuffer[dataInTxBuffer++] = reg;
 }
 
 void NXP_I2C::endTransmission() {
+    log_debug("end Transmission");
     I2C_MasterWriteBlocking(base, txBuffer, dataInTxBuffer, kI2C_TransferDefaultFlag);
     dataInTxBuffer = 0;
 }
 
 void NXP_I2C::requestFrom(uint8_t address, uint8_t count) {
+    log_debug("requestFrom");
     dataToRead = 0;
     rxAddress = address << 1 | 1u;
 
@@ -44,5 +53,6 @@ void NXP_I2C::requestFrom(uint8_t address, uint8_t count) {
 }
 
 uint8_t NXP_I2C::read() {
+    log_debug("read");
     return rxBuffer[dataToRead++];
 }
