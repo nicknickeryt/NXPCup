@@ -24,14 +24,14 @@ private:
     NXP_I2C i2c = {I2C1, sdaPort, sclPort, 100000};
 
     // UART
-    NXP_PORT uartDebugRx = {PORTA, 1, 2};
-    NXP_PORT uartDebugTx = {PORTA, 2, 2};
-    NXP_PORT uartRx = {PORTD, 4, 2};
-    NXP_PORT uartTx = {PORTD, 5, 2};
+    NXP_PORT uartDebugRx = {PORTC, 3, 3};
+    NXP_PORT uartDebugTx = {PORTC, 4, 3};
+    NXP_PORT uartRx = {PORTD, 4, 3};
+    NXP_PORT uartTx = {PORTD, 5, 3};
 
 public:
     // UART
-    NXP_Uart uartDebug = {(UART_Type*)UART0, 115200, uartDebugRx, uartDebugTx};
+    NXP_Uart uartDebug = {(UART_Type*)UART1, 115200, uartDebugRx, uartDebugTx};
     NXP_Uart uartCommunication = {(UART_Type*)UART2, 115200, uartRx, uartTx};
 
     // SENOSR

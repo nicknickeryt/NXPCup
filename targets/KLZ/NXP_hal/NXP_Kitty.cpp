@@ -30,7 +30,6 @@ void SysTick_Handler(void) {
 }
 
 void Kitty::init() {
-    BOARD_InitBootPins();
     BOARD_InitBootClocks();
     SysTick_Config(SystemCoreClock / 1000);
     NVIC_ClearPendingIRQ(SysTick_IRQn);
@@ -38,19 +37,18 @@ void Kitty::init() {
 
     uartCommunication.init();
     uartDebug.init();
-    sensor.init();
+//    sensor.init();
     log_notice("Procek wstal pomyslnie!");
-
 }
 
 void Kitty::proc() {
-    if(systickTrigger){
-        static uint32_t counter;
-        systickTrigger = false;
-        if(200 <= counter++){
-            uint16_t y = sensor.readRangeSingleMillimeters();
-            log_notice("result: %d", y);
-            counter = 0;
-        }
-    }
+//    if(systickTrigger){
+//        static uint32_t counter;
+//        systickTrigger = false;
+//        if(200 <= counter++){
+//            uint16_t y = sensor.readRangeSingleMillimeters();
+//            log_notice("result: %d", y);
+//            counter = 0;
+//        }
+//    }
 }

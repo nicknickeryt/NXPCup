@@ -15,7 +15,7 @@ NXP_Uart* nxpUartHandlers[6];
 
 NXP_Uart::NXP_Uart(UART_Type* uart, uint32_t baudrate, NXP_PORT& rxPin, NXP_PORT& txPin) :
     uart(uart), baudrate(baudrate), rxPin(rxPin), txPin(txPin), redirectHandler(nullptr) {
-    if(UART0 == (UART0_Type*)uart){
+    if(UART0 == uart){
         nxpUartHandlers[0] = this;
     } else if(UART1 == uart){
         nxpUartHandlers[1] = this;
@@ -68,7 +68,7 @@ void NXP_Uart::init(){
 
     enableInterrupt(InterruptType::RX_FULL);
 
-    if(uart == (UART_Type*)UART0){
+    if(uart == UART0){
         NVIC_ClearPendingIRQ(UART2_IRQn);
         NVIC_EnableIRQ(UART2_IRQn);
     } else if(UART1 == uart){
@@ -153,15 +153,15 @@ void UART_IRQ(NXP_Uart* nxpUartHandler) {
 }
 
 extern "C" {
-void UART0_RX_TX_IRQHandler() {
+void UART0_IRQHandler() {
     UART_IRQ(nxpUartHandlers[0]);
 }
 
-void UART1_RX_TX_IRQHandler() {
+void UART1_IRQHandler() {
     UART_IRQ(nxpUartHandlers[1]);
 }
 
-void UART2_RX_TX_IRQHandler() {
+void UART2_IRQHandler() {
     UART_IRQ(nxpUartHandlers[2]);
 }
 }

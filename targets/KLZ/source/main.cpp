@@ -9,7 +9,6 @@
 #include "NXP_Kitty.hpp"
 
 int main() {
-    BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 
