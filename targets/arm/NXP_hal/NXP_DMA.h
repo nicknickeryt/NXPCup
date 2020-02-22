@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "MKV58F24.h"
 #include "HALinia_DMA.h"
 
 class NXP_DMA : HALina_DMA {

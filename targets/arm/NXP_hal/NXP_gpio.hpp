@@ -48,19 +48,19 @@ public:
     void init() override;
 
     inline void set() override {
-        GPIO_SetPinsOutput(base, 1U << pin);
+        GPIO_PortSet(base, 1U << pin);
     }
 
     inline void reset() override {
-        GPIO_ClearPinsOutput(base, 1U << pin);
+        GPIO_PortClear(base, 1U << pin);
     }
 
     bool get() override {
-        return static_cast<bool>(GPIO_ReadPinInput(base, pin));
+        return static_cast<bool>(GPIO_PinRead(base, pin));
     }
 
     void toggle() override {
-        GPIO_TogglePinsOutput(base, 1U << pin);
+        GPIO_PortToggle(base, 1U << pin);
     }
 
     void appendInterrupt(Interrupt *portInterrupts, NXP_GPIO* gpio) {
