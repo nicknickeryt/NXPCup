@@ -13,19 +13,17 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
-bool algorithmTrigger = false;
-bool commandTerminalTrigger = false;
-void pit_generalHandler(uint32_t*) {
-    algorithmTrigger = true;
-    commandTerminalTrigger = true;
-}
 
 uint_fast64_t Kitty::milliseconds = 0;
 extern "C" {
-bool systickTrigger = false;
+volatile bool systickTrigger = false;
 void SysTick_Handler(void) {
     Kitty::millisIncrease();
-    systickTrigger = true;
+    static auto counter = 0;
+    if(200 == counter++) {
+        systickTrigger = true;
+        counter = 0;
+    }
 }
 }
 
@@ -37,21 +35,11 @@ void Kitty::init() {
 
     uartCommunication.init();
     uartDebug.init();
-    log_debug("uarts ready");
-    if(!sensor.init()){
-        log_error("Sensor was not initialized");
-    }
+    algorithm.init();
+    uartCommunication.write("xD", 2);
     log_notice("Procek wstal pomyslnie!");
 }
 
 void Kitty::proc() {
-//    if(systickTrigger){
-        static uint32_t counter;
-//        systickTrigger = false;
-        if(100000 <= counter++){
-            uint16_t y = sensor.readRangeSingleMillimeters();
-            log_notice("result: %d", y);
-            counter = 0;
-        }
-//    }
+    algorithm.proc(systickTrigger);
 }

@@ -26,7 +26,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO} )
+set(SOURCES ${SOURCES_AUTO} source/algorithm.cpp source/algorithm.h NXP_hal/NXP_frame.hpp)
 
 add_executable(${NAME} ${SOURCES})
 

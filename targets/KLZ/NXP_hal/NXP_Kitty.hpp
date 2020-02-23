@@ -12,6 +12,7 @@
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
+#include "algorithm.h"
 
 class Kitty{
 private:
@@ -26,16 +27,23 @@ private:
     // UART
     NXP_PORT uartDebugRx = {PORTC, 3, 3};
     NXP_PORT uartDebugTx = {PORTC, 4, 3};
-    NXP_PORT uartRx = {PORTD, 4, 3};
-    NXP_PORT uartTx = {PORTD, 5, 3};
+    NXP_PORT uartRx = {PORTA, 1, 2};
+    NXP_PORT uartTx = {PORTA, 2, 2};
+
+    // LEDS
+    NXP_GPIO ledLeft = {PORTD, GPIOD, 2, NXP_GPIO::Mode::OUTPUT};
+    NXP_GPIO ledLeftFront = {PORTD, GPIOD, 7, NXP_GPIO::Mode::OUTPUT};
+    NXP_GPIO ledRight = {PORTE, GPIOE, 2, NXP_GPIO::Mode::OUTPUT};
+    NXP_GPIO ledRightFront = {PORTE, GPIOE, 22, NXP_GPIO::Mode::OUTPUT};
+    std::array<NXP_GPIO, 4> leds = {ledLeft, ledLeftFront, ledRight, ledRightFront};
 
 public:
     // UART
-    NXP_Uart uartDebug = {(UART_Type*)UART1, 115200, uartDebugRx, uartDebugTx};
-    NXP_Uart uartCommunication = {(UART_Type*)UART2, 115200, uartRx, uartTx};
+    NXP_Uart uartDebug = {UART1, 115200, uartDebugRx, uartDebugTx};
+    NXP_Uart uartCommunication = {UART0, 115200, uartRx, uartTx};
 
-    // SENOSR
-    VL53L0X sensor = {i2c};
+    Algorithm algorithm = {i2c, uartCommunication, leds};
+
 
 private:
     Kitty() = default;
