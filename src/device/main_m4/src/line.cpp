@@ -4102,13 +4102,6 @@ int line_reversePrimary()
 
 int line_legoLineData(uint8_t *buf, uint32_t buflen)
 {
-#if 0
-    buf[0] = 1;
-    buf[1] = 2;
-    buf[2] = 3;
-    buf[3] = 4;
-    
-#else
     SimpleListNode<Tracker<DecodedBarCode> > *j;
     uint8_t codeVal;
     uint16_t maxy;
@@ -4171,9 +4164,7 @@ int line_legoLineData(uint8_t *buf, uint32_t buflen)
     if (g_newIntersection)
         g_newIntersection = false;
     
-    memcpy(lastData, buf, 4);
-#endif
-    
+    memcpy(lastData, buf, 4);   
     return 4;
 }
 

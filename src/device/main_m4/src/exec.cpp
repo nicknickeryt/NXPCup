@@ -608,15 +608,13 @@ void exec_select()
 	exec_runProg(g_progIndex);
 }
 
-static void loadParams()
-{
+static void loadParams() {
 	int i;
 	char buf[256], buf2[64];
 
 	// create program menu
 	strcpy(buf, "Selects the program number that's run upon power-up. @c Expert");
-	for (i=0; i<ProgTableUtil::m_progTableIndex; i++)
-	{
+	for (i=0; i<ProgTableUtil::m_progTableIndex; i++) {
 		sprintf(buf2, " @s %d=%s", i, ProgTableUtil::m_progTable[i].m_name);
 		strcat(buf, buf2);
 	} 
@@ -630,44 +628,28 @@ static void loadParams()
 	
 	prm_get("Debug", &g_debug, END);
 	prm_get("Default program", &g_defaultProgram, END);
-	
 }
 
-void exec_loadParams()
-{
+void exec_loadParams() {
  	cc_loadParams();
 	ser_loadParams();
 	cam_loadParams();
-#ifndef LEGO
 	rcs_loadParams();
-#endif
 	line_loadParams(exec_getProgIndex(PROG_NAME_LINE));
 	loadParams(); // local
 }
 
-int8_t exec_progIndex()
-{
+int8_t exec_progIndex() {
 	return g_progIndex;
 }
 
-
-//#define FOO
-
-void exec_mainLoop()
-{
+void exec_mainLoop() {
 	bool prevConnected = false;
 	bool connected, gui;
 	uint8_t saveIndex;
-	
-#ifdef FOO
-	g_state = 4;
-#else
-	g_state = 0;
-#endif
 
-#ifndef FOO
+	g_state = 0;
 	exec_select();
-#endif
 
 	// enable USB *after* we've initialized chirp, all modules and selected the program
 	USBLink *usbLink = new USBLink;
@@ -675,59 +657,49 @@ void exec_mainLoop()
 
 	g_runningProgIndex = EXEC_MAX_PROGS;
 	
-	while(1)
-	{
+	while(1) {
 		connected = g_chirpUsb->connected();
 		gui = connected && USB_Configuration && g_chirpUsb->hinformer();
 		
 		exec_periodic();
 
-		switch (g_state)
-		{
+		switch (g_state) {
 		case 0:	// setup state
 			led_set(0);  // turn off any stray led 
 			saveIndex = g_progIndex; // save off program index to eliminate any race conditions with ISRs
 		
-			if (g_runningProgIndex!=saveIndex || g_prog==NULL) // new program
-			{
-				// if we're running a program already, exit
-				exec_progExit(); 
-				// reset shadow parameters, invalidate current view, ledOverride but only if we're switching programs
-				if (g_runningProgIndex!=saveIndex)
-				{
+			if (g_runningProgIndex!=saveIndex || g_prog==NULL) { // new program 
+				exec_progExit(); // if we're running a program already, exit
+				if (g_runningProgIndex!=saveIndex) { // reset shadow parameters, invalidate current view, ledOverride but only if we're switching programs
 					// reset shadows
 					prm_resetShadows();
 					Prog::m_view = -1; 
 					cc_setLEDOverride(false);
 				}
-				if (exec_progSetup(saveIndex)<0) // then run				
+				if (exec_progSetup(saveIndex)<0) { // then run				
 					g_state = 3; // stop state
-				else 
-				{
-					if (g_runningProgIndex!=saveIndex)
-					{
+				} else {
+					if (g_runningProgIndex!=saveIndex) {
 						exec_sendEvent(g_chirpUsb, EVT_PROG_CHANGE);
 						g_runningProgIndex = saveIndex; // update g_runningProgIndex and arg -- we're now transitioned
 					}
 					g_state = LOOP_STATE; // loop state
 				}
-			}
-			else
+			} else {
 				g_state = LOOP_STATE;
+			}
 			break;
 
 		case LOOP_STATE:  // loop state, program is running
 			ser_setReady(); // we're ready
 			ser_update(); // update serial while we're running
-			if (!g_run)
+			if (!g_run) {
 				g_state = 3; // stop state
-			// if g_program has been changed out from under us...
-			else if (g_progIndex!=g_runningProgIndex)
+			} else if (g_progIndex!=g_runningProgIndex) { // if g_program has been changed out from under us...
 				g_state = 0; // transition out of this program and arg, to the next
-			else if (exec_progLoop(gui)<0)
+			} else if (exec_progLoop(gui)<0) {
 				g_state = 3; // stop state
-			else if (prevConnected && !connected) // if we disconnect from pixymon, revert back to default program
-			{
+			} else if (prevConnected && !connected) { // if we disconnect from pixymon, revert back to default program 
 				exec_runProg(g_defaultProgram); // run default program
 				g_state = 0; // setup state
 			}
@@ -743,27 +715,23 @@ void exec_mainLoop()
 			break;
 
 		case 4:	// wait for run state
-#ifndef FOO
-			if (g_run) 
-			{
+			if (g_run) {
 				exec_run();
 				g_state = 0; // back to setup state
-			}
-			else if (!connected || !USB_Configuration) // if we disconnect from pixy or unplug cable, revert back to default program
-			{
+			} else if (!connected || !USB_Configuration) { // if we disconnect from pixy or unplug cable, revert back to default program
 				exec_runProg(g_defaultProgram); // run default program
 				g_state = 0;	// back to setup state
 			}
-#endif
 			break;
 				
 		default:
 			g_state = 3; // stop state				
 		}
-
 		prevConnected = connected;
 	}
 }
+
+
 
 int exec_progSetup(uint8_t progIndex)
 {

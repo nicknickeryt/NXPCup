@@ -102,48 +102,7 @@ int ProgLine::packet(uint8_t type, const uint8_t *data, uint8_t len, bool checks
 		else
 			ser_sendError(res, checksum);
 		return 0;
-	}
-	else if (type==TYPE_REQUEST_SET_NEXT_TURN_ANGLE)
-	{
-		if (len==2)
-			res = line_setNextTurnAngle(*(int16_t *)data);
-		if (res>=0)
-			ser_sendResult(res, checksum);
-		else
-			ser_sendError(res, checksum);
-		return 0;
-	}
-	else if (type==TYPE_REQUEST_SET_DEFAULT_TURN_ANGLE)
-	{
-		if (len==2)
-			res = line_setDefaultTurnAngle(*(int16_t *)data);
-		if (res>=0)
-			ser_sendResult(res, checksum);
-		else
-			ser_sendError(res, checksum);
-		return 0;
-	}
-	else if (type==TYPE_REQUEST_SET_VECTOR)
-	{
-		if (len==1)
-			res = line_setVector(*(int8_t *)data);
-		if (res>=0)
-			ser_sendResult(res, checksum);
-		else
-			ser_sendError(res, checksum);		
-		return 0;
-	}
-	else if (type==TYPE_REQUEST_REVERSE_VECTOR)
-	{
-		if (len==0)
-			res = line_reversePrimary();
-		if (res>=0)
-			ser_sendResult(res, checksum);
-		else
-			ser_sendError(res, checksum);
-		return 0;
 	}		
-		
 	// nothing rings a bell, return error
 	return -1;
 }

@@ -103,8 +103,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 		error = exec_setProgIndex(video)!=video;
 	}
 	
-		
-#if 1
 	if (c==0x00)
 	{
 		const char *str = "V0.4";
@@ -124,19 +122,9 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 		return 6;		
 	}
 	else 
-#endif
 	if (c==0x50)
 	{
 		BlobA *max;
-#if 0
-		buf[0] = 1;
-		buf[1] = 2;
-		buf[2] = 3;
-		buf[3] = 4;
-		buf[4] = 5;
-		buf[5] = 6;
-		buf[6] = 7;
-#else
 		max = (BlobA *)g_blobs->getMaxBlob();
 		if (max==0)
 			memset(buf, 0, 7);
@@ -160,8 +148,7 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 				temp = ((int32_t)max->m_angle*91)>>7;
 				g_angle = temp;
 			}
-		}
-#endif		
+		}		
 		return 6;
 	}
 	else if (c==0x60)
@@ -171,13 +158,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 	}
 	else if (c>=0x51 && c<=0x57)
 	{
-#if 0
-		buf[0] = 1;
-		buf[1] = 2;
-		buf[2] = 3;
-		buf[3] = 4;
-		buf[4] = 5;
-#else
 		BlobA *max;
 		max = g_blobs->getMaxBlob(c-0x50, &numBlobs);
 		if (max==0)
@@ -198,7 +178,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 			temp = (height*1262)>>10;
 			buf[4] = temp; // height
 		}
-#endif
 		return 5;
 	}
 	else if (c==0x58)
@@ -206,14 +185,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 		BlobA *max;
 		if (serial->receive((uint8_t *)&d, 2)<2) // receive cc signature to look for
 			return 0;
-#if 0
-		buf[0] = 1;
-		buf[1] = 2;
-		buf[2] = 3;
-		buf[3] = 4;
-		buf[4] = 5;
-		buf[5] = 6;
-#else
 		max = (BlobA *)g_blobs->getMaxBlob(d, &numBlobs); 
 		if (max==0)
 			memset(buf, 0, 6);
@@ -235,7 +206,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 			temp = ((int32_t)max->m_angle*91)>>7;
 			buf[5] = temp; // angle
 		}
-#endif
 		return 6;
 	}
 	else if (c==0x5a)
@@ -318,14 +288,7 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 		return 1;
 	}
 	else  
-	{
-#if 0
-		static uint8_t c = 0;
-
-		buf[0] = c++;
-#else
-		//printf("%x\n", c);														  
-
+	{										  
 		if (c==0x42) // this works in port view mode on the ev3's LCD
 		{
 			BlobA *max;
@@ -341,8 +304,6 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 		}
 		else
 			buf[0] = 1;	 // need to return nonzero value for other inquiries or LEGO brick will think we're an analog sensor
-
-#endif
 		return 1;
 	}
 }
