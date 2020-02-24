@@ -78,7 +78,7 @@ private:
 public:
     struct MenuParameters {
         std::vector<std::variant<uint32_t *, uint16_t *, uint8_t *, float *, int32_t *, int16_t *, int8_t *, int *>> parameters;
-        std::vector<uint8_t> divider;
+        std::vector<float> divider;
     };
 private:
     MenuParameters parameters;
@@ -98,7 +98,7 @@ public:
     void addParameter(int32_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
     void addParameter(int16_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
     void addParameter(int8_t* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
-    void addParameter(float* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
+    void addParameter(float* data, float divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
     void addParameter(int* data, uint8_t divider = 1){ parameters.parameters.emplace_back(data); parameters.divider.emplace_back(divider);};
 
     static void buttonHandler();

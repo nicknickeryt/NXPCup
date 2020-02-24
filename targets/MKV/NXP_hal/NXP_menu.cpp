@@ -62,6 +62,7 @@ bool NXP_Menu::proc(bool &systickTrigger){
 namespace fsm {
     void Idle::on_entry(const StartMenu &) const {
         menu.display.print(0);
+        menu.stateMachine.handle(ChangeParameterUp{});
     }
 
     void Idle::on_entry(const EmergencyBreak &) const {
@@ -92,6 +93,8 @@ namespace fsm {
             if(auto pval = get_if<int16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<int8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<int*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) += menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+        }else{
+            log_debug("wrong type!");
         }
     }
 
@@ -101,17 +104,20 @@ namespace fsm {
             if(auto pval = get_if<uint32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval)))); }
             if(auto pval = get_if<uint16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<uint8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
-            if(auto pval = get_if<float*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(*(*pval), 2);}
+            if(auto pval = get_if<float*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(*(*pval), 2); log_debug("%f", *(*pval));}
             if(auto pval = get_if<int32_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<int16_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<int8_t*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
             if(auto pval = get_if<int*>(&menu.parameters.parameters[parametersCounter])){ (*(*pval)) -= menu.parameters.divider[parametersCounter]; menu.display.print(int((*(*pval))));}
+        }else{
+            log_debug("wrong type!");
         }
     }
 
     void Race::on_entry(const StartRace &) const {
         log_debug("Race::on_entry::StartRace");
         menu.isMenuRunning = false;
+        Kitty::kitty().motors.run();
         menu.display.disable();
     }
 }

@@ -29,17 +29,17 @@ void SysTick_Handler(void) {
 
 void Kitty::init() {
     BOARD_InitBootClocks();
-    SysTick_Config(SystemCoreClock / 1000);
-    NVIC_ClearPendingIRQ(SysTick_IRQn);
-    NVIC_EnableIRQ(SysTick_IRQn);
-
-    uartCommunication.init();
-    uartDebug.init();
-    algorithm.init();
-    uartCommunication.write("xD", 2);
-    log_notice("Procek wstal pomyslnie!");
+//    SysTick_Config(SystemCoreClock / 1000);
+//    NVIC_ClearPendingIRQ(SysTick_IRQn);
+//    NVIC_EnableIRQ(SysTick_IRQn);
+//
+//    uartCommunication.init();
+//    uartDebug.init();
+//    algorithm.init();
+//    uartCommunication.write("xD", 2);
+//    log_notice("Procek wstal pomyslnie!");
 }
 
 void Kitty::proc() {
-    algorithm.proc(systickTrigger);
+//    algorithm.proc(systickTrigger);
 }

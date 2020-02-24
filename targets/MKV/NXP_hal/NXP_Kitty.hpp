@@ -84,6 +84,8 @@ private:
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
     NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
+    NXP_PORT uart4TXmux = {PORTE, 25U, 0x08};
+    NXP_PORT uart4RXmux = {PORTE, 24U, 0x08};
 
     // SERVO
     NXP_PORT servoPort = {PORTA, 7, 0x03};
@@ -135,6 +137,7 @@ public:
     // UART
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartToKLZ = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY
     NXP_Display display;
@@ -148,7 +151,7 @@ public:
     VL53L0X sensor = {i2c};
 
     // ALGORITHM
-    AlgorithmUnit algorithmUnit = {servo, uartCommunication};
+    AlgorithmUnit algorithmUnit = {servo, uartCommunication, switches};
 
     // MENU
     NXP_Menu::MenuParameters menuParameters;

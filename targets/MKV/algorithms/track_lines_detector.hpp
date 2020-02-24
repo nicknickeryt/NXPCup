@@ -51,7 +51,7 @@ class TrackLinesDetector{
         Line rightLine;
 
     private:
-        void findLine(LineType line, uint16_t const* correlationDataBuffer);
+        void findLine(LineType line, int16_t const* correlationDataBuffer);
 
     public:
         TrackLinesDetector(uint8_t cameraDataSize, uint8_t lineWidthInPixels) :
@@ -69,6 +69,6 @@ class TrackLinesDetector{
             rightLine.rightBorderIndex = (cameraDataSize >> 1) + (spaceBetweenLinesInPixels >> 1) + (lineSearchingWindow >> 1);
         }
 
-        void detect(uint16_t const* cameraData);
+        void detect(int16_t const* cameraData);
 
 };

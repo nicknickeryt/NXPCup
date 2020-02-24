@@ -18,7 +18,10 @@ void AlgorithmUnit::analyze() {
     filter(algorithmData.cameraData, 3);
     setThreshold(algorithmData.cameraData);
     quantization(algorithmData.cameraData);
-    diff(algorithmData.cameraData);
+    diff((int16_t*)algorithmData.cameraData);
+    if(!darkBackgroundMode){
+        deleteUnusedLines(algorithmData.cameraData);
+    }
 
     // fixme: DEBUG
     uint8_t camera1DataBuffer[260];
@@ -31,7 +34,7 @@ void AlgorithmUnit::analyze() {
 
     state = State::FINDING_TRACK_LINES;
     // find track lines
-    trackLinesDetector.detect(algorithmData.cameraData);
+    trackLinesDetector.detect((int16_t*)algorithmData.cameraData);
 
     auto result = computeCarPositionOnTrack();
     setServo(result);
@@ -53,14 +56,29 @@ void AlgorithmUnit::setThreshold(uint16_t* data){
     threshold = uint16_t(thresholdLocal);
 }
 
-void AlgorithmUnit::diff(uint16_t* data){
+void AlgorithmUnit::diff(int16_t* data){
     int16_t diff[cameraDataBufferSize];
     for(auto i=0; i<cameraDataBufferSize; i++){
-        diff[i] = (data[i+1] >= data[i]) ? (int32_t(data[i+1]) - data[i]) : (int32_t(data[i]) - data[i+1]);
+        diff[i] = data[i+1] - data[i];
     }
     diff[cameraDataBufferSize-1] = 0;
 
     memcpy(data, diff, sizeof(diff));
+}
+
+void AlgorithmUnit::deleteUnusedLines(uint16_t* data){
+    for(auto i = 0; (i < cameraDataBufferSize / 2); i++){
+        if(data[i] != 0){
+            data[i] = 0;
+            break;
+        }
+    }
+    for(auto i = cameraDataBufferSize; i > (cameraDataBufferSize / 2); i--){
+        if(data[i] != 0){
+            data[i] = 0;
+            break;
+        }
+    }
 }
 
 void AlgorithmUnit::filter(uint16_t* data, uint8_t maxCount){
@@ -129,7 +147,7 @@ void AlgorithmUnit::quantization(uint16_t *data) {
     // iterate through the data and assign 1 to the values above threshold and 0 to values below
     for (auto i = 0; i < cameraDataBufferSize; i++) {
         if (data[i] >= threshold) {
-            data[i] = UINT16_MAX;
+            data[i] = 1;
         } else{
             data[i] = 0;
         }
@@ -175,4 +193,8 @@ void AlgorithmUnit::setServo(int8_t value){
     }else{
         servo.set(0.0);
     }
+}
+
+void AlgorithmUnit::checkSwitches() {
+    darkBackgroundMode = !switches.at(0).get();
 }

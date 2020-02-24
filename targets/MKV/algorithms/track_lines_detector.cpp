@@ -14,7 +14,7 @@
 
 #include "logger.h"
 
-void TrackLinesDetector::detect(uint16_t const* cameraData){
+void TrackLinesDetector::detect(int16_t const* cameraData){
     if(cameraData != nullptr){
         findLine(LineType::LEFT, cameraData);
         findLine(LineType::RIGHT, cameraData);
@@ -29,11 +29,10 @@ void TrackLinesDetector::detect(uint16_t const* cameraData){
     }
 }
 
-void TrackLinesDetector::findLine(LineType lineType, uint16_t const* data){
+void TrackLinesDetector::findLine(LineType lineType, int16_t const* data){
     Line* line;
-
-    if(data != nullptr){
-        switch(lineType){
+    if(data != nullptr) {
+        switch (lineType) {
             case LineType::LEFT:
                 line = &leftLine;
                 break;
@@ -44,14 +43,14 @@ void TrackLinesDetector::findLine(LineType lineType, uint16_t const* data){
                 break;
         }
 
-        // find max value
-        line->isDetected = false;
         for(auto i = line->leftBorderIndex; i < line->rightBorderIndex; i++){
-            if(data[i] != 0){
+            if(data[i] != 0) {
                 line->isDetected = true;
-                line->centerIndex = i - (lineWidth/2);
+                line->centerIndex = i;
                 lineSearchingWindow = standardLineSearchingWindow;
-                break;
+                return;
+            }else{
+                line->isDetected = false;
             }
         }
     }

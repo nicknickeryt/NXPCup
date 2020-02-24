@@ -18,11 +18,11 @@ void NXP_Motor::init(){
 void NXP_Motor::setValue(float value) {
     value = std::clamp(value, -1.0f, 1.0f);
 
-    if (value >= 0.0f) {
-        pwm.setDutyCycle(value, pwm.channelFirst);
+    if (value <= 0.0f) {
+        pwm.setDutyCycle(-value, pwm.channelFirst);
         pwm.setDutyCycle(0.0f, pwm.channelSecond);
     } else {
-        pwm.setDutyCycle(-value, pwm.channelSecond);
+        pwm.setDutyCycle(value, pwm.channelSecond);
         pwm.setDutyCycle(0.0f, pwm.channelFirst);
     }
 }
