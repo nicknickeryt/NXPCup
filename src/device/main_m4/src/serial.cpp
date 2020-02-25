@@ -336,10 +336,11 @@ void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
 		exec_progPacket(type, rxData, len, checksum);
 	else if (type==SER_TYPE_REQUEST_CHANGE_PROG)
 	{
-		res = exec_runProgName((const char *)rxData);
+		/* res = exec_runProgName((const char *)rxData);
 		if (res<0)
 			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
 		else
+		*/ 
 			ser_sendResult(res, checksum);
 	}
 	else if (type==SER_TYPE_REQUEST_RESOLUTION)
