@@ -46,6 +46,8 @@
 #define BARCODELINE_POINTS_SIZE     6               // arbitrary
 #define BARCODECANDIDATES_SIZE      4                                   // arbitrary
 
+// #define LINE_GRID_WIDTH 200
+// #define LINE_GRID_HEIGHT 100
 struct Point_u16
 {
     uint16_t x;
@@ -529,53 +531,50 @@ int32_t line_getEdges()
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 {
+		
     uint16_t j, index, bit0, bit1, col0, col1, lineWidth;
 
-    // copy a lot of code to reduce branching, make it faster
-    if (g_whiteLine) // pos neg
-    {
-        for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
-        {
-            bit0 = buf[j]&EQ_NEGATIVE;
-            bit1 = buf[j+1]&EQ_NEGATIVE;
-            col0 = buf[j]&~EQ_NEGATIVE;
-            col1 = buf[j+1]&~EQ_NEGATIVE;
-            if (bit0==0 && bit1!=0)
-            {
-                lineWidth = col1 - col0;
-                if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
-                {
-                    index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
-                    if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-                        g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;
-                    else
-                        cprintf(0, "high index\n");
-                }
-            }
-        }
-    }
-    else // black line
-    {
-         for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
-        {
-            bit0 = buf[j]&EQ_NEGATIVE;
-            bit1 = buf[j+1]&EQ_NEGATIVE;
-            col0 = buf[j]&~EQ_NEGATIVE;
-            col1 = buf[j+1]&~EQ_NEGATIVE;
-            if (bit0!=0 && bit1==0)
-            {
-                lineWidth = col1 - col0;
-                if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
-                {
-                    index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
-                    if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-                        g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;
-                    else
-                        cprintf(0, "high index\n");
-                }
-            }
-        }
-    }
+		if(row == 50) {
+				
+		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
+		{
+				bit0 = buf[j]&EQ_NEGATIVE;
+				bit1 = buf[j+1]&EQ_NEGATIVE;
+				col0 = buf[j]&~EQ_NEGATIVE;
+				col1 = buf[j+1]&~EQ_NEGATIVE;
+				if (bit0!=0 && bit1==0)
+				{
+					
+						// cprintf(0, "dupa %d %d %d  ", col0, col1, len);
+					
+						lineWidth = col1 - col0;
+					
+						Point p1, p2;
+		
+						p1.m_y = 50 / 2;
+						p1.m_x = col0 / 8;
+						
+						
+								
+						p2.m_y = 50 / 2;
+						p2.m_x = col1 / 8;
+						
+						g_nodesList.add(p1);
+						g_nodesList.add(p2);
+					/**/
+					
+						if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
+						{
+								index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
+							
+								if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
+										g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;
+								else
+										cprintf(0, "high index\n");
+						}
+				}
+		}
+	}
     
     return 0;
 }
@@ -584,58 +583,37 @@ int line_vLine(uint8_t row, uint8_t *vstate, uint16_t *buf, uint32_t len)
 {
     uint16_t i, index, bit0, col0, lineWidth;
 
-    if (g_whiteLine)
-    {
-        for (i=0; buf[i]<EQ_HSCAN_LINE_START && i<len; i++)
-        {
-            bit0 = buf[i]&EQ_NEGATIVE;
-            col0 = (buf[i]&~EQ_NEGATIVE)>>2;
-            if (bit0==0) // pos
-                vstate[col0] = row+1;
-            else // bit0!=0, neg
-            {
-                if (vstate[col0]!=0)
-                {
-                    lineWidth = (row - (vstate[col0]-1))<<2; // multiply by 4 because vertical is subsampled by 4
-                    if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth && col0<LINE_VSIZE)
-                    {
-                        index = LINE_GRID_INDEX(col0>>1, (row - (lineWidth>>3))>>1);
-                        if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-                            g_lineGrid[index] |= LINE_NODE_FLAG_VLINE;
-                        else
-                            cprintf(0, "high index\n");
-                    }
-                    vstate[col0] = 0;
-                }
-            }
-        }
-    }
-    else // black line
-    {
-        for (i=0; buf[i]<EQ_HSCAN_LINE_START && i<len; i++)
-        {
-            bit0 = buf[i]&EQ_NEGATIVE;
-            col0 = (buf[i]&~EQ_NEGATIVE)>>2;
-            if (bit0!=0) // neg
-                vstate[col0] = row+1;
-            else // bit0==0, pos
-            {
-                if (vstate[col0]!=0)
-                {
-                    lineWidth = (row - (vstate[col0]-1))<<2; // multiply by 4 because vertical is subsampled by 4
-                    if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth && col0<LINE_VSIZE)
-                    {
-                        index = LINE_GRID_INDEX(col0>>1, (row - (lineWidth>>3))>>1);
-                        if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-                            g_lineGrid[index] |= LINE_NODE_FLAG_VLINE;
-                        else
-                            cprintf(0, "high index\n");
-                    }
-                    vstate[col0] = 0;
-                }
-            }
-        }
-    }
+	// 
+		// if (row != 200) return 0;
+    
+	if (row == 50) {
+		//cprintf(0, "row %d %d\n", row, len);
+		
+		for (i=0; buf[i]<EQ_HSCAN_LINE_START && i<len; i++)
+		{
+				bit0 = buf[i]&EQ_NEGATIVE;
+				col0 = (buf[i]&~EQ_NEGATIVE)>>2;
+				if (bit0!=0) // neg
+						vstate[col0] = row+1;
+				else // bit0==0, pos
+				{
+						if (vstate[col0]!=0)
+						{
+								lineWidth = (row - (vstate[col0]-1))<<2; // multiply by 4 because vertical is subsampled by 4
+								if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth && col0<LINE_VSIZE)
+								{
+										index = LINE_GRID_INDEX(col0>>1, (row - (lineWidth>>3))>>1);
+										if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
+												g_lineGrid[index] |= LINE_NODE_FLAG_VLINE;
+										else
+												cprintf(0, "high index\n");
+								}
+								vstate[col0] = 0;
+						}
+				}
+		}
+	}/**/
+    
     return 0;
 }
 
@@ -1969,63 +1947,6 @@ void sendPrimaryFeatures(uint8_t renderFlags)
         
     
 }
-/*
-
-int16_t voteCodes(BarCodeCluster *cluster)
-{
-    uint8_t votes[LINE_MMC_VTSIZE];
-    int16_t vals[LINE_MMC_VTSIZE];
-    int16_t val;
-    uint16_t i, j, max, maxIndex;
-
-    if (cluster->m_n<=1)
-        return -1;
-    
-    for (i=0; i<LINE_MMC_VTSIZE; i++)
-        votes[i] = 0;
-
-    // tally votes
-    for (i=0; i<cluster->m_n; i++)
-    {
-        val = g_candidateBarcodes[cluster->m_indexes[i]]->m_val;
-        if (val<0)
-            continue;
-        // find index or empty location
-        for (j=0; j<LINE_MMC_VTSIZE; j++)
-        {
-            if (votes[j]==0)
-            {
-                vals[j] = val;
-                break;
-            }
-            if (vals[j]==val)
-                break;
-        }
-        if (j>=LINE_MMC_VTSIZE)
-            continue;
-        // add vote
-        votes[j]++;
-    }
-
-    // find winner
-    for (i=0, max=0; i<LINE_MMC_VTSIZE; i++)
-    {
-        if (votes[i]==0) // we've reached end
-            break;
-        if (votes[i]>max)
-        {
-            max = votes[i];
-            maxIndex = i;
-        }
-    }
-
-    if (max<=1) // no valid codes, and you need at least 2 votes
-        return -2;
-    if ((max<<8)/cluster->m_n<g_minVotingThreshold)
-        return -3;
-    return vals[maxIndex];
-}
-*/
 
 uint32_t dist2_4(const Point16 &p0, const Point16 &p1)
 {
@@ -2035,121 +1956,6 @@ uint32_t dist2_4(const Point16 &p0, const Point16 &p1)
         diffy = (p1.m_y - p0.m_y)*4;
         
         return diffx*diffx + diffy*diffy;    
-}
-
-void clusterCodes()
-{
-    for (int i = 0; i <= g_blLastValid; i++)
-    {
-        BarcodeLine &b = g_barcodeLines[i];
-
-        if (1 == b.pointsIndex)
-        {
-            std::swap(g_barcodeLines[i], g_barcodeLines[g_blLastValid]);
-            --i;
-            --g_blLastValid;
-        }
-        else
-        {
-            b.x /= b.pointsIndex;
-            b.y /= b.pointsIndex;
-            b.width /= b.pointsIndex;
-            int16_t dx = b.points[b.pointsIndex - 1].x - b.points[0].x;
-            int16_t dy = (b.points[b.pointsIndex - 1].y - b.points[0].y);
-            b.a = (1000 * dx) / dy;
-            b.b = 1000*b.y - b.x*b.a;
-        }
-    }
-
-    for (int i = 0; i < g_blLastValid; ++i)
-    {
-        for (int j = i + 1; j <= g_blLastValid; ++j)
-        {
-            if (g_barcodeLines[i].x > g_barcodeLines[j].x)
-            {
-                BarcodeLine temp = g_barcodeLines[i];
-                g_barcodeLines[i] = g_barcodeLines[j];
-                g_barcodeLines[j] = temp;
-            }
-        }
-    }
-        
-#if 1
-   /* for (int i = 0; i <= g_blLastValid; ++i)
-    {
-        cprintf(0, "barcodelines[%d]: x=%d, y=%d, a=%d, b=%d, width=%d\n", i, g_barcodeLines[i].x, g_barcodeLines[i].y, g_barcodeLines[i].a, g_barcodeLines[i].b, g_barcodeLines[i].width);
-    }*/
-#endif
-    for (int i = 0; i < g_blLastValid; ++i)
-    {
-        uint16_t y = (g_barcodeLines[i].y + g_barcodeLines[i+1].y) >> 1;
-        uint16_t distance = g_barcodeLines[i+1].x - g_barcodeLines[i].x;
-        if (g_bcIndex)
-        {
-            bool newCandidate = true;
-            for (BarcodeCandidate *iter = &g_barcodeCandidates[0]; iter < &g_barcodeCandidates[g_bcIndex]; ++iter)
-            {
-                if ( ABS(iter->y - y) < 2*10 && ABS(iter->distance - distance) < 2*10)
-                {
-                    iter->y = (iter->y * iter->count + y) / (iter->count + 1);
-                    iter->distance = (iter->distance * iter->count + distance) / (iter->count + 1);
-                    iter->count++;
-                    newCandidate = false;
-                    break;
-                }
-            }
-            if (newCandidate)
-            {
-                g_barcodeCandidates[g_bcIndex++].y = y;
-                g_barcodeCandidates[g_bcIndex].distance = distance;
-                g_barcodeCandidates[g_bcIndex].count = 2;
-            }
-        }
-        else
-        {
-            g_barcodeCandidates[g_bcIndex].y = y;
-            g_barcodeCandidates[g_bcIndex].distance = distance;
-            g_barcodeCandidates[g_bcIndex].count = 2;
-            ++g_bcIndex;
-        }
-    }
-    for (int i = 0; i < g_bcIndex; ++i)
-    {
-        if (g_barcodeCandidates[i].count == 3)
-        {
-            g_b3Detected = true;
-        }
-        if (g_barcodeCandidates[i].count == 4)
-        {
-            g_b4Detected = true;
-        }
-        // cprintf(0, "barcodeCandidates[%d]: y=%d, distance=%d, count=%d\n", i, g_barcodeCandidates[i].y, g_barcodeCandidates[i].distance, g_barcodeCandidates[i].count);
-    }
-
-
-    g_votedBarcodeIndex = 0;
-		/*
-    if (g_b3Detected)
-    {
-        g_votedBarcodes[g_votedBarcodeIndex].m_val = 3;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_xOffset = 100;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_yOffset = 50;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_width = 10;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_height = 10;
-        g_votedBarcodes[g_votedBarcodeIndex].m_tracker = NULL;
-        g_votedBarcodeIndex++;
-    }
-    if (g_b4Detected)
-    {
-        g_votedBarcodes[g_votedBarcodeIndex].m_val = 4;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_xOffset = 200;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_yOffset = 50;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_width = 10;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_height = 10;
-        g_votedBarcodes[g_votedBarcodeIndex].m_tracker = NULL;
-        g_votedBarcodeIndex++;
-    }*/
-
 }
 
 int comp8(const void *a, const void *b)
@@ -2814,8 +2620,10 @@ int line_processMain()
         *g_equeue->m_fields = g_savedEqueue;
     else
         g_savedEqueue = *g_equeue->m_fields;
+		
+    g_nodesList.clear();
     
-    setTimer(&timer);
+		setTimer(&timer);
     for (i=0, row=-1, tlen=0; true; i++)
     {
         while((len=g_equeue->readLine(g_lineBuf, LINE_BUFSIZE, &eof, &error))==0)
@@ -2831,12 +2639,12 @@ int line_processMain()
         if (g_lineBuf[0]==EQ_HSCAN_LINE_START)
         {
             row++;
-            // detectCodes(row, g_lineBuf+1, len-1);
             line_hLine(row, g_lineBuf+1, len-1);
         }
-        else if (g_lineBuf[0]==EQ_VSCAN_LINE_START)
-            line_vLine(row, vstate, g_lineBuf+1, len-1);
-
+        else if (g_lineBuf[0]==EQ_VSCAN_LINE_START) {
+					
+            // line_vLine(row, vstate, g_lineBuf+1, len-1);
+				}
         if (g_debug&LINE_DEBUG_LAYERS)
             CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('E','D','G','S')), UINTS16(len, g_lineBuf), END);
         if (eof || error)
@@ -2846,23 +2654,19 @@ int line_processMain()
     outside:
     // indicate end of edge data
     if (g_debug&LINE_DEBUG_LAYERS)
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('E','D','G','F')), 
-            HINT8(0), HINT16(CAM_RES3_WIDTH), HINT16(CAM_RES3_HEIGHT), END);
-
+        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('E','D','G','F')), HINT8(0), HINT16(CAM_RES3_WIDTH), HINT16(CAM_RES3_HEIGHT), END);
 
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
 
     if (g_debug==LINE_DEBUG_BENCHMARK)
         setTimer(&timer);
-    clusterCodes();
+
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
-
-    //clearGrid();
     
     g_linesList.clear();
-    g_nodesList.clear();
+
     g_nadirsList.clear();
     g_intersectionsList.clear();
     
@@ -2876,30 +2680,45 @@ int line_processMain()
         
     g_allMutex = true;
     g_primaryMutex = true;
-    // handleBarCodeTracking();
     g_primaryMutex = false;
-    
-    //if (g_debug&LINE_DEBUG_LAYERS)
-    //    sendCodes(0);
-    
-    // sendTrackedCodes(RENDER_FLAG_BLEND);
     
     if (g_debug&LINE_DEBUG_LAYERS)
         line_sendLineGrid(0);
     
     if (g_debug==LINE_DEBUG_BENCHMARK)
         setTimer(&timer);
-    extractLineSegments();
+		
+		/* Point p1, p2;
+		
+		p1.m_x = 20;
+		p1.m_y = 20;
+		
+		
+				
+		p2.m_x = 50;
+		p2.m_y = 50;
+		
+		g_nodesList.add(p1);
+    g_nodesList.add(p2); 
+*/		
+		
+		cprintf(0, "wymiary %d %d\n", LINE_GRID_WIDTH, LINE_GRID_HEIGHT);
+		
+		
+		//addline(p1, p2);
+		
+		
+    //extractLineSegments();
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
 
     n_lineSegments = g_lineSegIndex;
     
-    if (g_debug&LINE_DEBUG_LAYERS)
-    {
+    // if (g_debug&LINE_DEBUG_LAYERS)
+    // {
         sendLineSegments(0);
         sendPoints(g_nodesList, 0, "nodes");
-    }
+    // }
     g_allMutex = false;
     // render whatever we've sent
         exec_sendEvent(g_chirpUsb, EVT_RENDER_FLUSH);
@@ -2992,33 +2811,6 @@ int line_getPrimaryFrame(uint8_t typeMap, uint8_t *buf, uint16_t len)
             g_newIntersection = false;
         }
     }
-    if (typeMap&LINE_FR_BARCODE)
-    {
-        SimpleListNode<Tracker<DecodedBarCode> > *j;
-    
-        // go through list, find best candidates
-        for (j=g_barCodeTrackersList.m_first; j!=NULL; j=j->m_next)
-        {
-            if (j->m_object.m_events&TR_EVENT_VALIDATED && !(j->m_object.m_eventsShadow&TR_EVENT_VALIDATED))
-            {
-                FrameCode *barcode;
-    
-                *(uint8_t *)(buf + length) = LINE_FR_BARCODE;
-                *(uint8_t *)(buf + length + 1) = sizeof(FrameCode);
-                barcode = (FrameCode *)(buf + length + 2);
-                barcode->m_code = j->m_object.m_object.m_val;
-                barcode->m_flags = 0;
-                // return center location of code
-                barcode->m_x = (j->m_object.m_object.m_outline.m_xOffset + (j->m_object.m_object.m_outline.m_width>>1))>>LINE_GRID_WIDTH_REDUCTION;
-                barcode->m_y = (j->m_object.m_object.m_outline.m_yOffset + (j->m_object.m_object.m_outline.m_height>>1))>>LINE_GRID_HEIGHT_REDUCTION;
-                length += sizeof(FrameCode) + 2;
-                // set shadow so we don't report again
-                j->m_object.m_eventsShadow |= TR_EVENT_VALIDATED;
-                // only 1 code per frame
-                break; 
-            }
-        }
-    }
     return length;
 }
 
@@ -3061,33 +2853,6 @@ int line_getPrimaryFrame2(uint8_t typeMap, uint8_t *buf, uint16_t len)
             length += sizeof(FrameIntersection) + 2;
             
             g_newIntersection = false;
-        }
-    }
-    if (typeMap&LINE_FR_BARCODE)
-    {
-        SimpleListNode<Tracker<DecodedBarCode> > *j;
-    
-        // go through list, find best candidates
-        for (j=g_barCodeTrackersList.m_first; j!=NULL; j=j->m_next)
-        {
-            if (j->m_object.m_events&TR_EVENT_VALIDATED && !(j->m_object.m_eventsShadow&TR_EVENT_VALIDATED))
-            {
-                FrameCode *barcode;
-    
-                *(uint8_t *)(buf + length) = LINE_FR_BARCODE;
-                *(uint8_t *)(buf + length + 1) = sizeof(FrameCode);
-                barcode = (FrameCode *)(buf + length + 2);
-                barcode->m_code = j->m_object.m_object.m_val;
-                barcode->m_flags = 0;
-                // return center location of code
-                barcode->m_x = (j->m_object.m_object.m_outline.m_xOffset + (j->m_object.m_object.m_outline.m_width>>1))>>LINE_GRID_WIDTH_REDUCTION;
-                barcode->m_y = (j->m_object.m_object.m_outline.m_yOffset + (j->m_object.m_object.m_outline.m_height>>1))>>LINE_GRID_HEIGHT_REDUCTION;
-                length += sizeof(FrameCode) + 2;
-                // set shadow so we don't report again
-                j->m_object.m_eventsShadow |= TR_EVENT_VALIDATED;
-                // only 1 code per frame
-                break; 
-            }
         }
     }
     return length;
@@ -3149,32 +2914,6 @@ int line_getAllFrame(uint8_t typeMap, uint8_t *buf, uint16_t len)
             length += 2;
         }
     }
-    if (typeMap&LINE_FR_BARCODE)
-    {
-        SimpleListNode<Tracker<DecodedBarCode> > *j;
-        DecodedBarCode *dcode;
-        FrameCode *barcode;
-        
-        // go through list, find best candidates
-        for (j=g_barCodeTrackersList.m_first, plength=0, hbuf=buf+length; j!=NULL && length<len-sizeof(FrameCode)-2; j=j->m_next)
-        {
-            dcode = &j->m_object.m_object;
-            barcode = (FrameCode *)(buf + length + 2);
-            barcode->m_x = (dcode->m_outline.m_xOffset + (dcode->m_outline.m_width>>1))>>LINE_GRID_WIDTH_REDUCTION;
-            barcode->m_y = (dcode->m_outline.m_yOffset + (dcode->m_outline.m_height>>1))>>LINE_GRID_HEIGHT_REDUCTION;
-            barcode->m_flags = j->m_object.m_state;
-            barcode->m_code = dcode->m_val;
-                
-            length += sizeof(FrameCode);
-            plength += sizeof(FrameCode);
-        }
-        if (plength>0)
-        {
-            *(uint8_t *)hbuf = LINE_FR_BARCODE;
-            *(uint8_t *)(hbuf+1) = plength;
-            length += 2;
-        }
-    }
     return length;
 }
 
@@ -3214,52 +2953,6 @@ int line_getAllFrame2(uint8_t typeMap, uint8_t *buf, uint16_t len)
         if (plength>0)
         {
             *(uint8_t *)hbuf = LINE_FR_VECTOR_LINES;
-            *(uint8_t *)(hbuf+1) = plength;
-            length += 2;
-        }
-    }
-//     if (typeMap&LINE_FR_INTERSECTION)
-//     {
-//         SimpleListNode<Intersection> *i;
-//         FrameIntersection *intersection;
-//         
-//         for (i=g_intersectionsList.m_first, plength=0, hbuf=buf+length; i!=NULL && length<len-sizeof(FrameIntersection)-2; i=i->m_next)
-//         {
-//             intersection = (FrameIntersection *)(buf + length + 2);
-//             formatIntersection(i->m_object, intersection, true); 
-//                 
-//             length += sizeof(FrameIntersection);
-//             plength += sizeof(FrameIntersection);            
-//         }
-//         if (plength>0)
-//         {
-//             *(uint8_t *)hbuf = LINE_FR_INTERSECTION;
-//             *(uint8_t *)(hbuf+1) = plength;
-//             length += 2;
-//         }
-//     }
-    if (typeMap&LINE_FR_BARCODE)
-    {
-        SimpleListNode<Tracker<DecodedBarCode> > *j;
-        DecodedBarCode *dcode;
-        FrameCode *barcode;
-        
-        // go through list, find best candidates
-        for (j=g_barCodeTrackersList.m_first, plength=0, hbuf=buf+length; j!=NULL && length<len-sizeof(FrameCode)-2; j=j->m_next)
-        {
-            dcode = &j->m_object.m_object;
-            barcode = (FrameCode *)(buf + length + 2);
-            barcode->m_x = (dcode->m_outline.m_xOffset + (dcode->m_outline.m_width>>1))>>LINE_GRID_WIDTH_REDUCTION;
-            barcode->m_y = (dcode->m_outline.m_yOffset + (dcode->m_outline.m_height>>1))>>LINE_GRID_HEIGHT_REDUCTION;
-            barcode->m_flags = j->m_object.m_state;
-            barcode->m_code = dcode->m_val;
-                
-            length += sizeof(FrameCode);
-            plength += sizeof(FrameCode);
-        }
-        if (plength>0)
-        {
-            *(uint8_t *)hbuf = LINE_FR_BARCODE;
             *(uint8_t *)(hbuf+1) = plength;
             length += 2;
         }
@@ -3312,7 +3005,6 @@ int line_reversePrimary()
 
 int line_legoLineData(uint8_t *buf, uint32_t buflen)
 {
-    SimpleListNode<Tracker<DecodedBarCode> > *j;
     uint8_t codeVal;
     uint16_t maxy;
     Line2 *primary;
@@ -3347,21 +3039,7 @@ int line_legoLineData(uint8_t *buf, uint32_t buflen)
     {
         buf[0] = (uint8_t)-1;
         buf[3] = 0;
-    }
-
-    for (j=g_barCodeTrackersList.m_first, maxy=0, codeVal=(uint8_t)-1; j!=NULL; j=j->m_next)
-    {
-        if (j->m_object.m_events&TR_EVENT_VALIDATED)
-        {
-            if (maxy < j->m_object.m_object.m_outline.m_yOffset)
-            {
-                maxy = j->m_object.m_object.m_outline.m_yOffset;
-                codeVal = j->m_object.m_object.m_val;
-            }
-        }
-    }
-    buf[1] = codeVal;
-    
+    }   
     
     primary = findLine(g_primaryLineIndex);
     if (primary)
