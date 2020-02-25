@@ -35,7 +35,7 @@
 
 
 #define LOOP_STATE  1
-//#define DEBUG_SERVO
+
 
 static const ProcModule g_module[] =
 {
@@ -58,29 +58,6 @@ static const ProcModule g_module[] =
 	(ProcPtr)exec_run, 
 	{END}, 
 	"Run the current program"
-	"@r returns 0 if successful, -1 otherwise"
-	},
-	{
-	"runProg",
-	(ProcPtr)exec_runProg, 
-	{CRP_UINT8, END}, 
-	"Run the specified program"
-	"@p program number"
-	"@r returns currently running program index if successful, -1 otherwise"
-	},
-	{
-	"runProgName",
-	(ProcPtr)exec_runProgName, 
-	{CRP_STRING, END}, 
-	"Run the specified program name"
-	"@p program name of program"
-	"@r returns 0 if successful, -1 otherwise"
-	},
-	{
-	"runProgDefault",
-	(ProcPtr)exec_runProgDefault, 
-	{END}, 
-	"Run the default program"
 	"@r returns 0 if successful, -1 otherwise"
 	},
 	{
@@ -214,74 +191,6 @@ uint8_t ProgTableUtil::m_progTableIndex = 0;
 static void loadParams();
 
 #define SDELAY 500000
-
-#ifdef DEBUG_SERVO
-void exec_servo()
-{
-	static uint8_t state = 0;
-	static uint32_t timer;
-	switch(state)
-	{
-		case 0:
-		setTimer(&timer);
-		rcs_setPos(0, 0);
-		rcs_setPos(1, 0);
-		state = 2;
-		break;
-			
-		case 1:
-		if (getTimer(timer)>SDELAY)
-		{
-			setTimer(&timer);
-			rcs_setPos(0, 0);
-			rcs_setPos(1, 0);
-			state = 2;
-		}
-		break;
-		
-		
-		case 2:
-		if (getTimer(timer)>SDELAY)
-		{
-			setTimer(&timer);
-			rcs_setPos(0, 1000);
-			rcs_setPos(1, 1000);
-			state = 3;
-		}
-		break;
-		
-		case 3:
-		if (getTimer(timer)>SDELAY)
-		{
-			setTimer(&timer);
-			rcs_setPos(0, 0);
-			rcs_setPos(1, 0);
-			state = 4;
-		}
-		break;
-
-		case 4:
-		if (getTimer(timer)>SDELAY)
-		{
-			setTimer(&timer);
-			rcs_setPos(0, 500);
-			rcs_setPos(1, 500);
-			state = 5;
-		}
-		break;
-
-		case 5:
-		if (getTimer(timer)>SDELAY)
-		{
-			setTimer(&timer);
-			rcs_setPos(0, 1000);
-			rcs_setPos(1, 1000);
-			state = 1;
-		}
-		break;
-	}
-}
-#endif
 
 int compProgNames(const void *a, const void *b)
 {
@@ -608,13 +517,15 @@ void exec_select()
 	exec_runProg(g_progIndex);
 }
 
-static void loadParams() {
+static void loadParams()
+{
 	int i;
 	char buf[256], buf2[64];
 
 	// create program menu
 	strcpy(buf, "Selects the program number that's run upon power-up. @c Expert");
-	for (i=0; i<ProgTableUtil::m_progTableIndex; i++) {
+	for (i=0; i<ProgTableUtil::m_progTableIndex; i++)
+	{
 		sprintf(buf2, " @s %d=%s", i, ProgTableUtil::m_progTable[i].m_name);
 		strcat(buf, buf2);
 	} 
@@ -628,6 +539,7 @@ static void loadParams() {
 	
 	prm_get("Debug", &g_debug, END);
 	prm_get("Default program", &g_defaultProgram, END);
+	
 }
 
 void exec_loadParams() {
@@ -642,6 +554,9 @@ void exec_loadParams() {
 int8_t exec_progIndex() {
 	return g_progIndex;
 }
+
+
+//#define FOO
 
 void exec_mainLoop() {
 	bool prevConnected = false;
@@ -688,6 +603,7 @@ void exec_mainLoop() {
 			} else {
 				g_state = LOOP_STATE;
 			}
+			exec_runProg(1); // set line trackinig default 
 			break;
 
 		case LOOP_STATE:  // loop state, program is running
