@@ -130,7 +130,7 @@ static SimpleList<Intersection> g_intersectionsList;
 
 static uint8_t g_barcodeIndex;
 static BarCode **g_candidateBarcodes;
-static DecodedBarCode *g_votedBarcodes;
+// static DecodedBarCode *g_votedBarcodes;
 static uint8_t *g_votedBarcodesMem;
 static uint8_t g_votedBarcodeIndex;
 static uint16_t g_maxCodeDist;
@@ -446,7 +446,7 @@ int line_open(int8_t progIndex)
     g_candidateBarcodes = (BarCode **)malloc(LINE_MMC_CANDIDATE_BARCODES*sizeof(BarCode *));
     
     g_votedBarcodesMem = (uint8_t *)malloc(LINE_MMC_VOTED_BARCODES*sizeof(DecodedBarCode)+CAM_PREBUF_LEN);
-    g_votedBarcodes = (DecodedBarCode *)(g_votedBarcodesMem+CAM_PREBUF_LEN);
+    //g_votedBarcodes = (DecodedBarCode *)(g_votedBarcodesMem+CAM_PREBUF_LEN);
     
     g_lineBuf = (uint16_t *)malloc(LINE_BUFSIZE*sizeof(uint16_t)); 
     g_equeue = new (std::nothrow) Equeue;
@@ -1377,18 +1377,6 @@ void removeLine(SimpleListNode<Line2> *linen)
     removeLine(linen, linen->m_object.m_i0);
     removeLine(linen, linen->m_object.m_i1);
     
-#if 0
-    // remove line from g_lines
-    for (i=0; i<g_lineIndex; i++)
-    {
-        if (g_lines[i]==linen)
-        {
-            g_lines[i] = NULL;
-            break;
-        }
-    }
-#endif
-    
     // remove line from g_linesList
     g_linesList.remove(linen);
     
@@ -1399,17 +1387,6 @@ void replaceLine(SimpleListNode<Line2> *linen, SimpleListNode<Line2> *linenx)
     uint8_t i;
     SimpleListNode<Intersection> *j;
 
-#if 0    
-    for (i=0; i<g_lineIndex; i++)
-    {
-        if (g_lines[i]==linenx)
-        {
-            g_lines[i] = linen;
-            break;
-        }
-    }
-#endif
-    
     // remove line from existing intersections
     for (j=g_intersectionsList.m_first; j!=NULL; j=j->m_next)
     {
@@ -1992,6 +1969,7 @@ void sendPrimaryFeatures(uint8_t renderFlags)
         
     
 }
+/*
 
 int16_t voteCodes(BarCodeCluster *cluster)
 {
@@ -2047,6 +2025,7 @@ int16_t voteCodes(BarCodeCluster *cluster)
         return -3;
     return vals[maxIndex];
 }
+*/
 
 uint32_t dist2_4(const Point16 &p0, const Point16 &p1)
 {
@@ -2149,6 +2128,7 @@ void clusterCodes()
 
 
     g_votedBarcodeIndex = 0;
+		/*
     if (g_b3Detected)
     {
         g_votedBarcodes[g_votedBarcodeIndex].m_val = 3;
@@ -2168,439 +2148,14 @@ void clusterCodes()
         g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_height = 10;
         g_votedBarcodes[g_votedBarcodeIndex].m_tracker = NULL;
         g_votedBarcodeIndex++;
-    }
+    }*/
 
-}
-
-void clusterCodes_old()
-{
-    BarCodeCluster *clusters[LINE_MMC_VOTED_BARCODES];
-    uint8_t i, j, numClusters = 0;
-    int16_t val;
-    int32_t dist;
-
-    for (i=0; i<g_barcodeIndex; i++)
-    {
-        for (j=0; j<numClusters; j++)
-        {
-            dist = dist2_4 (g_candidateBarcodes[i]->m_p0, clusters[j]->m_p1);
-            if (dist<g_maxCodeDist)
-                break;
-        }
-        if (j>=LINE_MMC_VOTED_BARCODES) // table is full, move onto next code
-            continue;
-        if (j>=numClusters) // new entry
-        {
-            clusters[j] = new (std::nothrow) BarCodeCluster;
-            if (clusters[j]==NULL)
-                break;
-            // reset positions
-            clusters[j]->m_p0 = g_candidateBarcodes[i]->m_p0;
-            clusters[j]->m_p1 = g_candidateBarcodes[i]->m_p0;
-            numClusters++;
-        }
-        //cprintf(" add %d %d, %d %d %d %d", j, i, g_candidateBarcodes[i]->m_p0.m_x, g_candidateBarcodes[i]->m_p0.m_y,
-         //      clusters[j]->m_p1.m_x, clusters[j]->m_p1.m_y);
-        clusters[j]->addCode(i);
-        // update width, position
-        clusters[j]->updateWidth(g_candidateBarcodes[i]->m_width);
-        clusters[j]->m_p1 = g_candidateBarcodes[i]->m_p0;
-    }
-
-#if 0
-    for (i=0; i<numClusters; i++)
-        cprintf(0, "%d: %d %d %d %d\n", i, clusters[i]->m_p0.m_x, clusters[i]->m_p0.m_y, clusters[i]->m_p1.m_x, clusters[i]->m_p1.m_y);
-#endif
-    // vote
-    for (i=0, g_votedBarcodeIndex=0; i<numClusters; i++)
-    {
-        if (g_votedBarcodeIndex>=LINE_MMC_VOTED_BARCODES)
-            break; // out of table space
-        val = voteCodes(clusters[i]);
-        if (val<0)
-            continue;
-        g_votedBarcodes[g_votedBarcodeIndex].m_val = val;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_xOffset = clusters[i]->m_p0.m_x + g_dist;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_yOffset = clusters[i]->m_p0.m_y;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_width = clusters[i]->m_width + 1;
-        g_votedBarcodes[g_votedBarcodeIndex].m_outline.m_height = clusters[i]->m_p1.m_y - clusters[i]->m_p0.m_y + 1;
-        g_votedBarcodes[g_votedBarcodeIndex].m_tracker = NULL;
-        g_votedBarcodeIndex++;
-    }
-
-    
-#if 0
-    for (i=0; i<g_votedBarcodeIndex; i++)
-    cprintf(0, "%d: %d, %d %d %d %d", i, g_votedBarcodes[i].m_val,
-               g_votedBarcodes[i].m_outline.m_xOffset, g_votedBarcodes[i].m_outline.m_yOffset,
-               g_votedBarcodes[i].m_outline.m_width, g_votedBarcodes[i].m_outline.m_height);
-#endif
-    
-    for (i=0; i<numClusters; i++)
-        delete clusters[i];
-
-    for (i=0; i<g_barcodeIndex; i++)
-        delete g_candidateBarcodes[i];
-}
-
-int32_t decodeCode(BarCode *bc, uint16_t dec)
-{
-    uint8_t i, bits;
-    uint16_t val, bit, width, minWidth, maxWidth;
-    bool flag;
-
-    for (i=1, bits=0, val=0, flag=false, minWidth=0xffff, maxWidth=0; i<bc->m_n && bits<LINE_MMC_BITS; i++)
-    {
-        bit = bc->m_edges[i]&EQ_NEGATIVE;
-        if ((bit==0 && (i&1)) || (bit && (i&1)==0))
-            return -1;
-
-        width = bc->m_edges[i]&~EQ_NEGATIVE;
-        if (width<minWidth)
-            minWidth = width;
-        if (width>maxWidth)
-            maxWidth = width;
-        if (width<dec)
-        {
-            if (flag)
-            {
-                val <<= 1;
-                if (bit==0)
-                    val |= 1;
-                bits++;
-                flag = false;
-            }
-            else
-                flag = true;
-        }
-        else if (flag) // wide with flag, must be error
-            return 0;
-        else // wide
-        {
-            val <<= 1;
-            if (bit==0)
-                val |= 1;
-            bits++;
-        }
-    }
-    if (bits!=LINE_MMC_BITS)
-        return 0;
-    if (maxWidth/minWidth>10)
-        return -2;
-    bc->m_val = val;
-    return 1;
 }
 
 int comp8(const void *a, const void *b)
 {
   return *(uint8_t *)a - *(uint8_t *)b;
 }
-
-bool decodeCode(BarCode *bc)
-{
-    int32_t res;
-    uint8_t halfPeriodsLUT[1<<LINE_MMC_BITS], edges[LINE_MMC_MAX_EDGES-1];
-    uint8_t i, j, lastBit, bit, bits, transitions, ftrans, gap, maxGap, threshold;
-    
-    for (i=0; i<1<<LINE_MMC_BITS; i++)
-    {
-        // count 01 transitions
-        // count them by looking at lsb first, so we're looking at 10 transitions
-        for (j=0, bits=i, lastBit=0, transitions=0, ftrans=0; j<LINE_MMC_BITS; j++, bits>>=1, lastBit=bit)
-        {
-            bit = bits&0x01;
-            if (bit==0 && lastBit!=0)
-            {
-                if (i==1)
-                    ftrans = 1;
-                transitions++;
-            }
-        }
-        halfPeriodsLUT[i] = 9;
-        if (ftrans)
-            halfPeriodsLUT[i] += 2;
-        else if ((i&0x01)==0)
-            halfPeriodsLUT[i] += 1;
-    }
-    
-    // copy edges
-    for (i=0; i<bc->m_n; i++)
-        edges[i] = bc->m_edges[i];
-    
-    // sort 
-    qsort(edges, bc->m_n, sizeof(uint8_t), comp8);
-    
-    // find biggest gap
-    for (i=0, maxGap=0; i<bc->m_n-1; i++)
-    {
-        gap = edges[i+1] - edges[i];
-        if (gap>maxGap)
-        {
-            maxGap = gap;
-            threshold = (edges[i+1] + edges[i])>>1;
-        }
-    }
-    
-    // is the biggest gap big enough?
-    // It needs to be at least a quarter of the smallest gap
-    if (maxGap < (edges[0]>>2) + 1)
-        threshold = edges[bc->m_n-1] + 1;  // it's not big enough, make threshold outside our gap range
-    
-    res = decodeCode(bc, threshold);
-    if (res==1)
-        return true;
-    else // error
-        return false;
-}
-
-
-bool detectCode(uint16_t *edges, uint16_t len, bool begin, BarCode *bc)
-{
-    uint16_t col00, col0, col1, col01, width0, width, qWidth;
-    uint8_t e;
-
-    col00 = edges[0]&~EQ_NEGATIVE;
-    col01 = edges[1]&~EQ_NEGATIVE;
-    width0 = col01 - col00;
-    qWidth = width0<<2; // use to calc front-porch and back-porch
-
-    // check front quiet period
-    if (!begin)
-    {
-        width = col00 - (edges[-1]&~EQ_NEGATIVE);
-        if (width<qWidth)
-            return false;
-    }
-
-
-    // first determine if we have enough edges
-    for (e=0, bc->m_n=0; e<len-1; e++)
-    {
-        if  (e>=LINE_MMC_MAX_EDGES)
-            return false; // too many edges for valid code
-        col0 = edges[e]&~EQ_NEGATIVE;
-        // correct
-        //if ((edges[e]&EQ_NEGATIVE)==0)
-        //    col0--;
-        col1 = edges[e+1]&~EQ_NEGATIVE;
-
-        width = col1 - col0;
-        if (width>qWidth) // back-porch?
-            break;
-        // save edge
-        bc->m_edges[e] = width | (edges[e+1]&EQ_NEGATIVE);
-        bc->m_n++;
-        bc->m_width = col1 - col00;
-    }
-
-    if (e<LINE_MMC_MIN_EDGES-1)
-        return false; // too few edges
-
-    bc->m_p0.m_x = col00;
-    return true;
-}
-
-void detectCodes(uint8_t row, uint16_t *buf, uint32_t len)
-{
-    // cprintf(0, "Entering detectCodes\n");
-    uint16_t j, x, y, bit0, bit1, col0, col1, barcodeLineWidth;
-
-    for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
-    {
-        bit0 = buf[j]&EQ_NEGATIVE;
-        bit1 = buf[j+1]&EQ_NEGATIVE;
-        col0 = buf[j]&~EQ_NEGATIVE;
-        col1 = buf[j+1]&~EQ_NEGATIVE;
-
-        if (bit0!=0 && bit1==0)
-        {
-            x = ((col0 + col1) >> 2);
-            y = (row << 1) + 1;
-            barcodeLineWidth = col1 - col0;
-            // cprintf(0, "detectCodes: BarcodeLine found at (%d, %d) with width %d\n", x, y, barcodeLineWidth);
-            if (g_minBarcodeLineWidth<barcodeLineWidth && barcodeLineWidth<g_maxBarcodeLineWidth)
-            {
-                // cprintf(0, "detectCodes: found BarcodeLine is of good width at (avgx, y) = (%d, %d)\n", x, y);
-                for (int i = 0; i < BARCODELINES_SIZE; ++i)
-                {
-                    BarcodeLine &b = g_barcodeLines[i];
-                    if (0 == b.pointsIndex)
-                    {
-                        b.points[b.pointsIndex].x = x;
-                        b.points[b.pointsIndex].y = y;
-                        ++b.pointsIndex;
-                        b.x = x;
-                        b.y = y;
-                        b.width = barcodeLineWidth;
-                        g_blLastValid = i;
-                        i = BARCODELINES_SIZE; 
-                    }
-                    else
-                    {
-                        if (ABS(b.points[b.pointsIndex - 1].x - x) <= g_maxBarcodeLineJitter && ABS(b.points[b.pointsIndex - 1].y - y) <= g_maxBarcodeLineJitter)
-                        {
-                            if (b.pointsIndex < BARCODELINE_POINTS_SIZE)
-                            {
-                                b.points[b.pointsIndex].x = x;
-                                b.points[b.pointsIndex].y = y;
-                                ++b.pointsIndex;
-                                b.x += x;
-                                b.y += y;
-                                b.width += barcodeLineWidth;
-                            }
-                            else
-                            {
-                                b.points[BARCODELINE_POINTS_SIZE - 1].x = x;
-                                b.points[BARCODELINE_POINTS_SIZE - 1].y = y;
-                            }
-                            i = BARCODELINES_SIZE;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void detectCodes_old(uint8_t row, uint16_t *edges, uint32_t len)
-{
-    bool res;
-    bool begin;
-    uint16_t j, k, bit0, bit1;
-    BarCode *bc;
-
-    if (len<LINE_MMC_MIN_EDGES)
-        return;
-
-    bc = new (std::nothrow) BarCode;
-    if (bc==NULL)
-        return;
-    
-    for (j=0, begin=true, k=0; j<len-1 && edges[j]<EQ_HSCAN_LINE_START && edges[j+1]<EQ_HSCAN_LINE_START; j++, begin=false, k++)
-    {
-        bit0 = edges[j]&EQ_NEGATIVE;
-        bit1 = edges[j+1]&EQ_NEGATIVE;
-        if (bit0!=0 && bit1==0 && len>=LINE_MMC_MIN_EDGES-1+k)
-        {
-            bc->m_p0.m_y = row;
-
-            if (detectCode(&edges[j], len-j, begin, bc))
-            {
-                if (g_barcodeIndex>=LINE_MMC_CANDIDATE_BARCODES)
-                    goto end;
-                res = decodeCode(bc);
-#if 0
-                cprintf(0, "%d %d: %d %d: %d, %d %d %d %d %d %d %d %d %d", bc->m_p0.m_x, bc->m_p0.m_y, res, bc->m_val,
-                           bc->m_n, bc->m_edges[0]&~EQ_NEGATIVE, bc->m_edges[1]&~EQ_NEGATIVE, bc->m_edges[2]&~EQ_NEGATIVE, bc->m_edges[3]&~EQ_NEGATIVE, bc->m_edges[4]&~EQ_NEGATIVE,
-                            bc->m_edges[5]&~EQ_NEGATIVE, bc->m_edges[6]&~EQ_NEGATIVE, bc->m_edges[7]&~EQ_NEGATIVE, bc->m_edges[8]&~EQ_NEGATIVE);
-#endif
-                if (res)
-                {
-                    g_candidateBarcodes[g_barcodeIndex++] = bc;
-                    bc = new (std::nothrow) BarCode;
-                    if (bc==NULL)
-                        return;
-                }
-            }
-        }
-    }
-
-    end:    
-    delete bc;
-}
-
-int sendCodes(uint8_t renderFlags)
-{
-    uint32_t len;
-    uint8_t *codeData = (uint8_t *)g_votedBarcodesMem + CAM_PREBUF_LEN - CAM_FRAME_HEADER_LEN;
-    
-    // fill buffer contents manually for return data 
-    len = Chirp::serialize(g_chirpUsb, (uint8_t *)codeData, LINE_MMC_VOTED_BARCODES*sizeof(DecodedBarCode), HTYPE(FOURCC('C','O','D','E')), HINT8(renderFlags), UINT16(CAM_RES3_WIDTH), UINT16(CAM_RES3_HEIGHT), UINTS8_NO_COPY(g_votedBarcodeIndex*sizeof(DecodedBarCode)), END); 
-    if (len!=CAM_FRAME_HEADER_LEN)
-        return -1;
-    
-    g_chirpUsb->useBuffer((uint8_t *)codeData, CAM_FRAME_HEADER_LEN+g_votedBarcodeIndex*sizeof(DecodedBarCode)); 
-    
-    return 0;
-}
-
-int sendTrackedCodes(uint8_t renderFlags)
-{
-    SimpleListNode<Tracker<DecodedBarCode> > *i;
-    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('B','C','0','F')), INT8(RENDER_FLAG_START), STRING("Tracked barcodes"), UINT16(CAM_RES3_WIDTH), UINT16(CAM_RES3_HEIGHT), END);
-
-    for (i=g_barCodeTrackersList.m_first; i!=NULL; i=i->m_next)
-    {
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('B','C','0','S')), UINT8(i->m_object.m_index), UINT16(i->m_object.m_object.m_val), 
-            UINT16(i->m_object.m_object.m_outline.m_xOffset), UINT16(i->m_object.m_object.m_outline.m_yOffset), UINT16(i->m_object.m_object.m_outline.m_width), UINT16(i->m_object.m_object.m_outline.m_height), END);
-    }
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('B','C','0','F')), INT8(renderFlags), STRING("Tracked barcodes"), INT16(CAM_RES3_WIDTH), INT16(CAM_RES3_HEIGHT), END);            
-    
-    return 0;
-}
-
-void clearGrid(const RectB rect)
-{
-    uint8_t i, j;
-    uint16_t index;
-    uint16_t height;
-    int16_t r0;
-    
-    height = rect.m_bottom - rect.m_top;
-    height *= 4;
-    
-    
-    r0 = rect.m_top-height;
-    if (r0<0)
-        r0 = 0;
-    for (i=r0; i<=rect.m_bottom; i++)
-    {
-        for (j=rect.m_left, index=i*LINE_GRID_WIDTH+rect.m_left; j<=rect.m_right; j++, index++)
-            g_lineGrid[index] = 0;
-    }
-}
-
-void clearGrid()
-{
-    // remove edges 
-    int16_t val, i;
-    uint16_t v, h;
-    RectB rect;
-    
-    for (i=0; i<g_votedBarcodeIndex; i++)
-    {
-        h = LINE_MMC_HBOUNDARY*g_votedBarcodes[i].m_outline.m_width;
-        if (h>>LINE_GRID_WIDTH_REDUCTION==0)
-            h = 1<<LINE_GRID_WIDTH_REDUCTION; // ensure minimum of 1 pixel in grid
-        v = LINE_MMC_VBOUNDARY*g_votedBarcodes[i].m_outline.m_height;
-        if (v>>LINE_GRID_HEIGHT_REDUCTION==0)
-            v = 1<<LINE_GRID_HEIGHT_REDUCTION; // ensure minimum of 1 pixel in grid
-        
-        val = (g_votedBarcodes[i].m_outline.m_xOffset - h)>>LINE_GRID_WIDTH_REDUCTION;
-        if (val<0)
-            val = 0;
-        rect.m_left = val;
-        
-        val = (g_votedBarcodes[i].m_outline.m_xOffset + g_votedBarcodes[i].m_outline.m_width + h)>>LINE_GRID_WIDTH_REDUCTION;
-        if (val>=LINE_GRID_WIDTH)
-            val = LINE_GRID_WIDTH-1;
-        rect.m_right = val;
-        
-        val = (g_votedBarcodes[i].m_outline.m_yOffset - v)>>LINE_GRID_HEIGHT_REDUCTION;
-        if (val<0)
-            val = 0;
-        rect.m_top = val;
-        
-        val = (g_votedBarcodes[i].m_outline.m_yOffset + g_votedBarcodes[i].m_outline.m_height + v)>>LINE_GRID_HEIGHT_REDUCTION;
-        if (val>=LINE_GRID_HEIGHT)
-            val = LINE_GRID_HEIGHT-1;
-        rect.m_bottom = val;
-        
-        clearGrid(rect); 
-    }    
-}
-
 
 uint32_t compareLines(const Line2 &line0, const Line2 &line1)
 {
@@ -2745,7 +2300,7 @@ void handleLineTracking()
             i->m_object.m_object.m_p0.m_x, i->m_object.m_object.m_p0.m_y, i->m_object.m_object.m_p1.m_x, i->m_object.m_object.m_p1.m_y);
     }
 }
-
+/*
 uint32_t compareBarCodes(const DecodedBarCode &c0, const DecodedBarCode &c1)
 {
     int32_t x, y;
@@ -2762,105 +2317,7 @@ uint32_t compareBarCodes(const DecodedBarCode &c0, const DecodedBarCode &c1)
     
     return x*x + y*y; 
 }
-
-uint16_t handleBarCodeTracking2()
-{
-    uint32_t val, min;
-    uint16_t n=0;
-    SimpleListNode<Tracker<DecodedBarCode> > *i;
-    uint8_t j;
-    DecodedBarCode *minCode;
-    
-    // go through list, find best candidates
-    for (i=g_barCodeTrackersList.m_first; i!=NULL; i=i->m_next)
-    {
-        // already found minimum, continue
-        if (i->m_object.m_minVal!=TR_MAXVAL)
-            continue;
-        
-        // find min
-        for (j=0, min=TR_MAXVAL, minCode=NULL; j<g_votedBarcodeIndex; j++)
-        {
-            val = compareBarCodes(i->m_object.m_object, g_votedBarcodes[j]);
-            // find minimum, but if line is already chosen, make sure we're a better match
-            if (val<min && i->m_object.swappable(val, &g_votedBarcodes[j]))
-            {
-                min = val;
-                minCode = &g_votedBarcodes[j];
-            }
-        }
-        if (minCode)
-        {
-            // if this minimum line already has a tracker, see which is better
-            if (minCode->m_tracker)
-            {
-                minCode->m_tracker->resetMin(); // reset tracker pointed to by current minline
-                minCode->m_tracker = &i->m_object; 
-                i->m_object.setMin(minCode, min);
-                n++;
-            }
-            else
-            {
-                minCode->m_tracker = &i->m_object; // update tracker pointer            
-                i->m_object.setMin(minCode, min);
-                n++;
-            }
-        }
-    }
-    return n;
-}
-
-void handleBarCodeTracking()
-{
-    SimpleListNode<Tracker<DecodedBarCode> > *i, *inext;
-    uint8_t j;
-    uint16_t leading, trailing;
-    
-    // reset tracking table
-    // Note, we don't need to reset g_linesList entries (e.g. m_tracker) because these are renewed  
-    for (i=g_barCodeTrackersList.m_first; i!=NULL; i=i->m_next) 
-        i->m_object.resetMin();
-    
-    // do search, find minimums
-    while(handleBarCodeTracking2());
-    
-    // go through, update tracker, remove entries that are no longer valid
-    for (i=g_barCodeTrackersList.m_first; i!=NULL; i=inext)
-    {
-        inext = i->m_next;
-        
-        if (i->m_object.update()&TR_EVENT_INVALIDATED)
-            g_barCodeTrackersList.remove(i); // no longer valid?  remove from tracker list
-    }    
-    
-    // find new candidates
-    for (j=0; j<g_votedBarcodeIndex; j++)
-    {
-        if (g_votedBarcodes[j].m_tracker==NULL)
-        {
-            SimpleListNode<Tracker<DecodedBarCode> > *n;
-            leading = g_barcodeFiltering*LINE_FILTERING_MULTIPLIER;
-            trailing = (leading+1)>>1;
-            n = g_barCodeTrackersList.add(Tracker<DecodedBarCode>(g_votedBarcodes[j], g_barCodeTrackerIndex++, leading, trailing));
-            if (n==NULL)
-            {
-                cprintf(0, "hlt\n");
-                break;
-            }
-            g_votedBarcodes[j].m_tracker = &n->m_object; // point back to tracker
-        }
-    }
-    if (g_debug&LINE_DEBUG_TRACKING)
-    {
-        uint8_t n;
-        cprintf(0, "Barcodes\n");
-        for (i=g_barCodeTrackersList.m_first, n=0; i!=NULL; i=i->m_next, n++)
-            cprintf(0, "   %d: %d %d %d (%d %d %d %d)\n", n, i->m_object.m_index, i->m_object.m_state, i->m_object.m_object.m_val,
-            i->m_object.m_object.m_outline.m_height, i->m_object.m_object.m_outline.m_width, 
-            i->m_object.m_object.m_outline.m_xOffset, i->m_object.m_object.m_outline.m_yOffset);
-    }
-}
-
+*/
 Line2 *findLine(uint8_t index)
 {
     SimpleListNode<Line2> *i;
@@ -2904,21 +2361,7 @@ uint8_t trackedLinesWithPoint(const Point &p)
 
 bool compareIntersections(const Intersection &i0, const FrameIntersection &i1)
 {
-#if 0
-    uint8_t i, n;
-    
-    // count valid lines
-    for (i=0, n=0; i<i0.m_n; i++)
-    {
-        if (i0.m_lines[i]->m_object.m_tracker && i0.m_lines[i]->m_object.m_tracker->get()!=NULL)
-            n++;
-    }
-    
-    // are valid lines in i0 equal to number of lines in i1?
-    return n==i1.m_n;
-#else
     return i0.m_n==i1.m_n;
-#endif
 }
 
 int16_t getAngle(const Line2 &line, const Point &p)
@@ -3007,145 +2450,6 @@ uint8_t updatePrimaryIntersection(SimpleListNode<Intersection> *intern)
     return g_primaryIntersection.update();
 }
 
-#if 0
-void updatePrimaryPoint(const Line2 &primary)
-{
-    g_primaryActive = primary.m_tracker->get()!=NULL;
-    
-    if (xdirection(primary.m_p0, primary.m_p1))
-    {
-        if (((LINE_HT_LEFT | LINE_HT_RIGHT)&g_primaryPointMap)==0)
-        {
-            if (g_primaryPointMap&LINE_HT_UP)
-            {
-                if (primary.m_p0.m_y < primary.m_p1.m_y) // p0 is primary
-                {
-                    if (primary.m_p0.m_x < primary.m_p1.m_x) 
-                        g_primaryPointMap |= LINE_HT_LEFT;
-                    else // p0 > p1
-                        g_primaryPointMap |= LINE_HT_RIGHT;                    
-                }
-                else // p1 is primary
-                {
-                    if (primary.m_p1.m_x < primary.m_p0.m_x) 
-                        g_primaryPointMap |= LINE_HT_LEFT;
-                    else // p1 > p0
-                        g_primaryPointMap |= LINE_HT_RIGHT;                    
-                }
-            }
-            else // g_primaryPointMap&LINE_HT_DOWN
-            {
-                if (primary.m_p0.m_y > primary.m_p1.m_y) // p0 is primary 
-                {
-                    if (primary.m_p0.m_x < primary.m_p1.m_x) 
-                        g_primaryPointMap |= LINE_HT_LEFT;
-                    else // p0 > p1
-                        g_primaryPointMap |= LINE_HT_RIGHT;                    
-                }
-                else // p1 is primary
-                {
-                    if (primary.m_p1.m_x < primary.m_p0.m_x) 
-                        g_primaryPointMap |= LINE_HT_LEFT;
-                    else // p1 > p0
-                        g_primaryPointMap |= LINE_HT_RIGHT;                    
-                }
-            }
-        }
-        if (g_primaryPointMap&LINE_HT_LEFT)
-        {
-            if (primary.m_p0.m_x < primary.m_p1.m_x) // p0 is primary 
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-            }
-            else // p1 is primary
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-            }
-        }
-        else // g_primaryPointMap&LINE_HT_RIGHT
-        {
-            if (primary.m_p0.m_x > primary.m_p1.m_x) // p0 is primary 
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-            }
-            else // p1 is primary
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-            }
-        }
-    }
-    else // y direction
-    {
-        if (((LINE_HT_UP | LINE_HT_DOWN)&g_primaryPointMap)==0)
-        {
-            if (g_primaryPointMap&LINE_HT_LEFT)
-            {
-                if (primary.m_p0.m_x < primary.m_p1.m_x) // p0 is primary
-                {
-                    if (primary.m_p0.m_y < primary.m_p1.m_y) 
-                        g_primaryPointMap |= LINE_HT_UP;
-                    else // p0 > p1
-                        g_primaryPointMap |= LINE_HT_DOWN;                    
-                }
-                else // p1 is primary
-                {
-                    if (primary.m_p1.m_y < primary.m_p0.m_y) 
-                        g_primaryPointMap |= LINE_HT_UP;
-                    else // p1 > p0
-                        g_primaryPointMap |= LINE_HT_DOWN;                    
-                }
-            }
-            else // g_primaryPointMap&LINE_HT_RIGHT
-            {
-                if (primary.m_p0.m_x > primary.m_p1.m_x) // p0 is primary 
-                {
-                    if (primary.m_p0.m_y < primary.m_p1.m_y) 
-                        g_primaryPointMap |= LINE_HT_UP;
-                    else // p0 > p1
-                        g_primaryPointMap |= LINE_HT_DOWN;                    
-                }
-                else // p1 is primary
-                {
-                    if (primary.m_p1.m_y < primary.m_p0.m_y) 
-                        g_primaryPointMap |= LINE_HT_UP;
-                    else // p1 > p0
-                        g_primaryPointMap |= LINE_HT_DOWN;                    
-                }
-            }
-        }
-        if (g_primaryPointMap&LINE_HT_UP)
-        {
-            if (primary.m_p0.m_y < primary.m_p1.m_y) // p0 is primary 
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-            }
-            else // p1 is primary
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-            }
-        }
-        else // g_primaryPointMap&LINE_HT_DOWN
-        {
-            if (primary.m_p0.m_y > primary.m_p1.m_y) // p0 is primary 
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-            }
-            else // p1 is primary
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-            }
-        }
-    }
-}
-#else
 void updatePrimaryPoint(const Line2 &primary)
 {
     g_primaryActive = primary.m_tracker->get()!=NULL;
@@ -3237,7 +2541,7 @@ void updatePrimaryPoint(const Line2 &primary)
         }
     }
 }
-#endif
+
 
 int intersectionTurn()
 {
@@ -3527,7 +2831,7 @@ int line_processMain()
         if (g_lineBuf[0]==EQ_HSCAN_LINE_START)
         {
             row++;
-            detectCodes(row, g_lineBuf+1, len-1);
+            // detectCodes(row, g_lineBuf+1, len-1);
             line_hLine(row, g_lineBuf+1, len-1);
         }
         else if (g_lineBuf[0]==EQ_VSCAN_LINE_START)
@@ -3555,7 +2859,7 @@ int line_processMain()
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
 
-    clearGrid();
+    //clearGrid();
     
     g_linesList.clear();
     g_nodesList.clear();
@@ -3575,8 +2879,8 @@ int line_processMain()
     // handleBarCodeTracking();
     g_primaryMutex = false;
     
-    if (g_debug&LINE_DEBUG_LAYERS)
-        sendCodes(0);
+    //if (g_debug&LINE_DEBUG_LAYERS)
+    //    sendCodes(0);
     
     // sendTrackedCodes(RENDER_FLAG_BLEND);
     
@@ -3596,101 +2900,7 @@ int line_processMain()
         sendLineSegments(0);
         sendPoints(g_nodesList, 0, "nodes");
     }
-#if 0    
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        setTimer(&timer);
-    findNadirs();
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        timers.add(getTimer(timer));
-    
-    if (g_debug&LINE_DEBUG_LAYERS)
-        sendNadirs(g_nadirsList, 0, "nadir pairs");
-    
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        setTimer(&timer);
-    reduceNadirs();
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        timers.add(getTimer(timer));
-
-    checkGraph(__LINE__);
-
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        setTimer(&timer);
-    formIntersections();
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        timers.add(getTimer(timer));
-
-    checkGraph(__LINE__);
-
-    if (g_debug&LINE_DEBUG_LAYERS)
-    {
-        sendNadirs(g_nadirsList, 0, "merged nadirs");
-        sendLines(g_linesList, 0, "pre-cleaned lines");
-        sendIntersections(g_intersectionsList, 0, "pre-cleaned intersections");
-    }
-
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        setTimer(&timer);
-    cleanIntersections();
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        timers.add(getTimer(timer));
-        
-    checkGraph(__LINE__);
-
-    removeMinLines(g_minLineLength2);
-    
-    if (g_debug&LINE_DEBUG_TRACKING)
-    {
-        SimpleListNode<Line2> *ln;
-        SimpleListNode<Intersection> *in;
-        uint32_t k;
-    
-        cprintf(0, "Lines\n");
-        for (ln=g_linesList.m_first, k=0; ln!=NULL; ln=ln->m_next, k++)
-            cprintf(0, "  %d: (%d %d %x)(%d %d %x)\n", k, ln->m_object.m_p0.m_x, ln->m_object.m_p0.m_y, ln->m_object.m_i0, ln->m_object.m_p1.m_x, ln->m_object.m_p1.m_y, ln->m_object.m_i1);
-        cprintf(0, "Intersections\n");
-        for (in=g_intersectionsList.m_first, k=0; in!=NULL; in=in->m_next, k++)
-            cprintf(0, " %d: %d (%d %d) %x\n", k, in->m_object.m_n, in->m_object.m_p.m_x, in->m_object.m_p.m_y, in);
-    }
-    
-    checkGraph(__LINE__);
-
-    if (g_debug&LINE_DEBUG_LAYERS)
-        sendLines(g_linesList, 0, "lines");
-        
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        setTimer(&timer);
-    handleLineTracking();
-#endif
     g_allMutex = false;
-#if 0
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-        timers.add(getTimer(timer));
-    
-    if (g_renderMode==LINE_RM_ALL_FEATURES|| (g_debug&LINE_DEBUG_LAYERS))
-        sendTrackedLines(g_lineTrackersList, RENDER_FLAG_BLEND, "filtered lines");
-
-    if (g_renderMode==LINE_RM_ALL_FEATURES)
-        sendIntersections(g_intersectionsList, RENDER_FLAG_BLEND, "intersections");
-    else if (g_debug&LINE_DEBUG_LAYERS)
-        sendIntersections(g_intersectionsList, 0, "intersections");
-    
-    g_primaryMutex = true;
-    handleLineState();
-    g_primaryMutex = false;    
-    
-    if (g_debug==LINE_DEBUG_BENCHMARK)
-    {
-        for (j=timers.m_first, i=0, timer=0; j!=NULL; j=j->m_next, i++)
-        {
-            timer += j->m_object;
-            cprintf(0, "timer %d: %d\n", i, j->m_object);
-        }
-        cprintf(0, "total: %d\n", timer);
-    }
-
-    sendPrimaryFeatures(RENDER_FLAG_BLEND);
-#endif
     // render whatever we've sent
         exec_sendEvent(g_chirpUsb, EVT_RENDER_FLUSH);
     
