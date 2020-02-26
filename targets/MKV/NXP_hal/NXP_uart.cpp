@@ -180,6 +180,11 @@ uint8_t NXP_Uart::read() {
     return c;
 }
 
+bool NXP_Uart::isBufferEmpty(){
+    return RingBuffer_IsEmpty(&rxRingBuffer);
+}
+
+
 void NXP_Uart::enableInterrupt(InterruptType interrupt){
     uart->C2 |= static_cast<uint8_t >(interrupt);
 }
