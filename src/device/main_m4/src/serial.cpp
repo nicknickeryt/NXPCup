@@ -359,11 +359,11 @@ void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
 		}
 						
 		ser_getTx(&txData);
-		*(uint8_t *)(txData + 0) = 6;
-		*(uint32_t *)(txData + 1) = 6;
-		*(uint16_t *)(txData + 2) = 6;
+		*(uint16_t *)(txData + 0) = 1234;
+		*(uint16_t *)(txData + 2) = 4321;
+		*(uint16_t *)(txData + 4) = 888;
 		
-		ser_setTx(SER_TYPE_RESPONSE_OPT, 7, checksum);
+		ser_setTx(SER_TYPE_RESPONSE_OPT, 6, checksum);
 	}
 	else if (type==SER_TYPE_REQUEST_VERSION) // get version information
 	{
@@ -652,13 +652,12 @@ int ser_init(Chirp *chirp)
 
 void ser_loadParams()
 {
-#ifndef LEGO
 	prm_add("Data out port", 0, PRM_PRIORITY_1, 
 		"Selects the port that's used to output data (default Arduino ICSP SPI) @c Interface @s 0=Arduino_ICSP_SPI @s 1=SPI_with_SS @s 2=I2C @s 3=UART @s 4=analog/digital_x @s 5=analog/digital_y @s 6=LEGO_I2C", UINT8(0), END);
 	prm_add("I2C address", PRM_FLAG_HEX_FORMAT, PRM_PRIORITY_1-1, 
 		"@c Interface Sets the I2C address if you are using I2C data out port. (default 0x54)", UINT8(I2C_DEFAULT_SLAVE_ADDR), END);
 	prm_add("UART baudrate", 0, PRM_PRIORITY_1-2, 
-		"@c Interface Sets the UART baudrate if you are using UART data out port. (default 19200)", UINT32(19200), END);
+		"@c Interface Sets the UART baudrate if you are using UART data out port. (default 115200)", UINT32(115200), END);
 	prm_add("Pixy 1.0 compatibility mode", PRM_FLAG_CHECKBOX, PRM_PRIORITY_1-3, 
 		"@c Interface If this is set, Pixy will return data using the Pixy 1.0 protocol.  This only applies to color connected components program, not other programs. (default false)", UINT8(0), END);
 
@@ -669,14 +668,10 @@ void ser_loadParams()
 	g_i2c0->setSlaveAddr(addr);
 
 	prm_get("UART baudrate", &baudrate, END);
-	g_uart0->setBaudrate(baudrate);
+	// g_uart0->setBaudrate(baudrate);
 
 	prm_get("Data out port", &interface, END);
 	ser_setInterface(interface);
-
-#else
-	ser_setInterface(SER_INTERFACE_LEGO);
-#endif
 }
 
 int ser_setInterface(uint8_t interface)
@@ -692,80 +687,14 @@ int ser_setInterface(uint8_t interface)
 	
 	// reset variables
 	g_state = 0;
-	g_interface = interface;
+	g_interface = 3; // UART
 	g_txReadIndex = 0; 
 	g_txLen = 0; 
 	g_tx = g_txBuf;
 	g_brightnessQ.m_valid = false;
-
-	switch (interface)
-	{		    
-	case SER_INTERFACE_SS_SPI:
-		if (g_oldProtocol)
-		{
-			spi_deinit();
-			spi2_deinit();
-			spi_init(txCallback);
-			g_serial = g_spi;
-			g_spi->setAutoSlaveSelect(false);
-		}
-		else
-		{
-			spi_deinit();
-			spi2_deinit();
-			spi2_init();
-			g_serial = g_spi2;
-			g_spi2->setAutoSlaveSelect(false);
-		}
-		break;
-
-	case SER_INTERFACE_I2C:     
-		g_serial = g_i2c0;
-		g_i2c0->setFlags(false, true);
-		break;
-
-	case SER_INTERFACE_UART:    
-		g_serial = g_uart0;
-		break;
-
-	case SER_INTERFACE_ADX:      
-		g_ad->setDirection(true);
-		g_serial = g_ad;
-		break;
-
-	case SER_INTERFACE_ADY:
-		g_ad->setDirection(false);
-		g_serial = g_ad;
-		break;		
-
-	case SER_INTERFACE_LEGO:
-		g_serial = g_i2c0;
- 		g_i2c0->setSlaveAddr(0x01);
-		g_i2c0->setFlags(true, false);
-		g_oldProtocol = true;
-		break;
-		
-	default:
-	case SER_INTERFACE_ARDUINO_SPI:
-		if (g_oldProtocol)
-		{
-			spi_deinit();
-			spi2_deinit();
-			spi_init(txCallback);
-			g_serial = g_spi;
-			g_spi->setAutoSlaveSelect(true);
-		}
-		else
-		{
-			spi_deinit();
-			spi2_deinit();
-			spi2_init();
-			g_serial = g_spi2;
-			g_spi2->setAutoSlaveSelect(true);
-		}			
-		break;
-	}
-
+	
+	g_serial = g_uart0; // always uart
+	
 	g_serial->open();
 
 	return 0;

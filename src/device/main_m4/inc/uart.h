@@ -20,7 +20,7 @@
 
 #define UART_TRANSMIT_BUF_SIZE     32
 #define UART_RECEIVE_BUF_SIZE      64
-#define UART_DEFAULT_BAUDRATE      19200
+#define UART_DEFAULT_BAUDRATE      115200
 
 class Uart : public Iserial
 {
