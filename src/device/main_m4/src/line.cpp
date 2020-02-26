@@ -2700,19 +2700,24 @@ int line_processMain()
 		
 		g_nodesList.add(p1);
     g_nodesList.add(p2); 
-*/		
+	
 		
-		cprintf(0, "wymiary %d %d\n", LINE_GRID_WIDTH, LINE_GRID_HEIGHT);
-		
-		
-		//addline(p1, p2);
+		// cprintf(0, "wymiary %d %d\n", LINE_GRID_WIDTH, LINE_GRID_HEIGHT);
 		
 		
-    //extractLineSegments();
+		addline(p1, p2);*/	
+		
+		//g_linesList.add(line2);
+		
+		
+    extractLineSegments();
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
 
     n_lineSegments = g_lineSegIndex;
+		
+		sendLineSegments(0);
+		sendLines(g_linesList, 0, "lines");
     
     // if (g_debug&LINE_DEBUG_LAYERS)
     // {
