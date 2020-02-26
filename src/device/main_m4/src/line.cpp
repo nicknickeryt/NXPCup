@@ -515,7 +515,7 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 		
     uint16_t j, index, bit0, bit1, col0, col1, lineWidth;
 
-		if(row == 50) {
+		if(row == 60 || row ==50 || row ==  40) {
 				
 		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
 		{
@@ -532,12 +532,12 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 					
 						Point p1, p2;
 		
-						p1.m_y = 50 / 2;
+						p1.m_y = row / 2;
 						p1.m_x = col0 / 8;
 						
 						
 								
-						p2.m_y = 50 / 2;
+						p2.m_y = row / 2;
 						p2.m_x = col1 / 8;
 						
 						g_nodesList.add(p1);
