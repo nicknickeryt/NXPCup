@@ -351,6 +351,20 @@ void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
 			if (exec_progResolution(rxData[0], checksum)<0)
 				ser_sendError(SER_ERROR_PROG_CHANGING, checksum);
 	}
+	else if (type == SER_TYPE_REQUEST_LINE_NODES) {
+		  if (!g_ready)
+		{
+			ser_sendError(-8, checksum);
+			return;
+		}
+						
+		ser_getTx(&txData);
+		*(uint8_t *)(txData + 0) = 6;
+		*(uint32_t *)(txData + 1) = 6;
+		*(uint16_t *)(txData + 2) = 6;
+		
+		ser_setTx(SER_TYPE_RESPONSE_OPT, 7, checksum);
+	}
 	else if (type==SER_TYPE_REQUEST_VERSION) // get version information
 	{
 		uint32_t hwVal;

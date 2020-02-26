@@ -67,6 +67,8 @@
 #define SER_TYPE_REQUEST_OPT          0x1a
 #define SER_TYPE_RESPONSE_OPT         0x1b
 
+#define SER_TYPE_REQUEST_LINE_NODES   0x1c
+#define SER_TYPE_RESPONSE_LINE_NODES  0x1d
 
 // error codes
 #define SER_ERROR_GENERAL             -1
