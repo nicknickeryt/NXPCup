@@ -44,7 +44,7 @@ void Kitty::init() {
     uartCommunication.init();
     uartCommunication.initDMA();
     uartToKLZ.init();
-    uartPixy.init();
+
     ledLine.init();
     display.init();
     servo.init();
@@ -77,22 +77,8 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
-    //if(!menu.proc(systickTrigger)) {
-        //motors.setValue(algorithmUnit.startSpeed, algorithmUnit.startSpeed);
-//        if (commandTerminalTrigger) {
-//            commandManager.run();
-//            commandTerminalTrigger = false;
-//        }
-//        if (algorithmTrigger) {
-//            algorithmTrigger = false;
-//            camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
-//            algorithmUnit.analyze();
-//        }
-        if(pixyTrigger){
-            pixyTrigger = false;
-            pixy.control();
-        }
-    //}
+    pixy.proc();
+
     magicDiodComposition();
 }
 
