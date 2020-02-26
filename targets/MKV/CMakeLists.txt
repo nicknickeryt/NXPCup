@@ -32,7 +32,7 @@ foreach(DIRECTORY ${PROJECT_DIRECTORIES})
 	include_directories( ${CMAKE_CURRENT_LIST_DIR}/${DIRECTORY})
 endforeach(DIRECTORY)
 
-set(SOURCES ${SOURCES_AUTO} source/pixy.cpp source/pixy.hpp)
+set(SOURCES ${SOURCES_AUTO} source/pixy.cpp source/pixy.hpp source/pixy_packet.hpp)
 
 add_executable(${NAME} ${SOURCES})
 

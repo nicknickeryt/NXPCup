@@ -11,7 +11,8 @@
 #include <cstring>
 
 class PixyPacketRequest{
-
+public:
+    virtual void serialize(uint8_t *data, uint8_t* length) = 0;
 };
 
 class PixyPacketResponse{
