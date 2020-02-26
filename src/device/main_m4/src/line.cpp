@@ -72,17 +72,8 @@ struct BarcodeCandidate
     uint8_t count;
 };
 
-static uint16_t g_minBarcodeLineWidth = 29;
-static uint16_t g_maxBarcodeLineWidth = 42;
-static uint16_t g_maxBarcodeLineJitter = 4 * 2;
-static int8_t  g_blLastValid = 0;                                      // barcodeLinesLastValid
-static int8_t g_bcIndex = 0;                                           // barcodeCandidateIndex
-
 static BarcodeLine g_barcodeLines[BARCODELINES_SIZE];
 static BarcodeCandidate g_barcodeCandidates[BARCODECANDIDATES_SIZE];    // arbitrary
-
-static bool g_b3Detected = false;                                       // barcode with 3 lines detected
-static bool g_b4Detected = false;                                       // barcode with 4 lines detected
 
 /********************************************************************/
 
@@ -130,20 +121,16 @@ static SimpleList<Point> g_nodesList;
 static SimpleList<Nadir> g_nadirsList;
 static SimpleList<Intersection> g_intersectionsList;
 
-static uint8_t g_barcodeIndex;
 static BarCode **g_candidateBarcodes;
 // static DecodedBarCode *g_votedBarcodes;
 static uint8_t *g_votedBarcodesMem;
-static uint8_t g_votedBarcodeIndex;
-static uint16_t g_maxCodeDist;
-static uint16_t g_minVotingThreshold;
+
 
 static SimpleList<Tracker<Line2> > g_lineTrackersList;
 static Tracker<FrameIntersection> g_primaryIntersection;
 static bool g_newIntersection;
 
 static SimpleList<Tracker<DecodedBarCode> > g_barCodeTrackersList;
-static uint8_t g_barCodeTrackerIndex;
 static uint8_t g_lineTrackerIndex;
 static uint8_t g_primaryLineIndex;
 static uint8_t g_primaryPointMap;
@@ -458,12 +445,6 @@ int line_open(int8_t progIndex)
     g_maxTrackingTanAngle = tan(M_PI/10)*1000;
     g_pointsPerSeg = 8; // 12 was here first
     g_maxError = 0.9;
-    
-    g_barcodeIndex = 0;
-    g_votedBarcodeIndex     = 0;
-    g_maxCodeDist = 15*15;
-    g_minVotingThreshold = 128; // divide by 256, so 128 is 1/2
-    g_barCodeTrackerIndex = 0;
     g_lineTrackerIndex = 0;
     
     g_lineState = LINE_STATE_ACQUIRING;
@@ -2577,8 +2558,7 @@ int line_processMain()
     int8_t row;
     uint8_t vstate[LINE_VSIZE];
     uint32_t timer;
-    SimpleList<uint32_t> timers;
-    SimpleListNode<uint32_t> *j;    
+    SimpleList<uint32_t> timers;  
 
     // send frame and data over USB 
     if (g_renderMode!=LINE_RM_MINIMAL)
@@ -2592,16 +2572,8 @@ int line_processMain()
     // initialize variables
     g_lineIndex = 1; // set to 1 because 0 means empty...
     g_lineSegIndex = 0;
-    g_barcodeIndex = 0;
     memset(vstate, 0, LINE_VSIZE);
     memset(g_lineGrid, 0, LINE_GRID_WIDTH*LINE_GRID_HEIGHT*sizeof(LineGridNode));
-    
-    
-    g_blLastValid = 0;
-    g_bcIndex = 0;
-    g_b3Detected = false;
-    g_b4Detected = false;
-
     
     memset(g_barcodeLines, 0,  sizeof(BarcodeLine) * BARCODELINES_SIZE);
     memset(g_barcodeCandidates, 0, sizeof(BarcodeCandidate) * BARCODECANDIDATES_SIZE);  
@@ -2933,8 +2905,6 @@ int line_getAllFrame2(uint8_t typeMap, uint8_t *buf, uint16_t len)
     g_frameFlag = false;
     if (typeMap&LINE_FR_VECTOR_LINES)
     {
-        SimpleListNode<Tracker<Line2> > *n;
-        Line2 *line;
         FrameLine *fline;
         LineSeg *ls0;
         int i = 0;
@@ -3010,8 +2980,6 @@ int line_reversePrimary()
 
 int line_legoLineData(uint8_t *buf, uint32_t buflen)
 {
-    uint8_t codeVal;
-    uint16_t maxy;
     Line2 *primary;
     uint32_t x;
     static uint8_t lastData[4];
