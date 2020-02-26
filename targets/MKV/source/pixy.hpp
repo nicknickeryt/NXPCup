@@ -8,21 +8,26 @@
 #pragma once
 
 #include "NXP_uart.hpp"
+#include "pixy_packet.hpp"
 
 class Pixy{
     private:
-        static constexpr char startOfFrame = 'R';
+        static constexpr uint16_t bufferSize = 1024;
+        uint8_t txPacketBuffer[bufferSize];
+        uint8_t rxPacketBuffer[bufferSize];
+        uint32_t txPacketLength;
+        uint32_t rxPacketLength;
         NXP_Uart& uart;
-
-//        struct Packet{
-//
-//        };
+        bool lampOn;
 
     public:
-        Pixy(NXP_Uart& uart) : uart(uart){};
+        Pixy(NXP_Uart& uart, bool lampOn) : uart(uart), lampOn(lampOn){};
 
-        bool getData();
+        void init();
+
+        void control();
 
     private:
-        void sendRequest();
+        void sendRequest(PixyPacketRequest& packet);
+        void getResponse(PixyPacketResponse& packet);
 };

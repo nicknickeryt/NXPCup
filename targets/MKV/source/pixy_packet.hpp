@@ -12,7 +12,7 @@
 
 class PixyPacketRequest{
 public:
-    virtual void serialize(uint8_t *data, uint8_t* length) = 0;
+    virtual void serialize(uint8_t *data, uint32_t* length) = 0;
 };
 
 class PixyPacketResponse{
@@ -28,7 +28,7 @@ struct SetLampRequest : public PixyPacketRequest{
 
     SetLampRequest(uint8_t upper, uint8_t lower) : upper(upper), lower(lower){}
 
-    void serialize(uint8_t *data, uint8_t* length){
+    void serialize(uint8_t *data, uint32_t* length){
         memcpy(data, this, sizeof(*this));
         *length = sizeof(*this);
     }

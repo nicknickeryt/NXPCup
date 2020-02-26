@@ -57,6 +57,7 @@ void Kitty::init() {
     menu.init();
     motors.init();
     commandManager.init(printCommandManager);
+    pixy.init();
 
     motors.run();
     camera.start();
@@ -89,7 +90,7 @@ void Kitty::proc() {
 //        }
         if(pixyTrigger){
             pixyTrigger = false;
-            pixy.getData();
+            pixy.control();
         }
     //}
     magicDiodComposition();

@@ -157,7 +157,7 @@ public:
     // ALGORITHM
     AlgorithmUnit algorithmUnit = {servo, uartCommunication, switches};
 
-    Pixy pixy = {uartPixy};
+    Pixy pixy = {uartPixy, true};
 
     // MENU
     NXP_Menu::MenuParameters menuParameters;
