@@ -13,8 +13,6 @@
 class Pixy{
     public:
 
-
-
     private:
         static constexpr uint16_t bufferSize = 1024;
         static constexpr uint32_t readingTimeout = 10000000;

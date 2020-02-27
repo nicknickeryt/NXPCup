@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstring>
 
-#define MAX_POINTS_NUMBER 100
+#define MAX_LINES_NUMBER 2
 
 enum class PacketType : uint8_t{
     RESPONSE_RESULT = 1,
@@ -19,6 +19,13 @@ enum class PacketType : uint8_t{
     LAMP_REQUEST = 0x16,
     LINE_NODE_REQUEST = 0x1c,
     LINE_NODE_RESPONSE = 0x1d
+};
+
+enum class LinesTypes : uint8_t{
+    NO_LINES = 0x01,
+    RIGHT_LINE = 0x02,
+    LEFT_LINE = 0x03,
+    BOTH_LINES = 0x04
 };
 
 struct PixyPacketRequest{
@@ -76,7 +83,8 @@ struct LineNodeRequest : public PixyPacketRequest{
 
 struct LineNodeResponse : public PixyPacketResponse{
     struct __attribute__((__packed__)) Payload{
-        uint16_t points[MAX_POINTS_NUMBER];
+        LinesTypes linesType;
+        uint16_t lines[MAX_LINES_NUMBER];
     } payload;
 
     LineNodeResponse() : PixyPacketResponse(PacketType::LINE_NODE_RESPONSE){}

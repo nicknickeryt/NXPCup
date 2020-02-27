@@ -36,8 +36,22 @@ void Pixy::control(){
     // check if response is valid
     if(getResponse<LineNodeResponse>(lineNodeResponse)){
         log_debug("Got response");
-        for(uint32_t i = 0; i<(lineNodeResponse.header.payloadLength/sizeof(uint16_t)); i++){
-            log_debug("Point nr: %d, value: %d", i, lineNodeResponse.payload.points[i]);
+        switch(lineNodeResponse.payload.linesType){
+            case LinesTypes::NO_LINES:
+                log_debug("No line detected");
+                break;
+            case LinesTypes::RIGHT_LINE:
+                log_debug("Right line detected at position: %d", lineNodeResponse.payload.lines[0]);
+                break;
+            case LinesTypes::LEFT_LINE:
+                log_debug("Left line detected at position: %d", lineNodeResponse.payload.lines[0]);
+                break;
+            case LinesTypes::BOTH_LINES:
+                log_debug("Both lines detected, left at position: %d, right at position: %d", lineNodeResponse.payload.lines[0], lineNodeResponse.payload.lines[1]);
+                break;
+            default:
+                log_debug("Wrong line type");
+                break;
         }
     } else{
         log_debug("Get response failed");
