@@ -24,9 +24,10 @@ struct PixyPacketRequest{
         uint16_t sync;
         PacketType type;
         uint8_t payloadLength;
+        uint16_t checksum;
     } header;
 
-    explicit PixyPacketRequest(PacketType packetType, uint8_t payloadLength) : header{0xc1ae, packetType, payloadLength} {}
+    explicit PixyPacketRequest(PacketType packetType, uint8_t payloadLength) : header{0xc1ae, packetType, payloadLength, 0} {}
     virtual void serialize(uint8_t *data, uint32_t* length) = 0;
 };
 
