@@ -12,9 +12,6 @@
 
 class Pixy{
 public:
-    inline static Pixy* pixy = nullptr;
-    uint8_t waitForBytes = 0;
-    // uint8_t recivedBytes = 0;
 
     private:
         static constexpr uint16_t bufferSize = 1024;
@@ -32,19 +29,8 @@ public:
 
         void control();
 
-        void sendData(uint8_t* data, uint8_t len) {
-            uart.write(data, len);
-        }
-
-        void addToBuffer(uint8_t byte) {
-            rxPacketBuffer[rxPacketLength++] = byte;
-        }
-
-        void proc();
-
-        static void byteFromUart(uint8_t byte) ;
-
     private:
         void sendRequest(PixyPacketRequest& packet);
-        void getResponse();
+        template<typename T>
+        void getResponse(T& packet);
 };

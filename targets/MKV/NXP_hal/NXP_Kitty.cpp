@@ -44,6 +44,7 @@ void Kitty::init() {
     uartCommunication.init();
     uartCommunication.initDMA();
     uartToKLZ.init();
+    uartPixy.init();
 
     ledLine.init();
     display.init();
@@ -57,7 +58,7 @@ void Kitty::init() {
     menu.init();
     motors.init();
     commandManager.init(printCommandManager);
-    pixy.init();
+    //pixy.init();
 
     motors.run();
     camera.start();
@@ -77,7 +78,10 @@ void Kitty::init() {
 }
 
 void Kitty::proc() {
-    pixy.proc();
+    if(pixyTrigger) {
+        pixyTrigger = false;
+        pixy.control();
+    }
 
     magicDiodComposition();
 }

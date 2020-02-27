@@ -14,52 +14,60 @@
 #include "logger.h"
 
 void Pixy::init(){
-    Pixy::pixy = this;
-    uart.init();
-    uart.setRedirectHandler(Pixy::byteFromUart);
 
-//    if(lampOn){
-//        log_debug("Turning on lamps");
-//        SetLampRequest setLampRequest(1,1);
-//        sendRequest(setLampRequest);
-//    } else{
-//        log_debug("Turning off lamps");
-//        SetLampRequest setLampRequest(0,0);
-//        sendRequest(setLampRequest);
-//    }
-
-    getResponse();
-
-    // uint8_t data [] = {0xAE, 0xC1, 0x1C, 0};
-    // sendData(data, sizeof(data));
+    if(lampOn){
+        log_debug("Turning on lamps");
+        SetLampRequest setLampRequest(1,1);
+        sendRequest(setLampRequest);
+    } else{
+        log_debug("Turning off lamps");
+        SetLampRequest setLampRequest(0,0);
+        sendRequest(setLampRequest);
+    }
 }
 
 void Pixy::control(){
+    LineNodeRequest lineNodeRequest(3);
+    sendRequest(lineNodeRequest);
 
+    LineNodeResponse lineNodeResponse;
+    getResponse<LineNodeResponse>(lineNodeResponse);
+    log_debug("%d", lineNodeResponse.payload.data1);
+    log_debug("%d", lineNodeResponse.payload.data2);
+    log_debug("%d", lineNodeResponse.payload.data3);
 }
 
 void Pixy::sendRequest(PixyPacketRequest& packet){
     log_debug("Sending request to PIXY");
     packet.serialize(txPacketBuffer, &txPacketLength);
+    uart.flushRxBuffer();
     uart.write(txPacketBuffer, txPacketLength);
 }
 
-void Pixy::getResponse(){
-    waitForBytes = 12;
-    rxPacketLength = 0;
-    uint8_t data [] = {0xAE, 0xC1, 0x1C, 0};
-    sendData(data, sizeof(data));
-}
-
-void Pixy::proc() {
-    if (rxPacketLength == waitForBytes) {
-        rxPacketLength = 0;
-        uint16_t response[3];
-        memcpy(response, &rxPacketBuffer[6], 6);
-        log_debug("mam %d %d %d", response[0], response[1], response[2]);
+template<typename T>
+void Pixy::getResponse(T& packet){
+    volatile uint16_t bytesToRead;
+    switch(packet.header.type){
+        case PacketType::LINE_NODE_RESPONSE: {
+            // first get only header, inside it there is info about payload size
+            bytesToRead = sizeof(packet.header);
+            // wait for given number of bytes
+            while(bytesToRead != uart.getBufferLevel()){
+                asm("nop");
+            }
+            uart.read(rxPacketBuffer, bytesToRead);
+            packet.getHeader(rxPacketBuffer);
+            // get payload, now we know the size
+            bytesToRead = packet.header.payloadLength;
+            // wait for given number of bytes
+            while(bytesToRead != uart.getBufferLevel()){
+                asm("nop");
+            }
+            uart.read(rxPacketBuffer, bytesToRead);
+            packet.deserialize(rxPacketBuffer);
+            }
+            break;
+        default:
+            break;
     }
-}
-
-void Pixy::byteFromUart(uint8_t byte) {
-    pixy->addToBuffer(byte);
 }

@@ -20,7 +20,7 @@ enum class PacketType : uint8_t{
 };
 
 struct PixyPacketRequest{
-    struct Header{
+    struct __attribute__((__packed__)) Header{
         uint16_t sync;
         PacketType type;
         uint8_t payloadLength;
@@ -31,7 +31,7 @@ struct PixyPacketRequest{
 };
 
 struct PixyPacketResponse{
-    struct Header{
+    struct __attribute__((__packed__)) Header{
         uint16_t sync = 0;
         PacketType type = PacketType::RESPONSE_ERROR;
         uint8_t payloadLength = 2;
@@ -44,7 +44,7 @@ struct PixyPacketResponse{
 };
 
 struct SetLampRequest : public PixyPacketRequest{
-    struct Payload{
+    struct __attribute__((__packed__)) Payload{
         uint8_t upper = 0;
         uint8_t lower = 0;
     } payload;
@@ -59,7 +59,7 @@ struct SetLampRequest : public PixyPacketRequest{
 };
 
 struct LineNodeRequest : public PixyPacketRequest{
-    struct Payload{
+    struct __attribute__((__packed__)) Payload{
         uint32_t lineNo = 0;
     } payload;
 
@@ -73,7 +73,7 @@ struct LineNodeRequest : public PixyPacketRequest{
 };
 
 struct LineNodeResponse : public PixyPacketResponse{
-    struct Payload{
+    struct __attribute__((__packed__)) Payload{
         uint8_t data1 = 0;
         uint16_t data2 = 0;
         uint32_t data3 = 0;
@@ -85,7 +85,7 @@ struct LineNodeResponse : public PixyPacketResponse{
         memcpy(&header, data, sizeof(header));
     }
     void deserialize(uint8_t *data) override {
-        memcpy(&payload, data + sizeof(header), header.payloadLength);
+        memcpy(&payload, data, header.payloadLength);
     }
 };
 
