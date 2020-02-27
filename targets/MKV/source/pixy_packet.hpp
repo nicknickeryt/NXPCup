@@ -33,11 +33,11 @@ struct PixyPacketRequest{
 struct PixyPacketResponse{
     struct Header{
         uint16_t sync = 0;
-        uint8_t type = 0;
+        PacketType type = PacketType::RESPONSE_ERROR;
         uint8_t payloadLength = 2;
     } header;
 
-    PixyPacketResponse() = default;
+    explicit PixyPacketResponse(PacketType type) : header{0xc1af, type, 0}{}
     virtual void getHeader(uint8_t* data) = 0;
     virtual void deserialize(uint8_t *data) = 0;
 };
@@ -73,10 +73,12 @@ struct LineNodeRequest : public PixyPacketRequest{
 
 struct LineNodeResponse : public PixyPacketResponse{
     struct Payload{
-        uint8_t data1;
-        uint16_t data2;
-        uint32_t data3;
+        uint8_t data1 = 0;
+        uint16_t data2 = 0;
+        uint32_t data3 = 0;
     } payload;
+
+    LineNodeResponse() : PixyPacketResponse(PacketType::LINE_NODE_RESPONSE){}
 
     void getHeader(uint8_t* data) override {
         memcpy(&header, data, sizeof(header));
