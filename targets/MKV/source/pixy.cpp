@@ -27,14 +27,18 @@ void Pixy::init(){
 }
 
 void Pixy::control(){
+    // send request about line nodes
     LineNodeRequest lineNodeRequest(3);
     sendRequest(lineNodeRequest);
 
+    // wait for response about line nodes
     LineNodeResponse lineNodeResponse;
+    // check if response is valid
     if(getResponse<LineNodeResponse>(lineNodeResponse)){
-        log_debug("%d", lineNodeResponse.payload.data1);
-        log_debug("%d", lineNodeResponse.payload.data2);
-        log_debug("%d", lineNodeResponse.payload.data3);
+        log_debug("Got response");
+        for(uint32_t i = 0; i<(lineNodeResponse.header.payloadLength/sizeof(uint16_t)); i++){
+            log_debug("Point nr: %d, value: %d", i, lineNodeResponse.payload.points[i]);
+        }
     } else{
         log_debug("Get response failed");
     }

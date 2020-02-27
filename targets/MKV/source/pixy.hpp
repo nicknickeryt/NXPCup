@@ -11,7 +11,9 @@
 #include "pixy_packet.hpp"
 
 class Pixy{
-public:
+    public:
+
+
 
     private:
         static constexpr uint16_t bufferSize = 1024;
