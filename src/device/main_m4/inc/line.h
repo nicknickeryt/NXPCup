@@ -110,6 +110,13 @@
 #define LINE_MODEMAP_MANUAL_SELECT_VECTOR    0x02
 #define LINE_MODEMAP_WHITE_LINE              0x80
 
+
+struct RowFrame {
+	SimpleList<uint16_t> roller;
+	bool  isUsed;
+	
+};
+
 enum LineState
 {
 	LINE_STATE_ACQUIRING, 

@@ -65,6 +65,9 @@ struct BarcodeLine
     Point_u16 points[BARCODELINE_POINTS_SIZE];
 };
 
+uint16_t rollerCoaster[20];
+uint16_t rollerLength = 0;
+
 struct BarcodeCandidate
 {
     uint16_t y;
@@ -112,6 +115,11 @@ static LineSegIndex n_lineSegments;
 static float g_maxError;
 static uint8_t g_lineIndex;
 static SimpleListNode<Line2> **g_lines;
+
+
+RowFrame rowFrame;
+
+
 static uint32_t g_maxSegTanAngle;
 static uint32_t g_maxEquivTanAngle;
 static uint32_t g_maxTrackingTanAngle;
@@ -510,12 +518,15 @@ int32_t line_getEdges()
 }
 
 
+
+
+
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 {
-		
-    uint16_t j, index, bit0, bit1, col0, col1, lineWidth;
-
-		if(row == 60 || row ==50 || row ==  40) {
+    uint16_t j, index, bit0, bit1, col0, col1, col3, col4, lineWidth;
+		uint16_t rollerTemp[20];
+		uint16_t rollerCounter = 0;
+		if( row ==50) {
 				
 		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
 		{
@@ -523,14 +534,25 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 				bit1 = buf[j+1]&EQ_NEGATIVE;
 				col0 = buf[j]&~EQ_NEGATIVE;
 				col1 = buf[j+1]&~EQ_NEGATIVE;
+			
+			
 				if (bit0!=0 && bit1==0)
 				{
 					
-						// cprintf(0, "dupa %d %d %d  ", col0, col1, len);
+						//cprintf(0, "dupa %d %d %d  ", col0, col1, len); 
+					lineWidth = col1 - col0;
 					
-						lineWidth = col1 - col0;
+					uint16_t center = (col0 + col1) / 2;
+						
+							rowFrame.isUsed = true;						
+					/**/
 					
-						Point p1, p2;
+						if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
+						{
+							
+						rollerTemp[rollerCounter++] = center;
+
+							Point p1, p2;
 		
 						p1.m_y = row / 2;
 						p1.m_x = col0 / 8;
@@ -542,21 +564,32 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
 						
 						g_nodesList.add(p1);
 						g_nodesList.add(p2);
-					/**/
-					
-						if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
-						{
+							
+							
 								index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
 							
 								if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-										g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;
+										g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;							
 								else
 										cprintf(0, "high index\n");
 						}
 				}
 		}
+		
+				rollerLength = rollerCounter;
+	memcpy(rollerCoaster, rollerTemp, sizeof(rollerCoaster));
+	cprintf(0, "len %d  ", rollerLength);
+		
+		
+	for (uint8_t i = 0; i < rollerLength; i++) {
+		cprintf(0, "%d ", rollerCoaster[i]);
 	}
-    
+	cprintf(0, "\n");
+	}
+		
+	
+
+	
     return 0;
 }
 
@@ -609,7 +642,7 @@ int line_sendLineGrid(uint8_t renderFlags)
         return -1;
     
     g_chirpUsb->useBuffer((uint8_t *)gridData, CAM_FRAME_HEADER_LEN+LINE_GRID_WIDTH*LINE_GRID_HEIGHT*sizeof(LineGridNode)); 
-    
+    cprintf(0, "%s\n", gridData);
     return 0;
 }
 
@@ -2660,42 +2693,14 @@ int line_processMain()
     if (g_debug==LINE_DEBUG_BENCHMARK)
         setTimer(&timer);
 		
-		/* Point p1, p2;
-		
-		p1.m_x = 20;
-		p1.m_y = 20;
-		
-		
-				
-		p2.m_x = 50;
-		p2.m_y = 50;
-		
-		g_nodesList.add(p1);
-    g_nodesList.add(p2); 
-	
-		
-		// cprintf(0, "wymiary %d %d\n", LINE_GRID_WIDTH, LINE_GRID_HEIGHT);
-		
-		
-		addline(p1, p2);*/	
-		
-		//g_linesList.add(line2);
-		
-		
-    extractLineSegments();
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
 
     n_lineSegments = g_lineSegIndex;
 		
-		sendLineSegments(0);
-		sendLines(g_linesList, 0, "lines");
-    
-    // if (g_debug&LINE_DEBUG_LAYERS)
-    // {
         sendLineSegments(0);
         sendPoints(g_nodesList, 0, "nodes");
-    // }
+		
     g_allMutex = false;
     // render whatever we've sent
         exec_sendEvent(g_chirpUsb, EVT_RENDER_FLUSH);

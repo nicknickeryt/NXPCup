@@ -31,6 +31,10 @@
 #include "progvideo.h"
 #include "calc.h"
 
+
+extern uint16_t rollerCoaster[20];
+extern uint16_t rollerLength;
+
 static const ProcModule g_module[] =
 {
 	{
@@ -359,11 +363,12 @@ void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
 		}
 						
 		ser_getTx(&txData);
-		*(uint16_t *)(txData + 0) = 1234;
-		*(uint16_t *)(txData + 2) = 4321;
-		*(uint16_t *)(txData + 4) = 888;
+//		*(uint16_t *)(txData + 0) = dot1;
+//		*(uint16_t *)(txData + 2) = dot2;
+//		*(uint16_t *)(txData + 4) = dot3;
+			memcpy(txData, rollerCoaster, rollerLength*2);
 		
-		ser_setTx(SER_TYPE_RESPONSE_OPT, 6, checksum);
+		ser_setTx(SER_TYPE_RESPONSE_LINE_NODES, rollerLength * 2, checksum);
 	}
 	else if (type==SER_TYPE_REQUEST_VERSION) // get version information
 	{
