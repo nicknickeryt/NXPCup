@@ -32,9 +32,6 @@
 #include "calc.h"
 
 
-extern uint16_t rollerCoaster[20];
-extern uint16_t rollerLength;
-
 static const ProcModule g_module[] =
 {
 	{
@@ -67,6 +64,165 @@ static uint16_t g_txLen; // current length
 static bool g_newPacket = false; 
 static BrightnessQ g_brightnessQ;
 static bool g_ready = false;
+
+////////////////////////////////// OUR PARAMETERS ///////////////////////////////////
+extern uint16_t detectedLinesTab[2];
+extern uint8_t detectedLinesNumber;
+////////////////////////////////// OUR FUNCTIONS ///////////////////////////////////
+void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
+{
+	uint8_t *txData;
+	int res;
+	
+	// first check if current program can handle request 
+	if (type>SER_TYPE_REQUEST_NO_PROG_MAX)
+		exec_progPacket(type, rxData, len, checksum);
+	else if (type==SER_TYPE_REQUEST_CHANGE_PROG)
+	{
+		/* res = exec_runProgName((const char *)rxData);
+		if (res<0)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
+		else
+		*/ 
+			ser_sendResult(res, checksum);
+	}
+	else if (type==SER_TYPE_REQUEST_RESOLUTION)
+	{
+		if (len!=1)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);	
+		else
+			if (exec_progResolution(rxData[0], checksum)<0)
+				ser_sendError(SER_ERROR_PROG_CHANGING, checksum);
+	}
+	else if (type == SER_TYPE_REQUEST_LINE_NODES) {
+		  if (!g_ready)
+		{
+			ser_sendError(-8, checksum);
+			return;
+		}
+						
+		ser_getTx(&txData);
+		uint8_t bytesToSend = 0;
+		*(uint8_t *)(txData) = detectedLinesNumber;
+		
+		if(detectedLinesNumber == 2 || detectedLinesNumber == 3){
+			memcpy(txData + 1, detectedLinesTab, 2);
+			bytesToSend = 3;
+		}else if(detectedLinesNumber == 4){
+			memcpy(txData + 1, detectedLinesTab, 4);
+			bytesToSend = 5;
+		}else{
+			bytesToSend = 1;
+		}
+		
+		
+		ser_setTx(SER_TYPE_RESPONSE_LINE_NODES, bytesToSend, checksum);
+	}
+	else if (type==SER_TYPE_REQUEST_VERSION) // get version information
+	{
+		uint32_t hwVal;
+		
+		// this mechanism provides feedback to serial client that we're ready to accept input after "boot-up"
+		// If g_ready is false, we're not ready...
+		if (!g_ready)
+		{
+			ser_sendError(SER_ERROR_BUSY, checksum);
+			return;
+		}
+				
+		ser_getTx(&txData);
+		// hw version, first 2 bytes
+		hwVal = *(uint32_t *)(0x40045000+0x38);
+		if (hwVal>>16==0xc1ab)
+			*(uint16_t *)(txData + 0) = hwVal&0xffff;
+		else // if value isn't set, assume Pixy version 1.3b 
+			*(uint16_t *)(txData + 0) = 0x1301;				
+		// fw version, next 4 bytes
+		*(uint8_t *)(txData + 2) = FW_MAJOR_VER;
+		*(uint8_t *)(txData + 3) = FW_MINOR_VER;
+		*(uint16_t *)(txData + 4) = FW_BUILD_VER;
+		
+		// fw type, next 10 bytes
+		strncpy((char *)txData+6, FW_TYPE, 10);
+			
+		ser_setTx(SER_TYPE_RESPONSE_VERSION, 16, checksum);
+	}
+  else if (type==SER_TYPE_REQUEST_OPT) // get lines information
+	{
+	  if (!g_ready)
+		{
+			ser_sendError(-8, checksum);
+			return;
+		}
+						
+		ser_getTx(&txData);
+		*(uint8_t *)(txData + 0) = 5;
+		*(uint8_t *)(txData + 1) = 8;
+		*(uint16_t *)(txData + 2) = 1997;
+		
+			
+		ser_setTx(SER_TYPE_RESPONSE_OPT, 4, checksum);
+	}
+	else if (type==SER_TYPE_REQUEST_BRIGHTNESS) // set brightness
+	{
+		if (len!=1)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
+		else
+		{
+			// "queue" up the brightness request because it goes out over i2c and takes time
+			g_brightnessQ.m_valid = true;
+			g_brightnessQ.m_brightness = rxData[0];
+			ser_sendResult(0, checksum);
+		}
+	}
+	else if (type==SER_TYPE_REQUEST_SERVO) // set servo positions
+	{
+		if (len!=4)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
+		else
+		{
+			rcs_setPos(0, *(uint16_t *)rxData);
+			rcs_setPos(1, *(uint16_t *)&rxData[2]);
+			ser_sendResult(0, checksum);
+		}
+	}
+	else if (type==SER_TYPE_REQUEST_LED) // set LED 
+	{
+		if (len!=3)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
+		else
+		{
+			// set override, user is now in control
+			cc_setLEDOverride(true);
+			led_setRGB(rxData[0], rxData[1], rxData[2]);
+			ser_sendResult(0, checksum);
+		}
+	}
+	else if (type==SER_TYPE_REQUEST_LAMP) // set lamp
+	{
+		if (len!=2)
+			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
+		else
+		{
+			// set lower LED override if lower lamp is turned on
+			if (rxData[1])
+				cc_setLEDOverride(true);
+			led_setLamp(rxData[0], rxData[1]);
+			ser_sendResult(0, checksum);				
+		}				
+	}
+	else if (type==SER_TYPE_REQUEST_FPS) // get frames per second
+	{
+		float fps = cam_getFPS() + 0.5f;
+		uint32_t val = (uint32_t)fps; // convert to int, round up or down
+		ser_sendResult(val, checksum);				
+	}
+	else // not able to find handler, return error
+		ser_sendError(SER_ERROR_TYPE_UNSUPPORTED, checksum);		
+}
+
+///////////////////////////////////////////// OTHER FUNCTION /////////////////////////////////////////
+
 
 uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 {
@@ -327,150 +483,6 @@ void ser_sendError(int8_t error, bool checksum)
 	ser_getTx(&txData);
 	txData[0] = error;
 	ser_setTx(SER_TYPE_RESPONSE_ERROR, 1, checksum);	
-}
-
-
-void ser_packet(uint8_t type, const uint8_t *rxData, uint8_t len, bool checksum)
-{
-	uint8_t *txData;
-	int res;
-	
-	// first check if current program can handle request 
-	if (type>SER_TYPE_REQUEST_NO_PROG_MAX)
-		exec_progPacket(type, rxData, len, checksum);
-	else if (type==SER_TYPE_REQUEST_CHANGE_PROG)
-	{
-		/* res = exec_runProgName((const char *)rxData);
-		if (res<0)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
-		else
-		*/ 
-			ser_sendResult(res, checksum);
-	}
-	else if (type==SER_TYPE_REQUEST_RESOLUTION)
-	{
-		if (len!=1)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);	
-		else
-			if (exec_progResolution(rxData[0], checksum)<0)
-				ser_sendError(SER_ERROR_PROG_CHANGING, checksum);
-	}
-	else if (type == SER_TYPE_REQUEST_LINE_NODES) {
-		  if (!g_ready)
-		{
-			ser_sendError(-8, checksum);
-			return;
-		}
-						
-		ser_getTx(&txData);
-//		*(uint16_t *)(txData + 0) = dot1;
-//		*(uint16_t *)(txData + 2) = dot2;
-//		*(uint16_t *)(txData + 4) = dot3;
-			memcpy(txData, rollerCoaster, rollerLength*2);
-		
-		ser_setTx(SER_TYPE_RESPONSE_LINE_NODES, rollerLength * 2, checksum);
-	}
-	else if (type==SER_TYPE_REQUEST_VERSION) // get version information
-	{
-		uint32_t hwVal;
-		
-		// this mechanism provides feedback to serial client that we're ready to accept input after "boot-up"
-		// If g_ready is false, we're not ready...
-		if (!g_ready)
-		{
-			ser_sendError(SER_ERROR_BUSY, checksum);
-			return;
-		}
-				
-		ser_getTx(&txData);
-		// hw version, first 2 bytes
-		hwVal = *(uint32_t *)(0x40045000+0x38);
-		if (hwVal>>16==0xc1ab)
-			*(uint16_t *)(txData + 0) = hwVal&0xffff;
-		else // if value isn't set, assume Pixy version 1.3b 
-			*(uint16_t *)(txData + 0) = 0x1301;				
-		// fw version, next 4 bytes
-		*(uint8_t *)(txData + 2) = FW_MAJOR_VER;
-		*(uint8_t *)(txData + 3) = FW_MINOR_VER;
-		*(uint16_t *)(txData + 4) = FW_BUILD_VER;
-		
-		// fw type, next 10 bytes
-		strncpy((char *)txData+6, FW_TYPE, 10);
-			
-		ser_setTx(SER_TYPE_RESPONSE_VERSION, 16, checksum);
-	}
-  else if (type==SER_TYPE_REQUEST_OPT) // get lines information
-	{
-	  if (!g_ready)
-		{
-			ser_sendError(-8, checksum);
-			return;
-		}
-						
-		ser_getTx(&txData);
-		*(uint8_t *)(txData + 0) = 5;
-		*(uint8_t *)(txData + 1) = 8;
-		*(uint16_t *)(txData + 2) = 1997;
-		
-			
-		ser_setTx(SER_TYPE_RESPONSE_OPT, 4, checksum);
-	}
-	else if (type==SER_TYPE_REQUEST_BRIGHTNESS) // set brightness
-	{
-		if (len!=1)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
-		else
-		{
-			// "queue" up the brightness request because it goes out over i2c and takes time
-			g_brightnessQ.m_valid = true;
-			g_brightnessQ.m_brightness = rxData[0];
-			ser_sendResult(0, checksum);
-		}
-	}
-	else if (type==SER_TYPE_REQUEST_SERVO) // set servo positions
-	{
-		if (len!=4)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
-		else
-		{
-			rcs_setPos(0, *(uint16_t *)rxData);
-			rcs_setPos(1, *(uint16_t *)&rxData[2]);
-			ser_sendResult(0, checksum);
-		}
-	}
-	else if (type==SER_TYPE_REQUEST_LED) // set LED 
-	{
-		if (len!=3)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
-		else
-		{
-			// set override, user is now in control
-			cc_setLEDOverride(true);
-			led_setRGB(rxData[0], rxData[1], rxData[2]);
-			ser_sendResult(0, checksum);
-		}
-	}
-	else if (type==SER_TYPE_REQUEST_LAMP) // set lamp
-	{
-		if (len!=2)
-			ser_sendError(SER_ERROR_INVALID_REQUEST, checksum);
-		else
-		{
-			// set lower LED override if lower lamp is turned on
-			if (rxData[1])
-				cc_setLEDOverride(true);
-			led_setLamp(rxData[0], rxData[1]);
-			ser_sendResult(0, checksum);				
-		}				
-	}
-	else if (type==SER_TYPE_REQUEST_FPS) // get frames per second
-	{
-		float fps = cam_getFPS() + 0.5f;
-		uint32_t val = (uint32_t)fps; // convert to int, round up or down
-		ser_sendResult(val, checksum);				
-	}
-	else // not able to find handler, return error
-		ser_sendError(SER_ERROR_TYPE_UNSUPPORTED, checksum);		
 }
 
 int32_t ser_packetChirp(const uint8_t &type, const uint32_t &len, const uint8_t *request, Chirp *chirp)

@@ -117,9 +117,6 @@ static uint8_t g_lineIndex;
 static SimpleListNode<Line2> **g_lines;
 
 
-RowFrame rowFrame;
-
-
 static uint32_t g_maxSegTanAngle;
 static uint32_t g_maxEquivTanAngle;
 static uint32_t g_maxTrackingTanAngle;
@@ -174,6 +171,90 @@ Line2 *findTrackedLine(uint8_t index);
 uint8_t trackedLinesWithPoint(const Point &p);
 
 void line_shadowCallback(const char *id, const uint16_t &val);
+
+/////////////////////////////// OUR PARAMETERS ////////////////////////////////////////////////
+uint16_t detectedLinesTab[2];
+uint8_t detectedLinesNumber;
+
+/////////////////////////////// OUR FUNCTIONS /////////////////////////////////////////////////
+
+
+
+int line_hLine(uint8_t row, uint16_t *buf, uint32_t len){
+    uint16_t j, index, bit0, bit1, col0, col1, col3, col4, lineWidth;
+		uint16_t rollerTemp[20];
+		uint16_t rollerCounter = 0;
+		if( row ==50) {
+				
+		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++){
+				bit0 = buf[j]&EQ_NEGATIVE;
+				bit1 = buf[j+1]&EQ_NEGATIVE;
+				col0 = buf[j]&~EQ_NEGATIVE;
+				col1 = buf[j+1]&~EQ_NEGATIVE;
+				if (bit0!=0 && bit1==0){
+					
+					/// calculate line width
+					lineWidth = col1 - col0;
+					/// search for line center
+					uint16_t center = (col0 + col1) / 2;			
+					
+					if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth){
+					rollerTemp[rollerCounter++] = center;
+					
+					Point p1, p2;
+					p1.m_y = row / 2;
+					p1.m_x = col0 / 8;
+					p2.m_y = row / 2;
+					p2.m_x = col1 / 8;					
+					g_nodesList.add(p1);
+					g_nodesList.add(p2);							
+							index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
+							if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
+									g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;							
+							else
+									cprintf(0, "high index\n");
+						}
+				}
+		}
+		
+		
+		if(rollerCounter > 0){
+			if(rollerCounter == 1){
+				if(rollerTemp[0] < 300){
+					detectedLinesTab[0] = rollerTemp[0];
+					detectedLinesNumber = 3;
+					cprintf(0, "line right %d  \n", detectedLinesTab[0]);
+				}else if(rollerTemp[0] > 300){
+					detectedLinesTab[0] = rollerTemp[0];
+					detectedLinesNumber = 2;
+					cprintf(0, "line right %d  \n", detectedLinesTab[0]);
+				}
+			}else if(rollerCounter > 1){
+				detectedLinesNumber = 4;
+				detectedLinesTab[0] = rollerTemp[0];
+				detectedLinesTab[1] = rollerTemp[rollerCounter - 1];
+			}
+		}else{
+			detectedLinesNumber = 1;
+		}		
+		
+		cprintf(0, "number %d  \n", detectedLinesNumber);
+		
+	//rollerLength = rollerCounter;
+	//memcpy(rollerCoaster, rollerTemp, sizeof(rollerCoaster));
+	// cprintf(0, "len %d  ", rollerLength);
+		
+	//for (uint8_t i = 0; i < rollerLength; i++) {
+		// cprintf(0, "%d ", rollerCoaster[i]);
+	//}
+	// cprintf(0, "\n");
+	}
+		return 0;
+}
+
+
+
+/////////////////////////////////////// OTHER FUNCTION /////////////////////////////////////////////
 
 uint32_t tanDiffAbs1000(const Point &p00, const Point &p01, const Point &p10, const Point &p11, bool min=false)
 {
@@ -515,82 +596,6 @@ int32_t line_getEdges()
     g_chirpM0->callSync(g_getEdgesM0, UINT32(SRAM1_LOC+CAM_PREBUF_LEN), END_OUT_ARGS, &responseInt, END_IN_ARGS);
         
     return responseInt;
-}
-
-
-
-
-
-int line_hLine(uint8_t row, uint16_t *buf, uint32_t len)
-{
-    uint16_t j, index, bit0, bit1, col0, col1, col3, col4, lineWidth;
-		uint16_t rollerTemp[20];
-		uint16_t rollerCounter = 0;
-		if( row ==50) {
-				
-		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
-		{
-				bit0 = buf[j]&EQ_NEGATIVE;
-				bit1 = buf[j+1]&EQ_NEGATIVE;
-				col0 = buf[j]&~EQ_NEGATIVE;
-				col1 = buf[j+1]&~EQ_NEGATIVE;
-			
-			
-				if (bit0!=0 && bit1==0)
-				{
-					
-						//cprintf(0, "dupa %d %d %d  ", col0, col1, len); 
-					lineWidth = col1 - col0;
-					
-					uint16_t center = (col0 + col1) / 2;
-						
-							rowFrame.isUsed = true;						
-					/**/
-					
-						if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth)
-						{
-							
-						rollerTemp[rollerCounter++] = center;
-
-							Point p1, p2;
-		
-						p1.m_y = row / 2;
-						p1.m_x = col0 / 8;
-						
-						
-								
-						p2.m_y = row / 2;
-						p2.m_x = col1 / 8;
-						
-						g_nodesList.add(p1);
-						g_nodesList.add(p2);
-							
-							
-								index = LINE_GRID_INDEX((((col0+col1)>>1) + g_dist)>>3, row>>1);
-							
-								if (index<LINE_GRID_WIDTH*LINE_GRID_HEIGHT+8)
-										g_lineGrid[index] |= LINE_NODE_FLAG_HLINE;							
-								else
-										cprintf(0, "high index\n");
-						}
-				}
-		}
-		
-				rollerLength = rollerCounter;
-	memcpy(rollerCoaster, rollerTemp, sizeof(rollerCoaster));
-	cprintf(0, "len %d  ", rollerLength);
-		
-		
-	for (uint8_t i = 0; i < rollerLength; i++) {
-		cprintf(0, "%d ", rollerCoaster[i]);
-	}
-	cprintf(0, "\n");
-	}
-		
-	
-
-	
-    return 0;
 }
 
 int line_vLine(uint8_t row, uint8_t *vstate, uint16_t *buf, uint32_t len)
