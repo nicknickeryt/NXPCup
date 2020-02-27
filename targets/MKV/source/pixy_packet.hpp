@@ -38,7 +38,8 @@ struct PixyPacketResponse{
     } header;
 
     PixyPacketResponse() = default;
-    virtual void deserialize(uint8_t *data, uint32_t* length) = 0;
+    virtual void getHeader(uint8_t* data) = 0;
+    virtual void deserialize(uint8_t *data) = 0;
 };
 
 struct SetLampRequest : public PixyPacketRequest{
@@ -72,13 +73,16 @@ struct LineNodeRequest : public PixyPacketRequest{
 
 struct LineNodeResponse : public PixyPacketResponse{
     struct Payload{
-        uint32_t lineNo = 0;
+        uint8_t data1;
+        uint16_t data2;
+        uint32_t data3;
     } payload;
 
-    LineNodeResponse() = default;
-
-    void deserialize(uint8_t *data, uint32_t* length) override {
-
+    void getHeader(uint8_t* data) override {
+        memcpy(&header, data, sizeof(header));
+    }
+    void deserialize(uint8_t *data) override {
+        memcpy(&payload, data + sizeof(header), header.payloadLength);
     }
 };
 
