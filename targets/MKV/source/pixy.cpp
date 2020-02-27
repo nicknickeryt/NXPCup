@@ -31,10 +31,14 @@ void Pixy::control(){
     sendRequest(lineNodeRequest);
 
     LineNodeResponse lineNodeResponse;
-    getResponse<LineNodeResponse>(lineNodeResponse);
-    log_debug("%d", lineNodeResponse.payload.data1);
-    log_debug("%d", lineNodeResponse.payload.data2);
-    log_debug("%d", lineNodeResponse.payload.data3);
+    if(getResponse<LineNodeResponse>(lineNodeResponse)){
+        log_debug("%d", lineNodeResponse.payload.data1);
+        log_debug("%d", lineNodeResponse.payload.data2);
+        log_debug("%d", lineNodeResponse.payload.data3);
+    } else{
+        log_debug("Get response failed");
+    }
+
 }
 
 void Pixy::sendRequest(PixyPacketRequest& packet){
@@ -45,8 +49,9 @@ void Pixy::sendRequest(PixyPacketRequest& packet){
 }
 
 template<typename T>
-void Pixy::getResponse(T& packet){
+bool Pixy::getResponse(T& packet){
     volatile uint16_t bytesToRead;
+    uint32_t timeout = 0;
     switch(packet.header.type){
         case PacketType::LINE_NODE_RESPONSE: {
             // first get only header, inside it there is info about payload size
@@ -54,7 +59,13 @@ void Pixy::getResponse(T& packet){
             // wait for given number of bytes
             while(bytesToRead != uart.getBufferLevel()){
                 asm("nop");
+                timeout++;
+                // timeout guard to avoid locking
+                if(timeout >= readingTimeout){
+                    return false;
+                }
             }
+            timeout = 0;
             uart.read(rxPacketBuffer, bytesToRead);
             packet.getHeader(rxPacketBuffer);
             // get payload, now we know the size
@@ -62,6 +73,11 @@ void Pixy::getResponse(T& packet){
             // wait for given number of bytes
             while(bytesToRead != uart.getBufferLevel()){
                 asm("nop");
+                timeout++;
+                // timeout guard to avoid locking
+                if(timeout >= readingTimeout){
+                    return false;
+                }
             }
             uart.read(rxPacketBuffer, bytesToRead);
             packet.deserialize(rxPacketBuffer);
@@ -70,4 +86,5 @@ void Pixy::getResponse(T& packet){
         default:
             break;
     }
+    return true;
 }

@@ -15,6 +15,7 @@ public:
 
     private:
         static constexpr uint16_t bufferSize = 1024;
+        static constexpr uint32_t readingTimeout = 10000000;
         uint8_t txPacketBuffer[bufferSize];
         uint8_t rxPacketBuffer[bufferSize];
         uint32_t txPacketLength;
@@ -32,5 +33,5 @@ public:
     private:
         void sendRequest(PixyPacketRequest& packet);
         template<typename T>
-        void getResponse(T& packet);
+        bool getResponse(T& packet);
 };

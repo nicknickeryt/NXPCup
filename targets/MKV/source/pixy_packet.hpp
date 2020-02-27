@@ -74,9 +74,9 @@ struct LineNodeRequest : public PixyPacketRequest{
 
 struct LineNodeResponse : public PixyPacketResponse{
     struct __attribute__((__packed__)) Payload{
-        uint8_t data1 = 0;
+        uint16_t data1 = 0;
         uint16_t data2 = 0;
-        uint32_t data3 = 0;
+        uint16_t data3 = 0;
     } payload;
 
     LineNodeResponse() : PixyPacketResponse(PacketType::LINE_NODE_RESPONSE){}
