@@ -24,10 +24,9 @@ struct PixyPacketRequest{
         uint16_t sync;
         PacketType type;
         uint8_t payloadLength;
-        uint16_t checksum;
     } header;
 
-    explicit PixyPacketRequest(PacketType packetType, uint8_t payloadLength) : header{0xc1ae, packetType, payloadLength, 0} {}
+    explicit PixyPacketRequest(PacketType packetType, uint8_t payloadLength) : header{0xc1ae, packetType, payloadLength} {}
     virtual void serialize(uint8_t *data, uint32_t* length) = 0;
 };
 
@@ -36,9 +35,10 @@ struct PixyPacketResponse{
         uint16_t sync = 0;
         PacketType type = PacketType::RESPONSE_ERROR;
         uint8_t payloadLength = 2;
+        uint16_t checksum;
     } header;
 
-    explicit PixyPacketResponse(PacketType type) : header{0xc1af, type, 0}{}
+    explicit PixyPacketResponse(PacketType type) : header{0xc1af, type, 0, 0}{}
     virtual void getHeader(uint8_t* data) = 0;
     virtual void deserialize(uint8_t *data) = 0;
 };
