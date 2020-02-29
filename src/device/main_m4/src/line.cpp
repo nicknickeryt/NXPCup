@@ -153,11 +153,12 @@ const static uint8_t maxSimilarLinesToCHeck = 3;
 
 struct LineInRow {
 	enum LineType : uint8_t{
-		EDGE = 9, // detect track edges
-		PATTERN = 1, // patterns on track, 3 or 4 patternt between edges
-		STOP_MAIN = 2, // diuring main competition
-		STOP = 3, // smaller competition
-		NONE // not detected
+		NONE, // not detected
+		EDGE = 1, // detect track edges
+		PATTERN = 2, // patterns on track, 3 or 4 patternt between edges
+		STOP_MAIN = 3, // diuring main competition
+		STOP = 4 // smaller competition
+
 	};/**/
 	
 	uint16_t center;
@@ -182,6 +183,8 @@ struct LineInRow {
 	}
 };
 
+LineInRow::LineType debugPrintPattern = LineInRow::LineType::EDGE;
+
 /////////////////////////////// OUR FUNCTIONS /////////////////////////////////////////////////
 
 class AnalyseData {
@@ -192,36 +195,27 @@ public:
 	LineInRow edgeLines[10];
 	uint16_t rowIndex;
 private:
-	uint8_t edgeLinesDefaultWidth;
-	
-	void analyseEdgeLineWidth(LineInRow *lineInRow, uint16_t *edges, uint8_t startIndexInTab, uint8_t stopIndexInTab, bool validSide) {
-		uint16_t width = edges[stopIndexInTab] - edges[startIndexInTab];
-		if (validSide) {
-			if (width > (edgeLinesDefaultWidth - 8) && width < (edgeLinesDefaultWidth + 8)) {
-				lineInRow->setData(edges[startIndexInTab], edges[stopIndexInTab], true);
-			}	else {
-				lineInRow->setData(edges[startIndexInTab], edges[stopIndexInTab], false);
-			}
-		} else {
-			//lineInRow->valid = false;
-		}
-	}
-	
+	uint16_t edgeLinesDefaultWidth;
+	uint16_t patternLinesDefaultWidth;
+
 	void checkPossibleLineType(LineInRow* line, uint16_t startPixel, uint16_t stopPixel) {
 		uint16_t width = stopPixel - startPixel;
 		if (width < (edgeLinesDefaultWidth + 6) && width > (edgeLinesDefaultWidth - 6)) {
 			line->type = LineInRow::LineType::EDGE;
+		} else if (width < (patternLinesDefaultWidth + 6) && width > (patternLinesDefaultWidth - 6)) {
+			line->type = LineInRow::LineType::PATTERN;
 		} else {
 			line->type = LineInRow::LineType::NONE;
 		}
-		//line->width = width;
+		
 		line->center = (startPixel + stopPixel) / 2;
 	}
 	
 public:
-	AnalyseData(uint16_t rowIndex_m, uint8_t edgeLinesNormalWidth_m) {
+	AnalyseData(uint16_t rowIndex_m, uint8_t edgeLinesNormalWidth_m, uint16_t patternLinesDefaultWidth_m) {
 		rowIndex = rowIndex_m;
 		edgeLinesDefaultWidth = edgeLinesNormalWidth_m;
+		patternLinesDefaultWidth = patternLinesDefaultWidth_m;
 		goodDetectedLinesCount = 0;
 		
 		memset(linesInSubRow, 0, sizeof(LineInRow) * 10 * 3);
@@ -294,7 +288,6 @@ public:
 			LineInRow* s1 = nullptr;
 			LineInRow* s2 = nullptr;
 			
-			
 			for (uint8_t i = 0; i < 10; i++) {
 				s0 = &linesInSubRow[0][i];
 				s1 = findSimilar(linesInSubRow[1], s0, 10);
@@ -326,12 +319,12 @@ public:
 			}
 			
 			for (uint8_t i =0; i < goodDetectedLinesCount; i++) {
-				if (goodDetectedLines[i].type == LineInRow::LineInRow::EDGE) {
+				if (goodDetectedLines[i].type == debugPrintPattern) {
 					Point p1, p2;
 					p1.m_y = (row -1) / 2;
 					p1.m_x = goodDetectedLines[i].center / 8;				
 					g_nodesList.add(p1);					
-				}
+				} 
 			}
 		}
 		return true;
@@ -339,17 +332,32 @@ public:
 };
 
 AnalyseData linesData[] = {
-	AnalyseData(68, 17), 
-	AnalyseData(62, 15),
-	AnalyseData(56, 14),
-	AnalyseData(50, 13),
-	AnalyseData(44, 12)
+	AnalyseData(68, 17, 51), 
+	AnalyseData(62, 15, 45),
+	AnalyseData(56, 14, 42),
+	AnalyseData(50, 13, 39),
+	AnalyseData(44, 12, 36)
 };
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
+	static uint16_t counter = 0;
+	static uint8_t patternCounter;
+	
+	if (row == 1) {
+		counter ++;
+		if (counter > 60) {
+			counter = 0;
+			patternCounter++;
+			if (patternCounter >= 3) {
+				patternCounter = 1;
+			}
+			debugPrintPattern = (LineInRow::LineType)patternCounter;
+		}
+	}
+	
 	for(uint8_t i =0; i < 5; i++) {
 		if (linesData[i].check(row, buf, len)) {
-		
+			
 		}
 	}
 	return 0;
