@@ -53,7 +53,6 @@ void Kitty::init() {
     pitSendCameraData.init();
     encoderRight.init();
     encoderLeft.init();
-    encodersPit.init();
     menu.init();
     motors.init();
     commandManager.init(printCommandManager);
@@ -62,6 +61,7 @@ void Kitty::init() {
     camera.start();
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
+    encodersPit.init();
     uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
     display.enable();
 
@@ -90,6 +90,10 @@ void Kitty::proc() {
     }
 
     if(frameTrigger){
+
+        log_notice("%" PRIu16, encoderLeft.getTicks());
+//        log_notice("ER %" PRIu16, encoderRight.getTicks());
+
         static uint8_t line1 = 10;
         static uint8_t line2 = 5;
         static bool speedUp;
@@ -97,10 +101,6 @@ void Kitty::proc() {
         static bool emergency;
         static bool stop;
         static bool crossroad;
-        static float encoderLeft = 0.5;
-        static float encoderRight = 0.5;
-        static bool directionLeft = true;
-        static bool directionRight = true;
 
         uint8_t linesValues[2] = {line1++, line2++};
         if(line1 == 127){
@@ -109,24 +109,7 @@ void Kitty::proc() {
         }
 
         int16_t motorsValues[2] = {int16_t(motors.getValue().first * 100.0), int16_t(motors.getValue().second * 100.0)};
-        int16_t encodersValues[2] = {int16_t(encoderLeft * 100.0), int16_t(encoderRight * 100.0)};
-
-
-        if(directionLeft){
-            encoderLeft += 0.01;
-            directionLeft = encoderLeft < 1.00;
-        }else{
-            encoderLeft -= 0.01;
-            directionLeft = encoderLeft <= -1.00;
-        }
-
-        if(directionRight){
-            encoderRight += 0.02;
-            directionRight = encoderRight < 1.00;
-        }else{
-            encoderRight -= 0.02;
-            directionRight = encoderRight <= -1.00;
-        }
+        int16_t encodersValues[2] = {0, 0};
 
         uint8_t obstacleSide = 1;
             speedUp ^= 1U;

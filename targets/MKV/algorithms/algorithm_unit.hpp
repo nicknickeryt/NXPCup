@@ -51,7 +51,7 @@ private:
     halina::Switches &switches;
 
 public:
-    float startSpeed = 0.5;
+    float startSpeed = 0.2;
 
 public:
     class AlgorithmData{

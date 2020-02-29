@@ -9,6 +9,7 @@
 #pragma once
 
 #include "NXP_gpio.hpp"
+#include <math.h>
 
 class NXP_Encoder{
 public:
