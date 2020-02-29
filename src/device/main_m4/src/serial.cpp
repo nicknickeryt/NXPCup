@@ -378,9 +378,9 @@ uint16_t lego_getData(uint8_t *buf, uint32_t buflen)
 			turn16 = turn;
 			turn16 *= 180; // scale accordingly
 			turn16 /= 127;
-			line_setNextTurnAngle(turn16);
-			if (lastReverse!=0xffff && lastReverse!=reverse)
-				line_reversePrimary();
+			//line_setNextTurnAngle(turn16);
+			//if (lastReverse!=0xffff && lastReverse!=reverse)
+			//	line_reversePrimary();
 			if (lastLamp!=lamp)
 			{
 				if (lamp)

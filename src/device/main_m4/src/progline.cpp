@@ -122,11 +122,11 @@ void ProgLine::sendLineData(uint8_t requestType, uint8_t typeMap, bool checksum)
 
 	len = ser_getTx(&txData);
 	
-	if (requestType==GET_PRIMARY_FEATURES)
-		res = line_getPrimaryFrame2(typeMap, txData, len);
+	/*if (requestType==GET_PRIMARY_FEATURES){}
+		//res = line_getPrimaryFrame2(typeMap, txData, len);
 	else //if (requestType==GET_ALL_FEATURES)
 		res = line_getAllFrame2(typeMap, txData, len);
-	
+	*/
 	if (res<0)
 		ser_sendError(SER_ERROR_BUSY, checksum);
 	else

@@ -40,11 +40,7 @@
 
 #define LINE_BUFSIZE    CAM_RES3_WIDTH/2
 
-/********************************************************************/
-
-#define BARCODELINES_SIZE           8               // arbitrary
-#define BARCODELINE_POINTS_SIZE     6               // arbitrary
-#define BARCODECANDIDATES_SIZE      4                                   // arbitrary
+/********************************************************************/                    
 
 // #define LINE_GRID_WIDTH 200
 // #define LINE_GRID_HEIGHT 100
@@ -54,33 +50,11 @@ struct Point_u16
     uint16_t y;
 };
 
-struct BarcodeLine
-{
-    uint16_t x;
-    uint16_t y;
-    int32_t a;
-    int32_t b;
-    uint16_t width;
-    uint8_t pointsIndex;
-    Point_u16 points[BARCODELINE_POINTS_SIZE];
-};
 
-uint16_t rollerCoaster[20];
-uint16_t rollerLength = 0;
-
-struct BarcodeCandidate
-{
-    uint16_t y;
-    uint16_t distance;
-    uint8_t count;
-};
-
-static BarcodeLine g_barcodeLines[BARCODELINES_SIZE];
-static BarcodeCandidate g_barcodeCandidates[BARCODECANDIDATES_SIZE];    // arbitrary
+//static BarcodeLine g_barcodeLines[BARCODELINES_SIZE];
+//static BarcodeCandidate g_barcodeCandidates[BARCODECANDIDATES_SIZE];    // arbitrary
 
 /********************************************************************/
-
-
 
 Equeue *g_equeue;
 
@@ -88,7 +62,7 @@ static uint16_t *g_lineBuf;
 
 static uint16_t g_minLineWidth;
 static uint16_t g_maxLineWidth;
-static uint32_t g_minLineLength2; // squared
+//static uint32_t g_minLineLength2; // squared
 static uint32_t g_minLineLength; // not squared
 static uint16_t g_maxMergeDist; 
 
@@ -107,38 +81,38 @@ static ChirpProc g_setEdgeParamsM0 = -1;
 
 LineGridNode *g_lineGrid;
 static uint8_t *g_lineGridMem;
-static LineSeg *g_lineSegs;
+//static LineSeg *g_lineSegs;
 static uint8_t *g_lineSegsMem;
-static uint8_t g_pointsPerSeg;
+//static uint8_t g_pointsPerSeg;
 static LineSegIndex g_lineSegIndex;
-static LineSegIndex n_lineSegments;
-static float g_maxError;
-static uint8_t g_lineIndex;
+//static LineSegIndex n_lineSegments;
+//static float g_maxError;
+//static uint8_t g_lineIndex;
 static SimpleListNode<Line2> **g_lines;
 
 
-static uint32_t g_maxSegTanAngle;
-static uint32_t g_maxEquivTanAngle;
-static uint32_t g_maxTrackingTanAngle;
+//static uint32_t g_maxSegTanAngle;
+//static uint32_t g_maxEquivTanAngle;
+//static uint32_t g_maxTrackingTanAngle;
 
 static SimpleList<Line2> g_linesList;
 static SimpleList<Point> g_nodesList;
 static SimpleList<Nadir> g_nadirsList;
 static SimpleList<Intersection> g_intersectionsList;
 
-static BarCode **g_candidateBarcodes;
+//static BarCode **g_candidateBarcodes;
 // static DecodedBarCode *g_votedBarcodes;
-static uint8_t *g_votedBarcodesMem;
+//static uint8_t *g_votedBarcodesMem;
 
 
-static SimpleList<Tracker<Line2> > g_lineTrackersList;
-static Tracker<FrameIntersection> g_primaryIntersection;
+//static SimpleList<Tracker<Line2> > g_lineTrackersList;
+//static Tracker<FrameIntersection> g_primaryIntersection;
 static bool g_newIntersection;
 
-static SimpleList<Tracker<DecodedBarCode> > g_barCodeTrackersList;
-static uint8_t g_lineTrackerIndex;
+// static SimpleList<Tracker<DecodedBarCode> > g_barCodeTrackersList;
+//static uint8_t g_lineTrackerIndex;
 static uint8_t g_primaryLineIndex;
-static uint8_t g_primaryPointMap;
+//static uint8_t g_primaryPointMap;
 static Point g_goalPoint;
 static Point g_primaryPoint;
 static bool g_primaryActive;
@@ -155,27 +129,25 @@ static bool g_frameFlag;
 static bool g_primaryMutex;
 static bool g_allMutex;
 
-static int16_t g_nextTurnAngle;
+//static int16_t g_nextTurnAngle;
 static int16_t g_defaultTurnAngle;
 static uint8_t g_delayedTurn;
-static bool g_newTurnAngle;
+//static bool g_newTurnAngle;
 static bool g_manualVectorSelect;
-static uint8_t g_manualVectorSelecIndextActive;
-static uint8_t g_manualVectorSelectIndex;
-static bool g_reversePrimary;
+//static uint8_t g_manualVectorSelecIndextActive;
+//static uint8_t g_manualVectorSelectIndex;
+//static bool g_reversePrimary;
 
 bool checkGraph(int val, uint8_t suppress0=0, uint8_t suppress1=0, SimpleListNode<Intersection> *intern=NULL);
 
 Line2 *findLine(uint8_t index);
-Line2 *findTrackedLine(uint8_t index);
-uint8_t trackedLinesWithPoint(const Point &p);
+
 
 void line_shadowCallback(const char *id, const uint16_t &val);
 
 /////////////////////////////// OUR PARAMETERS ////////////////////////////////////////////////
 uint16_t detectedLinesTab[2];
 uint8_t detectedLinesNumber;
-static volatile uint8_t const foo[5000] = {1,2};
 struct LineInRow {
 	/*enum class LineType : uint8_t{
 		EDGE = 0, // detect track edges
@@ -186,7 +158,6 @@ struct LineInRow {
 	
 	uint16_t startPixel, stopPixel, center, width;
 	bool valid;
-	
 	
 	void setData(uint16_t startPixel_m, uint16_t stopPixel_m, bool valid_m) {
 		startPixel = startPixel_m;
@@ -201,7 +172,7 @@ struct LineInRow {
 
 class AnalyseData {
 public:	
-	LineInRow edgeLines[20];
+	LineInRow edgeLines[50];
 	uint16_t rowIndex;
 private:
 	uint8_t edgeLinesDefaultWidth;
@@ -228,9 +199,7 @@ public:
 	void analyse(uint16_t *edges, uint8_t len) {
 		uint16_t startIndex = 0;
 		uint16_t stopIndex = 1;
-if(foo[4095] != 0 && foo[500] != 0) {
-volatile	uint8_t data = foo[100];
-}
+
 		analyseEdgeLineWidth(&edgeLines[0], edges, startIndex, stopIndex, (edges[startIndex] < 320 && edges[stopIndex] < 320));
 
 		if ((edgeLines[0].valid == true && len > 2) || (len > 1)) { 
@@ -294,12 +263,12 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 			} else if (!linesData[i].edgeLines[0].valid && linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 2;
 				detectedLinesTab[1] = linesData[i].edgeLines[1].center;
-				cprintf(0, "%d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[0].width);
+				cprintf(0, "kkk %d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[0].width);
 				
 			} else if (linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 3;
 				detectedLinesTab[0] = linesData[i].edgeLines[0].center;
-				cprintf(0, "%d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[1].width);
+				cprintf(0, "kk %d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[1].width);
 			} else if (!linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 1;
 			}
@@ -339,33 +308,6 @@ uint32_t tanDiffAbs1000(const Point &p00, const Point &p01, const Point &p10, co
     return res;
 }
 
-uint32_t tanAbs1000(const Point &p0, const Point &p1)
-{
-    // find tangent of angle difference between the two lines
-    int16_t xdiff, ydiff;
-    int32_t res;
-
-    xdiff = p1.m_x - p0.m_x;
-    ydiff = p1.m_y - p0.m_y;
-
-    if (xdiff==0)
-        return 1000000;
-
-    res = ydiff*1000/xdiff;
-    res = ABS(res);
-    return res;
-}
-
-bool xdirection(const Point &p0, const Point &p1)
-{
-    int16_t xdiff, ydiff;
-
-    xdiff = p1.m_x - p0.m_x;
-    ydiff = p1.m_y - p0.m_y;
-
-    return abs(xdiff)>abs(ydiff);
-}
-
 static const ProcModule g_module[] =
 {
     END
@@ -399,7 +341,7 @@ void line_shadowCallback(const char *id, const void *val)
     else if (strcmp(id, "Minimum line length")==0)
     {
         g_minLineLength = *(uint16_t *)val;
-        g_minLineLength2 = g_minLineLength*g_minLineLength; // squared
+        //g_minLineLength2 = g_minLineLength*g_minLineLength; // squared
     }
     else if (strcmp(id, "Maximum line compare")==0)
         g_maxLineCompare = *(uint32_t *)val; 
@@ -415,7 +357,7 @@ void line_shadowCallback(const char *id, const void *val)
         v = *(uint8_t *)val;
         leading = v*LINE_FILTERING_MULTIPLIER;
         trailing = (leading+1)>>1;
-        g_primaryIntersection.setTiming(leading, trailing); 
+        //g_primaryIntersection.setTiming(leading, trailing); 
     }
     else if (strcmp(id, "Barcode filtering")==0)
         g_barcodeFiltering = *(uint8_t *)val;
@@ -529,13 +471,13 @@ int line_loadParams(int8_t progIndex)
     prm_get("Line extraction distance", &g_extractionDist, END);
     prm_get("Maximum merge distance", &g_maxMergeDist, END);
     prm_get("Minimum line length", &g_minLineLength, END);
-    g_minLineLength2 = g_minLineLength*g_minLineLength; // square it 
+    //g_minLineLength2 = g_minLineLength*g_minLineLength; // square it 
     prm_get("Maximum line compare", &g_maxLineCompare, END);
     prm_get("White line", &g_whiteLine, END);
     prm_get("Intersection filtering", &g_lineFiltering, END);
     leading = g_lineFiltering*LINE_FILTERING_MULTIPLIER;
     trailing = (leading+1)>>1;
-    g_primaryIntersection.setTiming(leading, trailing); 
+    //g_primaryIntersection.setTiming(leading, trailing); 
     prm_get("Line filtering", &g_lineFiltering, END);
     prm_get("Barcode filtering", &g_barcodeFiltering, END);
     prm_get("Default turn angle", &g_defaultTurnAngle, END);
@@ -568,48 +510,27 @@ int line_open(int8_t progIndex)
     g_nodesList.clear();
     g_nadirsList.clear();
     g_intersectionsList.clear();
-    g_lineTrackersList.clear();
-    g_barCodeTrackersList.clear();
-    
-        // malloc(79*52*sizeof(uint16_t)...)
+
     g_lineGridMem = (uint8_t *)malloc(LINE_GRID_WIDTH*LINE_GRID_HEIGHT*sizeof(LineGridNode)+CAM_PREBUF_LEN+8); // +8 for extra memory at the end because little overruns sometimes happen
     g_lineGrid = (LineGridNode *)(g_lineGridMem+CAM_PREBUF_LEN);
     
     g_lines = (SimpleListNode<Line2> **)malloc(LINE_MAX_LINES*sizeof(SimpleListNode<Line2> *));
     g_lineSegsMem = (uint8_t *)malloc(LINE_MAX_SEGMENTS*sizeof(LineSeg)+CAM_PREBUF_LEN);
-    g_lineSegs = (LineSeg *)(g_lineSegsMem+CAM_PREBUF_LEN);
-    
-    g_candidateBarcodes = (BarCode **)malloc(LINE_MMC_CANDIDATE_BARCODES*sizeof(BarCode *));
-    
-    g_votedBarcodesMem = (uint8_t *)malloc(LINE_MMC_VOTED_BARCODES*sizeof(DecodedBarCode)+CAM_PREBUF_LEN);
-    //g_votedBarcodes = (DecodedBarCode *)(g_votedBarcodesMem+CAM_PREBUF_LEN);
     
     g_lineBuf = (uint16_t *)malloc(LINE_BUFSIZE*sizeof(uint16_t)); 
     g_equeue = new (std::nothrow) Equeue;
-
-    g_maxSegTanAngle = tan(M_PI/32)*1000; // M_PI/4 was here first
-    g_maxEquivTanAngle = tan(M_PI/16)*1000;
-    g_maxTrackingTanAngle = tan(M_PI/10)*1000;
-    g_pointsPerSeg = 8; // 12 was here first
-    g_maxError = 0.9;
-    g_lineTrackerIndex = 0;
     
     g_lineState = LINE_STATE_ACQUIRING;
     g_primaryActive = false;
     g_newIntersection = false;
     g_delayedTurn = false;
     g_defaultTurnAngle = 0;
-    g_nextTurnAngle = 0;
-    g_newTurnAngle = false;
-    g_manualVectorSelect = false;
-    g_manualVectorSelecIndextActive = false;
 
-    g_reversePrimary = false;
+    g_manualVectorSelect = false;
     
     g_renderMode = LINE_RM_ALL_FEATURES;
     
-    if (g_equeue==NULL || g_lineBuf==NULL || g_lineGridMem==NULL || g_lineSegsMem==NULL || 
-        g_lines==NULL || g_candidateBarcodes==NULL || g_votedBarcodesMem==NULL)
+    if (g_equeue==NULL || g_lineBuf==NULL || g_lineGridMem==NULL || g_lineSegsMem==NULL || g_lines==NULL )
     {
         cprintf(0, "Line memory error\n");
         line_close();
@@ -635,16 +556,10 @@ void line_close()
         free(g_lineSegsMem);
     if (g_lines)
         free(g_lines);
-    if (g_candidateBarcodes)
-        free(g_candidateBarcodes);
-    if (g_votedBarcodesMem)
-        free(g_votedBarcodesMem);
     g_linesList.clear();
     g_nodesList.clear();
     g_nadirsList.clear();
     g_intersectionsList.clear();
-    g_lineTrackersList.clear();
-    g_barCodeTrackersList.clear();
 }
 
 int32_t line_getEdges()
@@ -708,796 +623,6 @@ int line_sendLineGrid(uint8_t renderFlags)
     cprintf(0, "%s\n", gridData);
     return 0;
 }
-
-float lineSegError(Point ps[], uint8_t points, uint8_t *maxIndex)
-{
-    int8_t i, xdiff, ydiff;
-    float e, fe, maxe, error, slope;
-    
-    xdiff = ps[points-1].m_x - ps[0].m_x;
-    ydiff = ps[points-1].m_y - ps[0].m_y;
-    
-    if (ABS(ydiff)>ABS(xdiff)) // vertical
-    {
-        slope = (float)xdiff/ydiff;
-        for (i=1, error=0.0, maxe=-1.0; i<points; i++)
-        {
-            e = ps[i].m_x - (ps[0].m_x + (ps[i].m_y-ps[0].m_y)*slope);
-            fe = fabsf(e);
-            if (fe>maxe)
-            {
-                *maxIndex = i;
-                maxe = fe;
-            }
-            error += e;
-        }
-    }
-    else // horizontal
-    {
-        slope = (float)ydiff/xdiff;
-        for (i=1, error=0.0, maxe=-1.0; i<points; i++)
-        {
-            e = ps[i].m_y - (ps[0].m_y + (ps[i].m_x-ps[0].m_x)*slope);
-            fe = fabsf(e);
-            if (fe>maxe)
-            {
-                *maxIndex = i;
-                maxe = fe;
-            }
-            error += e;
-        }
-    }
-
-    error = fabsf(error)/(points-1);
-    
-    return error;
-}
-
-    
-void cleanGrid(Point ps[], uint8_t points)
-{
-    uint8_t i;
-    int8_t xdiff, ydiff;
-    int16_t j;
-    
-    // don't put bogus indexes in grid
-    if (g_lineIndex>=LINE_MAX_LINES)
-        return;
-    
-    xdiff = ps[points-1].m_x - ps[0].m_x;
-    ydiff = ps[points-1].m_y - ps[0].m_y;
-    
-    if (ABS(ydiff)>ABS(xdiff)) // vertical
-    {
-        for (i=0; i<points-1; i++) // don't clean around the last point, otherwise we might not be able to pick up where we left off
-        {
-            j = LINE_GRID_INDEX_P(ps[i]);
-
-            g_lineGrid[j] &= ~LINE_NODE_LINE_MASK;
-            g_lineGrid[j] |= g_lineIndex;
-            if (ps[i].m_x>0)
-                g_lineGrid[j-1] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_x>1)
-                g_lineGrid[j-2] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_x<LINE_GRID_WIDTH-1)
-                g_lineGrid[j+1] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_x<LINE_GRID_WIDTH-2)
-                g_lineGrid[j+2] |= LINE_NODE_FLAG_NULL;
-        }
-    }
-    else // horizontal
-    {
-        for (i=0; i<points-1; i++) // don't clean around the last point, otherwise we might not be able to pick up where we left off
-        {
-            j = LINE_GRID_INDEX_P(ps[i]);
-            
-            g_lineGrid[j] &= ~LINE_NODE_LINE_MASK;
-            g_lineGrid[j] |= g_lineIndex;
-            if (ps[i].m_y>0)
-                g_lineGrid[j-LINE_GRID_WIDTH] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_y>1)
-                g_lineGrid[j-LINE_GRID_WIDTH-LINE_GRID_WIDTH] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_y<LINE_GRID_HEIGHT-1)
-                g_lineGrid[j+LINE_GRID_WIDTH] |= LINE_NODE_FLAG_NULL;
-            if (ps[i].m_y<LINE_GRID_HEIGHT-2)
-                g_lineGrid[j+LINE_GRID_WIDTH+LINE_GRID_WIDTH] |= LINE_NODE_FLAG_NULL;
-        }
-    }
-    // mark last point
-    j = LINE_GRID_INDEX_P(ps[i]);
-    g_lineGrid[j] &= ~LINE_NODE_LINE_MASK;
-    g_lineGrid[j] |= g_lineIndex;
-}
-
-int addline(const Point &p0, const Point &p1)
-{
-    SimpleListNode<Line2> *linen;
-    Line2 line;
-
-    if (g_lineIndex>=LINE_MAX_LINES)
-        return -2;
-    
-    line.m_p0 = p0;
-    line.m_p1 = p1; 
-    line.m_index = g_lineIndex;
-    linen = g_linesList.add(line);
-    if (linen==NULL)
-        return -1;
-    g_lines[g_lineIndex++] = linen;    
-    g_nodesList.add(p0);
-    g_nodesList.add(p1);        
-    return 0;
-}    
-
-LineSegIndex finishGridNode(Point ps[], uint8_t points, LineSegIndex prevSeg, Point &p0)
-{
-    float error;
-    LineSeg *ls0, *ls1;
-    uint8_t maxIndex;
-    
-    if (points==0 || g_lineSegIndex>=LINE_MAX_SEGMENTS-1 || g_lineIndex>=LINE_MAX_LINES-1)
-        return prevSeg; // return prevSeg to help logic in extractLines
-    
-    // check error of segment, split if necessary
-    error = lineSegError(ps, points, &maxIndex);
-    if (error<g_maxError || points<=5)
-    {
-        ls0 = &g_lineSegs[g_lineSegIndex++];
-        ls0->reset();
-        ls0->m_p0.m_x = ps[0].m_x;
-        ls0->m_p0.m_y = ps[0].m_y;
-        ls0->m_p1.m_x = ps[points-1].m_x;
-        ls0->m_p1.m_y = ps[points-1].m_y;
-        ls0->m_ls0 = prevSeg;
-        ls0->m_line = g_lineIndex;
-        cleanGrid(ps, points);
-    }
-    else // split 
-    {        
-        ls0 = &g_lineSegs[g_lineSegIndex++];
-        ls0->reset();
-        ls0->m_p0.m_x = ps[0].m_x;
-        ls0->m_p0.m_y = ps[0].m_y;
-        ls0->m_p1.m_x = ps[maxIndex].m_x;
-        ls0->m_p1.m_y = ps[maxIndex].m_y;
-        ls0->m_ls0 = prevSeg;
-        ls0->m_ls1 = g_lineSegIndex;
-        ls0->m_line = g_lineIndex;
-        cleanGrid(ps, maxIndex+1);
-
-        // split the line
-        addline(p0, ps[maxIndex+1]);
-        p0 = ps[maxIndex+1];
-        
-        ls1 = &g_lineSegs[g_lineSegIndex++];
-        ls1->reset();
-        ls1->m_p0.m_x = ps[maxIndex].m_x;
-        ls1->m_p0.m_y = ps[maxIndex].m_y;
-        ls1->m_p1.m_x = ps[points-1].m_x;
-        ls1->m_p1.m_y = ps[points-1].m_y;
-        ls1->m_ls0 = g_lineSegIndex-2;
-        ls1->m_line = g_lineIndex;
-        cleanGrid(ps+maxIndex+1, points-(maxIndex+1));
-    }
-    return g_lineSegIndex-1;
-}
-
-bool ydirUp(Point &p, uint16_t &i, uint8_t &points, Point ps[])
-{
-    if (p.m_y==0)
-        return false;
-
-    if (g_lineGrid[i-LINE_GRID_WIDTH]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-LINE_GRID_WIDTH]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y--;
-        ps[points] = p;
-        i += -LINE_GRID_WIDTH;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x>0 && g_lineGrid[i-LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y--;
-        p.m_x--;
-        ps[points] = p;
-        i += -LINE_GRID_WIDTH-1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x<LINE_GRID_WIDTH-1 && g_lineGrid[i-LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y--;
-        p.m_x++;
-        ps[points] = p;
-        i += -LINE_GRID_WIDTH+1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else // no points in the up direction
-        return false;
-}
-
-bool xdirLeft(Point &p, uint16_t &i, uint8_t &points, Point ps[])
-{
-    if (p.m_x>0 && g_lineGrid[i-1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_x--;
-        ps[points] = p;
-        i+= -1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x>0 && p.m_y>0 && g_lineGrid[i-LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y--;
-        p.m_x--;
-        ps[points] = p;
-        i += -LINE_GRID_WIDTH-1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x>0 && p.m_y<LINE_GRID_HEIGHT-1 && g_lineGrid[i+LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i+LINE_GRID_WIDTH-1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y++;
-        p.m_x--;
-        ps[points] = p;
-        i += LINE_GRID_WIDTH-1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else
-        return false;
-}
-
-bool xdirRight(Point &p, uint16_t &i, uint8_t &points, Point ps[])
-{
-    if (p.m_x<LINE_GRID_WIDTH-1 && g_lineGrid[i+1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i+1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_x++;
-        ps[points] = p;
-        i += 1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x<LINE_GRID_WIDTH-1 && p.m_y>0 && g_lineGrid[i-LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i-LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y--;
-        p.m_x++;
-        ps[points] = p;
-        i += -LINE_GRID_WIDTH+1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else if (p.m_x<LINE_GRID_WIDTH-1 && p.m_y<LINE_GRID_HEIGHT-1 && g_lineGrid[i+LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_1 && !(g_lineGrid[i+LINE_GRID_WIDTH+1]&LINE_NODE_FLAG_NULL))
-    {
-        p.m_y++;
-        p.m_x++;
-        ps[points] = p;
-        i += LINE_GRID_WIDTH+1;
-        g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-        points++;
-        return true;
-    }
-    else
-        return false;
-}
-
-void extractLineSegments(const Point &p)
-{
-    bool ydir = true;
-    bool rdir = true;
-    uint16_t i = LINE_GRID_INDEX_P(p);
-    Point ps[LINE_MAX_SEGMENT_POINTS];
-    uint8_t points = 0;
-    LineSegIndex prevSeg = -1, thisSeg = -1;
-    uint32_t angle;
-    Point p2 = p; // current point    
-    Point p0 = p; // first point of line
-    
-    // nullify current point
-    ps[0] = p2;
-    g_lineGrid[i] |= LINE_NODE_FLAG_NULL;
-    points++;
-        
-    while(1)
-    {
-        if (ydir)
-        {
-            if (!ydirUp(p2, i, points, ps))
-            {
-                if (!xdirLeft(p2, i, points, ps))
-                {
-                    if (!xdirRight(p2, i, points, ps))
-                        goto end;
-                    else
-                    {
-                        ydir = false;
-                        rdir = true;
-                    }
-                }
-                else
-                {
-                    ydir = false;
-                    rdir = false;
-                }                
-            }
-        }
-        else if (!ydir && rdir)
-        {
-            if (!xdirRight(p2, i, points, ps))
-            {
-                if (!ydirUp(p2, i, points, ps))
-                    goto end;
-                else
-                    ydir = true;
-            }
-        }
-        else if (!ydir && !rdir)
-        {
-            if (!xdirLeft(p2, i, points, ps))
-            {
-                if (!ydirUp(p2, i, points, ps))
-                    goto end;
-                else
-                    ydir = true;
-            }
-        }
-        
-        if (points>=g_pointsPerSeg)
-        {
-            thisSeg = finishGridNode(ps, points, prevSeg, p0);
-            if (prevSeg>=0)
-            {
-                if (thisSeg-prevSeg>1) // deal with bisected segment 
-                {
-                    g_lineSegs[prevSeg].m_ls1 = thisSeg-1; // link up prev segment with this one
-                    // look at angle between segments, add if it exceeds a threshold 
-                    angle = tanDiffAbs1000(g_lineSegs[prevSeg].m_p0, g_lineSegs[prevSeg].m_p1, g_lineSegs[thisSeg-1].m_p0, g_lineSegs[thisSeg-1].m_p1);
-                }
-                else
-                {
-                    g_lineSegs[prevSeg].m_ls1 = thisSeg; // link up prev segment with this one
-                    // look at angle between segments, add if it exceeds a threshold 
-                    angle = tanDiffAbs1000(g_lineSegs[prevSeg].m_p0, g_lineSegs[prevSeg].m_p1, g_lineSegs[thisSeg].m_p0, g_lineSegs[thisSeg].m_p1);
-                }
-                if (angle>g_maxSegTanAngle)
-                {
-                    // split the line here
-                    addline(p0, g_lineSegs[prevSeg].m_p1);
-                    if (g_lineIndex<LINE_MAX_LINES)
-                    {
-                        g_lineSegs[thisSeg].m_line = g_lineIndex; // set line seg line index to new index
-                        cleanGrid(ps, points); // set nodes to new line index
-                    }
-                    p0 = ps[0];
-                }
-            }
-            prevSeg = thisSeg;
-            points = 0;
-        }
-    }
-
-    end:
-    // should we use the current segment?
-    // we should if there were previous segments or if the current segment is bigger than 2
-    if (prevSeg>=0 || points>2)
-    {        
-        thisSeg = finishGridNode(ps, points, prevSeg, p0);    
-        if (prevSeg>=0)
-            g_lineSegs[prevSeg].m_ls1 = thisSeg;
-        prevSeg = thisSeg;
-    }
-    
-    // add line
-    if (prevSeg>=0 && g_lineIndex<LINE_MAX_LINES)
-    {
-        if (addline(p0, g_lineSegs[prevSeg].m_p1)<0)
-            return;
-    }        
-}
-
-
-void addNadir(const Point &p0, const Point &p1)
-{
-    uint16_t dist;
-    SimpleListNode<Nadir> *i;
-    Nadir n;
-    uint8_t i0, i1, is;
-    Point pp0, pp1;
-    
-    // calc distance between points
-    dist = p0.dist2(p1);
-    
-    // find lines
-    i0 = LINE_GRID_LINE_P(p0);
-    i1 = LINE_GRID_LINE_P(p1);
-    
-    if (i0==i1)
-        return;
-    if (i0<i1)
-    {
-        pp0 = p0;
-        pp1 = p1;
-    }
-    else // swap
-    {
-        pp0 = p1;
-        pp1 = p0;
-        is = i0;
-        i0 = i1;
-        i1 = is;
-    }
-    
-    // search nadir list for this pair, if it exists, and it's closer, replace it.
-    for (i=g_nadirsList.m_first; i!=NULL; i=i->m_next)
-    {
-        if (i0==LINE_GRID_LINE_P(i->m_object.m_points[0]) && i1==LINE_GRID_LINE_P(i->m_object.m_points[1]))
-        {
-            if (dist < i->m_object.m_dist)
-            {
-                i->m_object.m_dist = dist;
-                i->m_object.m_points[0] = pp0;
-                i->m_object.m_points[1] = pp1;
-                i->m_object.m_pavg = pp0;
-                i->m_object.m_pavg.avg(pp1);
-            }
-            return;
-        }
-    }
-            
-    // if it isn't in the list, add it.
-    n.m_points[0] = pp0;
-    n.m_points[1] = pp1;
-    n.m_n = 2;
-    n.m_dist = dist;
-    n.m_pavg = pp0;
-    n.m_pavg.avg(pp1);
-    g_nadirsList.add(n);
-}
-
-void search(const Point &p, uint8_t radius)
-{
-    int8_t i, r;
-    uint16_t j, k;
-    uint8_t i0, i1;
-    
-    j = LINE_GRID_INDEX(p.m_x, p.m_y);
-    i0 = g_lineGrid[j]&LINE_NODE_LINE_MASK;
-    
-    // search up
-    r = p.m_y - radius;
-    if (r<0) 
-        r = 0;
-    for (i=p.m_y-1, k=j-LINE_GRID_WIDTH; i>=r; i--, k-=LINE_GRID_WIDTH)
-    {
-        i1 = g_lineGrid[k]&LINE_NODE_LINE_MASK;
-        if (i1==0 || i0==i1)
-            continue;
-        addNadir(p, Point(p.m_x, i));
-    }
-    // search down
-    r = p.m_y + radius;
-    if (r>LINE_GRID_HEIGHT) 
-        r = LINE_GRID_HEIGHT;
-    for (i=p.m_y+1, k=j+LINE_GRID_WIDTH; i<r; i++, k+=LINE_GRID_WIDTH)
-    {
-        i1 = g_lineGrid[k]&LINE_NODE_LINE_MASK;
-        if (i1==0 || i0==i1)
-            continue;
-        addNadir(p, Point(p.m_x, i));
-    }
-    
-    // search left
-    r = p.m_x - radius;
-    if (r<0)
-        r = 0;
-    for (i=p.m_x-1, k=j-1; i>=r; i--, k--)
-    {
-        i1 = g_lineGrid[k]&LINE_NODE_LINE_MASK;
-        if (i1==0 || i0==i1)
-            continue;
-        addNadir(p, Point(i, p.m_y));
-    }
-    // search right
-    r = p.m_x + radius;
-    if (r>LINE_GRID_WIDTH)
-        r = LINE_GRID_WIDTH;
-    for (i=p.m_x+1, k=j+1; i<r; i++, k++)
-    {
-        i1 = g_lineGrid[k]&LINE_NODE_LINE_MASK;
-        if (i1==0 || i0==i1)
-            continue;
-        addNadir(p, Point(i, p.m_y));
-    }    
-}
-
-
-void findNadirs()
-{
-    SimpleListNode<Point> *i, *j;
-    uint16_t dist;
-    uint8_t li, lj;
-    uint16_t maxMergeDist2=g_maxMergeDist*g_maxMergeDist;
-    
-    // do n^2 search (or n*(n-1)/2 search)
-    for (i=g_nodesList.m_first; i!=NULL; i=i->m_next)
-    {
-        li = LINE_GRID_LINE_P(i->m_object); 
-        for (j=i->m_next; j!=NULL; j=j->m_next)
-        {
-            lj = LINE_GRID_LINE_P(j->m_object); 
-            if (li==lj) // if we're the same line, don't bother.  We're looking for a greater line index
-                continue;
-            dist = i->m_object.dist2(j->m_object);
-            if (dist<=maxMergeDist2)
-                // in general li<lj because of the ordering of the labeling of the nodes and lines
-                // this is important because of the grid search below.  We'll ignore cases where li>=lj
-                // in the interest of efficiency.
-                addNadir(i->m_object, j->m_object);
-        }
-    }
-    
-    // do grid search 
-    for (i=g_nodesList.m_first; i!=NULL; i=i->m_next)
-        search(i->m_object, g_maxMergeDist);
-}
-
-void reduceNadirs()
-{
-    SimpleListNode<Nadir> *i, *j, *inext, *jnext;
-    uint32_t dist;
-    uint16_t n, maxMergeDist2=(g_maxMergeDist*g_maxMergeDist*12)>>3; // multiply by a scaling factor of 1.5
-    
-    while(1)
-    {
-        // perform n^2 search, looking for nadirs that are close to each other
-        n = 0;
-        for (i=g_nadirsList.m_first; i!=NULL; i=inext)
-        {
-            inext = i->m_next;
-            for (j=i->m_next; j!=NULL; j=jnext)
-            {
-                jnext = j->m_next;
-                dist = i->m_object.m_pavg.dist2(j->m_object.m_pavg);
-                if (dist<maxMergeDist2)
-                {
-                    i->m_object.merge(j->m_object); // merge j -> i
-                    g_nadirsList.remove(j);
-                    if (inext==j)
-                        inext = jnext;
-                    n++;
-                }
-            }
-        }
-        if (n==0) // no change, return...
-            break;
-    }
-}
-
-// line1.m_p0 is center (intersection)
-// line1.m_p1 is outer point of line1
-// p01 is outer point of line0
-void addLine(SimpleListNode<Nadir> *nadirs, uint8_t li0, const Point &p01, SimpleListNode<Line2> *linen1)
-{
-    SimpleListNode<Intersection> *j;
-    uint8_t i, li1 = linen1->m_object.m_index;
-    int8_t diffx, diffy;
-    bool horiz;
-    const Line2 &line1 = linen1->m_object;
-
-    // determine direction
-    diffx = p01.m_x - line1.m_p1.m_x;
-    diffy = p01.m_y - line1.m_p1.m_y;
-    
-    horiz = ABS(diffx)>ABS(diffy);
-
-    // look through intersections list for lines that are affected
-    for (j=g_intersectionsList.m_first; j!=NULL; j=j->m_next)
-    {
-        for (i=0; i<j->m_object.m_n; i++)
-        {
-            // line li0 has changed.  It's had one of its endpoints set to the new intersection
-            if (j->m_object.m_lines[i]->m_object.m_index==li0)
-            {
-                // We only need to look at line1.m_p1 since it's the only point that's an endpoint and therefore possibly coincident with this intersection
-                // if line.m_p1 is coincident with the intersection, we need to change the line pointer
-                if (j->m_object.m_p.equals(line1.m_p1))
-                {
-                    j->m_object.m_lines[i] = linen1;
-                    linen1->m_object.m_i1 = j; // if we change the line in an intersection, we need to change the line to point to the intersection
-                }
-            }
-        }
-    }
-
-    // look through remaining nadir list for points->lines that are affected
-    for (; nadirs!=NULL; nadirs=nadirs->m_next)
-    {
-        for (i=0; i<nadirs->m_object.m_n; i++)
-        {
-            const Point &pt = nadirs->m_object.m_points[i];
-            //if (LINE_GRID_INDEX_P(pt)>LINE_GRID_HEIGHT*LINE_GRID_WIDTH)
-            //    printf("*** %d\n");
-            if (li0==LINE_GRID_LINE_P(pt))
-            {
-                if (horiz)
-                {
-                    if (SIGN(pt.m_x-line1.m_p0.m_x)==SIGN(line1.m_p1.m_x-line1.m_p0.m_x))
-                    {
-                        LINE_GRID_P(pt) &= ~LINE_NODE_LINE_MASK;
-                        LINE_GRID_P(pt) |= li1;
-                    }
-                }
-                else // vertical
-                {
-                    if (SIGN(pt.m_y-line1.m_p0.m_y)==SIGN(line1.m_p1.m_y-line1.m_p0.m_y))
-                    {
-                        LINE_GRID_P(pt) &= ~LINE_NODE_LINE_MASK;
-                        LINE_GRID_P(pt) |= li1;
-                    }
-                }
-            }            
-        }
-    }
-}
-
-bool breakLine(SimpleListNode<Nadir> *nadirs, uint8_t li, SimpleListNode<Intersection> *intern)
-{
-    // orig line linen0   p0                m_p               p1
-    // broken line        p0 linen0 p1 intersection p0 linen1 p1
-    Line2 line2;
-    SimpleListNode<Line2> *linen1;
-    SimpleListNode<Line2> *linen0 = g_lines[li];
-    checkGraph(__LINE__, 1, 2);
-    
-    if (g_lineIndex>=LINE_MAX_LINES || intern->m_object.m_n>LINE_MAX_INTERSECTION_LINES-2 || 
-        linen0->m_object.m_p0.equals(linen0->m_object.m_p1)) // this last case is a crazy case the fouls up the addLine() logic below
-        return false;
-    
-    // create new line, add it to intersection
-    line2.m_p1 = linen0->m_object.m_p1;
-    line2.m_p0 = intern->m_object.m_p;
-    line2.m_index = g_lineIndex;
-    linen1 = g_linesList.add(line2);
-
-    if (linen1==NULL)
-        return false;
-
-    // modify first line
-    linen0->m_object.m_p1 = intern->m_object.m_p;
-    intern->m_object.addLine(linen0, intern, 1);
-
-    g_lines[g_lineIndex++] = linen1;
-    intern->m_object.addLine(linen1, intern, 0);
-    
-    // feedforward new line to nadirs we haven't seen yet
-    addLine(nadirs, li, linen0->m_object.m_p0, linen1); 
-    
-    checkGraph(__LINE__, 1, 2);
-    
-    return true;
-}
-
-uint8_t removeLine(SimpleListNode<Line2> *linen, SimpleListNode<Intersection> *intern)
-{
-    uint8_t i, j, m;
-    
-    // remove line from intersection
-    for (i=m=0; intern && i<intern->m_object.m_n; i++)
-    {
-        if (intern->m_object.m_lines[i]==linen)
-        {
-            intern->m_object.m_n--;
-            // shift lines down
-            for (j=i; j<intern->m_object.m_n; j++)
-                intern->m_object.m_lines[j] = intern->m_object.m_lines[j+1];
-            i--;
-            m++;
-        }
-    }
-    return m;
-}
-
-
-void removeLine(SimpleListNode<Line2> *linen)
-{    
-    removeLine(linen, linen->m_object.m_i0);
-    removeLine(linen, linen->m_object.m_i1);
-    
-    // remove line from g_linesList
-    g_linesList.remove(linen);
-    
-}
-
-void replaceLine(SimpleListNode<Line2> *linen, SimpleListNode<Line2> *linenx)
-{
-    uint8_t i;
-    SimpleListNode<Intersection> *j;
-
-    // remove line from existing intersections
-    for (j=g_intersectionsList.m_first; j!=NULL; j=j->m_next)
-    {
-        for (i=0; i<j->m_object.m_n; i++)
-        {
-            if (j->m_object.m_lines[i]==linenx)
-            {
-                j->m_object.m_lines[i] = linen;
-//                break;
-            }
-        }
-    }
-    
-    g_linesList.remove(linenx);
-}
-
-
-void formIntersections()
-{
-    SimpleListNode<Nadir> *i;
-    uint8_t j, li;
-
-    checkGraph(__LINE__);
-    
-    // go through nadir list and break up the lines
-    for (i=g_nadirsList.m_first; i!=NULL; i=i->m_next)
-    {
-        SimpleListNode<Intersection> *intern = new (std::nothrow) SimpleListNode<Intersection>;
-        if (intern==NULL)
-            return;
-        Intersection *inter = &intern->m_object;
-        inter->m_p = i->m_object.m_pavg;
-        // look at each point/line in the list
-        // If it's an endpoint, we extend the line to the intersection point (avg)
-        // if it's not endpoint, we need to break the line and form 2 lines, each with the endpoint at the intersection
-        
-        for (j=inter->m_n=0; j<i->m_object.m_n && inter->m_n<LINE_MAX_INTERSECTION_LINES; j++)
-        {
-            Line2 *line;
-            SimpleListNode<Line2> *linen;
-            const Point &pt = i->m_object.m_points[j];
-            li = LINE_GRID_LINE_P(pt); 
-            if (li==0)
-                continue;
-            linen = g_lines[li];
-            line = &linen->m_object;
-            checkGraph(__LINE__, 1, 2, intern);
-            if (pt.equals(line->m_p0)) // matches p0
-            {
-                line->m_p0 = inter->m_p; // extend line
-                if (line->m_i0) // if we are already pointing to another intersection, remove and add ours
-                    removeLine(linen, line->m_i0);
-                inter->addLine(linen, intern, 0);
-                checkGraph(__LINE__, 0, 0, intern);
-                checkGraph(__LINE__, 1, 2);
-            }
-            else if (pt.equals(line->m_p1)) // matches p1
-            {
-                line->m_p1 = inter->m_p; // extend line
-                if (line->m_i1) // if we are already pointing to another intersection, remove and add ours
-                    removeLine(linen, line->m_i1);
-                inter->addLine(linen, intern, 1);
-                checkGraph(__LINE__, 0, 0, intern);
-                checkGraph(__LINE__, 1, 2);
-            }
-            else
-            {
-                breakLine(i->m_next, li, intern);
-                checkGraph(__LINE__, 0, 0, intern);
-                checkGraph(__LINE__, 1, 2);
-            }
-        }
-        g_intersectionsList.add(intern);
-        checkGraph(__LINE__);
-    }
-}    
 
 bool validIntersection(SimpleListNode<Intersection> *intern)
 {
@@ -1607,282 +732,6 @@ bool checkGraph(int val, uint8_t suppress0, uint8_t suppress1, SimpleListNode<In
     return true;
 }
 
-uint16_t removeShortLinesIntersections()
-{
-    uint8_t i, si;
-    SimpleListNode<Intersection> *j;
-    uint16_t n, m, length, shortest;
-    
-    // look through intersections removing short lines
-    // we remove the shortest lines first because we want to preserve the next-longest line for when we get to lines==2
-    for (j=g_intersectionsList.m_first, m=0; j!=NULL; j=j->m_next)
-    {
-        while(1)
-        {
-            checkGraph(__LINE__);
-            n = 0;
-            // If there are 2 lines in the intersection, no reason to trim (we'll merge them)
-            //if (j->m_object.m_n<=2)
-            //    break;
-            
-            // find shortest line in intersection
-            for (i=0, shortest=0xffff, si=0; i<j->m_object.m_n; i++)
-            {
-                length = j->m_object.m_lines[i]->m_object.length2();
-                if (length<shortest)
-                {
-                    si = i;
-                    shortest = length;
-                }
-            }
-                
-            // if it's shorter than g_minLineLength2, possibly remove it 
-            if (shortest<g_minLineLength2)
-            {
-                SimpleListNode<Line2> *linen = j->m_object.m_lines[si];
-                // one of the intersection pointers needs to be NULL, the other is our intersection
-                // if they are both non-NULL, this line bridges 2 intersections, so we can't remove
-                if (linen->m_object.m_i0==NULL || linen->m_object.m_i1==NULL)
-                {
-                    removeLine(linen);
-                    n++;
-                    m++;
-                }
-            }
-            checkGraph(__LINE__);
-            if (n==0)
-                break;
-        }
-    }
-    return m;
-}
-
-bool equivalentLines(const Line2 &line0, const Line2 &line1)
-{
-    return ((line0.m_p0.equals(line1.m_p0) && line0.m_p1.equals(line1.m_p1)) ||
-        (line0.m_p0.equals(line1.m_p1) && line0.m_p1.equals(line1.m_p0)));
-}
-
-bool minAngleLines(const Line2 &line0, const Line2 &line1, const Point &p, uint32_t minAngle)
-{
-    Point p01, p11;
-    
-    if (p.equals(line0.m_p0))
-        p01 = line0.m_p1;
-    else
-        p01 = line0.m_p0;
-    if (p.equals(line1.m_p0))
-        p11 = line1.m_p1;
-    else
-        p11 = line1.m_p0;
-    
-    return (tanDiffAbs1000(p, p01, p, p11) <= minAngle);
-}
-
-uint16_t removeRedundantLinesIntersections()
-{
-    uint8_t i, j, n;
-    SimpleListNode<Intersection> *k;
-
-    for (k=g_intersectionsList.m_first, n=0; k!=NULL; k=k->m_next)
-    {
-        // perform n^2 search of lines within this intersection
-        for (i=0; i<k->m_object.m_n; i++)
-        {
-            for (j=i+1; j<k->m_object.m_n; j++)
-            {
-                // Check for equivalent lines...
-                if (equivalentLines(k->m_object.m_lines[i]->m_object, k->m_object.m_lines[j]->m_object))
-                {
-                    removeLine(k->m_object.m_lines[j]);
-                    n++;
-                    j--; // list was shifted down, decrement so we don't skip an entry
-                }
-                // Check for lines with a small angle between them
-                else if (minAngleLines(k->m_object.m_lines[i]->m_object, k->m_object.m_lines[j]->m_object, k->m_object.m_p, g_maxEquivTanAngle))
-                {
-                    // lines i and j have a small angle between them.  Which do we delete?  Which line is longer?  What if the shorter one is connected to another intersection?
-                    // if i is longer than j
-                    if (k->m_object.m_lines[i]->m_object.length2() > k->m_object.m_lines[j]->m_object.length2())
-                    {
-                        // remove line j, since it's shorter, unless it's connected...
-                        if (k->m_object.m_lines[j]->m_object.m_i0==NULL || k->m_object.m_lines[j]->m_object.m_i1==NULL)
-                        {
-                            removeLine(k->m_object.m_lines[j]);
-                            n++;
-                            j--; // list was shifted down, decrement so we don't skip an entry
-                        }
-                        // otherwise remove line i, if it's not connected (we know that it's connected this intersection, so if it has at least 1 NULL intersection pointer...)
-                        else if (k->m_object.m_lines[i]->m_object.m_i0==NULL || k->m_object.m_lines[i]->m_object.m_i1==NULL)
-                        {
-                            removeLine(k->m_object.m_lines[i]);
-                            n++;
-                            i--; // list was shifted down, decrement so we don't skip an entry
-                            break; // then exit, since it affects our i-th index
-                        }
-                    }
-                    else // Line j is longer than i
-                    {
-                        // remove line i, since it's shorter, unless it's connected... 
-                        if (k->m_object.m_lines[i]->m_object.m_i0==NULL || k->m_object.m_lines[i]->m_object.m_i1==NULL)
-                        {
-                            removeLine(k->m_object.m_lines[i]);
-                            n++;
-                            i--; // list was shifted down, decrement so we don't skip an entry
-                            break; // then exit, since it affects our i-th index
-                        }
-                        // otherwise remove line j, if it's not connected
-                        else if (k->m_object.m_lines[j]->m_object.m_i0==NULL || k->m_object.m_lines[j]->m_object.m_i1==NULL)
-                        {
-                            removeLine(k->m_object.m_lines[j]);
-                            n++;
-                            j--; // list was shifted down, decrement so we don't skip an entry
-                        }
-                    }
-                }
-            }
-        }
-    }
-    checkGraph(__LINE__);
-    
-    return n;
-}
-
-uint16_t simplifyIntersections()
-{
-    uint16_t n;
-    SimpleListNode<Intersection> *j, *jnext;
-
-    checkGraph(__LINE__);
-
-    // look through intersections dealing with 0, 1 and 2-line intersections
-    for (j=g_intersectionsList.m_first, n=0; j!=NULL; j=jnext)
-    {
-        jnext = j->m_next;
-        if (j->m_object.m_n==0)
-        {
-            g_intersectionsList.remove(j);
-            checkGraph(__LINE__);
-            n++;
-        }
-        else if (j->m_object.m_n==1)
-        {
-            if (j->m_object.m_lines[0]->m_object.m_i0==j)
-                j->m_object.m_lines[0]->m_object.m_i0 = NULL;
-            if (j->m_object.m_lines[0]->m_object.m_i1==j)
-                j->m_object.m_lines[0]->m_object.m_i1 = NULL;
-            g_intersectionsList.remove(j);
-            checkGraph(__LINE__);
-            n++;
-        }
-        else if (j->m_object.m_n==2 && 
-            j->m_object.m_p.m_x>g_minLineLength && j->m_object.m_p.m_x<LINE_GRID_WIDTH-g_minLineLength && // do not simplify intersections that are
-            j->m_object.m_p.m_y>g_minLineLength && j->m_object.m_p.m_y<LINE_GRID_HEIGHT-g_minLineLength) // close to any edge because they don't look like intersections.
-        {
-            SimpleListNode<Line2> *linen0 = j->m_object.m_lines[0];
-            SimpleListNode<Line2> *linen1 = j->m_object.m_lines[1];
-            g_intersectionsList.remove(j);
-            if (linen0->m_object.m_i0==j)
-            {
-                if (linen1->m_object.m_i0==j)
-                {
-                    // this case will lead to an intersection with two of the same line pointers, so get rid of linen1, proceed...
-                    if (linen0->m_object.m_i1==linen1->m_object.m_i1 && linen1->m_object.m_i1!=NULL)
-                    {
-                        linen0->m_object.m_i0 = NULL;
-                        removeLine(linen1);
-                    }
-                    else
-                    {
-                        linen0->m_object.m_p0 = linen1->m_object.m_p1;
-                        linen0->m_object.m_i0 = linen1->m_object.m_i1;
-                        replaceLine(linen0, linen1);
-                    }
-                }
-                else
-                {
-                    // this case will lead to an intersection with two of the same line pointers, so get rid of linen1, proceed...
-                    if (linen0->m_object.m_i1==linen1->m_object.m_i0 && linen1->m_object.m_i0!=NULL)
-                    {
-                        linen0->m_object.m_i0 = NULL;
-                        removeLine(linen1);
-                    }
-                    else
-                    {
-                        linen0->m_object.m_p0 = linen1->m_object.m_p0;
-                        linen0->m_object.m_i0 = linen1->m_object.m_i0;
-                        replaceLine(linen0, linen1);
-                    }
-                }
-            }
-            else
-            {
-                if (linen1->m_object.m_i0==j)
-                {
-                    // this case will lead to an intersection with two of the same line pointers, so get rid of linen1, proceed...
-                    if (linen0->m_object.m_i0==linen1->m_object.m_i1 && linen1->m_object.m_i1!=NULL)
-                    {
-                        linen0->m_object.m_i1 = NULL;
-                        removeLine(linen1);
-                    }
-                    else
-                    {
-                        linen0->m_object.m_p1 = linen1->m_object.m_p1;
-                        linen0->m_object.m_i1 = linen1->m_object.m_i1;
-                        replaceLine(linen0, linen1);
-                    }
-                }
-                else
-                {
-                    // this case will lead to an intersection with two of the same line pointers, so get rid of linen1, proceed...
-                    if (linen0->m_object.m_i0==linen1->m_object.m_i0 && linen1->m_object.m_i0!=NULL)
-                    {
-                        linen0->m_object.m_i1 = NULL;
-                        removeLine(linen1);
-                    }
-                    else
-                    {
-                        linen0->m_object.m_p1 = linen1->m_object.m_p0;
-                        linen0->m_object.m_i1 = linen1->m_object.m_i0;
-                        replaceLine(linen0, linen1);
-                    }
-                }
-            }
-            checkGraph(__LINE__);
-            n++;
-        }
-    }
-    return n;
-}
-
-void cleanIntersections()
-{
-    uint16_t n;
-    
-    while(1)
-    {
-        n = 0;
-        n += removeShortLinesIntersections(); 
-        n += removeRedundantLinesIntersections();
-        n += simplifyIntersections();
-        
-        if (n==0)
-            break;
-    }
-}
-
-void removeMinLines(uint16_t minLineLength)
-{
-    SimpleListNode<Line2> *i;
-        
-    for (i=g_linesList.m_first; i!=NULL; i=i->m_next)
-    {
-        if (i->m_object.length2()<minLineLength && i->m_object.m_i0==NULL && i->m_object.m_i1==NULL)
-            g_linesList.remove(i);
-    }
-}
-
-
 int sendLineSegments(uint8_t renderFlags)
 {
     uint32_t len;
@@ -1914,81 +763,11 @@ void sendPoints(const SimpleList<Point> &points, uint8_t renderFlags, const char
     CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(renderFlags), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
 }
 
-
-void sendNadirs(const SimpleList<Nadir> &nadirs, uint8_t renderFlags, const char *desc)
-{
-    SimpleListNode<Nadir> *i;
-    uint32_t pi;
-    Point ps[LINE_MAX_INTERSECTION_LINES];
-
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(RENDER_FLAG_START), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
-    
-    for (i=nadirs.m_first; i!=NULL; i=i->m_next)
-    {
-        ps[0] = i->m_object.m_pavg;
-        
-        for (pi=0; pi<i->m_object.m_n; pi++)
-            ps[pi+1] = i->m_object.m_points[pi];
-        
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','S')), INTS8((i->m_object.m_n+1)*2, ps), END);    
-    }
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(renderFlags), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
-}
-
-void sendLines(const SimpleList<Line2> &lines, uint8_t renderFlags, const char *desc)
-{
-    SimpleListNode<Line2> *n;
-    uint8_t i;
-    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','F')), INT8(RENDER_FLAG_START), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
-
-    for(n=lines.m_first, i=0; n; n=n->m_next, i++)
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','S')), INT8(1), INT8(i), INT16(n->m_object.m_p0.m_x), INT16(n->m_object.m_p0.m_y), INT16(n->m_object.m_p1.m_x), INT16(n->m_object.m_p1.m_y), END);
-    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','F')), INT8(renderFlags), STRING(desc), INT16(CAM_RES3_WIDTH), INT16(CAM_RES3_HEIGHT), END);    
-}
-
-void sendTrackedLines(const SimpleList<Tracker<Line2> > &lines, uint8_t renderFlags, const char *desc)
-{
-    SimpleListNode<Tracker<Line2> > *n;
-    Line2 *line;
-    uint8_t i, mode;
-    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','F')), INT8(RENDER_FLAG_START), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
-
-    for(n=lines.m_first, i=0; n; n=n->m_next, i++)
-    {
-        mode = n->m_object.get()==NULL ? 1 : 0;
-        line = & n->m_object.m_object;
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','S')), INT8(mode), INT8(n->m_object.m_index), INT16(line->m_p0.m_x), INT16(line->m_p0.m_y), INT16(line->m_p1.m_x), INT16(line->m_p1.m_y), END);
-    }
-    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('L','I','S','F')), INT8(renderFlags), STRING(desc), INT16(CAM_RES3_WIDTH), INT16(CAM_RES3_HEIGHT), END);    
-}
-    
-void sendIntersections(const SimpleList<Intersection> &lines, uint8_t renderFlags, const char *desc)
-{
-    SimpleListNode<Intersection> *i;
-
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(RENDER_FLAG_START), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
-    
-    for (i=lines.m_first; i!=NULL; i=i->m_next)
-        CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','S')), INTS8(2, &i->m_object.m_p), END);    
-    CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(renderFlags), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);    
-}
-
 void sendPrimaryFeatures(uint8_t renderFlags)
 {
     uint8_t n=0;
     Line2 *primary=NULL;
     
-    if (g_lineState==LINE_STATE_TRACKING)
-    {    
-        primary = findTrackedLine(g_primaryLineIndex);
-        if (g_primaryIntersection.m_state!=TR_INVALID)
-            n = g_primaryIntersection.m_object.m_n;
-    }
-
     if (primary)
     {
         if (g_goalPoint.equals(primary->m_p0))
@@ -2015,615 +794,6 @@ uint32_t dist2_4(const Point16 &p0, const Point16 &p1)
         return diffx*diffx + diffy*diffy;    
 }
 
-int comp8(const void *a, const void *b)
-{
-  return *(uint8_t *)a - *(uint8_t *)b;
-}
-
-uint32_t compareLines(const Line2 &line0, const Line2 &line1)
-{
-    uint16_t d0, d1, d2, d3, da, db;
-    uint32_t angle, df;
-    
-    d0 = line0.m_p0.dist2(line1.m_p0);
-    d1 = line0.m_p0.dist2(line1.m_p1);
-    d2 = line0.m_p1.dist2(line1.m_p0);
-    d3 = line0.m_p1.dist2(line1.m_p1);
-    
-    da = MIN(d0, d1);
-    db = MIN(d2, d3);
-    
-    df = da+db;
-    
-    // compare to max line distance
-    if (df>g_maxLineCompare)
-        return TR_MAXVAL;
-
-    // test angle
-    angle = tanDiffAbs1000(line0.m_p0, line0.m_p1, line1.m_p0, line1.m_p1, true);
-    if (angle>g_maxTrackingTanAngle)
-        return TR_MAXVAL;
-        
-    return da+db;
-}
-
-uint16_t handleLineTracking2()
-{
-    uint32_t val, min;
-    uint16_t n=0;
-    SimpleListNode<Tracker<Line2> > *i;
-    SimpleListNode<Line2> *j;
-    uint8_t k;
-    Line2 *minLine;
-    bool priority;
-    
-    // go through list, find best candidates
-    for (i=g_lineTrackersList.m_first; i!=NULL; i=i->m_next)
-    {
-        // calculate priority -- primary lines and lines in the primary intersection
-        priority = false;
-        if (g_primaryActive && g_primaryLineIndex==i->m_object.m_index)
-            priority = true;
-        else if (g_primaryIntersection.m_state!=TR_INVALID)
-        {
-            for (k=0; k<g_primaryIntersection.m_object.m_n; k++)
-            {
-                if (g_primaryIntersection.m_object.m_lines[k].m_index==i->m_object.m_index)
-                {
-                    priority = true;
-                    break;
-                }
-            }
-        }
-        // already found minimum, continue
-        if (i->m_object.m_minVal!=TR_MAXVAL)
-            continue;
-        
-        // find min
-        for (j=g_linesList.m_first, min=TR_MAXVAL, minLine=NULL; j!=NULL; j=j->m_next)
-        {
-            val = compareLines(i->m_object.m_object, j->m_object);
-            if (!priority) 
-                val <<= 12; // we scale up by 4096 because this exceeds pretty much all possible compare values due to geometry
-            // find minimum, but if line is already chosen, make sure we're a better match
-            if (val<min && i->m_object.swappable(val, &j->m_object))
-            {
-                min = val;
-                minLine = &j->m_object;
-            }
-        }
-        if (minLine)
-        {
-            // if this minimum line already has a tracker, see which is better
-            if (minLine->m_tracker)
-            {
-                minLine->m_tracker->resetMin(); // reset tracker pointed to by current minline
-                minLine->m_tracker = &i->m_object; 
-                i->m_object.setMin(minLine, min);
-                n++;
-            }
-            else
-            {
-                minLine->m_tracker = &i->m_object; // update tracker pointer            
-                i->m_object.setMin(minLine, min);
-                n++;
-            }
-        }
-    }
-    return n;
-}
-
-
-void handleLineTracking()
-{
-    SimpleListNode<Tracker<Line2> > *i, *inext;
-    SimpleListNode<Line2> *j;
-    uint16_t leading, trailing;
-    
-    // reset tracking table
-    // Note, we don't need to reset g_linesList entries (e.g. m_tracker) because these are renewed  
-    for (i=g_lineTrackersList.m_first; i!=NULL; i=i->m_next)
-        i->m_object.resetMin();
-    
-    // do search, find minimums
-    while(handleLineTracking2());
-    
-    // go through, update tracker, remove entries that are no longer valid
-    for (i=g_lineTrackersList.m_first; i!=NULL; i=inext)
-    {
-        inext = i->m_next;
-        
-        if (i->m_object.update()&TR_EVENT_INVALIDATED)
-            g_lineTrackersList.remove(i); // no longer valid?  remove from tracker list
-    }    
-    
-    // find new candidates
-    for (j=g_linesList.m_first; j!=NULL; j=j->m_next)
-    {
-        if (j->m_object.m_tracker==NULL)
-        {
-            SimpleListNode<Tracker<Line2> > *n;
-            leading = g_lineFiltering*LINE_FILTERING_MULTIPLIER;
-            trailing = (leading+1)>>1;
-            n = g_lineTrackersList.add(Tracker<Line2>(j->m_object, g_lineTrackerIndex++, leading, trailing));
-            if (n==NULL)
-            {
-                cprintf(0, "hlt\n");
-                break;
-            }
-            j->m_object.m_tracker = &n->m_object; // point back to tracker
-        }
-    }
-    if (g_debug&LINE_DEBUG_TRACKING)
-    {
-        uint8_t n;
-        cprintf(0, "Trackers\n");
-        for (i=g_lineTrackersList.m_first, n=0; i!=NULL; i=i->m_next, n++)
-            cprintf(0, "   %d: %d %d (%d %d)(%d %d)\n", n, i->m_object.m_index, i->m_object.m_state, 
-            i->m_object.m_object.m_p0.m_x, i->m_object.m_object.m_p0.m_y, i->m_object.m_object.m_p1.m_x, i->m_object.m_object.m_p1.m_y);
-    }
-}
-/*
-uint32_t compareBarCodes(const DecodedBarCode &c0, const DecodedBarCode &c1)
-{
-    int32_t x, y;
-    
-    // different values are different
-    if (c0.m_val!=c1.m_val)
-        return TR_MAXVAL;
-    
-    // find distance between 
-    x = c0.m_outline.m_xOffset + (c0.m_outline.m_width>>1);
-    y = c0.m_outline.m_yOffset + (c0.m_outline.m_height>>1);
-    x -= c1.m_outline.m_xOffset + (c1.m_outline.m_width>>1);
-    y -= c1.m_outline.m_yOffset + (c1.m_outline.m_height>>1);
-    
-    return x*x + y*y; 
-}
-*/
-Line2 *findLine(uint8_t index)
-{
-    SimpleListNode<Line2> *i;
-    
-    for (i=g_linesList.m_first; i!=NULL; i=i->m_next)
-    {
-        if (i->m_object.m_tracker && i->m_object.m_tracker->m_index==index)
-            return &i->m_object;
-    }
-    return NULL;
-}
-
-
-Line2 *findTrackedLine(uint8_t index)
-{
-    SimpleListNode<Tracker<Line2> > *i;
-    
-    for (i=g_lineTrackersList.m_first; i!=NULL; i=i->m_next)
-    {
-        if (i->m_object.m_index==index)
-            return &i->m_object.m_object;
-    }
-    return NULL;
-}
-
-uint8_t trackedLinesWithPoint(const Point &p)
-{
-    uint8_t n;
-    Line2 *line;
-    
-    SimpleListNode<Tracker<Line2> > *i;
-    
-    for (i=g_lineTrackersList.m_first, n=0; i!=NULL; i=i->m_next)
-    {
-        line = &i->m_object.m_object;
-        if (line && (line->m_p0.equals(p) || line->m_p1.equals(p))) 
-            n++;
-    }
-    return n;
-}
-
-bool compareIntersections(const Intersection &i0, const FrameIntersection &i1)
-{
-    return i0.m_n==i1.m_n;
-}
-
-int16_t getAngle(const Line2 &line, const Point &p)
-{
-    float x, y;
-    int16_t xdiff, ydiff, res;
-    
-    // find diff's using the point that's not p
-    // Note that y axis is pointing down, so we invert.
-    if (p.equals(line.m_p0)) 
-    {
-        xdiff = line.m_p1.m_x - p.m_x;
-        ydiff = p.m_y - line.m_p1.m_y;
-    }
-    else
-    {
-        xdiff = line.m_p0.m_x - p.m_x;
-        ydiff = p.m_y - line.m_p0.m_y;
-    }
-    // rotate axes 90 degrees so 0 is pointing straight up
-    x = ydiff;
-    y = -xdiff;
-    
-    res = (int16_t)(atan2(y, x)*180/(float)M_PI);
-    
-    return res;
-}
-
-int compareAngle(const void *a, const void *b)
-{
-  return (((FrameIntersectionLine *)a)->m_angle - ((FrameIntersectionLine *)b)->m_angle );
-}
-
-void formatIntersection(const Intersection &intersection, FrameIntersection *fintersection, bool tracked)
-{
-    uint8_t i, j;
-        
-    for (i=0, j=0; i<intersection.m_n && j<LINE_MAX_FRAME_INTERSECTION_LINES; i++)
-    {
-        // only add valid lines to fintersection
-        if (!tracked || intersection.m_lines[i]->m_object.m_tracker)// && intersection.m_lines[i]->m_object.m_tracker->get()!=NULL))
-        {    
-            if (tracked)
-                fintersection->m_lines[j].m_index = intersection.m_lines[i]->m_object.m_tracker->m_index;
-            else
-                fintersection->m_lines[j].m_index = 0;                
-            fintersection->m_lines[j].m_angle = getAngle(intersection.m_lines[i]->m_object, intersection.m_p);   
-            fintersection->m_lines[j].m_reserved = 0;
-            j++;
-        }
-    }
-    // zero-out rest of lines
-    for (i=j; i<LINE_MAX_FRAME_INTERSECTION_LINES; i++)
-    {    
-        fintersection->m_lines[i].m_index = 0;
-        fintersection->m_lines[i].m_angle = 0;   
-        fintersection->m_lines[i].m_reserved = 0;
-    }
-    
-    fintersection->m_x = intersection.m_p.m_x;
-    fintersection->m_y = intersection.m_p.m_y;
-    fintersection->m_n = j;
-    
-    // sort lines based on angles
-    qsort(fintersection->m_lines, fintersection->m_n, sizeof(FrameIntersectionLine), compareAngle);
-}
-
-
-uint8_t updatePrimaryIntersection(SimpleListNode<Intersection> *intern)
-{
-    FrameIntersection fint;
-    
-    g_primaryIntersection.resetMin();
-    
-    if (intern && 
-        intern->m_object.m_p.m_y>g_minLineLength*1.4 && // only consider intersections that are sufficiently far from the top
-        intern->m_object.m_p.m_y<LINE_GRID_HEIGHT-g_minLineLength*1.4) // and bottom
-    {
-        if (g_primaryIntersection.m_state==TR_INVALID || compareIntersections(intern->m_object, g_primaryIntersection.m_object))
-        {
-            formatIntersection(intern->m_object, &fint, true);
-            g_primaryIntersection.setMin(&fint, 0);
-        }
-    }
-        
-    return g_primaryIntersection.update();
-}
-
-void updatePrimaryPoint(const Line2 &primary)
-{
-    g_primaryActive = primary.m_tracker->get()!=NULL;
-    
-    if (xdirection(primary.m_p0, primary.m_p1))
-    {
-        if (g_primaryPointMap&LINE_HT_RIGHT)
-        {
-            g_primaryPointMap = LINE_HT_RIGHT;
-            if (primary.m_p0.m_x > primary.m_p1.m_x) // p0 is the primary point
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-                // update UP/DOWN flag
-                if (primary.m_p0.m_y > primary.m_p1.m_y)
-                    g_primaryPointMap |= LINE_HT_DOWN;
-            }
-            else // p1 is the primary point
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-                // update UP/DOWN flag
-                if (primary.m_p1.m_y > primary.m_p0.m_y)
-                    g_primaryPointMap |= LINE_HT_DOWN;
-            }
-        }
-        else // LINE_HT_LEFT
-        {
-            g_primaryPointMap = LINE_HT_LEFT;
-            if (primary.m_p0.m_x < primary.m_p1.m_x) // p0 is the primary point
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-                // update UP/DOWN flag
-                if (primary.m_p0.m_y > primary.m_p1.m_y)
-                    g_primaryPointMap |= LINE_HT_DOWN;
-            }
-            else // p1 is the primary point
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-                // update UP/DOWN flag
-                if (primary.m_p1.m_y > primary.m_p0.m_y)
-                    g_primaryPointMap |= LINE_HT_DOWN;
-            }
-        }                
-    }
-    else // y direction
-    {
-        if (g_primaryPointMap&LINE_HT_DOWN)
-        {
-            g_primaryPointMap = LINE_HT_DOWN;
-            if (primary.m_p0.m_y > primary.m_p1.m_y) // p0 is the primary point
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-                // update LEFT/RIGHT flag
-                if (primary.m_p0.m_x > primary.m_p1.m_x)
-                    g_primaryPointMap |= LINE_HT_RIGHT;
-            }
-            else // p1 is the primary point
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-                // update LEFT/RIGHT flag
-                if (primary.m_p1.m_x > primary.m_p0.m_x)
-                    g_primaryPointMap |= LINE_HT_RIGHT;
-            }
-        }
-        else // LINE_HT_UP
-        {
-            g_primaryPointMap = LINE_HT_UP;
-            if (primary.m_p0.m_y < primary.m_p1.m_y) // p0 is the primary point
-            {
-                g_primaryPoint = primary.m_p0;
-                g_goalPoint = primary.m_p1;
-                // update LEFT/RIGHT flag
-                if (primary.m_p0.m_x > primary.m_p1.m_x)
-                    g_primaryPointMap |= LINE_HT_RIGHT;
-            }
-            else // p1 is the primary point
-            {
-                g_primaryPoint = primary.m_p1;
-                g_goalPoint = primary.m_p0;
-                // update LEFT/RIGHT flag
-                if (primary.m_p1.m_x > primary.m_p0.m_x)
-                    g_primaryPointMap |= LINE_HT_RIGHT;
-            }
-        }
-    }
-}
-
-
-int intersectionTurn()
-{
-    uint8_t k, mink;
-    uint16_t angle, minAngle;
-    Line2 *primary;
-        
-    // find line that best fits our desired turn angle (g_nextTurnAngle), ie, find minimum difference
-    for (k=0, minAngle=0xffff; k<g_primaryIntersection.m_object.m_n; k++)
-    {
-        // calculate difference between angles
-        angle = ABS(g_primaryIntersection.m_object.m_lines[k].m_angle - g_nextTurnAngle);
-        if (angle<minAngle)
-        {
-            minAngle = angle;
-            mink = k;
-        }
-    }
-    // assign new primary line
-    g_primaryLineIndex = g_primaryIntersection.m_object.m_lines[mink].m_index;
-    primary = findTrackedLine(g_primaryLineIndex);
-    // set g_primaryPointMap
-    if (g_primaryIntersection.m_object.m_x==primary->m_p0.m_x && g_primaryIntersection.m_object.m_y==primary->m_p0.m_y) // primary point is p0
-    {
-        g_primaryPoint = primary->m_p0;
-        g_goalPoint = primary->m_p1;
-    }
-    else // primary point is p1
-    {
-        g_primaryPoint = primary->m_p1;
-        g_goalPoint = primary->m_p0;
-    }
-    if (xdirection(primary->m_p0, primary->m_p1))
-    {
-        if (g_primaryPoint.m_x<g_goalPoint.m_x)
-            g_primaryPointMap = LINE_HT_LEFT;
-        else
-            g_primaryPointMap = LINE_HT_RIGHT;                            
-    }
-    else // y direction
-    {
-        if (g_primaryPoint.m_y<g_goalPoint.m_y)
-            g_primaryPointMap = LINE_HT_UP;
-        else
-            g_primaryPointMap = LINE_HT_DOWN;                            
-    }
-    g_primaryActive = true;
-    g_primaryIntersection.m_state = TR_INVALID; // invalidate intersection
-    
-    // reset angle to default angle
-    g_nextTurnAngle = g_defaultTurnAngle;
-    g_newTurnAngle = false;
-    
-    // we always succeed by choosing the closest line
-    return 0;    
-}
-
-void setPrimaryVector(uint8_t index)
-{
-    Line2 *line;
-    
-    line = findTrackedLine(index);
-    if (line)
-    {
-        // choose point lower in the image as the primary point
-        g_primaryPointMap = LINE_HT_DOWN;
-                    
-        g_primaryLineIndex = index;
-        g_primaryIntersection.m_state = TR_INVALID;
-        g_lineState = LINE_STATE_TRACKING;
-        // update 
-        updatePrimaryPoint(*line);
-    }
-}
-
-void handleLineState()
-{
-    uint8_t ymax;
-    SimpleListNode<Tracker<Line2> > *i, *max;
-    Line2 *line, *primary;
-    uint8_t events;
-    
-    if (g_lineState==LINE_STATE_ACQUIRING)
-    {
-        if (g_manualVectorSelect) // // wait for user to select
-        {
-            if (g_manualVectorSelecIndextActive)
-            {
-                setPrimaryVector(g_manualVectorSelectIndex);
-                g_manualVectorSelecIndextActive = false;
-            }
-            
-            return;
-        }
-        // find line that meets our criteria -- it should be at least 45 degrees past horizontal and reasonably long
-        // we will consider lines that are lower in the image first.  The first line to fit the criterial is our line.
-        
-        // reset 
-        for (i=g_lineTrackersList.m_first; i!=NULL; i=i->m_next)
-            i->m_object.resetMin();
-
-        while(1)
-        {
-            for (i=g_lineTrackersList.m_first, ymax=0, max=NULL; i!=NULL; i=i->m_next)
-            {
-                line = i->m_object.get();
-                if (line!=NULL && i->m_object.m_minVal==TR_MAXVAL)
-                {
-                    if (line->m_p0.m_y>ymax)
-                    {
-                        ymax = line->m_p0.m_y;
-                        max = i;
-                    }
-                    else if (line->m_p1.m_y>ymax)
-                    {    
-                        ymax = line->m_p1.m_y;
-                        max = i;
-                    }
-                }
-            }
-            if (max)
-            {
-                //angle = tanAbs1000(max->m_object.m_object.m_p0, max->m_object.m_object.m_p1);
-                //if (angle>=LINE_MIN_ACQUISITION_TAN_ANGLE && max->m_object.m_object.length2()>=LINE_MIN_ACQUISITION_LENGTH2)
-                if (max->m_object.m_object.length2()>=LINE_MIN_ACQUISITION_LENGTH2)
-                {
-                    //cprintf("acq %d %d %d %d %d %d\n", max->m_object.m_index, angle, 
-                    //    max->m_object.m_object.m_p0.m_x, max->m_object.m_object.m_p0.m_y, max->m_object.m_object.m_p1.m_x, max->m_object.m_object.m_p1.m_y);
-                    
-                    setPrimaryVector(max->m_object.m_index);
-                    break;
-                }            
-                max->m_object.m_minVal = 0; // flag that we've visited
-            }
-            else
-            {
-                //cprintf("null\n");
-                break;
-            }
-        }
-    }
-    else // LINE_STATE_TRACKING
-    {
-        primary = findTrackedLine(g_primaryLineIndex);
-        
-        if (primary)
-        {
-            if (g_reversePrimary)
-            {
-                g_reversePrimary = false;
-                if (g_primaryPointMap&LINE_HT_UP)
-                {
-                    g_primaryPointMap &= ~LINE_HT_UP;
-                    g_primaryPointMap |= LINE_HT_DOWN;
-                }
-                else if (g_primaryPointMap&LINE_HT_DOWN)
-                {
-                    g_primaryPointMap &= ~LINE_HT_DOWN;
-                    g_primaryPointMap |= LINE_HT_UP;
-                }
-                if (g_primaryPointMap&LINE_HT_RIGHT)
-                {
-                    g_primaryPointMap &= ~LINE_HT_RIGHT;
-                    g_primaryPointMap |= LINE_HT_LEFT;
-                }
-                else if (g_primaryPointMap&LINE_HT_LEFT)
-                {
-                    g_primaryPointMap &= ~LINE_HT_LEFT;
-                    g_primaryPointMap |= LINE_HT_RIGHT;
-                }
-            }
-            // deal with primary point 
-            updatePrimaryPoint(*primary);
-            
-            if (g_debug&LINE_DEBUG_TRACKING)
-                cprintf(0, "Primary %d %d (%d %d)(%d %d)\n", g_primaryLineIndex, g_primaryPointMap, 
-                g_primaryPoint.m_x, g_primaryPoint.m_y, g_goalPoint.m_x, g_goalPoint.m_y);
-            
-            // Find primary again in list of lines.  Note if we find "primary" here, it will be the same line as "primary" above.  
-            // The only difference is this line will always have a valid intersection.  The "otherIndex" and "otherPoint" found 
-            // above will apply here also. 
-            primary = findLine(g_primaryLineIndex);
-            if (primary)
-            {
-                if (primary->m_p0.equals(g_goalPoint)) // look for intersection at i0
-                    events = updatePrimaryIntersection(primary->m_i0); 
-                else // look for intersection at i1
-                    events = updatePrimaryIntersection(primary->m_i1);
-                
-                // as soon as we see the g_primaryIntersection state transition to valid...
-                if (events&TR_EVENT_VALIDATED)
-                {
-                    g_newIntersection = true;
-                    if (g_debug&LINE_DEBUG_TRACKING)
-                        cprintf(0, "New intersection\n");
-                    
-                    // if turn angle is set before intersection, go ahead and choose turn now
-                    if (!g_delayedTurn)
-                        intersectionTurn();
-                    else // LINE_TURNMODE_DURING_INTERSECTION, we need to reset g_newTurnAngle, so we don't accidentally turn
-                        g_newTurnAngle = false;
-                }
-                // deal with turn, if turn mode dictates that choose turn during the intersection
-                else if (g_newTurnAngle && g_delayedTurn && g_primaryIntersection.m_state!=TR_INVALID)
-                    intersectionTurn();
-                    
-                if (events&TR_EVENT_INVALIDATED)
-                    g_newIntersection = false;
-
-                if ((g_debug&LINE_DEBUG_TRACKING) && g_primaryIntersection.m_state!=TR_INVALID)
-                    cprintf(0, "Intersection %d (%d %d)\n", g_primaryIntersection.m_state, g_primaryIntersection.m_object.m_x, g_primaryIntersection.m_object.m_y);
-            }                            
-        }
-        else // we lost the line
-            g_lineState = LINE_STATE_ACQUIRING;
-        
-    }
-}
-
 
 int line_processMain()
 {
@@ -2646,14 +816,11 @@ int line_processMain()
         CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('E','D','G','F')), HINT8(RENDER_FLAG_START), HINT16(CAM_RES3_WIDTH), HINT16(CAM_RES3_HEIGHT), END);
     
     // initialize variables
-    g_lineIndex = 1; // set to 1 because 0 means empty...
+    //g_lineIndex = 1; // set to 1 because 0 means empty...
     g_lineSegIndex = 0;
     memset(vstate, 0, LINE_VSIZE);
     memset(g_lineGrid, 0, LINE_GRID_WIDTH*LINE_GRID_HEIGHT*sizeof(LineGridNode));
     
-    memset(g_barcodeLines, 0,  sizeof(BarcodeLine) * BARCODELINES_SIZE);
-    memset(g_barcodeCandidates, 0, sizeof(BarcodeCandidate) * BARCODECANDIDATES_SIZE);  
-
 		cprintf(0, "g_debug %d\n", g_debug);		
     
     if (g_debug==LINE_DEBUG_BENCHMARK)
@@ -2738,15 +905,13 @@ int line_processMain()
 		
     if (g_debug==LINE_DEBUG_BENCHMARK)
         timers.add(getTimer(timer));
-
-    n_lineSegments = g_lineSegIndex;
 		
-        sendLineSegments(0);
-        sendPoints(g_nodesList, 0, "nodes");
+    // sendLineSegments(0);
+    sendPoints(g_nodesList, 0, "nodes");
 		
     g_allMutex = false;
     // render whatever we've sent
-        exec_sendEvent(g_chirpUsb, EVT_RENDER_FLUSH);
+    exec_sendEvent(g_chirpUsb, EVT_RENDER_FLUSH);
     
     g_frameFlag = true;
     
@@ -2830,7 +995,7 @@ int line_getPrimaryFrame(uint8_t typeMap, uint8_t *buf, uint16_t len)
         {
             *(uint8_t *)(buf + length) = LINE_FR_INTERSECTION;
             *(uint8_t *)(buf + length + 1) = sizeof(FrameIntersection);
-            memcpy(buf+length+2, &g_primaryIntersection.m_object, sizeof(FrameIntersection));
+            //memcpy(buf+length+2, &g_primaryIntersection.m_object, sizeof(FrameIntersection));
             length += sizeof(FrameIntersection) + 2;
             
             g_newIntersection = false;
@@ -2869,116 +1034,6 @@ int line_getPrimaryFrame2(uint8_t typeMap, uint8_t *buf, uint16_t len)
                 line->m_flags |= LINE_FR_FLAG_INTERSECTION;
             length += sizeof(FrameLine) + 2;
         }
-        // Intersection information, only present when intersection appears
-        if ((typeMap&LINE_FR_INTERSECTION) && g_newIntersection)
-        {
-            *(uint8_t *)(buf + length) = LINE_FR_INTERSECTION;
-            *(uint8_t *)(buf + length + 1) = sizeof(FrameIntersection);
-            memcpy(buf+length+2, &g_primaryIntersection.m_object, sizeof(FrameIntersection));
-            length += sizeof(FrameIntersection) + 2;
-            
-            g_newIntersection = false;
-        }
-    }
-    return length;
-}
-
-
-int line_getAllFrame(uint8_t typeMap, uint8_t *buf, uint16_t len)
-{
-    uint16_t length = 0;
-    uint8_t plength, *hbuf;
-    
-    if (!g_frameFlag || g_allMutex)
-        return -1; // no new data, or busy
-    g_frameFlag = false;
-    if (typeMap&LINE_FR_VECTOR_LINES)
-    {
-        SimpleListNode<Tracker<Line2> > *n;
-        Line2 *line;
-        FrameLine *fline;
-        
-        for(n=g_lineTrackersList.m_first, plength=0, hbuf=buf+length; n!=NULL && length<len-sizeof(FrameLine)-2; n=n->m_next)
-        {
-            fline = (FrameLine *)(buf + length + 2);
-            line = &n->m_object.m_object;
-            fline->m_x0 = line->m_p0.m_x;
-            fline->m_y0 = line->m_p0.m_y;
-            fline->m_x1 = line->m_p1.m_x;
-            fline->m_y1 = line->m_p1.m_y;
-            fline->m_index = n->m_object.m_index;
-            fline->m_flags = n->m_object.m_state;
-                
-            length += sizeof(FrameLine);
-            plength += sizeof(FrameLine);
-        }
-        if (plength>0)
-        {
-            *(uint8_t *)hbuf = LINE_FR_VECTOR_LINES;
-            *(uint8_t *)(hbuf+1) = plength;
-            length += 2;
-        }
-    }
-    if (typeMap&LINE_FR_INTERSECTION)
-    {
-        SimpleListNode<Intersection> *i;
-        FrameIntersection *intersection;
-        
-        for (i=g_intersectionsList.m_first, plength=0, hbuf=buf+length; i!=NULL && length<len-sizeof(FrameIntersection)-2; i=i->m_next)
-        {
-            intersection = (FrameIntersection *)(buf + length + 2);
-            formatIntersection(i->m_object, intersection, true); 
-                
-            length += sizeof(FrameIntersection);
-            plength += sizeof(FrameIntersection);            
-        }
-        if (plength>0)
-        {
-            *(uint8_t *)hbuf = LINE_FR_INTERSECTION;
-            *(uint8_t *)(hbuf+1) = plength;
-            length += 2;
-        }
-    }
-    return length;
-}
-
-
-int line_getAllFrame2(uint8_t typeMap, uint8_t *buf, uint16_t len)
-{
-    uint16_t length = 0;
-    uint8_t plength, *hbuf;
-    
-    if (!g_frameFlag || g_allMutex)
-        return -1; // no new data, or busy
-    g_frameFlag = false;
-    if (typeMap&LINE_FR_VECTOR_LINES)
-    {
-        FrameLine *fline;
-        LineSeg *ls0;
-        int i = 0;
-        for(plength=0, hbuf=buf+length; i < n_lineSegments && length<len-sizeof(FrameLine)-2; )
-        {
-                ls0 = &g_lineSegs[i++];
-                        if (ls0->m_p0.m_y < 100 || ls0->m_p1.m_y < 100)
-                        {
-                fline = (FrameLine *)(buf + length + 2);
-                fline->m_x0 = ls0->m_p0.m_x;
-                fline->m_y0 = ls0->m_p0.m_y;
-                fline->m_x1 = ls0->m_p1.m_x;
-                fline->m_y1 = ls0->m_p1.m_y;
-                fline->m_index = i;
-                fline->m_flags = 0;
-
-                length += sizeof(FrameLine);
-                plength += sizeof(FrameLine);
-                        }
-        }
-        if (plength>0)
-        {
-            *(uint8_t *)hbuf = LINE_FR_VECTOR_LINES;
-            *(uint8_t *)(hbuf+1) = plength;
-            length += 2;
-        }
     }
     return length;
 }
@@ -2988,41 +1043,6 @@ int line_setMode(int8_t modeMap)
     g_delayedTurn = (modeMap & LINE_MODEMAP_TURN_DELAYED) ? true : false;
     g_whiteLine = (modeMap & LINE_MODEMAP_WHITE_LINE) ? true : false;
     g_manualVectorSelect = (modeMap & LINE_MODEMAP_MANUAL_SELECT_VECTOR) ? true : false;
-    return 0;
-}
-
-int line_setNextTurnAngle(int16_t angle)
-{    
-    g_nextTurnAngle = angle;
-    g_newTurnAngle = true;
-        
-    // else we've just set the angle (for later)    
-    return 0;
-}
-
-int line_setDefaultTurnAngle(int16_t angle)
-{    
-    g_defaultTurnAngle = angle;
-        
-    // else we've just set the angle (for later)    
-    return 0;
-}
-
-int line_setVector(uint8_t index)
-{
-    g_manualVectorSelecIndextActive = true;
-    g_manualVectorSelectIndex = index;
-    
-    return 0;
-}
-
-int line_reversePrimary()
-{
-    // can't reverse primary if it's not active
-    if (!g_primaryActive)
-        return -1;
-    
-    g_reversePrimary = true;
     return 0;
 }
 
@@ -3062,14 +1082,6 @@ int line_legoLineData(uint8_t *buf, uint32_t buflen)
         buf[3] = 0;
     }   
     
-    primary = findLine(g_primaryLineIndex);
-    if (primary)
-    {            
-        if (primary->m_i1)
-            buf[2] = primary->m_i1->m_object.m_n;
-        else if (primary->m_i0)
-            buf[2] = primary->m_i0->m_object.m_n;
-    }
     if (g_newIntersection)
         g_newIntersection = false;
     
