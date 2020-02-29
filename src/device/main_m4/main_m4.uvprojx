@@ -335,7 +335,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>--cpp11</MiscControls>
               <Define>CORE_M4 IPC_MASTER PIXY KEIL</Define>
               <Undefine></Undefine>
               <IncludePath>., inc, ..\libpixy_m4\inc, ..\..\common\inc, ..\common\inc</IncludePath>

@@ -148,24 +148,36 @@ void line_shadowCallback(const char *id, const uint16_t &val);
 /////////////////////////////// OUR PARAMETERS ////////////////////////////////////////////////
 uint16_t detectedLinesTab[2];
 uint8_t detectedLinesNumber;
+
+const static uint8_t maxSimilarLinesToCHeck = 3;
+
 struct LineInRow {
 	enum LineType : uint8_t{
-		EDGE = 0, // detect track edges
+		EDGE = 9, // detect track edges
 		PATTERN = 1, // patterns on track, 3 or 4 patternt between edges
 		STOP_MAIN = 2, // diuring main competition
 		STOP = 3, // smaller competition
 		NONE // not detected
 	};/**/
 	
-	uint16_t center, width;
-	bool valid;
-	
+	uint16_t center;
 	LineType type;
+	bool mached;
+	
+	LineInRow() {
+		center = 0;
+		type = LineType::NONE;
+		mached = false;
+	}
+	
+	LineInRow(uint16_t center_m, LineType type_m, bool mached_m) {
+		center = center_m;
+		type = type_m;
+		mached = mached_m;
+	}
 	
 	
 	void setData(uint16_t startPixel_m, uint16_t stopPixel_m, bool valid_m) {
-		valid = valid_m;
-		width = stopPixel_m - startPixel_m;
 		center = (startPixel_m + stopPixel_m) / 2;
 	}
 };
@@ -174,7 +186,9 @@ struct LineInRow {
 
 class AnalyseData {
 public:	
-	LineInRow linesInRow[10];
+	LineInRow goodDetectedLines[10];
+	uint8_t goodDetectedLinesCount;
+	LineInRow linesInSubRow[maxSimilarLinesToCHeck][10];
 	LineInRow edgeLines[10];
 	uint16_t rowIndex;
 private:
@@ -189,18 +203,18 @@ private:
 				lineInRow->setData(edges[startIndexInTab], edges[stopIndexInTab], false);
 			}
 		} else {
-			lineInRow->valid = false;
+			//lineInRow->valid = false;
 		}
 	}
 	
-	void checkLineType(LineInRow* line, uint16_t startPixel, uint16_t stopPixel) {
+	void checkPossibleLineType(LineInRow* line, uint16_t startPixel, uint16_t stopPixel) {
 		uint16_t width = stopPixel - startPixel;
 		if (width < (edgeLinesDefaultWidth + 6) && width > (edgeLinesDefaultWidth - 6)) {
 			line->type = LineInRow::LineType::EDGE;
 		} else {
 			line->type = LineInRow::LineType::NONE;
 		}
-		line->width = width;
+		//line->width = width;
 		line->center = (startPixel + stopPixel) / 2;
 	}
 	
@@ -208,29 +222,53 @@ public:
 	AnalyseData(uint16_t rowIndex_m, uint8_t edgeLinesNormalWidth_m) {
 		rowIndex = rowIndex_m;
 		edgeLinesDefaultWidth = edgeLinesNormalWidth_m;
+		goodDetectedLinesCount = 0;
+		
+		memset(linesInSubRow, 0, sizeof(LineInRow) * 10 * 3);
 	}
 
-	void analyse(uint16_t *edges, uint8_t len) {
-		for (uint16_t i =0; i < len; i+=2) {
-			checkLineType(&linesInRow[i/2],edges[i], edges[i+1]);
+	void analyse(uint16_t *edges, uint8_t len, uint8_t subRow) {
+		LineInRow* linesInRow;
+		if (subRow == 0) {
+			linesInRow = linesInSubRow[0];
+		} else if (subRow == 1) {
+			linesInRow = linesInSubRow[1];
+		} else{
+			linesInRow = linesInSubRow[2];
 		}
 		
-		uint16_t startIndex = 0;
-		uint16_t stopIndex = 1;
-
-		analyseEdgeLineWidth(&edgeLines[0], edges, startIndex, stopIndex, (edges[startIndex] < 320 && edges[stopIndex] < 320));
-
-		if ((edgeLines[0].valid == true && len > 2) || (len > 1)) { 
-			startIndex = len - 2;
-			stopIndex = len - 1;
+		memset(linesInRow, 0, sizeof(LineInRow) * 10);
+		
+		for (uint16_t i =0; i < len; i+=2) {
+			checkPossibleLineType(&linesInRow[i/2],edges[i], edges[i+1]);
 		}
-
-		analyseEdgeLineWidth(&edgeLines[1], edges, startIndex, stopIndex, (edges[startIndex] > 320 && edges[stopIndex] > 320));
 		
 	}
 	
+	LineInRow* findSimilar(LineInRow* lines, LineInRow* mainLine, uint16_t pixelsRange) {
+		for(uint8_t i = 0; i < 10; i++){ 
+			if (lines[i].mached == false &&
+					mainLine->mached == false &&
+					lines[i].type == mainLine->type &&
+					lines[i].center > (mainLine->center - pixelsRange) && lines[i].center < (mainLine->center + pixelsRange) ) {
+					return &lines[i];
+			}
+		}
+		return nullptr;
+	}
+	
 	bool check(uint8_t row, uint16_t *buf, uint32_t len) {
-		if (row != rowIndex) return false;
+		uint8_t subRow = 0;
+		if (row == (rowIndex - 1)) {
+			subRow = 0;
+		} else if (row == rowIndex) {
+			subRow = 1;
+		} else if (row == (rowIndex + 1)) {
+			subRow = 2;
+		} else {
+			return false;
+		}
+		
 		uint16_t bit0, bit1, col0, col1, lineWidth;
 		uint16_t rowEdgesIndex[20];
 		uint16_t indexexNumber = 0;
@@ -244,19 +282,58 @@ public:
 				if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth){
 					rowEdgesIndex[indexexNumber++] = col0;
 					rowEdgesIndex[indexexNumber++] = col1;
-					// only debug
-					Point p1, p2;
-					p1.m_y = row / 2;
-					p1.m_x = col0 / 8;
-					p2.m_y = row / 2;
-					p2.m_x = col1 / 8;					
-					g_nodesList.add(p1);
-					g_nodesList.add(p2);
 				}
 			}
 		}
 		
-		analyse(rowEdgesIndex, indexexNumber);
+		analyse(rowEdgesIndex, indexexNumber, subRow);
+		goodDetectedLinesCount = 0;
+		if (subRow == 2) {
+			
+			LineInRow* s0 = nullptr;
+			LineInRow* s1 = nullptr;
+			LineInRow* s2 = nullptr;
+			
+			
+			for (uint8_t i = 0; i < 10; i++) {
+				s0 = &linesInSubRow[0][i];
+				s1 = findSimilar(linesInSubRow[1], s0, 10);
+				s2 = findSimilar(linesInSubRow[2], s0, 20);
+				if (s1 != nullptr && s2 != nullptr) {
+					goodDetectedLines[goodDetectedLinesCount++] = LineInRow((s1->center + s2->center + s0->center) / 3, s1->type, true);
+					s0->mached = true;
+					s1->mached = true;
+					s2->mached = true;
+				} else if (s1 != nullptr) {
+					goodDetectedLines[goodDetectedLinesCount++] = LineInRow((s1->center + s0->center) / 2, s1->type, true);
+					s0->mached = true;
+					s1->mached = true;
+				} else if (s2 != nullptr) {
+					goodDetectedLines[goodDetectedLinesCount++] = LineInRow((s2->center + s0->center) / 2, s2->type, true);
+					s0->mached = true;
+					s2->mached = true;
+				}
+			}
+			
+			for (uint8_t i = 0; i < 10; i++) {
+				s0 = &linesInSubRow[1][i];
+				s1 = findSimilar(linesInSubRow[2], s0, 5);
+				if (s1 != nullptr) {
+					goodDetectedLines[goodDetectedLinesCount++] = LineInRow((s1->center + s0->center) / 2, s1->type, true);
+					s0->mached = true;
+					s1->mached = true;
+				}
+			}
+			
+			for (uint8_t i =0; i < goodDetectedLinesCount; i++) {
+				if (goodDetectedLines[i].type == LineInRow::LineInRow::EDGE) {
+					Point p1, p2;
+					p1.m_y = (row -1) / 2;
+					p1.m_x = goodDetectedLines[i].center / 8;				
+					g_nodesList.add(p1);					
+				}
+			}
+		}
 		return true;
 	}
 };
@@ -272,27 +349,7 @@ AnalyseData linesData[] = {
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 	for(uint8_t i =0; i < 5; i++) {
 		if (linesData[i].check(row, buf, len)) {
-			static uint16_t data = 0;
-			data++;			
-
-			if (linesData[i].edgeLines[0].valid && linesData[i].edgeLines[1].valid) {
-				detectedLinesNumber = 4;
-				detectedLinesTab[0] = linesData[i].edgeLines[0].center;
-				detectedLinesTab[1] = linesData[i].edgeLines[1].center;
-			} else if (!linesData[i].edgeLines[0].valid && linesData[i].edgeLines[1].valid) {
-				detectedLinesNumber = 2;
-				detectedLinesTab[1] = linesData[i].edgeLines[1].center;
-				cprintf(0, "kkk %d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[0].width);
-				
-			} else if (linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
-				detectedLinesNumber = 3;
-				detectedLinesTab[0] = linesData[i].edgeLines[0].center;
-				cprintf(0, "kk %d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[1].width);
-			} else if (!linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
-				detectedLinesNumber = 1;
-			}
-
-			// cprintf(0, "%d, %d %d %d %d", row, data, detectedLinesNumber, detectedLinesTab[0], detectedLinesTab[1]);
+		
 		}
 	}
 	return 0;
@@ -302,30 +359,6 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 
 /////////////////////////////////////// OTHER FUNCTION /////////////////////////////////////////////
 
-uint32_t tanDiffAbs1000(const Point &p00, const Point &p01, const Point &p10, const Point &p11, bool min=false)
-{
-    // find tangent of angle difference between the two lines
-    int16_t xdiff0, ydiff0;
-    int16_t xdiff1, ydiff1;
-    int32_t x, y, res;
-
-    xdiff0 = p01.m_x - p00.m_x;
-    ydiff0 = p01.m_y - p00.m_y;
-    xdiff1 = p11.m_x - p10.m_x;
-    ydiff1 = p11.m_y - p10.m_y;
-
-    x = xdiff0*xdiff1 + ydiff0*ydiff1;
-    y = ydiff0*xdiff1 - ydiff1*xdiff0;
-
-    // min==true says that we don't care how the lines stack up, just return the abs of the minimum.
-    // min==false says that we care of the angles open beyond 90 degrees, in which case return a big value.
-    if ((min&&x==0) || (!min&&x<=0))
-        return 1000000;
-
-    res = y*1000/x;
-    res = ABS(res);
-    return res;
-}
 
 static const ProcModule g_module[] =
 {
