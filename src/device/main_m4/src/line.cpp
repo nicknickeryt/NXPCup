@@ -177,8 +177,16 @@ uint16_t detectedLinesTab[2];
 uint8_t detectedLinesNumber;
 
 struct LineInRow {
+	enum class LineType {
+		EDGE = 0, // detect track edges
+		PATTERN = 1, // patterns on track, 3 or 4 patternt between edges
+		STOP_MAIN = 2, // diuring main competition
+		STOP = 3 // smaller competition
+	};
+	
 	uint16_t startPixel, stopPixel, center, width;
 	bool valid;
+	
 	
 	void setData(uint16_t startPixel_m, uint16_t stopPixel_m, bool valid_m) {
 		startPixel = startPixel_m;
@@ -196,12 +204,12 @@ public:
 	LineInRow edgeLines[2];
 	uint16_t rowIndex;
 private:
-	uint8_t edgeLinesNormalWidth;
+	uint8_t edgeLinesDefaultWidth;
 	
 	void analyseEdgeLineWidth(LineInRow *lineInRow, uint16_t *edges, uint8_t startIndexInTab, uint8_t stopIndexInTab, bool validSide) {
 		uint16_t width = edges[stopIndexInTab] - edges[startIndexInTab];
 		if (validSide) {
-			if (width > (edgeLinesNormalWidth - 8) && width < (edgeLinesNormalWidth + 8)) {
+			if (width > (edgeLinesDefaultWidth - 8) && width < (edgeLinesDefaultWidth + 8)) {
 				lineInRow->setData(edges[startIndexInTab], edges[stopIndexInTab], true);
 			}	else {
 				lineInRow->setData(edges[startIndexInTab], edges[stopIndexInTab], false);
@@ -214,60 +222,63 @@ private:
 public:
 	AnalyseData(uint16_t rowIndex_m, uint8_t edgeLinesNormalWidth_m) {
 		rowIndex = rowIndex_m;
-		edgeLinesNormalWidth = edgeLinesNormalWidth_m;
+		edgeLinesDefaultWidth = edgeLinesNormalWidth_m;
 	}
-	
+
 	void analyse(uint16_t *edges, uint8_t len) {
 		uint16_t startIndex = 0;
 		uint16_t stopIndex = 1;
-		
+
 		analyseEdgeLineWidth(&edgeLines[0], edges, startIndex, stopIndex, (edges[startIndex] < 320 && edges[stopIndex] < 320));
-		
-		if ((edgeLines[0].valid == true && len > 2) || (len > 1)) { // right line
+
+		if ((edgeLines[0].valid == true && len > 2) || (len > 1)) { 
 			startIndex = len - 2;
 			stopIndex = len - 1;
 		}
-		
+
 		analyseEdgeLineWidth(&edgeLines[1], edges, startIndex, stopIndex, (edges[startIndex] > 320 && edges[stopIndex] > 320));
+	}
+	
+	bool check(uint8_t row, uint16_t *buf, uint32_t len) {
+		if (row != rowIndex) return false;
+		uint16_t index, bit0, bit1, col0, col1, col3, col4, lineWidth;
+		uint16_t rowEdgesIndex[20];
+		uint16_t indexexNumber = 0;
+		for (uint16_t j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++){
+			bit0 = buf[j]&EQ_NEGATIVE;
+			bit1 = buf[j+1]&EQ_NEGATIVE;
+			col0 = buf[j]&~EQ_NEGATIVE;
+			col1 = buf[j+1]&~EQ_NEGATIVE;
+			if (bit0!=0 && bit1==0){
+				lineWidth = col1 - col0;
+				if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth){
+					rowEdgesIndex[indexexNumber++] = col0;
+					rowEdgesIndex[indexexNumber++] = col1;
+					// only debug
+					Point p1, p2;
+					p1.m_y = row / 2;
+					p1.m_x = col0 / 8;
+					p2.m_y = row / 2;
+					p2.m_x = col1 / 8;					
+					g_nodesList.add(p1);
+					g_nodesList.add(p2);
+				}
+			}
+		}
+		
+		analyse(rowEdgesIndex, indexexNumber);
+		return true;
 	}
 };
 
-
 AnalyseData linesData[2] = {
 	AnalyseData(80, 22), 
-	AnalyseData(50, 22)
+	AnalyseData(50, 22),
 };
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
-	uint16_t j, index, bit0, bit1, col0, col1, col3, col4, lineWidth;
-	uint16_t rowEdgesIndex[20];
-	uint16_t indexexNumber = 0;
-
 	for(uint8_t i =0; i < 2; i++) {
-		if (linesData[i].rowIndex == row) {
-			for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++){
-				bit0 = buf[j]&EQ_NEGATIVE;
-				bit1 = buf[j+1]&EQ_NEGATIVE;
-				col0 = buf[j]&~EQ_NEGATIVE;
-				col1 = buf[j+1]&~EQ_NEGATIVE;
-				if (bit0!=0 && bit1==0){
-					lineWidth = col1 - col0;
-					if (g_minLineWidth<lineWidth && lineWidth<g_maxLineWidth){
-						rowEdgesIndex[indexexNumber++] = col0;
-						rowEdgesIndex[indexexNumber++] = col1;
-						// only debug
-						Point p1, p2;
-						p1.m_y = row / 2;
-						p1.m_x = col0 / 8;
-						p2.m_y = row / 2;
-						p2.m_x = col1 / 8;					
-						g_nodesList.add(p1);
-						g_nodesList.add(p2);
-					}
-				}
-			}
-			linesData[i].analyse(rowEdgesIndex, indexexNumber);
-			
+		if (linesData[i].check(row, buf, len)) {
 			static uint16_t data = 0;
 			data++;			
 
@@ -278,15 +289,17 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 			} else if (!linesData[i].edgeLines[0].valid && linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 2;
 				detectedLinesTab[1] = linesData[i].edgeLines[1].center;
+				cprintf(0, "%d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[0].width);
 				
 			} else if (linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 3;
 				detectedLinesTab[0] = linesData[i].edgeLines[0].center;
+				cprintf(0, "%d, %d %d %d", row, data, detectedLinesNumber, linesData[i].edgeLines[1].width);
 			} else if (!linesData[i].edgeLines[0].valid && !linesData[i].edgeLines[1].valid) {
 				detectedLinesNumber = 1;
 			}
 
-			cprintf(0, "%d, %d %d %d %d", row, data, detectedLinesNumber, detectedLinesTab[0], detectedLinesTab[1]);
+			// cprintf(0, "%d, %d %d %d %d", row, data, detectedLinesNumber, detectedLinesTab[0], detectedLinesTab[1]);
 		}
 	}
 	return 0;
@@ -1084,26 +1097,6 @@ void extractLineSegments(const Point &p)
         if (addline(p0, g_lineSegs[prevSeg].m_p1)<0)
             return;
     }        
-}
-
-void extractLineSegments()
-{
-    int8_t i, j;
-    uint16_t k;
-    LineGridNode node;
-    
-    for (i=LINE_GRID_HEIGHT-15; i>=0; i--) // bottom-up
-    {
-        k = i*LINE_GRID_WIDTH;
-        for (j=0; j<LINE_GRID_WIDTH; j++, k++)
-        {
-            node = g_lineGrid[k];
-            if (node&LINE_NODE_FLAG_1 && !(node&LINE_NODE_FLAG_NULL))
-                // we could do some analysis here to find the end of the continuous train of pixels, then asses which direction 
-                // the line is headed, upper-right, upper-left if it's horizontal
-                extractLineSegments(Point(j, i)); 
-        }
-    }
 }
 
 
