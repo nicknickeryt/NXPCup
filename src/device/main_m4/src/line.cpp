@@ -149,22 +149,24 @@ void line_shadowCallback(const char *id, const uint16_t &val);
 uint16_t detectedLinesTab[2];
 uint8_t detectedLinesNumber;
 struct LineInRow {
-	/*enum class LineType : uint8_t{
+	enum LineType : uint8_t{
 		EDGE = 0, // detect track edges
 		PATTERN = 1, // patterns on track, 3 or 4 patternt between edges
 		STOP_MAIN = 2, // diuring main competition
-		STOP = 3 // smaller competition
-	};*/
+		STOP = 3, // smaller competition
+		NONE // not detected
+	};/**/
 	
-	uint16_t startPixel, stopPixel, center, width;
+	uint16_t center, width;
 	bool valid;
 	
+	LineType type;
+	
+	
 	void setData(uint16_t startPixel_m, uint16_t stopPixel_m, bool valid_m) {
-		startPixel = startPixel_m;
-		stopPixel = stopPixel_m;
 		valid = valid_m;
-		width = stopPixel - startPixel;
-		center = (startPixel + stopPixel) / 2;
+		width = stopPixel_m - startPixel_m;
+		center = (startPixel_m + stopPixel_m) / 2;
 	}
 };
 
@@ -172,7 +174,8 @@ struct LineInRow {
 
 class AnalyseData {
 public:	
-	LineInRow edgeLines[50];
+	LineInRow linesInRow[10];
+	LineInRow edgeLines[10];
 	uint16_t rowIndex;
 private:
 	uint8_t edgeLinesDefaultWidth;
@@ -190,6 +193,17 @@ private:
 		}
 	}
 	
+	void checkLineType(LineInRow* line, uint16_t startPixel, uint16_t stopPixel) {
+		uint16_t width = stopPixel - startPixel;
+		if (width < (edgeLinesDefaultWidth + 6) && width > (edgeLinesDefaultWidth - 6)) {
+			line->type = LineInRow::LineType::EDGE;
+		} else {
+			line->type = LineInRow::LineType::NONE;
+		}
+		line->width = width;
+		line->center = (startPixel + stopPixel) / 2;
+	}
+	
 public:
 	AnalyseData(uint16_t rowIndex_m, uint8_t edgeLinesNormalWidth_m) {
 		rowIndex = rowIndex_m;
@@ -197,6 +211,10 @@ public:
 	}
 
 	void analyse(uint16_t *edges, uint8_t len) {
+		for (uint16_t i =0; i < len; i+=2) {
+			checkLineType(&linesInRow[i/2],edges[i], edges[i+1]);
+		}
+		
 		uint16_t startIndex = 0;
 		uint16_t stopIndex = 1;
 
@@ -208,11 +226,12 @@ public:
 		}
 
 		analyseEdgeLineWidth(&edgeLines[1], edges, startIndex, stopIndex, (edges[startIndex] > 320 && edges[stopIndex] > 320));
+		
 	}
 	
 	bool check(uint8_t row, uint16_t *buf, uint32_t len) {
 		if (row != rowIndex) return false;
-		uint16_t index, bit0, bit1, col0, col1, col3, col4, lineWidth;
+		uint16_t bit0, bit1, col0, col1, lineWidth;
 		uint16_t rowEdgesIndex[20];
 		uint16_t indexexNumber = 0;
 		for (uint16_t j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++){
@@ -243,15 +262,15 @@ public:
 };
 
 AnalyseData linesData[] = {
-	AnalyseData(80, 22), 
-	AnalyseData(50, 22),
-	AnalyseData(50, 22),
-	AnalyseData(50, 22),
-	AnalyseData(50, 22)
+	AnalyseData(68, 17), 
+	AnalyseData(62, 15),
+	AnalyseData(56, 14),
+	AnalyseData(50, 13),
+	AnalyseData(44, 12)
 };
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
-	for(uint8_t i =0; i < 2; i++) {
+	for(uint8_t i =0; i < 5; i++) {
 		if (linesData[i].check(row, buf, len)) {
 			static uint16_t data = 0;
 			data++;			
@@ -317,7 +336,7 @@ void line_shadowCallback(const char *id, const void *val)
 {
     int responseInt;
     bool callM0 = false;
-    uint16_t leading, trailing;
+//    uint16_t leading, trailing;
     
     if (strcmp(id, "Edge distance")==0)
     {
@@ -353,10 +372,10 @@ void line_shadowCallback(const char *id, const void *val)
         g_lineFiltering = *(uint8_t *)val;
     else if (strcmp(id, "Intersection filtering")==0)
     {
-        uint8_t v;
-        v = *(uint8_t *)val;
-        leading = v*LINE_FILTERING_MULTIPLIER;
-        trailing = (leading+1)>>1;
+//        uint8_t v;
+       // v = *(uint8_t *)val;
+        //leading = v*LINE_FILTERING_MULTIPLIER;
+//        trailing = (leading+1)>>1;
         //g_primaryIntersection.setTiming(leading, trailing); 
     }
     else if (strcmp(id, "Barcode filtering")==0)
@@ -378,7 +397,7 @@ int line_loadParams(int8_t progIndex)
 {    
     int i, responseInt=-1;
     char id[32], desc[128];
-    uint16_t leading, trailing;
+//    uint16_t leading, trailing;
     
     // add params
     if (progIndex>=0)
@@ -475,8 +494,8 @@ int line_loadParams(int8_t progIndex)
     prm_get("Maximum line compare", &g_maxLineCompare, END);
     prm_get("White line", &g_whiteLine, END);
     prm_get("Intersection filtering", &g_lineFiltering, END);
-    leading = g_lineFiltering*LINE_FILTERING_MULTIPLIER;
-    trailing = (leading+1)>>1;
+//    leading = g_lineFiltering*LINE_FILTERING_MULTIPLIER;
+  //  trailing = (leading+1)>>1;
     //g_primaryIntersection.setTiming(leading, trailing); 
     prm_get("Line filtering", &g_lineFiltering, END);
     prm_get("Barcode filtering", &g_barcodeFiltering, END);
@@ -763,8 +782,7 @@ void sendPoints(const SimpleList<Point> &points, uint8_t renderFlags, const char
     CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('N','A','D','F')), INT8(renderFlags), STRING(desc), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), END);
 }
 
-void sendPrimaryFeatures(uint8_t renderFlags)
-{
+void sendPrimaryFeatures(uint8_t renderFlags) {
     uint8_t n=0;
     Line2 *primary=NULL;
     
@@ -780,8 +798,6 @@ void sendPrimaryFeatures(uint8_t renderFlags)
     else // send null message so it always shows up as a layer
         CRP_SEND_XDATA(g_chirpUsb, HTYPE(FOURCC('P','V','I','0')), INT8(renderFlags), INT16(LINE_GRID_WIDTH), INT16(LINE_GRID_HEIGHT), 
             INT8(0), INT8(0), INT8(0), INT8(0), INT8(0), END);
-        
-    
 }
 
 uint32_t dist2_4(const Point16 &p0, const Point16 &p1)
@@ -1048,7 +1064,7 @@ int line_setMode(int8_t modeMap)
 
 int line_legoLineData(uint8_t *buf, uint32_t buflen)
 {
-    Line2 *primary;
+//    Line2 *primary;
     uint32_t x;
     static uint8_t lastData[4];
 
