@@ -18,13 +18,19 @@ class NXP_Motors;
 class NXP_Motor : public halina::Motor{
     friend class NXP_Motors;
 private:
+    enum class MotorDirection{
+    FORWARDS = 0,
+    BACKWARDS = 1
+};
     int32_t speed = 0;
-    NXP_PWM& pwm;
+    NXP_PWM& pwmForward;
+    NXP_PWM& pwmBackward;
     PWM_Filter filter;
     NXP_GPIO enablePin;
+    MotorDirection motorDirection = MotorDirection::FORWARDS;
 public:
-    NXP_Motor(NXP_PWM& pwm, NXP_GPIO& enablePin) :
-        pwm(pwm), enablePin(enablePin) { }
+    NXP_Motor(NXP_PWM& pwmForward, NXP_PWM& pwmBackward, NXP_GPIO& enablePin) :
+            pwmForward(pwmForward), pwmBackward(pwmBackward), enablePin(enablePin) { }
 
     void init() override;
 

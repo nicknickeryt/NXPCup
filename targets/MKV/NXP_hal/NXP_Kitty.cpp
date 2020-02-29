@@ -16,9 +16,12 @@
 #include "logger.h"
 bool algorithmTrigger = false;
 bool commandTerminalTrigger = false;
+bool frameTrigger = false;
+
 void pit_generalHandler(uint32_t*) {
     algorithmTrigger = true;
     commandTerminalTrigger = true;
+    frameTrigger = true;
 }
 
 uint_fast64_t Kitty::milliseconds = 0;
@@ -70,21 +73,72 @@ void Kitty::init() {
     camera.start();
     log_notice("KiTTy init finished");
     algorithmUnit.checkSwitches();
+
 }
 
 void Kitty::proc() {
     if(!menu.proc(systickTrigger)) {
         motors.setValue(algorithmUnit.startSpeed, algorithmUnit.startSpeed);
-        if (commandTerminalTrigger) {
-            commandManager.run();
-            commandTerminalTrigger = false;
-        }
-        if (algorithmTrigger) {
-            algorithmTrigger = false;
-            camera.getData(NXP_Camera::Type::CAMERA_1, algorithmUnit.algorithmData.cameraData);
-            algorithmUnit.analyze();
-        }
+//        if (commandTerminalTrigger) {
+//            commandManager.run();
+//            commandTerminalTrigger = false;
+//        }
+//        if (algorithmTrigger) {
+//            algorithmTrigger = false;
+////            algorithmUnit.analyze();
+//        }
     }
+
+    if(frameTrigger){
+        static uint8_t line1 = 10;
+        static uint8_t line2 = 5;
+        static bool speedUp;
+        static bool slowDown;
+        static bool emergency;
+        static bool stop;
+        static bool crossroad;
+        static float encoderLeft = 0.5;
+        static float encoderRight = 0.5;
+        static bool directionLeft = true;
+        static bool directionRight = true;
+
+        uint8_t linesValues[2] = {line1++, line2++};
+        if(line1 == 127){
+            line1 = 10;
+            line2 = 5;
+        }
+
+        int16_t motorsValues[2] = {int16_t(motors.getValue().first * 100.0), int16_t(motors.getValue().second * 100.0)};
+        int16_t encodersValues[2] = {int16_t(encoderLeft * 100.0), int16_t(encoderRight * 100.0)};
+
+
+        if(directionLeft){
+            encoderLeft += 0.01;
+            directionLeft = encoderLeft < 1.00;
+        }else{
+            encoderLeft -= 0.01;
+            directionLeft = encoderLeft <= -1.00;
+        }
+
+        if(directionRight){
+            encoderRight += 0.02;
+            directionRight = encoderRight < 1.00;
+        }else{
+            encoderRight -= 0.02;
+            directionRight = encoderRight <= -1.00;
+        }
+
+        uint8_t obstacleSide = 1;
+            speedUp ^= 1U;
+            slowDown ^= 1U;
+            emergency ^= 1U;
+            stop ^= 1U;
+            crossroad ^= 1U;;
+        frame.setPayload(linesValues, motorsValues, encodersValues, servo.get(), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
+        frame.sendFrameProc();
+        frameTrigger = false;
+    }
+
     magicDiodComposition();
 }
 

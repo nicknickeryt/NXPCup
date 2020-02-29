@@ -14,16 +14,15 @@ void NXP_Servo::init(){
     uint32_t ticks = pwm.getTicksPerSecond() / 1000; // ticks per milliseconds
     uint32_t ticksDeviation = ticks / 2;
     centerTicks = ticks + ticksDeviation;
-    pwm.setRawPeriod(centerTicks, pwm.channelFirst);
+    pwm.setRawPeriod(centerTicks, pwm.getChannel());
 
     maxTicksDeviation = maxDegreeDeviation * ticksDeviation / 90;
 }
 
 void NXP_Servo::set(float value){
     value = std::clamp(value, -1.0f, 1.0f);
-
+    currentValue = value;
     value = (float)maxTicksDeviation * value * servoMultiplier;
-
-    pwm.setRawPeriod(centerTicks + value, pwm.channelFirst);
+    pwm.setRawPeriod(centerTicks + value, pwm.getChannel());
 }
 

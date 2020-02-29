@@ -16,24 +16,26 @@ class Kitty;
 class NXP_PWM {
 private:
     FTM_Type* ftm;
-    NXP_PORT& portFirst;
-    NXP_PORT& portSecond;
+    NXP_PORT& port;
 
     uint32_t frequency;
     uint8_t dividerIndex = 0;
     uint16_t modulo = 0;
+    float currentValue = 0;
+    uint16_t channel = 0;
 
     constexpr static uint8_t dividers[8] = {1, 2, 4, 8, 16, 32, 64, 128};
 public:
-    uint8_t channelFirst;
-    uint8_t channelSecond;
+    NXP_PWM(FTM_Type* ftm, NXP_PORT& port, uint8_t channel, uint32_t frequency) :
+            ftm(ftm), port(port), frequency(frequency), channel(channel){ }
 
-    NXP_PWM(FTM_Type* ftm, NXP_PORT& portFirst, NXP_PORT& portSecond, uint8_t channelFirst, uint8_t channelSecond, uint32_t frequency) :
-            ftm(ftm), portFirst(portFirst), portSecond(portSecond),frequency(frequency), channelFirst(channelFirst), channelSecond(channelSecond) { }
+    void setDutyCycle(float dutyCycle);
 
-    void setDutyCycle(float dutyCycle, uint8_t channel);
+    float getDutyCycle();
 
     void init();
+
+    uint8_t getChannel(){return channel;}
 
     uint32_t getTicksPerSecond() {
         return CLOCK_GetFreq(kCLOCK_FastPeriphClk) / dividers[dividerIndex];
@@ -42,6 +44,7 @@ public:
     void setRawPeriod( uint16_t period, uint8_t channel) {
         ftm->CONTROLS[channel].CnV = FTM_CnV_VAL(std::clamp(period, (uint16_t)0, modulo));
     }
+
 
 };
 

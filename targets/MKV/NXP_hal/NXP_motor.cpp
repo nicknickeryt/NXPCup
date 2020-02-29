@@ -6,30 +6,40 @@
  *
 */
 
+
 #include "NXP_motor.hpp"
 #include "NXP_Kitty.hpp"
 
 void NXP_Motor::init(){
     enablePin.init();
     block();
-    pwm.init();
+    pwmForward.init();
+    pwmBackward.init();
 }
 
 void NXP_Motor::setValue(float value) {
     value = std::clamp(value, -1.0f, 1.0f);
 
     if (value <= 0.0f) {
-        pwm.setDutyCycle(-value, pwm.channelFirst);
-        pwm.setDutyCycle(0.0f, pwm.channelSecond);
+        motorDirection = MotorDirection::FORWARDS;
+        pwmForward.setDutyCycle(-value);
+        pwmBackward.setDutyCycle(0.0f);
     } else {
-        pwm.setDutyCycle(value, pwm.channelSecond);
-        pwm.setDutyCycle(0.0f, pwm.channelFirst);
+        motorDirection = MotorDirection::BACKWARDS;
+        pwmForward.setDutyCycle(0.0f);
+        pwmBackward.setDutyCycle(value);
     }
 }
 
 
 float NXP_Motor::getValue() {
-    // todo write conversion form int32_t to float
-    return 0.0f;
-//    return static_cast<float>(pwm.getDutyCycle());
+    switch(motorDirection){
+        case MotorDirection::FORWARDS:
+            return pwmForward.getDutyCycle();
+        case MotorDirection::BACKWARDS:
+            return pwmBackward.getDutyCycle();
+        default:
+            break;
+    }
+    return 0.0;
 }

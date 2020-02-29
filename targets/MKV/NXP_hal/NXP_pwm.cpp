@@ -5,28 +5,30 @@
  * NXP HALina implementation of pwm driver
  *
  */
+#define LOG_CHANNEL MOTOR
+#define MOTOR_LOG_CHANNEL 2
+#define MOTOR_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include <limits>
 #include <bits/algorithmfwd.h>
 #include "fsl_pwm.h"
 #include "NXP_pwm.hpp"
+#include "logger.h"
 
-void NXP_PWM::setDutyCycle(float dutyCycle, uint8_t channel){
+void NXP_PWM::setDutyCycle(float dutyCycle){
     dutyCycle = std::clamp(dutyCycle, 0.0f, 1.0f);
-
+    currentValue = dutyCycle;
     setRawPeriod((uint16_t)(dutyCycle * modulo), channel);
+}
+
+float NXP_PWM::getDutyCycle(){
+    return currentValue;
 }
 
 void NXP_PWM::init() {
     ftm->MODE = (FTM_MODE_FAULTM(0x00) | FTM_MODE_WPDIS_MASK);
-    if (portFirst.checkPort()) {
-        ftm->CONTROLS[channelFirst].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
-        portFirst.setMux();
-    }
-    if (portSecond.checkPort()) {
-        ftm->CONTROLS[channelSecond].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
-        portSecond.setMux();
-    }
+        ftm->CONTROLS[channel].CnSC = FTM_CnSC_MSB_MASK | FTM_CnSC_ELSB_MASK;
+        port.setMux();
 
     ftm->SC = FTM_SC_CLKS(0x01); // System clock
     uint32_t period = CLOCK_GetFreq(kCLOCK_FastPeriphClk) / frequency;
@@ -54,10 +56,6 @@ void NXP_PWM::init() {
     ftm->CNT = 0;
     ftm->MOD = FTM_MOD_MOD(modulo);
 
-    if (portFirst.checkPort()) {
-        setDutyCycle(0.0f, channelFirst);
-    }
-    if (portSecond.checkPort()) {
-        setDutyCycle(0.0f, channelSecond);
-    }
+    setDutyCycle(0.0f);
+
 }

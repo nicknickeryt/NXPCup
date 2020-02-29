@@ -22,6 +22,7 @@
 #include "NXP_DMA.h"
 #include "NXP_menu.hpp"
 #include "NXP_encoder.hpp"
+#include "NXP_frame.hpp"
 #include "commandManager.h"
 #include "command_terminal/command_manager.h"
 #include "algorithm_unit.hpp"
@@ -74,10 +75,12 @@ private:
     NXP_PORT motorLeftPortMLF = {PORTE, 6, 0x06};
     NXP_PORT motorRightPortMLB = {PORTE, 7, 0x06};
     NXP_PORT motorRightPortMLF = {PORTE, 8, 0x06};
-    NXP_PWM motorLeftPwm = {FTM3, motorLeftPortMLB, motorLeftPortMLF, 0, 1, 200};
-    NXP_PWM motorRightPwm = {FTM3, motorRightPortMLB, motorRightPortMLF, 2, 3, 200};
-    NXP_Motor motorLeft = {motorLeftPwm, motorEnablePin};
-    NXP_Motor motorRight = {motorRightPwm, motorEnablePin};
+    NXP_PWM motorLeftForwardPwm = {FTM3, motorLeftPortMLF, 1, 200};
+    NXP_PWM motorLeftBackwardPwm = {FTM3, motorLeftPortMLB, 0, 200};
+    NXP_PWM motorRightForwardPwm = {FTM3, motorRightPortMLF, 3, 200};
+    NXP_PWM motorRightBackwardPwm = {FTM3, motorRightPortMLB, 2, 200};
+    NXP_Motor motorLeft = {motorLeftForwardPwm, motorLeftBackwardPwm, motorEnablePin};
+    NXP_Motor motorRight = {motorRightForwardPwm, motorRightBackwardPwm, motorEnablePin};
 
     // UARTS
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
@@ -89,7 +92,7 @@ private:
 
     // SERVO
     NXP_PORT servoPort = {PORTA, 7, 0x03};
-    NXP_PWM servoPwm = {FTM0, servoPort, NXP_PORT::getEmptyPort(), 4, 0, 200};
+    NXP_PWM servoPwm = {FTM0, servoPort, 4, 200};
 
     // CAMERA
     NXP_GPIO cameraClockPin = {PORTB, GPIOB, 6, halina::GPIO::Mode::OUTPUT};
@@ -107,7 +110,7 @@ private:
 
     // PIT
     NXP_PIT pitCamera = {NXP_PIT::CHANNEL::_0, 25000, NXP_Camera::pitInterruptStatic, nullptr};
-    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 19, pit_generalHandler, nullptr};
+    NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 30, pit_generalHandler, nullptr};
     NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 100, nullptr, nullptr};
 
     // COMMAND TERMINAL
@@ -121,15 +124,17 @@ private:
     // I2C
     NXP_PORT sdaPort = {PORTE, 0, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
     NXP_PORT sclPort = {PORTE, 1, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
-
     NXP_I2C i2c = {I2C1, sdaPort, sclPort, 400000};
-
-public:
-    uint32_t jakisParameter32 = 51;
 
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
+
+    // FRAME
+    NXP_Frame frame = {uartCommunication};
+
+public:
+    uint32_t jakisParameter32 = 51;
 
     // KAMERA
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
@@ -147,6 +152,7 @@ public:
 
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
+
     // DISTANCE SENSOR
     VL53L0X sensor = {i2c};
 

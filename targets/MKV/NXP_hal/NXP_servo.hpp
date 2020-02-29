@@ -21,6 +21,7 @@ private:
     uint8_t maxDegreeDeviation;
     uint32_t maxTicksDeviation;
     float servoMultiplier;
+    float currentValue = 0.0;
 
 public:
     NXP_Servo(NXP_PWM& pwm, uint8_t maxDegreeDeviation, float servoMultiplier) :  pwm(pwm), servoMultiplier(servoMultiplier) {
@@ -31,8 +32,10 @@ public:
 
     void set(float) override;
 
+    float get(){return currentValue;};
+
     void disable() {
-        pwm.setRawPeriod(0, pwm.channelFirst);
+        pwm.setRawPeriod(0, pwm.getChannel());
     }
 };
 
