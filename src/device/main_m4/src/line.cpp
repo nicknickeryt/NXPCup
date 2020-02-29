@@ -201,7 +201,7 @@ struct LineInRow {
 
 class AnalyseData {
 public:	
-	LineInRow edgeLines[2];
+	LineInRow edgeLines[20];
 	uint16_t rowIndex;
 private:
 	uint8_t edgeLinesDefaultWidth;
