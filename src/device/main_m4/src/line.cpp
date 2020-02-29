@@ -175,14 +175,14 @@ void line_shadowCallback(const char *id, const uint16_t &val);
 /////////////////////////////// OUR PARAMETERS ////////////////////////////////////////////////
 uint16_t detectedLinesTab[2];
 uint8_t detectedLinesNumber;
-
+static volatile uint8_t const foo[5000] = {1,2};
 struct LineInRow {
-	enum class LineType {
+	/*enum class LineType : uint8_t{
 		EDGE = 0, // detect track edges
 		PATTERN = 1, // patterns on track, 3 or 4 patternt between edges
 		STOP_MAIN = 2, // diuring main competition
 		STOP = 3 // smaller competition
-	};
+	};*/
 	
 	uint16_t startPixel, stopPixel, center, width;
 	bool valid;
@@ -228,7 +228,9 @@ public:
 	void analyse(uint16_t *edges, uint8_t len) {
 		uint16_t startIndex = 0;
 		uint16_t stopIndex = 1;
-
+if(foo[4095] != 0 && foo[500] != 0) {
+volatile	uint8_t data = foo[100];
+}
 		analyseEdgeLineWidth(&edgeLines[0], edges, startIndex, stopIndex, (edges[startIndex] < 320 && edges[stopIndex] < 320));
 
 		if ((edgeLines[0].valid == true && len > 2) || (len > 1)) { 
@@ -271,9 +273,12 @@ public:
 	}
 };
 
-AnalyseData linesData[2] = {
+AnalyseData linesData[] = {
 	AnalyseData(80, 22), 
 	AnalyseData(50, 22),
+	AnalyseData(50, 22),
+	AnalyseData(50, 22),
+	AnalyseData(50, 22)
 };
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
