@@ -68,17 +68,29 @@ void Kitty::init() {
     uartCommunication.write("Bejbi don't hurt me", 19);
 
 
-    menu.addParameter(&algorithmUnit.startSpeed, 0.01);
+    menu.addParameter(&algorithmUnit.startSpeedLeft, 0.01);
+    menu.addParameter(&algorithmUnit.startSpeedRight, 0.01);
     servo.set(0.0);
     camera.start();
     log_notice("KiTTy init finished");
     algorithmUnit.checkSwitches();
 
+
+
 }
 
 void Kitty::proc() {
+    static int16_t motorsValues[2];
+    static int16_t encodersValues[2];
+    float leftSpeedToModify =  algorithmUnit.startSpeedLeft;
+    float rightSpeedToModify = algorithmUnit.startSpeedRight;
+    uint16_t encoderLeftSample = encoderLeft.getTicks();
+    uint16_t encoderRightSample = encoderRight.getTicks();
     if(!menu.proc(systickTrigger)) {
-        motors.setValue(algorithmUnit.startSpeed, algorithmUnit.startSpeed);
+        log_notice("L_in: %f R_in: %f", algorithmUnit.startSpeedLeft, algorithmUnit.startSpeedRight);
+        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
+        log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
+        motors.setValue(leftSpeedToModify, rightSpeedToModify);
 //        if (commandTerminalTrigger) {
 //            commandManager.run();
 //            commandTerminalTrigger = false;
@@ -91,7 +103,7 @@ void Kitty::proc() {
 
     if(frameTrigger){
 
-        log_notice("%" PRIu16, encoderLeft.getTicks());
+//        log_notice("%" PRIu16, encoderLeft.getTicks());
 //        log_notice("ER %" PRIu16, encoderRight.getTicks());
 
         static uint8_t line1 = 10;
@@ -108,8 +120,10 @@ void Kitty::proc() {
             line2 = 5;
         }
 
-        int16_t motorsValues[2] = {int16_t(motors.getValue().first * 100.0), int16_t(motors.getValue().second * 100.0)};
-        int16_t encodersValues[2] = {0, 0};
+        motorsValues[0] = int16_t( algorithmUnit.startSpeedLeft * 100.0);
+        motorsValues[1] = int16_t(algorithmUnit.startSpeedRight * 100.0);
+        encodersValues[0] = (int16_t)encoderLeftSample;
+        encodersValues[1] = (int16_t)encoderRightSample;
 
         uint8_t obstacleSide = 1;
             speedUp ^= 1U;
@@ -117,7 +131,7 @@ void Kitty::proc() {
             emergency ^= 1U;
             stop ^= 1U;
             crossroad ^= 1U;;
-        frame.setPayload(linesValues, motorsValues, encodersValues, servo.get(), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
+        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
         frame.sendFrameProc();
         frameTrigger = false;
     }

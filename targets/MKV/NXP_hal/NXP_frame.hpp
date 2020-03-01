@@ -42,7 +42,7 @@ public:
         clearPayload();
     }
 
-    void setPayload(uint8_t lines[2], int16_t motors[2], int16_t encoders[2], int16_t servo, uint8_t obstacle, bool speedUp, bool speedDown, bool emergencyBreak, bool stop, bool crossroad){
+    void setPayload(uint8_t *lines, int16_t *motors, int16_t *encoders, int16_t servo, uint8_t obstacle, bool speedUp, bool speedDown, bool emergencyBreak, bool stop, bool crossroad){
         memcpy(payload.detectedSideLinesIndexes, lines, sizeof(payload.detectedSideLinesIndexes));
         memcpy(payload.motorsValues, motors, sizeof(payload.motorsValues));
         memcpy(payload.encodersValues, encoders, sizeof(payload.encodersValues));

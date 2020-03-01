@@ -130,7 +130,6 @@ private:
     NXP_Frame frame = {uartCommunication};
 
 public:
-    uint32_t jakisParameter32 = 51;
 
     // ENKODER
     NXP_Encoder encoderLeft = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};

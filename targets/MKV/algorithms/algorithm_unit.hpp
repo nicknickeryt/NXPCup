@@ -14,6 +14,7 @@
 #include "patterns_detector.hpp"
 #include "NXP_uart.hpp"
 #include "NXP_servo.hpp"
+#include "pid.hpp"
 
 class AlgorithmUnit{
 private:
@@ -51,7 +52,9 @@ private:
     halina::Switches &switches;
 
 public:
-    float startSpeed = 0.2;
+    float startSpeedLeft = 0.5;
+    float startSpeedRight = 0.5;
+    PID pid ={0.01, 0.0, 0.7, 0.3, 454.375,-71.875};
 
 public:
     class AlgorithmData{
