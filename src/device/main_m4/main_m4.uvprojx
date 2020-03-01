@@ -403,11 +403,6 @@
               <FilePath>.\src\exec.cpp</FilePath>
             </File>
             <File>
-              <FileName>i2c.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\i2c.cpp</FilePath>
-            </File>
-            <File>
               <FileName>progblobs.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\progblobs.cpp</FilePath>
@@ -421,11 +416,6 @@
               <FileName>serial.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\serial.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>spi.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\spi.cpp</FilePath>
             </File>
             <File>
               <FileName>uart.cpp</FileName>
@@ -476,11 +466,6 @@
               <FileName>equeue.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\equeue.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>spi2.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\spi2.cpp</FilePath>
             </File>
             <File>
               <FileName>libpixy_m4.lib</FileName>
@@ -896,11 +881,6 @@
               <FilePath>.\src\exec.cpp</FilePath>
             </File>
             <File>
-              <FileName>i2c.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\i2c.cpp</FilePath>
-            </File>
-            <File>
               <FileName>progblobs.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\progblobs.cpp</FilePath>
@@ -914,11 +894,6 @@
               <FileName>serial.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\serial.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>spi.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\spi.cpp</FilePath>
             </File>
             <File>
               <FileName>uart.cpp</FileName>
@@ -969,11 +944,6 @@
               <FileName>equeue.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>.\src\equeue.cpp</FilePath>
-            </File>
-            <File>
-              <FileName>spi2.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>.\src\spi2.cpp</FilePath>
             </File>
             <File>
               <FileName>libpixy_m4.lib</FileName>

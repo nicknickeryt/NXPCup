@@ -658,7 +658,7 @@ bool ser_newPacket()
 int ser_init(Chirp *chirp)
 {
 	chirp->registerModule(g_module);
-	i2c_init(txCallback);
+	// i2c_init(txCallback);
 	uart_init(txCallback);
 	ad_init();
 
@@ -681,10 +681,10 @@ void ser_loadParams()
 	uint8_t interface, addr;
 	uint32_t baudrate;
 
-	prm_get("I2C address", &addr, END);
-	g_i2c0->setSlaveAddr(addr);
+	// prm_get("I2C address", &addr, END);
+	// g_i2c0->setSlaveAddr(addr);
 
-	prm_get("UART baudrate", &baudrate, END);
+	// prm_get("UART baudrate", &baudrate, END);
 	// g_uart0->setBaudrate(baudrate);
 
 	prm_get("Data out port", &interface, END);
