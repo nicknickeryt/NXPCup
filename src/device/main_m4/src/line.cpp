@@ -75,38 +75,15 @@ static ChirpProc g_setEdgeParamsM0 = -1;
 
 LineGridNode *g_lineGrid;
 static uint8_t *g_lineGridMem;
-//static LineSeg *g_lineSegs;
 static uint8_t *g_lineSegsMem;
-//static uint8_t g_pointsPerSeg;
 static LineSegIndex g_lineSegIndex;
-//static LineSegIndex n_lineSegments;
-//static float g_maxError;
-//static uint8_t g_lineIndex;
 static SimpleListNode<Line2> **g_lines;
-
-
-//static uint32_t g_maxSegTanAngle;
-//static uint32_t g_maxEquivTanAngle;
-//static uint32_t g_maxTrackingTanAngle;
 
 static SimpleList<Line2> g_linesList;
 static SimpleList<Point> g_nodesList;
 static SimpleList<Nadir> g_nadirsList;
 static SimpleList<Intersection> g_intersectionsList;
-
-//static BarCode **g_candidateBarcodes;
-// static DecodedBarCode *g_votedBarcodes;
-//static uint8_t *g_votedBarcodesMem;
-
-
-//static SimpleList<Tracker<Line2> > g_lineTrackersList;
-//static Tracker<FrameIntersection> g_primaryIntersection;
-static bool g_newIntersection;
-
-// static SimpleList<Tracker<DecodedBarCode> > g_barCodeTrackersList;
-//static uint8_t g_lineTrackerIndex;
-static uint8_t g_primaryLineIndex;
-//static uint8_t g_primaryPointMap;
+static bool g_newIntersection;static uint8_t g_primaryLineIndex;
 static Point g_goalPoint;
 static Point g_primaryPoint;
 static bool g_primaryActive;
@@ -123,19 +100,11 @@ static bool g_frameFlag;
 static bool g_primaryMutex;
 static bool g_allMutex;
 
-//static int16_t g_nextTurnAngle;
 static int16_t g_defaultTurnAngle;
 static uint8_t g_delayedTurn;
-//static bool g_newTurnAngle;
 static bool g_manualVectorSelect;
-//static uint8_t g_manualVectorSelecIndextActive;
-//static uint8_t g_manualVectorSelectIndex;
-//static bool g_reversePrimary;
 
 bool checkGraph(int val, uint8_t suppress0=0, uint8_t suppress1=0, SimpleListNode<Intersection> *intern=NULL);
-
-Line2 *findLine(uint8_t index);
-
 
 void line_shadowCallback(const char *id, const uint16_t &val);
 
@@ -357,21 +326,29 @@ struct Transition {
 	}
 };
 
-static uint16_t ddd = 0;
+// static uint16_t ddd = 0;
 
 struct Transitions {
+	int rightLine;
+	int leftLine;
+	uint16_t edgeLineWhiteSpacing;
+	uint16_t row;
 	Transition transitions[20];
 	uint16_t counter;
 	
-	Transitions() {
+	Transitions(uint16_t row_m, uint16_t edgeLineWhiteSpacing_m) {
 		counter = 0;
+		edgeLineWhiteSpacing = edgeLineWhiteSpacing_m;
+		row = row_m;
 	}
 	
 	void add(uint16_t pixel, Transition::TYPE type) {
 		transitions[counter++] = Transition(pixel, type);
 	}
 	
-	void checkLine(uint8_t row, uint16_t *buf, uint32_t len) {
+	void checkLine(uint8_t actualRow, uint16_t *buf, uint32_t len) {
+		if (actualRow != row) return;
+		
 		uint16_t j;
 		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
 		{
@@ -394,8 +371,8 @@ struct Transitions {
 		if (isLast) {
 			add(col1, (Transition::TYPE)(!transitions[counter-1].type));
 						
-			int rightLine = findRightLine();
-			int leftLine = findLeftLine();
+			findRightLine();
+			findLeftLine();
 			
 			if (rightLine > 320 && leftLine > 320) {
 				leftLine = -1;
@@ -407,42 +384,40 @@ struct Transitions {
 			
 			// debug
 			if (rightLine >= 0) {
-				g_nodesList.add(Point(rightLine / 8, 40 / 2));
+				g_nodesList.add(Point(rightLine / 8, row / 2));
 			}
 
 			if (leftLine >= 0) {
-				g_nodesList.add(Point(leftLine / 8, 40 / 2));
+				g_nodesList.add(Point(leftLine / 8, row / 2));
 			}
 		}
 	}
 	
-	int16_t findRightLine() {
+	void findRightLine() {
 		uint16_t lineTransitionPixel = 0;
-		uint16_t index = 0;
 		for (uint8_t i = 0; i < counter; i++) {
 			if (transitions[i].type == Transition::TYPE::W_B) {
 				uint16_t whiteSpacingBefore = transitions[i].center - transitions[i - 1].center;
-				if (whiteSpacingBefore > 60) {
+				if (whiteSpacingBefore > edgeLineWhiteSpacing) {
 					lineTransitionPixel = transitions[i].center;
-					index = i;
 				}
 			}
 		}
 		
 		if (lineTransitionPixel < 200) {
-			return -1;
+			rightLine = -1;
+			return;
 		}
-		return lineTransitionPixel;
+		rightLine = lineTransitionPixel;
 	}
 	
-	
-	int16_t findLeftLine() {
+	void findLeftLine() {
 		uint16_t lineTransitionPixel = 0;
-		uint16_t index = 0;
+// 		uint16_t index = 0;
 		for (uint8_t i = 0; i < counter; i++) {
 			if (transitions[i].type == Transition::TYPE::B_W) {
 				uint16_t whiteSpacingAfter = transitions[i + 1].center - transitions[i].center;
-				if (whiteSpacingAfter > 60) {
+				if (whiteSpacingAfter > edgeLineWhiteSpacing) {
 					lineTransitionPixel = transitions[i].center;
 					break;
 				}
@@ -450,50 +425,27 @@ struct Transitions {
 		}
 		
 		if (lineTransitionPixel > 440) {
-			return -1;
+			leftLine = -1;
+			return;
 		}
-		return lineTransitionPixel;
-	}
-				
+		leftLine = lineTransitionPixel;
+	}				
 };
 
-int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
-	Transitions tran;
+int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {	
+	Transitions transitionsToCheck[] = { 
+		Transitions(40, 60),
+		Transitions(30, 55),
+		Transitions(20, 50)
+	};
 	
-	// static uint16_t counter = 0;
-	// static uint8_t patternCounter;
-	uint16_t j; // index, bit0, bit1, col0, col1, lineWidth;
+	transitionsToCheck[0].checkLine(row, buf, len);
+	transitionsToCheck[1].checkLine(row, buf, len);
+	transitionsToCheck[2].checkLine(row, buf, len);
 	
-	//uint16_t whiteToBlack_FromCenterToLeft[20];
-	//uint16_t toLeft_counter = 0;
-	//uint16_t whiteToBlack_FromCenterToRight[20];
-	//uint16_t toRight_counter = 0;
-	
-	if (row != 40) return 0;
-	
-	tran.checkLine(row, buf, len);
-	// cprintf(0, "n %d\n", tran.counter);
-	
-	
-	/* if (row == 1) {
-		counter ++;
-		if (counter > 60) {
-			counter = 0;
-			patternCounter++;
-			if (patternCounter >= 3) {
-				patternCounter = 1;
-			}
-			debugPrintPattern = (LineInRow::LineType)patternCounter;
-		}
-	}
-	
-	for(uint8_t i =0; i < 5; i++) {
-		if (linesData[i].check(row, buf, len)) {
-			
-		}
-	}
-	
-	*/
+	detectedLinesTab[2];
+uint8_t detectedLinesNumber;
+
 	return 0;
 }
 

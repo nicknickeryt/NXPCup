@@ -11,10 +11,10 @@ LOAD_SPIFI 0x14000000 0x00100000
   RW_IRAM0 0x10000000 0x00020000  
   {
     startup_LPC43xx_m4.o (VECTORS, +First)
-    .ANY1 (+RO +RW +ZI)
+    .ANY2 (+RO +RW +ZI)
   }
   RW_IRAM1 0x20000000 0x00008000  
   {
-	.ANY2 (+RW )
+	.ANY1 (+RW )
   }
 }
