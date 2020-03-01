@@ -44,12 +44,6 @@
 
 // #define LINE_GRID_WIDTH 200
 // #define LINE_GRID_HEIGHT 100
-struct Point_u16
-{
-    uint16_t x;
-    uint16_t y;
-};
-
 
 //static BarcodeLine g_barcodeLines[BARCODELINES_SIZE];
 //static BarcodeCandidate g_barcodeCandidates[BARCODECANDIDATES_SIZE];    // arbitrary
@@ -331,19 +325,157 @@ public:
 	}
 };
 
-AnalyseData linesData[] = {
+/* AnalyseData linesData[] = {
 	AnalyseData(68, 17, 51), 
 	AnalyseData(62, 15, 45),
 	AnalyseData(56, 14, 42),
 	AnalyseData(50, 13, 39),
 	AnalyseData(44, 12, 36)
+};*/
+
+struct Transition {
+	enum TYPE : bool {
+		W_B = 0,
+		B_W = 1
+	};
+	uint16_t center;
+	uint16_t widthToLeft;
+	uint16_t widthToRight;
+	TYPE type;
+	
+	Transition(uint16_t center_m, TYPE type_m) {
+		center = center_m;
+		widthToLeft = 0;
+		widthToRight = 0;
+		type = type_m;
+	}
+	
+		Transition() {
+		center = 0;
+		widthToLeft = 0;
+		widthToRight = 0;
+	}
+};
+
+static uint16_t ddd = 0;
+
+struct Transitions {
+	Transition transitions[20];
+	uint16_t counter;
+	
+	Transitions() {
+		counter = 0;
+	}
+	
+	void add(uint16_t pixel, Transition::TYPE type) {
+		transitions[counter++] = Transition(pixel, type);
+	}
+	
+	void checkLine(uint8_t row, uint16_t *buf, uint32_t len) {
+		uint16_t j;
+		for (j=0; buf[j]<EQ_HSCAN_LINE_START && buf[j+1]<EQ_HSCAN_LINE_START && j<len; j++)
+		{
+			check(buf[j], buf[j+1], (j+2) == len, j == 0);			
+		}
+	}
+	
+	void check(uint16_t pixel0, uint16_t pixel1, bool isLast, bool isFirst) {	
+		uint16_t bit0 = pixel0 & EQ_NEGATIVE;
+		uint16_t bit1 = pixel1 & EQ_NEGATIVE;
+		uint16_t col0 = pixel0 &~ EQ_NEGATIVE;
+		uint16_t col1 = pixel1 &~ EQ_NEGATIVE;
+		
+		if (bit0 != 0 && bit1 == 0) { // black line
+			add(col0, Transition::TYPE::W_B);
+		} else if (bit0 == 0 && bit1 != 0) { // white line 
+			add(col0, Transition::TYPE::B_W);
+		}
+		
+		if (isLast) {
+			add(col1, (Transition::TYPE)(!transitions[counter-1].type));
+						
+			int rightLine = findRightLine();
+			int leftLine = findLeftLine();
+			
+			if (rightLine > 320 && leftLine > 320) {
+				leftLine = -1;
+			}
+			
+			if (rightLine < 320 && leftLine < 320) {
+				rightLine = -1;
+			}
+			
+			// debug
+			if (rightLine >= 0) {
+				g_nodesList.add(Point(rightLine / 8, 40 / 2));
+			}
+
+			if (leftLine >= 0) {
+				g_nodesList.add(Point(leftLine / 8, 40 / 2));
+			}
+		}
+	}
+	
+	int16_t findRightLine() {
+		uint16_t lineTransitionPixel = 0;
+		uint16_t index = 0;
+		for (uint8_t i = 0; i < counter; i++) {
+			if (transitions[i].type == Transition::TYPE::W_B) {
+				uint16_t whiteSpacingBefore = transitions[i].center - transitions[i - 1].center;
+				if (whiteSpacingBefore > 60) {
+					lineTransitionPixel = transitions[i].center;
+					index = i;
+				}
+			}
+		}
+		
+		if (lineTransitionPixel < 200) {
+			return -1;
+		}
+		return lineTransitionPixel;
+	}
+	
+	
+	int16_t findLeftLine() {
+		uint16_t lineTransitionPixel = 0;
+		uint16_t index = 0;
+		for (uint8_t i = 0; i < counter; i++) {
+			if (transitions[i].type == Transition::TYPE::B_W) {
+				uint16_t whiteSpacingAfter = transitions[i + 1].center - transitions[i].center;
+				if (whiteSpacingAfter > 60) {
+					lineTransitionPixel = transitions[i].center;
+					break;
+				}
+			}
+		}
+		
+		if (lineTransitionPixel > 440) {
+			return -1;
+		}
+		return lineTransitionPixel;
+	}
+				
 };
 
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
-	static uint16_t counter = 0;
-	static uint8_t patternCounter;
+	Transitions tran;
 	
-	if (row == 1) {
+	// static uint16_t counter = 0;
+	// static uint8_t patternCounter;
+	uint16_t j; // index, bit0, bit1, col0, col1, lineWidth;
+	
+	//uint16_t whiteToBlack_FromCenterToLeft[20];
+	//uint16_t toLeft_counter = 0;
+	//uint16_t whiteToBlack_FromCenterToRight[20];
+	//uint16_t toRight_counter = 0;
+	
+	if (row != 40) return 0;
+	
+	tran.checkLine(row, buf, len);
+	// cprintf(0, "n %d\n", tran.counter);
+	
+	
+	/* if (row == 1) {
 		counter ++;
 		if (counter > 60) {
 			counter = 0;
@@ -360,6 +492,8 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 			
 		}
 	}
+	
+	*/
 	return 0;
 }
 
