@@ -58,7 +58,7 @@ void Kitty::init() {
     menu.init();
     motors.init();
     commandManager.init(printCommandManager);
-    //pixy.init();
+    pixy.init();
 
     motors.run();
     camera.start();
