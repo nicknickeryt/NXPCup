@@ -122,7 +122,8 @@ void Kitty::proc() {
 
     if (pixyTrigger) {
         pixyTrigger = false;
-        pixy.control();
+        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
+        algorithmUnit.analyze();
     }
     magicDiodComposition();
 }

@@ -17,12 +17,14 @@
 #include "pid.hpp"
 
 class AlgorithmUnit{
+    friend class Kitty;
+public:
+    class Line{
+    public:
+        bool isDetected = false;
+        uint16_t position = 0;
+    };
 private:
-    static constexpr auto cameraDataBufferSize = 128;
-    // factor used to spread normalization output from range(0,1) to wider (0,1000)
-    static constexpr auto cameraDataNormalizationFactor = 1000;
-    static constexpr auto lostLineOffset = 5;
-    static constexpr auto keepPreviousPositionTime = 500;
 
     enum class DataType{
         CAMERA_DATA,
@@ -38,64 +40,28 @@ private:
     };
 
     State state;
-    TrackLinesDetector trackLinesDetector;
-    ObstacleDetector obstacleDetector;
-    PatternsDetector patternsDetector;
-    uint8_t carPosition{cameraDataBufferSize / 2};
-    uint16_t keepPreviousPositionCounter{0};
-    uint16_t threshold = 0;
-
-    bool darkBackgroundMode = false;
+    float speed = 0.2;
+    Line lineRight{};
+    Line lineLeft{};
+    PID pid ={0.01, 0.0, 0.7, 0.3, 454.375,-71.875};
 
     NXP_Servo& servo;
     NXP_Uart& debug;
     halina::Switches &switches;
 
 public:
-    float speed = 0.5;
-    PID pid ={0.01, 0.0, 0.7, 0.3, 454.375,-71.875};
-
-public:
     class AlgorithmData{
     public:
-        uint16_t cameraData[cameraDataBufferSize];
-        //fixme: przykladowe dane
-        uint16_t velocityRightMotor;
-        uint16_t velocityLeftMotor;
     };
     AlgorithmData algorithmData;
 
 private:
-    /**
-     * Method normalizes given data using min-max normalization algorithm
-     * It works by given equation:
-     * f(x) = (x- min(x))/(max(x)-min(x))
-     * This is the traditional min-max algorithm but it gives output in range(0,1).
-     * For spreading this values, the normalization factor is used (look at cameraDataNormalizationFactor)
-     * This type of normalization is called normalization by linear function
-     *
-     * @param dataType type of data to normalize
-     * @param data pointer to data buffer to normalize
-     */
-    void normalize(DataType dataType, uint16_t* data);
+    uint16_t computeCarPositionOnTrack();
 
-    void quantization(uint16_t* data);
-
-    void filter(uint16_t* data, uint8_t maxCount);
-
-    void diff(int16_t* data);
-
-    void setThreshold(uint16_t* data);
-
-    int8_t computeCarPositionOnTrack();
-
-    void setServo(int8_t value);
-
-    void deleteUnusedLines(uint16_t* data);
+    void setServo(int16_t value);
 
 public:
-    AlgorithmUnit(NXP_Servo& servo, NXP_Uart& debug, halina::Switches &switches) : trackLinesDetector(cameraDataBufferSize, 7),
-                                                                                   patternsDetector(trackLinesDetector.leftLine, trackLinesDetector.rightLine), servo(servo), debug(debug), switches(switches){}
+    AlgorithmUnit(NXP_Servo& servo, NXP_Uart& debug, halina::Switches &switches) : servo(servo), debug(debug), switches(switches){}
 
     void analyze();
 

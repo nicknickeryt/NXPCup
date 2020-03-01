@@ -7,12 +7,14 @@
  */
 #pragma once
 
+#include <algorithms/algorithm_unit.hpp>
 #include "NXP_uart.hpp"
 #include "pixy_packet.hpp"
 
 class Pixy{
     public:
-
+    constexpr static auto cameraLinesSize = 640;
+    constexpr static auto trackWidith = 468;
     private:
         static constexpr uint16_t bufferSize = 1024;
         static constexpr uint32_t readingTimeout = 10000000;
@@ -28,7 +30,7 @@ class Pixy{
 
         void init();
 
-        void control();
+        void getLines(AlgorithmUnit::Line &lineLeft, AlgorithmUnit::Line &lineRight);
 
     private:
         void sendRequest(PixyPacketRequest& packet);

@@ -11,32 +11,15 @@
 #define ALGORITHM_LOG_CHANNEL 3
 #define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 #include "logger.h"
+#include "pixy.hpp"
 #include <algorithm>
 
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
-    filter(algorithmData.cameraData, 3);
-    setThreshold(algorithmData.cameraData);
-    quantization(algorithmData.cameraData);
-    diff((int16_t*)algorithmData.cameraData);
-    if(!darkBackgroundMode){
-        deleteUnusedLines(algorithmData.cameraData);
-    }
-
-    // fixme: DEBUG
-    uint8_t camera1DataBuffer[260];
-    camera1DataBuffer[0] = 0xff;
-    camera1DataBuffer[1] = 0xff;
-    camera1DataBuffer[2] = 0xff;
-    camera1DataBuffer[3] = 0xff;
-    memcpy(&camera1DataBuffer[4], algorithmData.cameraData, 256);
-    debug.write(camera1DataBuffer, 260);
 
     state = State::FINDING_TRACK_LINES;
-    // find track lines
-    trackLinesDetector.detect((int16_t*)algorithmData.cameraData);
-
     auto result = computeCarPositionOnTrack();
+
     setServo(result);
 
     state = State::OBSTACLE_AVOIDING;
@@ -44,157 +27,34 @@ void AlgorithmUnit::analyze() {
 
     state = State::PATTERN_DETECTION;
     // detect patterns
-    patternsDetector.detect(algorithmData.cameraData);
 }
 
-void AlgorithmUnit::setThreshold(uint16_t* data){
-    uint32_t thresholdLocal = 0;
-    for(auto i = 0; i < cameraDataBufferSize; i++){
-        thresholdLocal += data[i];
-    }
-    thresholdLocal /= cameraDataBufferSize;
-    threshold = uint16_t(thresholdLocal);
-}
-
-void AlgorithmUnit::diff(int16_t* data){
-    int16_t diff[cameraDataBufferSize];
-    for(auto i=0; i<cameraDataBufferSize; i++){
-        diff[i] = data[i+1] - data[i];
-    }
-    diff[cameraDataBufferSize-1] = 0;
-
-    memcpy(data, diff, sizeof(diff));
-}
-
-void AlgorithmUnit::deleteUnusedLines(uint16_t* data){
-    for(auto i = 0; (i < cameraDataBufferSize / 2); i++){
-        if(data[i] != 0){
-            data[i] = 0;
-            break;
-        }
-    }
-    for(auto i = cameraDataBufferSize; i > (cameraDataBufferSize / 2); i--){
-        if(data[i] != 0){
-            data[i] = 0;
-            break;
-        }
-    }
-}
-
-void AlgorithmUnit::filter(uint16_t* data, uint8_t maxCount){
-    uint16_t filteredData[cameraDataBufferSize]{};
-    uint32_t sum = 0;
-    for(auto i = 0; i < cameraDataBufferSize; i++){
-        sum = 0;
-        if(((i + maxCount/2) <= (cameraDataBufferSize - 1)) && ((i - maxCount/2) >= 0)) {
-            for (auto j = i-(maxCount/2); j < i + (maxCount/2); j++) {
-                sum += data[j];
-            }
-            filteredData[i] = sum / maxCount;
-        }else{
-            filteredData[i] = data[i];
-        }
-    }
-    memcpy(data, filteredData, sizeof(filteredData));
-}
-
-void AlgorithmUnit::normalize(AlgorithmUnit::DataType dataType, uint16_t* data) {
-    // normalize data in other way depending on its type
-    switch(dataType){
-        case DataType::CAMERA_DATA: {
-            uint32_t maximalPixelBrightness = 0;
-            uint32_t minimalPixelBrightness = 65535;
-            uint32_t meanPixelBrightness = 0;
-            uint32_t summaryValue = 0;
-            uint16_t *cameraValues = data;
-
-            //Find minimum  and maximum brightness of pixels
-            for (auto i = 0; i < cameraDataBufferSize; i++) {
-                if (cameraValues[i] < minimalPixelBrightness) {
-                    minimalPixelBrightness = cameraValues[i];
-                }
-                if (cameraValues[i] > maximalPixelBrightness) {
-                    maximalPixelBrightness = cameraValues[i];
-                }
-                summaryValue += cameraValues[i];
-            }
-
-            const uint16_t minMaxDelta = maximalPixelBrightness - minimalPixelBrightness;
-
-            if(minMaxDelta != 0){
-                // calculate mean value
-                meanPixelBrightness = summaryValue / cameraDataBufferSize;
-                meanPixelBrightness = ((meanPixelBrightness - minimalPixelBrightness) * cameraDataNormalizationFactor) /
-                                      (maximalPixelBrightness - minimalPixelBrightness);
-
-                // normalize
-                for (auto i = 0; i < cameraDataBufferSize; i++) {
-                    //Normalisation
-                    cameraValues[i] = ((cameraValues[i] - minimalPixelBrightness) * cameraDataNormalizationFactor) /
-                                      (maximalPixelBrightness - minimalPixelBrightness)
-                                      - meanPixelBrightness;
-                }
-            }
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-
-void AlgorithmUnit::quantization(uint16_t *data) {
-    // iterate through the data and assign 1 to the values above threshold and 0 to values below
-    for (auto i = 0; i < cameraDataBufferSize; i++) {
-        if (data[i] >= threshold) {
-            data[i] = 1;
-        } else{
-            data[i] = 0;
-        }
-    }
-}
-
-int8_t AlgorithmUnit::computeCarPositionOnTrack(){
-    // both lines are detected
-    if(trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
-        log_debug("both %d, %d", trackLinesDetector.leftLine.centerIndex, trackLinesDetector.rightLine.centerIndex);
-        carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.rightLine.centerIndex)/2;
-    } // only left line is detected
-    else if(trackLinesDetector.leftLine.isDetected && !trackLinesDetector.rightLine.isDetected){
-        log_debug("left, %d", trackLinesDetector.leftLine.centerIndex);
-        carPosition = (trackLinesDetector.leftLine.centerIndex + trackLinesDetector.lineWidth + (cameraDataBufferSize/4) - lostLineOffset);
-    }// only right line is detected
-    else if(!trackLinesDetector.leftLine.isDetected && trackLinesDetector.rightLine.isDetected){
-        log_debug("right, %d", trackLinesDetector.rightLine.centerIndex);
-        carPosition = (trackLinesDetector.rightLine.centerIndex - trackLinesDetector.lineWidth - (cameraDataBufferSize/4) + lostLineOffset);
-    } // no line is detected
-    else{
-        log_debug("none");
-        if(keepPreviousPositionCounter > keepPreviousPositionTime){
-            carPosition = ((carPosition - (cameraDataBufferSize >> 1)) >> 1) + (cameraDataBufferSize >> 1);
-            keepPreviousPositionCounter = 0;
-        }
-        keepPreviousPositionCounter++;
-        trackLinesDetector.lineSearchingWindow = trackLinesDetector.widerLineSearchingWindow;
-        trackLinesDetector.leftLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) - (trackLinesDetector.spaceBetweenLinesInPixels >> 1);
-        trackLinesDetector.rightLine.centerIndex = carPosition - (trackLinesDetector.lineWidth >> 1) + (trackLinesDetector.spaceBetweenLinesInPixels >> 1);
+uint16_t AlgorithmUnit::computeCarPositionOnTrack(){
+    uint16_t carPosition;
+    if(lineLeft.isDetected && lineRight.isDetected){
+        carPosition = (lineRight.position + lineLeft.position) / 2;
+    }else{
+        carPosition = 0;
     }
     return carPosition;
 }
 
-void AlgorithmUnit::setServo(int8_t value){
-    int16_t converted = value - (cameraDataBufferSize/2);
+void AlgorithmUnit::setServo(int16_t value){
+    int16_t converted = value - (float(Pixy::cameraLinesSize)/2.0);
+    log_debug("servo: %d", value);
+    log_debug("servo converted: %d", converted);
     if(converted > 0){
-        auto val = float(converted/(float(cameraDataBufferSize)/2.0));
+        auto val = float(converted/(float(Pixy::trackWidith)/2.0));
         servo.set(val);
+        log_debug("servo: %f", val);
     }else if(converted < 0){
-        auto val = float(converted/(float(cameraDataBufferSize)/2.0));
+        auto val = float(converted/(float(Pixy::trackWidith)/2.0));
         servo.set(val);
+        log_debug("servo: %f", val);
     }else{
         servo.set(0.0);
     }
 }
 
 void AlgorithmUnit::checkSwitches() {
-    darkBackgroundMode = !switches.at(0).get();
 }
