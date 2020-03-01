@@ -14,7 +14,10 @@
 class Pixy{
     public:
     constexpr static auto cameraLinesSize = 640;
-    constexpr static auto trackWidith = 468;
+    constexpr static auto trackWidth = 468;
+    constexpr static auto theoreticalLeftLinePosition = 86;
+    constexpr static auto theoreticalRightLinePosition = 554;
+    constexpr static auto trackCenter = cameraLinesSize/2;
     private:
         static constexpr uint16_t bufferSize = 1024;
         static constexpr uint32_t readingTimeout = 10000000;

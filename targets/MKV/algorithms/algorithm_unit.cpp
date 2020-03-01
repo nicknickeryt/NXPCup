@@ -29,10 +29,14 @@ void AlgorithmUnit::analyze() {
     // detect patterns
 }
 
-uint16_t AlgorithmUnit::computeCarPositionOnTrack(){
-    uint16_t carPosition;
+int16_t AlgorithmUnit::computeCarPositionOnTrack(){
+    int16_t carPosition;
     if(lineLeft.isDetected && lineRight.isDetected){
         carPosition = (lineRight.position + lineLeft.position) / 2;
+    }else if(lineLeft.isDetected && !lineRight.isDetected){
+        carPosition = Pixy::trackCenter - (lineLeft.position - Pixy::theoreticalLeftLinePosition);
+    }else if(!lineLeft.isDetected && lineRight.isDetected){
+        carPosition = Pixy::theoreticalRightLinePosition - lineRight.position + Pixy::trackCenter;
     }else{
         carPosition = 0;
     }
@@ -40,15 +44,21 @@ uint16_t AlgorithmUnit::computeCarPositionOnTrack(){
 }
 
 void AlgorithmUnit::setServo(int16_t value){
-    int16_t converted = value - (float(Pixy::cameraLinesSize)/2.0);
+    int16_t converted = 0;
+    if(lineLeft.isDetected && lineRight.isDetected){
+        converted = value - (float(Pixy::cameraLinesSize)/2.0);
+    }else{
+        converted = (float(Pixy::cameraLinesSize)/2.0) - value;
+    }
+
     log_debug("servo: %d", value);
     log_debug("servo converted: %d", converted);
     if(converted > 0){
-        auto val = float(converted/(float(Pixy::trackWidith)/2.0));
+        auto val = float(float(converted)/(float(Pixy::cameraLinesSize)));
         servo.set(val);
         log_debug("servo: %f", val);
     }else if(converted < 0){
-        auto val = float(converted/(float(Pixy::trackWidith)/2.0));
+        auto val = float(float(converted)/(float(Pixy::cameraLinesSize)));
         servo.set(val);
         log_debug("servo: %f", val);
     }else{

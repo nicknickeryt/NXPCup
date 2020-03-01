@@ -56,7 +56,7 @@ public:
     AlgorithmData algorithmData;
 
 private:
-    uint16_t computeCarPositionOnTrack();
+    int16_t computeCarPositionOnTrack();
 
     void setServo(int16_t value);
 
