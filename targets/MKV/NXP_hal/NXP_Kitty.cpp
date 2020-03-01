@@ -67,45 +67,29 @@ void Kitty::init() {
 
     uartCommunication.write("Bejbi don't hurt me", 19);
 
-
-    menu.addParameter(&algorithmUnit.startSpeedLeft, 0.01);
-    menu.addParameter(&algorithmUnit.startSpeedRight, 0.01);
+    menu.addParameter(&algorithmUnit.speed, 0.01);
     servo.set(0.0);
     camera.start();
     log_notice("KiTTy init finished");
     algorithmUnit.checkSwitches();
-
-
-
 }
 
 void Kitty::proc() {
     static int16_t motorsValues[2];
     static int16_t encodersValues[2];
-    float leftSpeedToModify =  algorithmUnit.startSpeedLeft;
-    float rightSpeedToModify = algorithmUnit.startSpeedRight;
+    static uint8_t linesValues[2];
+    float leftSpeedToModify =  algorithmUnit.speed;
+    float rightSpeedToModify = algorithmUnit.speed;
     uint16_t encoderLeftSample = encoderLeft.getTicks();
     uint16_t encoderRightSample = encoderRight.getTicks();
     if(!menu.proc(systickTrigger)) {
-        log_notice("L_in: %f R_in: %f", algorithmUnit.startSpeedLeft, algorithmUnit.startSpeedRight);
+        log_notice("L_in: %f R_in: %f", algorithmUnit.speed, algorithmUnit.speed);
         algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
         log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
         motors.setValue(leftSpeedToModify, rightSpeedToModify);
-//        if (commandTerminalTrigger) {
-//            commandManager.run();
-//            commandTerminalTrigger = false;
-//        }
-//        if (algorithmTrigger) {
-//            algorithmTrigger = false;
-////            algorithmUnit.analyze();
-//        }
     }
 
     if(frameTrigger){
-
-//        log_notice("%" PRIu16, encoderLeft.getTicks());
-//        log_notice("ER %" PRIu16, encoderRight.getTicks());
-
         static uint8_t line1 = 10;
         static uint8_t line2 = 5;
         static bool speedUp;
@@ -113,24 +97,18 @@ void Kitty::proc() {
         static bool emergency;
         static bool stop;
         static bool crossroad;
-
-        uint8_t linesValues[2] = {line1++, line2++};
-        if(line1 == 127){
-            line1 = 10;
-            line2 = 5;
-        }
-
-        motorsValues[0] = int16_t( algorithmUnit.startSpeedLeft * 100.0);
-        motorsValues[1] = int16_t(algorithmUnit.startSpeedRight * 100.0);
-        encodersValues[0] = (int16_t)encoderLeftSample;
-        encodersValues[1] = (int16_t)encoderRightSample;
-
+        motorsValues[0] = int16_t( algorithmUnit.speed * 100.0);
+        motorsValues[1] = int16_t(algorithmUnit.speed * 100.0);
+        encodersValues[0] = int16_t(encoderLeftSample);
+        encodersValues[1] = int16_t(encoderRightSample);
+        linesValues[0] = line1;
+        linesValues[1] = line2;
         uint8_t obstacleSide = 1;
-            speedUp ^= 1U;
-            slowDown ^= 1U;
-            emergency ^= 1U;
-            stop ^= 1U;
-            crossroad ^= 1U;;
+        speedUp ^= 1U;
+        slowDown ^= 1U;
+        emergency ^= 1U;
+        stop ^= 1U;
+        crossroad ^= 1U;;
         frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
         frame.sendFrameProc();
         frameTrigger = false;
@@ -140,13 +118,13 @@ void Kitty::proc() {
 }
 
 void Kitty::FTM_Init() {
-        SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
-        SIM->SOPT2 |= SIM_SOPT2_TIMESRC(1);
-        SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
-        SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
-        SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
-        SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
-        SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
+    SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
+    SIM->SOPT2 |= SIM_SOPT2_TIMESRC(1);
+    SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
+    SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
+    SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
+    SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
+    SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
 void Kitty::magicDiodComposition(){

@@ -52,8 +52,7 @@ private:
     halina::Switches &switches;
 
 public:
-    float startSpeedLeft = 0.5;
-    float startSpeedRight = 0.5;
+    float speed = 0.5;
     PID pid ={0.01, 0.0, 0.7, 0.3, 454.375,-71.875};
 
 public:
