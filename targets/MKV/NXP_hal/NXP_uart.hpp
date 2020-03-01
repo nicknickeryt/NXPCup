@@ -102,5 +102,9 @@ public:
     void write(void const* data, uint16_t length) override;
     void write(uint8_t data) override;
     uint8_t read() override;
+    bool isBufferEmpty();
+    uint16_t getBufferLevel();
+    void flushRxBuffer();
+    void read(uint8_t* buffer, uint16_t length);
     static void proc();
 };

@@ -9,6 +9,7 @@
 #pragma once
 
 #include <NXP_hal/VL53L0X.h>
+#include <source/pixy.hpp>
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
@@ -85,6 +86,8 @@ private:
     // UARTS
     NXP_PORT uart0RXmux = {PORTA, 14U, 0x03};
     NXP_PORT uart0TXmux = {PORTA, 15U, 0x03};
+    NXP_PORT uart1RXmux = {PORTC, 3U, 0x03};
+    NXP_PORT uart1TXmux = {PORTC, 4U, 0x03};
     NXP_PORT uart2RXmux = {PORTE, 17U, 0x03};
     NXP_PORT uart2TXmux = {PORTE, 16U, 0x03};
     NXP_PORT uart4TXmux = {PORTE, 25U, 0x08};
@@ -142,6 +145,7 @@ public:
     NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
     NXP_Uart uartToKLZ = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartPixy = {UART1, 115200, uart1RXmux, uart1TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY
     NXP_Display display;
@@ -157,6 +161,8 @@ public:
 
     // ALGORITHM
     AlgorithmUnit algorithmUnit = {servo, uartCommunication, switches};
+
+    Pixy pixy = {uartPixy, true};
 
     // MENU
     NXP_Menu::MenuParameters menuParameters;

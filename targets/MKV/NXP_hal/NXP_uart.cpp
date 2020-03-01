@@ -180,6 +180,28 @@ uint8_t NXP_Uart::read() {
     return c;
 }
 
+void NXP_Uart::read(uint8_t* buffer, uint16_t length){
+    if(buffer != nullptr){
+        if(length <= RingBuffer_GetLen(&rxRingBuffer)){
+            for(auto i=0; i<length; i++){
+                RingBuffer_GetChar(&rxRingBuffer, &buffer[i]);
+            }
+        }
+    }
+}
+
+bool NXP_Uart::isBufferEmpty(){
+    return RingBuffer_IsEmpty(&rxRingBuffer);
+}
+
+uint16_t NXP_Uart::getBufferLevel(){
+    return RingBuffer_GetLen(&rxRingBuffer);
+}
+
+void NXP_Uart::flushRxBuffer(){
+    RingBuffer_Clear(&rxRingBuffer);
+}
+
 void NXP_Uart::enableInterrupt(InterruptType interrupt){
     uart->C2 |= static_cast<uint8_t >(interrupt);
 }

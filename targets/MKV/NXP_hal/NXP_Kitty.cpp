@@ -18,10 +18,12 @@ bool algorithmTrigger = false;
 bool commandTerminalTrigger = false;
 bool frameTrigger = false;
 
+bool pixyTrigger = false;
 void pit_generalHandler(uint32_t*) {
     algorithmTrigger = true;
     commandTerminalTrigger = true;
     frameTrigger = true;
+    pixyTrigger = true;
 }
 
 uint_fast64_t Kitty::milliseconds = 0;
@@ -45,6 +47,8 @@ void Kitty::init() {
     uartCommunication.init();
     uartCommunication.initDMA();
     uartToKLZ.init();
+    uartPixy.init();
+
     ledLine.init();
     display.init();
     servo.init();
@@ -56,6 +60,7 @@ void Kitty::init() {
     menu.init();
     motors.init();
     commandManager.init(printCommandManager);
+    pixy.init();
 
     motors.run();
     camera.start();
@@ -112,8 +117,10 @@ void Kitty::proc() {
         frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
         frame.sendFrameProc();
         frameTrigger = false;
+    if(pixyTrigger) {
+        pixyTrigger = false;
+        pixy.control();
     }
-
     magicDiodComposition();
 }
 
