@@ -83,18 +83,18 @@ void Kitty::proc() {
     static int16_t motorsValues[2];
     static int16_t encodersValues[2];
     static uint8_t linesValues[2];
-    float leftSpeedToModify =  algorithmUnit.speed;
+    float leftSpeedToModify = algorithmUnit.speed;
     float rightSpeedToModify = algorithmUnit.speed;
     uint16_t encoderLeftSample = encoderLeft.getTicks();
     uint16_t encoderRightSample = encoderRight.getTicks();
-    if(!menu.proc(systickTrigger)) {
+    if (!menu.proc(systickTrigger)) {
         log_notice("L_in: %f R_in: %f", algorithmUnit.speed, algorithmUnit.speed);
         algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
         log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
         motors.setValue(leftSpeedToModify, rightSpeedToModify);
     }
 
-    if(frameTrigger){
+    if (frameTrigger) {
         static uint8_t line1 = 10;
         static uint8_t line2 = 5;
         static bool speedUp;
@@ -102,7 +102,7 @@ void Kitty::proc() {
         static bool emergency;
         static bool stop;
         static bool crossroad;
-        motorsValues[0] = int16_t( algorithmUnit.speed * 100.0);
+        motorsValues[0] = int16_t(algorithmUnit.speed * 100.0);
         motorsValues[1] = int16_t(algorithmUnit.speed * 100.0);
         encodersValues[0] = int16_t(encoderLeftSample);
         encodersValues[1] = int16_t(encoderRightSample);
@@ -114,10 +114,13 @@ void Kitty::proc() {
         emergency ^= 1U;
         stop ^= 1U;
         crossroad ^= 1U;;
-        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp, slowDown, emergency, stop, crossroad);
+        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp,
+                         slowDown, emergency, stop, crossroad);
         frame.sendFrameProc();
         frameTrigger = false;
-    if(pixyTrigger) {
+    }
+
+    if (pixyTrigger) {
         pixyTrigger = false;
         pixy.control();
     }
