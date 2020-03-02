@@ -443,8 +443,19 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 	transitionsToCheck[1].checkLine(row, buf, len);
 	transitionsToCheck[2].checkLine(row, buf, len);
 	
-	detectedLinesTab[2];
-uint8_t detectedLinesNumber;
+	if (transitionsToCheck[0].rightLine >= 0 && transitionsToCheck[0].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[0].leftLine;
+		detectedLinesTab[1] = transitionsToCheck[0].rightLine;
+		detectedLinesNumber = 4;
+	} else if (transitionsToCheck[0].rightLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[0].rightLine;
+		detectedLinesNumber = 2;
+	} else if (transitionsToCheck[0].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[0].leftLine;
+		detectedLinesNumber = 3;
+	} else {
+		detectedLinesNumber = 1;
+	}
 
 	return 0;
 }
