@@ -334,6 +334,7 @@ struct Transitions {
 	uint16_t edgeLineWhiteSpacing;
 	uint16_t row;
 	Transition transitions[20];
+	Transition transitions_revert[20];
 	uint16_t counter;
 	
 	Transitions(uint16_t row_m, uint16_t edgeLineWhiteSpacing_m) {
@@ -390,16 +391,29 @@ struct Transitions {
 			if (leftLine >= 0) {
 				g_nodesList.add(Point(leftLine / 8, row / 2));
 			}
+			
+			counter = 0;
 		}
 	}
 	
 	void findRightLine() {
+		
 		uint16_t lineTransitionPixel = 0;
 		for (uint8_t i = 0; i < counter; i++) {
+			if (transitions[i].center < 320) {
+				continue;
+			}
+			
 			if (transitions[i].type == Transition::TYPE::W_B) {
-				uint16_t whiteSpacingBefore = transitions[i].center - transitions[i - 1].center;
+				uint16_t whiteSpacingBefore = 640;
+				
+				if((i - 1) > 0){
+					whiteSpacingBefore = transitions[i].center - transitions[i - 1].center;
+				}
+				 
 				if (whiteSpacingBefore > edgeLineWhiteSpacing) {
 					lineTransitionPixel = transitions[i].center;
+					break;
 				}
 			}
 		}
@@ -412,23 +426,37 @@ struct Transitions {
 	}
 	
 	void findLeftLine() {
+		for(uint8_t i = 0; i < counter; i++) {
+			transitions_revert[i] = transitions[counter - 1 - i];
+			if (transitions_revert[i].type == Transition::TYPE::B_W) {
+				transitions_revert[i].type = Transition::TYPE::W_B;
+			} else {
+				transitions_revert[i].type = Transition::TYPE::B_W;
+			}
+		}
+		
 		uint16_t lineTransitionPixel = 0;
-// 		uint16_t index = 0;
 		for (uint8_t i = 0; i < counter; i++) {
-			if (transitions[i].type == Transition::TYPE::B_W) {
-				uint16_t whiteSpacingAfter = transitions[i + 1].center - transitions[i].center;
-				if (whiteSpacingAfter > edgeLineWhiteSpacing) {
-					lineTransitionPixel = transitions[i].center;
+			if (transitions_revert[i].center > 320) {
+				continue;
+			}
+			
+			if (transitions_revert[i].type == Transition::TYPE::W_B) {
+				uint16_t whiteSpacingBefore =  transitions_revert[i - 1].center - transitions_revert[i].center;
+				
+				if (whiteSpacingBefore > edgeLineWhiteSpacing) {
+					lineTransitionPixel = transitions_revert[i].center;
 					break;
 				}
 			}
 		}
 		
-		if (lineTransitionPixel > 440) {
+		if (lineTransitionPixel > 440 || lineTransitionPixel < 5) {
 			leftLine = -1;
 			return;
 		}
-		leftLine = lineTransitionPixel;
+		
+		leftLine = lineTransitionPixel;/**/
 	}				
 };
 
@@ -436,12 +464,18 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 	Transitions transitionsToCheck[] = { 
 		Transitions(40, 60),
 		Transitions(30, 55),
-		Transitions(20, 50)
+		Transitions(20, 50),
+		Transitions(50, 65),
+		Transitions(60, 70),
+		Transitions(70, 75)
 	};
 	
 	transitionsToCheck[0].checkLine(row, buf, len);
 	transitionsToCheck[1].checkLine(row, buf, len);
 	transitionsToCheck[2].checkLine(row, buf, len);
+	transitionsToCheck[3].checkLine(row, buf, len);
+	transitionsToCheck[4].checkLine(row, buf, len);
+	transitionsToCheck[5].checkLine(row, buf, len);
 	
 	if (transitionsToCheck[0].rightLine >= 0 && transitionsToCheck[0].leftLine >= 0) {
 		detectedLinesTab[0] = transitionsToCheck[0].leftLine;
