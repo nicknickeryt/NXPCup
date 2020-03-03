@@ -34,16 +34,12 @@ void AlgorithmUnit::analyze() {
 int16_t AlgorithmUnit::computeCarPositionOnTrack(){
     if(lineLeft.isDetected && lineRight.isDetected){
         carPosition = (lineRight.position + lineLeft.position) / 2;
-        Kitty::kitty().display.print(10000);
     }else if(lineLeft.isDetected && !lineRight.isDetected){
-        Kitty::kitty().display.print(10000);
         carPosition = Pixy::trackCenter - (lineLeft.position - Pixy::theoreticalLeftLinePosition);
     }else if(!lineLeft.isDetected && lineRight.isDetected){
-        Kitty::kitty().display.print(10000);
         carPosition = Pixy::theoreticalRightLinePosition - lineRight.position + Pixy::trackCenter;
     }else{
         if(keepWheelsPositionCounter < keepWheelsPositionTime){
-            Kitty::kitty().display.print(6969);
             keepWheelsPositionCounter++;
         } else{
             keepWheelsPositionCounter = 0;

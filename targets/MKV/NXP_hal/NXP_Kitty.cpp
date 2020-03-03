@@ -89,7 +89,7 @@ void Kitty::proc() {
     uint16_t encoderRightSample = encoderRight.getTicks();
     if (!menu.proc(systickTrigger)) {
         log_notice("L_in: %f R_in: %f", algorithmUnit.speed, algorithmUnit.speed);
-        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
+//        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
         log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
         motors.setValue(leftSpeedToModify, rightSpeedToModify);
     }
@@ -109,12 +109,11 @@ void Kitty::proc() {
         frameTrigger = false;
     }
 
-    if (pixyTrigger) {
-        pixyTrigger = false;
-        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
-        algorithmUnit.analyze();
-    }
-    display.update();
+//    if (pixyTrigger) {
+//        pixyTrigger = false;
+//        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
+//        algorithmUnit.analyze();
+//    }
     magicDiodComposition();
 }
 
