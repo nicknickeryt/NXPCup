@@ -328,7 +328,75 @@ struct Transition {
 
 // static uint16_t ddd = 0;
 
+
+struct Pixel {
+	uint16_t x;
+	uint16_t y;
+	
+	Pixel (uint16_t x_m, uint16_t y_m) {
+		x = x_m;
+		y = y_m;
+	}
+
+	
+	Pixel () {
+		x = 0;
+		y = 0;
+	}
+};
+
+struct EdgeLine {
+	Pixel pixels[10];
+	uint8_t detedtedLinesNumber;
+	int32_t alphas[10];
+	uint8_t alphasCounter;
+	
+	EdgeLine() {
+		clear();
+	}
+	
+	void add(Pixel pixel) {
+		if (detedtedLinesNumber < 10 ) {
+			pixels[detedtedLinesNumber++] = pixel;
+		}
+	}
+	
+	void add(uint16_t x_m, uint16_t y_m) {
+		add(Pixel(x_m, y_m));
+	}
+	
+	void clear() {
+		detedtedLinesNumber = 0;
+		alphasCounter = 0;
+	}
+	
+	void calculateAlphas() {
+		for (int8_t i = detedtedLinesNumber - 2; i >=0 ; i-- ) {
+			
+			
+			uint16_t dy = pixels[i + 1].y -pixels[i].y;
+			
+			uint16_t dx = pixels[i].x - pixels[i + 1].x;
+			int32_t alpha = 1024 * dy / dx;
+			// addAlpha();		
+			cprintf(0, "K %d %d %d %d\n", pixels[i].x, pixels[i].y, pixels[i + 1].x, pixels[i + 1].y);
+			cprintf(0, "B %d %d %d %d", i, dy, dx, alpha);
+		}
+
+		
+	}
+	
+	void addAlpha(int32_t alpha) {
+		if (alphasCounter < 10) {
+			alphas[alphasCounter++] = alpha;
+		}
+	}
+
+};
+
 struct Transitions {
+	EdgeLine& leftEdgeLine;
+	EdgeLine& rightEdgeLine;
 	int rightLine;
 	int leftLine;
 	uint16_t edgeLineWhiteSpacing;
@@ -337,7 +405,8 @@ struct Transitions {
 	Transition transitions_revert[20];
 	uint16_t counter;
 	
-	Transitions(uint16_t row_m, uint16_t edgeLineWhiteSpacing_m) {
+	Transitions(EdgeLine& leftEdgeLine_m, EdgeLine& rightEdgeLine_m , uint16_t row_m, uint16_t edgeLineWhiteSpacing_m) 
+		: leftEdgeLine(leftEdgeLine_m), rightEdgeLine(rightEdgeLine_m) {
 		counter = 0;
 		edgeLineWhiteSpacing = edgeLineWhiteSpacing_m;
 		row = row_m;
@@ -385,10 +454,12 @@ struct Transitions {
 			
 			// debug
 			if (rightLine >= 0) {
+				rightEdgeLine.add(rightLine, row);
 				g_nodesList.add(Point(rightLine / 8, row / 2));
 			}
 
 			if (leftLine >= 0) {
+				leftEdgeLine.add(leftLine, row);
 				g_nodesList.add(Point(leftLine / 8, row / 2));
 			}
 			
@@ -460,16 +531,24 @@ struct Transitions {
 	}				
 };
 
+EdgeLine leftEdgeLine;
+EdgeLine rightEdgeLine;
+
+static Transitions transitionsToCheck[] = { 
+	Transitions(leftEdgeLine, rightEdgeLine, 20, 50),
+	Transitions(leftEdgeLine, rightEdgeLine, 30, 55),
+	Transitions(leftEdgeLine, rightEdgeLine, 40, 60),
+	Transitions(leftEdgeLine, rightEdgeLine, 50, 65),
+	Transitions(leftEdgeLine, rightEdgeLine, 60, 70),
+	Transitions(leftEdgeLine, rightEdgeLine, 70, 75)
+};
+
 int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {	
-	Transitions transitionsToCheck[] = { 
-		Transitions(40, 60),
-		Transitions(30, 55),
-		Transitions(20, 50),
-		Transitions(50, 65),
-		Transitions(60, 70),
-		Transitions(70, 75)
-	};
-	
+	if (row == 1) {
+		leftEdgeLine.clear();
+		rightEdgeLine.clear();
+	}
+		
 	transitionsToCheck[0].checkLine(row, buf, len);
 	transitionsToCheck[1].checkLine(row, buf, len);
 	transitionsToCheck[2].checkLine(row, buf, len);
@@ -477,15 +556,27 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 	transitionsToCheck[4].checkLine(row, buf, len);
 	transitionsToCheck[5].checkLine(row, buf, len);
 	
-	if (transitionsToCheck[0].rightLine >= 0 && transitionsToCheck[0].leftLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[0].leftLine;
-		detectedLinesTab[1] = transitionsToCheck[0].rightLine;
+	
+	
+	if (row == 90) {
+		leftEdgeLine.calculateAlphas();
+		
+		// cprintf(0, "%d %d %d %d %d",leftEdgeLine.alphas[0], leftEdgeLine.alphas[1], leftEdgeLine.alphas[2], leftEdgeLine.alphas[3], leftEdgeLine.alphas[4]);
+	}
+	
+	
+	
+	
+	
+	if (transitionsToCheck[3].rightLine >= 0 && transitionsToCheck[3].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[3].leftLine;
+		detectedLinesTab[1] = transitionsToCheck[3].rightLine;
 		detectedLinesNumber = 4;
-	} else if (transitionsToCheck[0].rightLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[0].rightLine;
+	} else if (transitionsToCheck[3].rightLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[3].rightLine;
 		detectedLinesNumber = 2;
-	} else if (transitionsToCheck[0].leftLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[0].leftLine;
+	} else if (transitionsToCheck[3].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[3].leftLine;
 		detectedLinesNumber = 3;
 	} else {
 		detectedLinesNumber = 1;
