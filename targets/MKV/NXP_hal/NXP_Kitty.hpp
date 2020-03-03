@@ -142,8 +142,8 @@ public:
     NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
 
     // UART
-    NXP_Uart uartDebug = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartCommunication = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartDebug = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
     NXP_Uart uartToKLZ = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartPixy = {UART1, 115200, uart1RXmux, uart1TXmux, NXP_DMA::emptyDMA()};
 

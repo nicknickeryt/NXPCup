@@ -97,25 +97,14 @@ void Kitty::proc() {
     if (frameTrigger) {
         static uint8_t line1 = 10;
         static uint8_t line2 = 5;
-        static bool speedUp;
-        static bool slowDown;
-        static bool emergency;
-        static bool stop;
-        static bool crossroad;
         motorsValues[0] = int16_t(algorithmUnit.speed * 100.0);
         motorsValues[1] = int16_t(algorithmUnit.speed * 100.0);
         encodersValues[0] = int16_t(encoderLeftSample);
         encodersValues[1] = int16_t(encoderRightSample);
         linesValues[0] = line1;
         linesValues[1] = line2;
-        uint8_t obstacleSide = 1;
-        speedUp ^= 1U;
-        slowDown ^= 1U;
-        emergency ^= 1U;
-        stop ^= 1U;
-        crossroad ^= 1U;;
-        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), obstacleSide, speedUp,
-                         slowDown, emergency, stop, crossroad);
+        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), 0, 0,
+                         0, 0, 0, 0);
         frame.sendFrameProc();
         frameTrigger = false;
     }
@@ -125,6 +114,7 @@ void Kitty::proc() {
         pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
         algorithmUnit.analyze();
     }
+    display.update();
     magicDiodComposition();
 }
 

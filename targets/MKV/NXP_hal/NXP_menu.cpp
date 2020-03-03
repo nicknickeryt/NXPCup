@@ -118,6 +118,6 @@ namespace fsm {
         log_debug("Race::on_entry::StartRace");
         menu.isMenuRunning = false;
         Kitty::kitty().motors.run();
-        menu.display.disable();
+//        menu.display.disable();
     }
 }

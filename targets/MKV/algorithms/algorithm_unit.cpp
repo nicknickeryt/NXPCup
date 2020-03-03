@@ -6,10 +6,12 @@
  *
  */
 #include "algorithm_unit.hpp"
+#include "NXP_display.hpp"
+#include "NXP_Kitty.hpp"
 
 #define LOG_CHANNEL ALGORITHM
 #define ALGORITHM_LOG_CHANNEL 3
-#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
 #include "logger.h"
 #include "pixy.hpp"
 #include <algorithm>
@@ -30,15 +32,23 @@ void AlgorithmUnit::analyze() {
 }
 
 int16_t AlgorithmUnit::computeCarPositionOnTrack(){
-    int16_t carPosition;
     if(lineLeft.isDetected && lineRight.isDetected){
         carPosition = (lineRight.position + lineLeft.position) / 2;
+        Kitty::kitty().display.print(10000);
     }else if(lineLeft.isDetected && !lineRight.isDetected){
+        Kitty::kitty().display.print(10000);
         carPosition = Pixy::trackCenter - (lineLeft.position - Pixy::theoreticalLeftLinePosition);
     }else if(!lineLeft.isDetected && lineRight.isDetected){
+        Kitty::kitty().display.print(10000);
         carPosition = Pixy::theoreticalRightLinePosition - lineRight.position + Pixy::trackCenter;
     }else{
-        carPosition = 0;
+        if(keepWheelsPositionCounter < keepWheelsPositionTime){
+            Kitty::kitty().display.print(6969);
+            keepWheelsPositionCounter++;
+        } else{
+            keepWheelsPositionCounter = 0;
+            carPosition = Pixy::trackCenter;
+        }
     }
     return carPosition;
 }

@@ -9,7 +9,7 @@
 
 #define LOG_CHANNEL PIXY
 #define PIXY_LOG_CHANNEL 5
-#define PIXY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define PIXY_LOG_CHANNEL_LEVEL LOG_LEVEL_ERROR
 
 #include "logger.h"
 
@@ -38,31 +38,31 @@ void Pixy::getLines(AlgorithmUnit::Line &lineLeft, AlgorithmUnit::Line &lineRigh
         log_debug("Got response");
         switch(lineNodeResponse.payload.linesType){
             case LinesTypes::NO_LINES:
-                log_debug("No line detected");
+                log_notice("No line detected");
                 lineRight.isDetected = false;
                 lineLeft.isDetected = false;
                 break;
             case LinesTypes::RIGHT_LINE:
-                log_debug("Right line detected at position: %d", lineNodeResponse.payload.lines[0]);
+                log_notice("Right line detected at position: %d", lineNodeResponse.payload.lines[0]);
                 lineRight.isDetected = true;
                 lineRight.position = lineNodeResponse.payload.lines[0];
                 lineLeft.isDetected = false;
                 break;
             case LinesTypes::LEFT_LINE:
-                log_debug("Left line detected at position: %d", lineNodeResponse.payload.lines[0]);
+                log_notice("Left line detected at position: %d", lineNodeResponse.payload.lines[0]);
                 lineLeft.isDetected = true;
                 lineLeft.position = lineNodeResponse.payload.lines[0];
                 lineRight.isDetected = false;
                 break;
             case LinesTypes::BOTH_LINES:
-                log_debug("Both lines detected, left at position: %d, right at position: %d", lineNodeResponse.payload.lines[0], lineNodeResponse.payload.lines[1]);
+                log_notice("Both lines detected, left at position: %d, right at position: %d", lineNodeResponse.payload.lines[0], lineNodeResponse.payload.lines[1]);
                 lineLeft.isDetected = true;
                 lineLeft.position = lineNodeResponse.payload.lines[0];
                 lineRight.isDetected = true;
                 lineRight.position = lineNodeResponse.payload.lines[1];
                 break;
             default:
-                log_debug("Wrong line type");
+                log_notice("Wrong line type");
                 break;
         }
     } else{
