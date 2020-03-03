@@ -152,6 +152,12 @@ LineInRow::LineType debugPrintPattern = LineInRow::LineType::EDGE;
 
 class AnalyseData {
 public:	
+	enum LineCode{
+		NONE = 1,
+		LEFT = 3,
+		RIGHT = 2,
+		BOTH = 4
+	};
 	LineInRow goodDetectedLines[10];
 	uint8_t goodDetectedLinesCount;
 	LineInRow linesInSubRow[maxSimilarLinesToCHeck][10];
@@ -471,7 +477,7 @@ struct Transitions {
 		
 		uint16_t lineTransitionPixel = 0;
 		for (uint8_t i = 0; i < counter; i++) {
-			if (transitions[i].center < 320) {
+			if (transitions[i].center < 280) {
 				continue;
 			}
 			
@@ -508,7 +514,7 @@ struct Transitions {
 		
 		uint16_t lineTransitionPixel = 0;
 		for (uint8_t i = 0; i < counter; i++) {
-			if (transitions_revert[i].center > 320) {
+			if (transitions_revert[i].center > 360) {
 				continue;
 			}
 			
@@ -565,21 +571,21 @@ int line_hLine(uint8_t row, uint16_t *buf, uint32_t len) {
 	}
 	
 	
+	uint8_t line = 4;
 	
 	
-	
-	if (transitionsToCheck[3].rightLine >= 0 && transitionsToCheck[3].leftLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[3].leftLine;
-		detectedLinesTab[1] = transitionsToCheck[3].rightLine;
-		detectedLinesNumber = 4;
-	} else if (transitionsToCheck[3].rightLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[3].rightLine;
-		detectedLinesNumber = 2;
-	} else if (transitionsToCheck[3].leftLine >= 0) {
-		detectedLinesTab[0] = transitionsToCheck[3].leftLine;
-		detectedLinesNumber = 3;
+	if (transitionsToCheck[line].rightLine >= 0 && transitionsToCheck[line].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[line].leftLine;
+		detectedLinesTab[1] = transitionsToCheck[line].rightLine;
+		detectedLinesNumber = (uint8_t)AnalyseData::LineCode::BOTH;
+	} else if (transitionsToCheck[line].rightLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[line].rightLine;
+		detectedLinesNumber = (uint8_t)AnalyseData::LineCode::RIGHT;
+	} else if (transitionsToCheck[line].leftLine >= 0) {
+		detectedLinesTab[0] = transitionsToCheck[line].leftLine;
+		detectedLinesNumber = (uint8_t)AnalyseData::LineCode::LEFT;
 	} else {
-		detectedLinesNumber = 1;
+		detectedLinesNumber = (uint8_t)AnalyseData::LineCode::NONE;
 	}
 
 	return 0;
