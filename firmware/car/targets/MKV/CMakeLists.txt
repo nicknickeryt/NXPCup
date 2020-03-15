@@ -1,4 +1,4 @@
-set(NAME arm)
+set(NAME MKV)
 
 #ReadVariables(${CMAKE_CURRENT_LIST_DIR}/Makefile "LDSCRIPT")
 #string(REPLACE "_FLASH.ld" "" DEVICE ${LDSCRIPT} )
