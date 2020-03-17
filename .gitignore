@@ -14,7 +14,6 @@
 *.uvopt*
 *.dep
 *.htm
-*.txt
 *.ppm
 *.png
 *.mkv
