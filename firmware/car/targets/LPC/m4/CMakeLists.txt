@@ -20,7 +20,7 @@ foreach(file ${SOURCES})
     set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "-w")
 endforeach(file)
 
-SET(OBJS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/m0.o ../dualcore_common/IPC.h)
+SET(OBJS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/m0.o )
 
 SET_SOURCE_FILES_PROPERTIES(
         ${OBJS}
