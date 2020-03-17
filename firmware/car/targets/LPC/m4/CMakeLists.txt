@@ -20,20 +20,16 @@ foreach(file ${SOURCES})
     set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "-w")
 endforeach(file)
 
-SET(OBJS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/m0.o )
+SET(M0_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/m0.o )
 
-SET_SOURCE_FILES_PROPERTIES(
-        ${OBJS}
-        PROPERTIES
-        EXTERNAL_OBJECT true
-        GENERATED true
-)
+SET_SOURCE_FILES_PROPERTIES( ${M0_OBJ}  PROPERTIES  EXTERNAL_OBJECT true  GENERATED true )
 
-add_executable(${NAME} ${SOURCES}  ${OBJS} )
+add_executable(${NAME} ${SOURCES}  ${M0_OBJ} )
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dualcore_common/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_board_ngx_xplorer_4330/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx/inc/config_43xx/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/m4_Debug.ld ${CORE_M4_FLAGS} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 

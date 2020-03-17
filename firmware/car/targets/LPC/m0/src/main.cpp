@@ -1,8 +1,6 @@
-#include "dualcore_common.h"
-#include "ipc_example.h"
-#include "ipc_msg.h"
+#include "board.h"
+#include "IPC.h"
 
-#define IPCEX_ID_BLINKY 4
 static const uint32_t xDelay = 500;
 
 static void LED_blinkProc(uint32_t val) {
@@ -11,10 +9,10 @@ static void LED_blinkProc(uint32_t val) {
 	Board_LED_Set((val >> 16) & 0xFFFF, val & 0xFFFF);
 }
 
-static int blink_delay(void) {
+static int blink_delay() {
 	static int32_t final, init;
 	if (!init) {
-		int32_t curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
+		auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
 		final = curr + (SystemCoreClock / 1000) * xDelay;
 		init = 1 + (final < 0 && curr > 0);
 	}
@@ -27,26 +25,18 @@ static int blink_delay(void) {
 }
 
 int main() {
+    volatile IPC<CPU::M0> ipc {SHARED_MEM_M0, SHARED_MEM_M4};
 	SystemCoreClockUpdate();
-
-	IPCEX_Init(); //Initialize the IPC Queue
-
-	ipcex_register_callback(IPCEX_ID_BLINKY, LED_blinkProc);
 
 	DEBUGSTR("Starting M0 Tasksssss...\r\n");
 
-	while(1) {
+	while(true) {
 	    static int i = 0;
 	    i++;
-		ipcex_tasks();
 
 		static int blink = 0;
 
 		if (!blink_delay()) {
-			/* if (ipcex_msgPush(IPCEX_ID_BLINKY, (0 << 16) | blink) == QUEUE_INSERT) {
-				blink = 1 - blink;
-			}*/
-
             Board_LED_Toggle(0);
 		}
 	}

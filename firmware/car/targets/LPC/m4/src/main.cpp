@@ -1,13 +1,11 @@
-#include <stdio.h>
-#include "dualcore_common.h"
-#include "ipc_msg.h"
-#include "ipc_example.h"
-
+#include <cstdio>
+#include "IPC.h"
+#include "board.h"
 
 static const uint32_t xDelay = 1000;
 
 void MSleep(int32_t msecs) {
-	int32_t curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
+	auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
 	int32_t final = curr + ((SystemCoreClock / 1000) * msecs);
 
 	/* If the value is zero let us not worry about it */
@@ -24,13 +22,13 @@ void MSleep(int32_t msecs) {
 }
 
 static void LED_blinkProc(uint32_t val) {
-	Board_LED_Set((val >> 16) & 0xFFFF, val & 0xFFFF);
+	Board_LED_Set((val >> 16u) & 0xFFFFu, val & 0xFFFFu);
 }
 
-static int blink_delay(void) {
+static int blink_delay() {
 	static int32_t final, init;
 	if (!init) {
-		int32_t curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
+		auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
 		final = curr + (SystemCoreClock / 1000) * xDelay;
 		init = 1 + (final < 0 && curr > 0);
 	}
@@ -42,7 +40,8 @@ static int blink_delay(void) {
 	return init != 0;
 }
 
-int main(void) {
+int main() {
+    volatile IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0};
 	SystemCoreClockUpdate();
 	Board_Init();
 
@@ -58,21 +57,10 @@ int main(void) {
 
 	MSleep(100);
 
-	IPCEX_Init();
-
-	ipcex_register_callback(IPCEX_ID_BLINKY, LED_blinkProc);
-
 	DEBUGSTR("Starting M4 Tasks...\r\n");
 
-
-	while(1) {
-		ipcex_tasks();
-
-		static int blink = 0;
+	while(true) {
 		if (!blink_delay()) {
-			if (ipcex_msgPush(IPCEX_ID_BLINKY, (1 << 16) | blink) == QUEUE_INSERT) {
-				blink = 1 - blink;
-			}
             Board_LED_Toggle(1);
 		}
 	}

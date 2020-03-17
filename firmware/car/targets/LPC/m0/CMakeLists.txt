@@ -25,7 +25,7 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dualcore_c
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_board_ngx_xplorer_4330_m0/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx_m0/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx_m0/inc/config_43xx_m0app/)
-#target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../ipc/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/m0_Debug.ld ${CORE_M0_FLAGS} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 target_link_libraries(${NAME}
