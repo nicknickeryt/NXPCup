@@ -25,7 +25,8 @@ static int blink_delay() {
 }
 
 int main() {
-    volatile IPC<CPU::M0> ipc {SHARED_MEM_M0, SHARED_MEM_M4};
+    IPC<CPU::M0> ipc {SHARED_MEM_M0, SHARED_MEM_M4};
+    ipc.setNVIC();
 	SystemCoreClockUpdate();
 
 	DEBUGSTR("Starting M0 Tasksssss...\r\n");

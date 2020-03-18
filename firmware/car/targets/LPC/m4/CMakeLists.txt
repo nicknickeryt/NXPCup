@@ -11,6 +11,8 @@ file(GLOB_RECURSE SOURCES
         "*.c"
         "*.cpp"
         "*.hpp"
+        "../dualcore_common/*M4.cpp"
+        "../dualcore_common/*.h"
         )
 
 message("SOURCES: ${SOURCES}")

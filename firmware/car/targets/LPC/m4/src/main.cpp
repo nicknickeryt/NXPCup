@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "IPC.h"
+#include "../dualcore_common/IPC.h"
 #include "board.h"
 
 static const uint32_t xDelay = 1000;
@@ -41,7 +41,8 @@ static int blink_delay() {
 }
 
 int main() {
-    volatile IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0};
+    IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0};
+    ipc.setNVIC();
 	SystemCoreClockUpdate();
 	Board_Init();
 
