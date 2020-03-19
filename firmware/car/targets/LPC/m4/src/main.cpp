@@ -2,7 +2,7 @@
 #include "../dualcore_common/IPC.h"
 #include "board.h"
 
-static const uint32_t xDelay = 1000;
+static const uint32_t xDelay = 100;
 
 void MSleep(int32_t msecs) {
 	auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
@@ -62,7 +62,8 @@ int main() {
 
 	while(true) {
 		if (!blink_delay()) {
-            Board_LED_Toggle(1);
+//            Board_LED_Toggle(1);
+            ipc.sendSignal();
 		}
 	}
 	return 0;

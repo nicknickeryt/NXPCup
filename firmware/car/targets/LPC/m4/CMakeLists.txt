@@ -1,6 +1,6 @@
 set(NAME m4)
 
-add_definitions(${CORE_M4_DEFINITIONS} -D__LPC43XX__ -DLPC43_MULTICORE_M0APP -D__MULTICORE_MASTER -D__MULTICORE_MASTER_SLAVE_M0APP)
+add_definitions(${CORE_M4_DEFINITIONS} -D__LPC43XX__ -DLPC43_MULTICORE_M0APP -D__MULTICORE_MASTER -D__MULTICORE_MASTER_SLAVE_M0APP -DCHIP_LPC43XX -DLPC_CREG)
 set(CORE_M4_FLAGS "-fno-common -g3 -Wall -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -fsingle-precision-constant -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -mthumb -fstack-usage")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CORE_M4_FLAGS}")
@@ -33,7 +33,8 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chi
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx/inc/config_43xx/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/m4_Debug.ld ${CORE_M4_FLAGS} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS
+        "-T ${CMAKE_CURRENT_SOURCE_DIR}/m4_Debug.ld ${CORE_M4_FLAGS} -Xlinker -Map=dualcore_blinky_m0.map -Xlinker -print-memory-usage -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 
 target_link_libraries(${NAME}
         lpc_board_ngx_xplorer_4330
@@ -41,7 +42,11 @@ target_link_libraries(${NAME}
 
 add_custom_command(TARGET ${NAME}
         POST_BUILD
-        COMMAND arm-none-eabi-objcopy  -v -O ihex "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.hex")
+        COMMAND ${CMAKE_OBJCOPY} -v -O ihex "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.hex"
+        COMMAND ${CMAKE_OBJCOPY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.elf)
 
 add_dependencies(${NAME} m0)
+
+set(DEVICE LPC4330_M4)
+target_jlink_flash(${NAME} 0x0000000)
 

@@ -1,6 +1,6 @@
 set(NAME m0)
 
-add_definitions(${CORE_M0_DEFINITIONS} -D__LPC43XX__  -D__MULTICORE_M0APP -DCORE_M0AP )
+add_definitions(${CORE_M0_DEFINITIONS} -D__LPC43XX__  -D__MULTICORE_M0APP -DCORE_M0AP -DCHIP_LPC43XX -DLPC_CREG)
 set(CORE_M0_FLAGS "-g3 -Wall -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -mcpu=cortex-m0 -mthumb -fstack-usage")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CORE_M0_FLAGS}")
@@ -29,7 +29,9 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chi
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx_m0/inc/config_43xx_m0app/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/m0_Debug.ld ${CORE_M0_FLAGS} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS
+        "-T ${CMAKE_CURRENT_SOURCE_DIR}/m0_Debug.ld ${CORE_M0_FLAGS} -Xlinker -Map=dualcore_blinky_m0.map -Xlinker -print-memory-usage -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
+
 target_link_libraries(${NAME}
         lpc_board_ngx_xplorer_4330_m0
         lpc_chip_43xx_m0
@@ -37,6 +39,7 @@ target_link_libraries(${NAME}
 
 add_custom_command(TARGET ${NAME}
         POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.elf
         COMMAND arm-none-eabi-objcopy
         --target elf32-littlearm
         --verbose

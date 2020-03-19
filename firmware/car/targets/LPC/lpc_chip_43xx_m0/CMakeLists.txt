@@ -1,6 +1,6 @@
 set(NAME lpc_chip_43xx_m0)
 
-add_definitions(${CORE_M0_DEFINITIONS})
+add_definitions(${CORE_M0_DEFINITIONS} -DCHIP_LPC43XX -DLPC_CREG)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CORE_M0_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORE_M0_FLAGS}")
 

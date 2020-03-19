@@ -38,7 +38,8 @@ int main() {
 		static int blink = 0;
 
 		if (!blink_delay()) {
-            Board_LED_Toggle(0);
+		    ipc.sendSignal();
+//            Board_LED_Toggle(0);
 		}
 	}
 	return 0;

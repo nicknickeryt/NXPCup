@@ -2,13 +2,17 @@
 
 #include "static_circular_deque.h"
 
-#ifndef SHARED_MEM_M0
-#define SHARED_MEM_M0          0x10089F80
-#endif
+// __top_RamAHB32 - 400
 #ifndef SHARED_MEM_M4
-#define SHARED_MEM_M4          0x10089FC0
+#define SHARED_MEM_M4          (0x20000000 + 0x8000 - 400)
 #endif
-void setNVIC_M4();
+
+// __top_RamAHB32 - 800
+#ifndef SHARED_MEM_M0
+#define SHARED_MEM_M0          (0x20000000 + 0x8000 - 800)
+#endif
+
+
 struct Event {
     enum class Type : uint8_t {
         NONE = 0,
@@ -70,8 +74,11 @@ public:
      }
 
      void setNVIC() ;
+     void sendSignal();
 };
 
 template <> void IPC<CPU::M4>::setNVIC();
-
 template <> void IPC<CPU::M0>::setNVIC();
+
+template <> void IPC<CPU::M4>::sendSignal();
+template <> void IPC<CPU::M0>::sendSignal();
