@@ -12,7 +12,6 @@
 #define SHARED_MEM_M0          (0x20000000 + 0x8000 - 800)
 #endif
 
-
 struct Event {
     enum class Type : uint8_t {
         NONE = 0,
@@ -51,8 +50,11 @@ private:
     deque* myDeque;
     deque* hisDeque;
 
+    void setNVIC() ;
+    void sendSignal();
 public:
-     IPC(uint32_t myDequeAddr, uint32_t hisDequeAddr) {
+    void(*callback)(Event event);
+     IPC(uint32_t myDequeAddr, uint32_t hisDequeAddr, void(*callback)(Event event)) : callback(callback) {
          if constexpr (CPU::M4 == C) {
              myDeque = new((void*) myDequeAddr) deque;
              hisDeque = new((void*) hisDequeAddr) deque;
@@ -69,12 +71,20 @@ public:
          }
     }
 
-     void push(uint8_t data) {
-         myDeque->push_back( Event(Event::Type::VAR_UINT8, data, 0, 0));
-     }
+    void init() {
+        setNVIC();
+    }
 
-     void setNVIC() ;
-     void sendSignal();
+    void push(uint8_t data) {
+        myDeque->push_back(Event(Event::Type::VAR_UINT8, data, 0, 0));
+        sendSignal();
+    }
+
+    void runCallback() {
+        callback(hisDeque->front());
+        hisDeque->pop_front();
+    }
+
 };
 
 template <> void IPC<CPU::M4>::setNVIC();

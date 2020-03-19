@@ -2,7 +2,7 @@
 #include "../dualcore_common/IPC.h"
 #include "board.h"
 
-static const uint32_t xDelay = 100;
+static const uint32_t xDelay = 99;
 
 void MSleep(int32_t msecs) {
 	auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
@@ -40,9 +40,16 @@ static int blink_delay() {
 	return init != 0;
 }
 
+volatile bool irq = false;
+Event event_global ;
+void callbackIPC(Event event) {
+    event_global = event;
+    irq = true;
+}
+
 int main() {
-    IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0};
-    ipc.setNVIC();
+    IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0, callbackIPC};
+    ipc.init();
 	SystemCoreClockUpdate();
 	Board_Init();
 
@@ -56,15 +63,22 @@ int main() {
 
 	Chip_RGU_ClearReset(RGU_M0APP_RST);
 
-	MSleep(100);
-
 	DEBUGSTR("Starting M4 Tasks...\r\n");
+
+	uint8_t index = 0;
 
 	while(true) {
 		if (!blink_delay()) {
-//            Board_LED_Toggle(1);
-            ipc.sendSignal();
+            ipc.push(index++);
 		}
+
+        if (irq) {
+            irq = false;
+            Board_LED_Toggle(1);
+            char buffer[10];
+            sprintf(buffer, "\tM4 %d\r\n", event_global.data1);
+            DEBUGSTR(buffer);
+        }
 	}
 	return 0;
 }

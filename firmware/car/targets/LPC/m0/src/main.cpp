@@ -24,22 +24,32 @@ static int blink_delay() {
 	return init != 0;
 }
 
+volatile bool irq = false;
+Event event_global ;
+void callbackIPC(Event event) {
+    event_global = event;
+    irq = true;
+}
+
+
 int main() {
-    IPC<CPU::M0> ipc {SHARED_MEM_M0, SHARED_MEM_M4};
-    ipc.setNVIC();
+    IPC<CPU::M0> ipc {SHARED_MEM_M0, SHARED_MEM_M4, callbackIPC};
+    ipc.init();
 	SystemCoreClockUpdate();
 
 	DEBUGSTR("Starting M0 Tasksssss...\r\n");
-
+    uint8_t index = 0;
 	while(true) {
-	    static int i = 0;
-	    i++;
-
-		static int blink = 0;
-
 		if (!blink_delay()) {
-		    ipc.sendSignal();
-//            Board_LED_Toggle(0);
+            ipc.push(index++);
+		}
+
+		if (irq) {
+		    irq = false;
+            Board_LED_Toggle(0);
+            char buffer[10];
+            sprintf(buffer, "M0 %d\r\n", event_global.data1);
+            DEBUGSTR(buffer);
 		}
 	}
 	return 0;

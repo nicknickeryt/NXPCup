@@ -47,6 +47,6 @@ add_custom_command(TARGET ${NAME}
 
 add_dependencies(${NAME} m0)
 
-set(DEVICE LPC4330_M4)
-target_jlink_flash(${NAME} 0x0000000)
+#set(DEVICE LPC4330_M4)
+#target_jlink_flash(${NAME} 0x0000000)
 
