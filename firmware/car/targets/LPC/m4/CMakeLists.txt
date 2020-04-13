@@ -12,6 +12,10 @@ file(GLOB_RECURSE SOURCES
         "*.cpp"
         "*.hpp"
         "../dualcore_common/*M4.cpp"
+        "../dualcore_common/*M4.c"
+        "../dualcore_common/*MB.cpp"
+        "../dualcore_common/*MB.c"
+        "../dualcore_common/*.hpp"
         "../dualcore_common/*.h"
         )
 
@@ -32,13 +36,15 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_boa
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx/inc/config_43xx/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc/)
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS
         "-T ${CMAKE_CURRENT_SOURCE_DIR}/m4_Debug.ld ${CORE_M4_FLAGS} -Xlinker -Map=dualcore_blinky_m0.map -Xlinker -print-memory-usage -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 
 target_link_libraries(${NAME}
         lpc_board_ngx_xplorer_4330
-        lpc_chip_43xx )
+        lpc_chip_43xx
+        core)
 
 add_custom_command(TARGET ${NAME}
         POST_BUILD

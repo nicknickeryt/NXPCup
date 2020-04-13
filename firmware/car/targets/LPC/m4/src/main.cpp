@@ -1,6 +1,10 @@
 #include <cstdio>
-#include "../dualcore_common/IPC.h"
+#include "IPC.hpp"
+#include "chip.h"
 #include "board.h"
+#include "NXP_GPIO.hpp"
+#include "NXP_CGU.hpp"
+#include "init.hpp"
 
 static const uint32_t xDelay = 99;
 
@@ -15,8 +19,7 @@ void MSleep(int32_t msecs) {
 
 	if ((final < 0) && (curr > 0)) {
 		while (Chip_RIT_GetCounter(LPC_RITIMER) < (uint32_t) final) {}
-	}
-	else {
+	} else {
 		while ((int32_t) Chip_RIT_GetCounter(LPC_RITIMER) < final) {}
 	}
 }
@@ -46,12 +49,25 @@ void callbackIPC(Event event) {
     event_global = event;
     irq = true;
 }
+extern "C" {
+    extern void SystemInit(void);
+}
+
+
 
 int main() {
+    unsigned int *pSCB_VTOR = (unsigned int *) 0xE000ED08;
+    fpuInit();
+    Board_SystemInit();
+
+    SystemInit();
+    clockInit();
+
     IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0, callbackIPC};
     ipc.init();
 	SystemCoreClockUpdate();
-	Board_Init();
+
+//    DEBUGINIT();
 
 	/* Make sure the M0 core is being held in reset via the RGU */
 	Chip_RGU_TriggerReset(RGU_M0APP_RST);
@@ -63,9 +79,15 @@ int main() {
 
 	Chip_RGU_ClearReset(RGU_M0APP_RST);
 
-	DEBUGSTR("Starting M4 Tasks...\r\n");
+//	DEBUGSTR("Starting M4 Tasks...\r\n");
 
 	uint8_t index = 0;
+
+    NXP_GPIO LED_blue = {1,11};
+    LED_blue.init();
+
+    NXP_GPIO LED_green = {1,12};
+    LED_green.init();
 
 	while(true) {
 		if (!blink_delay()) {
@@ -74,10 +96,12 @@ int main() {
 
         if (irq) {
             irq = false;
-            Board_LED_Toggle(1);
+            LED_blue.toggle();
+            LED_green.toggle();
+            //Board_LED_Toggle(1);
             char buffer[10];
             sprintf(buffer, "\tM4 %d\r\n", event_global.data1);
-            DEBUGSTR(buffer);
+//            DEBUGSTR(buffer);
         }
 	}
 	return 0;

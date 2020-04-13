@@ -98,6 +98,8 @@ function(target_jlink_flash TARGET BASE_ADDRESS)
     if("${FLASH_FILE}" STREQUAL "")
         get_property(FLASH_FILE TARGET ${TARGET} PROPERTY BIN_FILE)
     endif()
+    message("TARGET ${TARGET}")
+    message("FLASH_FILE ${FLASH_FILE}")
 
     configure_file(${CMAKE_SOURCE_DIR}/jlink/flash.jlink.template ${COMMAND_FILE})
 

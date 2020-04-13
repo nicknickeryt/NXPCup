@@ -12,25 +12,3 @@ add_subdirectory("lpc_board_ngx_xplorer_4330_m0")
 add_subdirectory("lpc_board_ngx_xplorer_4330")
 add_subdirectory("m0")
 add_subdirectory("m4")
-
-#set(SOURCES ${SOURCES_AUTO} )
-#
-#add_executable(${NAME} ${SOURCES})
-#
-#set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} ${ARMFLOAT} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
-#
-#target_link_libraries(${NAME} core )
-#
-#
-#target_generate_hex(${NAME})
-#
-#target_memory_report(${NAME})
-#target_asm_listing(${NAME})
-#
-#target_format_sources(${NAME} "${SOURCES_PROJECT}")
-#
-
-#
-#target_stlink_flash(${NAME})
-#
-#target_generate_elf(${NAME})

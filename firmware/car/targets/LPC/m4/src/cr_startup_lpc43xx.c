@@ -359,10 +359,6 @@ void ResetISR(void) {
 #endif  // ifndef DONT_RESET_ON_RESTART
 // *************************************************************
 
-#if defined (__USE_LPCOPEN)
-    SystemInit();
-#endif
-
     //
     // Copy the data sections from flash to SRAM.
     //
@@ -431,12 +427,7 @@ void ResetISR(void) {
     __libc_init_array();
 #endif
 
-#if defined (__REDLIB__)
-    // Call the Redlib library, which in turn calls main()
-    __main();
-#else
     main();
-#endif
 
     //
     // main() shouldn't return, but if it does, we'll just enter an infinite loop

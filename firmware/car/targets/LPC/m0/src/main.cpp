@@ -1,5 +1,5 @@
 #include "board.h"
-#include "IPC.h"
+#include "IPC.hpp"
 
 static const uint32_t xDelay = 500;
 
@@ -37,7 +37,7 @@ int main() {
     ipc.init();
 	SystemCoreClockUpdate();
 
-	DEBUGSTR("Starting M0 Tasksssss...\r\n");
+//	DEBUGSTR("Starting M0 Tasksssss...\r\n");
     uint8_t index = 0;
 	while(true) {
 		if (!blink_delay()) {
@@ -46,10 +46,10 @@ int main() {
 
 		if (irq) {
 		    irq = false;
-            Board_LED_Toggle(0);
-            char buffer[10];
-            sprintf(buffer, "M0 %d\r\n", event_global.data1);
-            DEBUGSTR(buffer);
+//            Board_LED_Toggle(0);
+//            char buffer[10];
+//            sprintf(buffer, "M0 %d\r\n", event_global.data1);
+//            DEBUGSTR(buffer);
 		}
 	}
 	return 0;

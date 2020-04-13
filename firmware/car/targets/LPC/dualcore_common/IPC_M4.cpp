@@ -1,4 +1,4 @@
-#include "IPC.h"
+#include "IPC.hpp"
 #include "cmsis.h"
 #include "core_cm4.h"
 #include "board.h"

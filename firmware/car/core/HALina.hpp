@@ -9,13 +9,6 @@
 #pragma once
 
 #include <gsl/gsl>
-#include "fsl_gpio.h"
-#include "fsl_port.h"
-#include "board.h"
-#include "peripherals.h"
-#include "pin_mux.h"
-#include "clock_config.h"
-
 #include "HALina_gpio.hpp"
 #include "HALina_uart.hpp"
 #include "HALina_pwm.hpp"

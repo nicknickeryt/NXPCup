@@ -12,6 +12,10 @@ file(GLOB_RECURSE SOURCES
         "*.cpp"
         "*.hpp"
         "../dualcore_common/*M0.cpp"
+        "../dualcore_common/*M0.c"
+        "../dualcore_common/*MB.cpp"
+        "../dualcore_common/*MB.c"
+        "../dualcore_common/*.hpp"
         "../dualcore_common/*.h"
         )
 
@@ -35,6 +39,7 @@ set_target_properties(${NAME} PROPERTIES LINK_FLAGS
 target_link_libraries(${NAME}
         lpc_board_ngx_xplorer_4330_m0
         lpc_chip_43xx_m0
+        core
         )
 
 add_custom_command(TARGET ${NAME}
