@@ -1,9 +1,5 @@
 #include "IPC.hpp"
-#include "cmsis.h"
-#include "core_cm0.h"
-#include "board.h"
-#include "chip_lpc43xx.h"
-#include "creg_18xx_43xx.h"
+#include "chip.h"
 
 IPC<CPU::M0> *ipc_m0;
 

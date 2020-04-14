@@ -1,13 +1,8 @@
-#include "board.h"
+//#include "board.h"
+#include "chip.h"
 #include "IPC.hpp"
 
 static const uint32_t xDelay = 500;
-
-static void LED_blinkProc(uint32_t val) {
-    volatile uint32_t d = val;
-    asm("nop");
-	Board_LED_Set((val >> 16) & 0xFFFF, val & 0xFFFF);
-}
 
 static int blink_delay() {
 	static int32_t final, init;

@@ -7,16 +7,13 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CORE_M0_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORE_M0_FLAGS}")
 
 file(GLOB_RECURSE SOURCES
-        "*.h"
+        "../lpc_chip/src/*.c"
         "*.c"
         "*.cpp"
-        "*.hpp"
         "../dualcore_common/*M0.cpp"
         "../dualcore_common/*M0.c"
         "../dualcore_common/*MB.cpp"
         "../dualcore_common/*MB.c"
-        "../dualcore_common/*.hpp"
-        "../dualcore_common/*.h"
         )
 
 message("SOURCES: ${SOURCES}")
@@ -27,20 +24,15 @@ foreach(file ${SOURCES})
 endforeach(file)
 
 add_executable(${NAME} ${SOURCES})
-target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/dualcore_common/)
-target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_board_ngx_xplorer_4330_m0/inc/)
-target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx_m0/inc/)
-target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip_43xx_m0/inc/config_43xx_m0app/)
+
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcore_common/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip/inc/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip/inc/config_43xx_m0app/)
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS
         "-T ${CMAKE_CURRENT_SOURCE_DIR}/m0_Debug.ld ${CORE_M0_FLAGS} -Xlinker -Map=dualcore_blinky_m0.map -Xlinker -print-memory-usage -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 
-target_link_libraries(${NAME}
-        lpc_board_ngx_xplorer_4330_m0
-        lpc_chip_43xx_m0
-        core
-        )
+target_link_libraries(${NAME} core )
 
 add_custom_command(TARGET ${NAME}
         POST_BUILD
