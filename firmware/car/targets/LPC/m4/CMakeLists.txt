@@ -8,6 +8,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CORE_M4_FLAGS}")
 
 file(GLOB_RECURSE SOURCES
         "../lpc_chip/src/*.c"
+        "../PIXY/src/*.c"
+        "../PIXY/src/*.cpp"
         "*.c"
         "*.cpp"
         "../dualcore_common/*M4.cpp"
@@ -33,6 +35,7 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../dualcor
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip/inc/)
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lpc_chip/inc/config_43xx/)
+target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../PIXY/inc/)
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS
         "-T ${CMAKE_CURRENT_SOURCE_DIR}/m4_Debug.ld ${CORE_M4_FLAGS} -Xlinker -Map=dualcore_blinky_m0.map -Xlinker -print-memory-usage -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")

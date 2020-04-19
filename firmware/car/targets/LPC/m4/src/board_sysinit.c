@@ -43,16 +43,16 @@ struct CLK_BASE_STATES {
 
 /* Initial base clock states are mostly on */
 STATIC const struct CLK_BASE_STATES InitClkStates[] = {
-	{CLK_BASE_PHY_TX, CLKIN_ENET_TX, true, false},
+//	{CLK_BASE_PHY_TX, CLKIN_ENET_TX, true, false},
 #if defined(USE_RMII)
 	{CLK_BASE_PHY_RX, CLKIN_ENET_TX, true, false},
 #else
-	{CLK_BASE_PHY_RX, CLKIN_ENET_RX, true, false},
+//	{CLK_BASE_PHY_RX, CLKIN_ENET_RX, true, false},
 #endif
 
 	/* Clocks derived from dividers */
-	{CLK_BASE_LCD, CLKIN_IDIVC, true, false},
-	{CLK_BASE_USB1, CLKIN_IDIVD, true, true}
+//	{CLK_BASE_LCD, CLKIN_IDIVC, true, false},
+//	{CLK_BASE_USB1, CLKIN_IDIVD, true, true}
 };
 
 /* SPIFI high speed pin mode setup */

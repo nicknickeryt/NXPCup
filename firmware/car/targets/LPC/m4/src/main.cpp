@@ -3,7 +3,9 @@
 #include "IPC.hpp"
 #include "NXP_GPIO.hpp"
 #include "NXP_CGU.hpp"
+#include "Camera.hpp"
 #include "init.hpp"
+#include "usbuser.h"
 
 static const uint32_t xDelay = 99;
 
@@ -49,12 +51,12 @@ extern "C" {
 void Board_SystemInit(void);
 }
 
+Camera camera;
+
 int main() {
     auto *pSCB_VTOR = (unsigned int *) 0xE000ED08;
     fpuInit();
     Board_SystemInit();
-
-    clockInit();
 
     IPC<CPU::M4> ipc {SHARED_MEM_M4, SHARED_MEM_M0, callbackIPC};
     ipc.init();
@@ -77,6 +79,17 @@ int main() {
 
     NXP_GPIO LED_green = {1,12};
     LED_green.init();
+
+//    camera.init();
+    timerInit();
+
+    NXP_SCU::enable(NXP_SCU::Type::PIN, NXP_SCU::Function::_1,
+                    NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS | NXP_SCU::Mode_HIGHSPEEDSLEW_EN,
+                    0x8, 1);
+    NXP_SCU::enable(NXP_SCU::Type::PIN, NXP_SCU::Function::_1,
+                    NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS | NXP_SCU::Mode_HIGHSPEEDSLEW_EN,
+                    0x8, 2);
+    USB_UserInit();
 
 	while(true) {
 		if (!blink_delay()) {

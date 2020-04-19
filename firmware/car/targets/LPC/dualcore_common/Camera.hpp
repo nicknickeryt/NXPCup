@@ -57,6 +57,15 @@ class Camera {
                   (NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS | NXP_SCU::Mode_HIGHSPEEDSLEW_EN),
                   0 };
 
+    NXP_GPIO red = {0x1, 0x1, halina::GPIO::Mode::OUTPUT};
+    NXP_GPIO green = {0x1, 0x2, halina::GPIO::Mode::OUTPUT};
+    NXP_GPIO blue = {0x2, 0x7, halina::GPIO::Mode::OUTPUT};
+
+    NXP_GPIO white = {0x1, 0x10, halina::GPIO::Mode::OUTPUT};
+
+//    NXP_GPIO button = {0x1, 0x10, halina::GPIO::Mode::INPUT};
+
+public:
     void init() {
         SIOD.init();
         SIOC.init();
@@ -75,6 +84,15 @@ class Camera {
         VSYNC.init();
         PCLK.init();
 
+        // CLK out to 17MHz
+        Chip_Clock_SetDivider(CLK_IDIV_B, CLKIN_MAINPLL, 12);
+        Chip_Clock_SetBaseClock(CLK_BASE_OUT, CLKIN_IDIVB, false, false);
         CLK.init();
+
+        // LEDs
+        red.init();
+        green.init();
+        blue.init();
+        white.init();
     }
 };
