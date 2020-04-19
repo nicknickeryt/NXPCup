@@ -69,7 +69,7 @@ extern void USB_Feature_Event   (void);
 
 extern void USB_UserInit(void);
 extern uint32_t USB_handleState(void);
-extern void USB_Recv(uint8_t *data, uint32_t len);
+extern void USB_Recv(const uint8_t *data, uint32_t len);
 extern void USB_Send(const uint8_t *data, uint32_t len);
 extern void USB_RecvReset(void);
 extern void USB_SendReset(void);

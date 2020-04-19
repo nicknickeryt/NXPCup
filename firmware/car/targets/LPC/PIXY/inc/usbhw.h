@@ -73,77 +73,77 @@ typedef volatile struct
 }  DQH_T;
 
 /* bit defines for USBCMD register */
-#define USBCMD_RS	    (1<<0)
-#define USBCMD_RST	    (1<<1)
-#define USBCMD_ATDTW 	(1<<12)
-#define USBCMD_SUTW	    (1<<13)
+#define USBCMD_RS	    (1u<<0u)
+#define USBCMD_RST	    (1u<<1u)
+#define USBCMD_ATDTW 	(1u<<12u)
+#define USBCMD_SUTW	    (1u<<13u)
 
 /* bit defines for USBSTS register */
-#define USBSTS_UI	    (1<<0)
-#define USBSTS_UEI	    (1<<1)
-#define USBSTS_PCI	    (1<<2)
-#define USBSTS_URI	    (1<<6)
-#define USBSTS_SRI	    (1<<7)
-#define USBSTS_SLI	    (1<<8)
-#define USBSTS_NAKI	    (1<<16)
+#define USBSTS_UI	    (1u<<0u)
+#define USBSTS_UEI	    (1u<<1u)
+#define USBSTS_PCI	    (1u<<2u)
+#define USBSTS_URI	    (1u<<6u)
+#define USBSTS_SRI	    (1u<<7u)
+#define USBSTS_SLI	    (1u<<8u)
+#define USBSTS_NAKI	    (1u<<16u)
 
 /* bit defines for DEVICEADDR register */
-#define USBDEV_ADDR_AD	(1<<24)
-#define USBDEV_ADDR(n)	(((n) & 0x7F)<<25)
+#define USBDEV_ADDR_AD	(1u<<24u)
+#define USBDEV_ADDR(n)	(((n) & 0x7Fu)<<25u)
 
 /* bit defines for PRTSC1 register */
-#define USBPRTS_CCS     (1<<0)
-#define USBPRTS_PE      (1<<2)
-#define USBPRTS_FPR     (1<<6)
-#define USBPRTS_SUSP    (1<<7)
-#define USBPRTS_PR      (1<<8)
-#define USBPRTS_HSP     (1<<9)
-#define USBPRTS_PLPSCD  (1<<23)
-#define USBPRTS_PFSC    (1<<24)
+#define USBPRTS_CCS     (1u<<0u)
+#define USBPRTS_PE      (1u<<2u)
+#define USBPRTS_FPR     (1u<<6u)
+#define USBPRTS_SUSP    (1u<<7u)
+#define USBPRTS_PR      (1u<<8u)
+#define USBPRTS_HSP     (1u<<9u)
+#define USBPRTS_PLPSCD  (1u<<23u)
+#define USBPRTS_PFSC    (1u<<24u)
 
 /* bit defines for USBMODE register */
-#define USBMODE_CM_IDLE	(0x0<<0)
-#define USBMODE_CM_DEV	(0x2<<0)
-#define USBMODE_CM_HOST	(0x3<<0)
-#define USBMODE_SLOM    (1<<3)
-#define USBMODE_SDIS    (1<<4)
+#define USBMODE_CM_IDLE	(0x0u<<0u)
+#define USBMODE_CM_DEV	(0x2u<<0u)
+#define USBMODE_CM_HOST	(0x3u<<0u)
+#define USBMODE_SLOM    (1u<<3u)
+#define USBMODE_SDIS    (1u<<4u)
 
 /* bit defines for EP registers*/
-#define USB_EP_BITPOS(n) (((n) & 0x80)? (0x10 | ((n) & 0x7)) : ((n) & 0x7))
+#define USB_EP_BITPOS(n) (((n) & 0x80u)? (0x10u | ((n) & 0x7u)) : ((n) & 0x7u))
 
 /* bit defines EPcontrol registers*/
-#define EPCTRL_RXS	      (1<<0)
-#define EPCTRL_RX_TYPE(n) (((n) & 0x3)<<2)
-#define EPCTRL_RX_CTL	  (0<<2)
-#define EPCTRL_RX_ISO	  (1<<2)
-#define EPCTRL_RX_BLK	  (2<<2)
-#define EPCTRL_RXI	      (1<<5)
-#define EPCTRL_RXR	      (1<<6)
-#define EPCTRL_RXE	      (1<<7)
-#define EPCTRL_TXS	      (1<<16)
-#define EPCTRL_TX_TYPE(n) (((n) & 0x3)<<18)
-#define EPCTRL_TX_CTL	  (0<<18)
-#define EPCTRL_TX_ISO	  (1<<18)
-#define EPCTRL_TX_BLK	  (2<<18)
-#define EPCTRL_TX_INT	  (3<<18)
-#define EPCTRL_TXI	      (1<<21)
-#define EPCTRL_TXR	      (1<<22)
-#define EPCTRL_TXE	      (1<<23)
+#define EPCTRL_RXS	      (1u<<0u)
+#define EPCTRL_RX_TYPE(n) (((n) & 0x3u)<<2u)
+#define EPCTRL_RX_CTL	  (0u<<2u)
+#define EPCTRL_RX_ISO	  (1u<<2u)
+#define EPCTRL_RX_BLK	  (2u<<2u)
+#define EPCTRL_RXI	      (1u<<5u)
+#define EPCTRL_RXR	      (1u<<6u)
+#define EPCTRL_RXE	      (1u<<7u)
+#define EPCTRL_TXS	      (1u<<16u)
+#define EPCTRL_TX_TYPE(n) (((n) & 0x3u)<<18u)
+#define EPCTRL_TX_CTL	  (0u<<18u)
+#define EPCTRL_TX_ISO	  (1u<<18u)
+#define EPCTRL_TX_BLK	  (2u<<18u)
+#define EPCTRL_TX_INT	  (3u<<18u)
+#define EPCTRL_TXI	      (1u<<21u)
+#define EPCTRL_TXR	      (1u<<22u)
+#define EPCTRL_TXE	      (1u<<23u)
 
 /* dQH field and bit defines */
 /* Temp fixed on max, should be taken out of table */
 #define QH_MAX_CTRL_PAYLOAD       0x03ff
 #define QH_MAX_PKT_LEN_POS            16
-#define QH_MAXP(n)                (((n) & 0x3FF)<<16)
-#define QH_IOS                    (1<<15)
-#define QH_ZLT                    (1<<29)
+#define QH_MAXP(n)                (((n) & 0x3FFu)<<16u)
+#define QH_IOS                    (1u<<15u)
+#define QH_ZLT                    (1u<<29u)
 
 /* dTD field and bit defines */
-#define TD_NEXT_TERMINATE         (1<<0)
-#define TD_IOC                    (1<<15)
+#define TD_NEXT_TERMINATE         (1u<<0u)
+#define TD_IOC                    (1u<<15u)
 
 /* Total physical enpoints*/
-#define EP_NUM_MAX	8
+#define EP_NUM_MAX	8u
 
 
 /* USB Hardware Functions */
@@ -165,7 +165,7 @@ extern void  USB_SetStallEP (uint32_t EPNum);
 extern void  USB_ClrStallEP (uint32_t EPNum);
 extern void  USB_ClearEPBuf  (uint32_t  EPNum);
 extern uint32_t USB_SetTestMode(uint8_t mode);
-extern uint32_t USB_ReadEP     (uint32_t EPNum, uint8_t *pData);
+extern uint32_t USB_ReadEP     (uint32_t EPNum, const uint8_t *pData);
 extern uint32_t USB_ReadReqEP(uint32_t EPNum, uint8_t *pData, uint32_t len);
 extern uint32_t USB_ReadSetupPkt(uint32_t, uint32_t *);
 extern uint32_t USB_WriteEP    (uint32_t EPNum, uint8_t *pData, uint32_t cnt);

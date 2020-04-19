@@ -30,42 +30,34 @@
  *
  * Copyright (c) 2009 Keil - An ARM Company. All rights reserved.
  *---------------------------------------------------------------------------*/
-
 #include <cstring>
-
 #include "chip.h"
 #include "lpc_types.h"
-
 #include "usb.h"
 #include "usbcfg.h"
 #include "usbhw.h"
 #include "usbcore.h"
 #include "usbuser.h"
 
-void sendChunk(void);
-void recvChunk(void);
-void bulkOutNak(void);
-
+void sendChunk();
+void recvChunk();
+void bulkOutNak();
 /*
  *  USB Power Event Callback
  *   Called automatically on USB Power Event
  *    Parameter:       power: On(TRUE)/Off(FALSE)
  */
-
 #if USB_POWER_EVENT
 void USB_Power_Event (uint32_t  power) {
 }
 #endif
-
-
 /*
  *  USB Reset Event Callback
  *   Called automatically on USB Reset Event
  */
-
 #if USB_RESET_EVENT
 void USB_Reset_Event (void) {
-  USB_ResetCore();
+    USB_ResetCore();
 }
 #endif
 
@@ -76,8 +68,7 @@ void USB_Reset_Event (void) {
  */
 
 #if USB_SUSPEND_EVENT
-void USB_Suspend_Event (void) {
-}
+void USB_Suspend_Event (void) { }
 #endif
 
 
@@ -87,8 +78,7 @@ void USB_Suspend_Event (void) {
  */
 
 #if USB_RESUME_EVENT
-void USB_Resume_Event (void) {
-}
+void USB_Resume_Event (void) { }
 #endif
 
 
@@ -113,24 +103,20 @@ void USB_SOF_Event (void) {
 }
 #endif
 
-
 /*
  *  USB Error Event Callback
  *   Called automatically on USB Error Event
  *    Parameter:       error: Error Code
  */
-
 #if USB_ERROR_EVENT
 void USB_Error_Event (uint32_t error) {
 }
 #endif
 
-
 /*
  *  USB Set Configuration Event Callback
  *   Called automatically on USB Set Configuration Request
  */
-
 #if USB_CONFIGURE_EVENT
 void USB_Configure_Event (void) {
 
@@ -140,23 +126,19 @@ void USB_Configure_Event (void) {
 }
 #endif
 
-
 /*
  *  USB Set Interface Event Callback
  *   Called automatically on USB Set Interface Request
  */
-
 #if USB_INTERFACE_EVENT
 void USB_Interface_Event (void) {
 }
 #endif
 
-
 /*
  *  USB Set/Clear Feature Event Callback
  *   Called automatically on USB Set/Clear Feature Request
  */
-
 #if USB_FEATURE_EVENT
 void USB_Feature_Event (void) {
 }
@@ -167,12 +149,10 @@ void USB_Feature_Event (void) {
 
 /* USB Endpoint Events Callback Pointers */
 void (* const USB_P_EP[USB_EP_NUM]) (uint32_t event) = {
-  P_EP(0),
-  P_EP(1),
-  P_EP(2),
-  P_EP(3),
-//  P_EP(4),
-//  P_EP(5)
+    P_EP(0),
+    P_EP(1),
+    P_EP(2),
+    P_EP(3),
 };
 
 
@@ -183,10 +163,9 @@ void (* const USB_P_EP[USB_EP_NUM]) (uint32_t event) = {
  */
 
 void USB_EndPoint1 (uint32_t event) {
-  switch (event) {
-    case USB_EVT_IN:
-      break;
-  }
+    if (event == USB_EVT_IN) {
+        return;
+    }
 }
 
 
@@ -196,50 +175,35 @@ void USB_EndPoint1 (uint32_t event) {
  *    Parameter:       event
  */
 
-void testWrite()
-{
-	static int flag = 0;
-   	unsigned int *memory = (unsigned int *)0x10000000;
-	int i;
-
-	if (!flag)
-	{
-		for (i=0; i<0x2000; i++)
-			memory[i] = (unsigned int)&memory[i];
-		flag = 1;		
-	}
-
-	USB_WriteEP(USB_BULK_IN_EP, (uint8_t *)memory, 0x4000);
-}
+//void testWrite()
+//{
+//	static int flag = 0;
+//   	auto *memory = (unsigned int *)0x10000000;
+//	int i;
+//
+//	if (!flag)
+//	{
+//		for (i=0; i<0x2000; i++)
+//			memory[i] = (unsigned int)&memory[i];
+//		flag = 1;
+//	}
+//
+//	USB_WriteEP(USB_BULK_IN_EP, (uint8_t *)memory, 0x4000);
+//}
 
 void USB_EndPoint2 (uint32_t event) {
 
-  switch (event) {
-#if 0
-     case USB_EVT_OUT_NAK:
-      //bulkOutNak();
-      break;
-	case USB_EVT_IN_NAK:
-	  break;		
-#endif
-    case USB_EVT_OUT:
-	  recvChunk();
-      break;
-    case USB_EVT_IN:  // this gets called upon completion
-	  sendChunk();
-      break;
-#if 0
-	default:
-	  printf("* %d\n", event);
-	  USB_ClrStallEP(USB_BULK_OUT_EP);
-	  USB_ResetEP(USB_BULK_OUT_EP);
-	  USB_ClrStallEP(USB_BULK_IN_EP);
-	  USB_ResetEP(USB_BULK_IN_EP);
-	  break;		
-#endif
-  }
+    switch (event) {
+        case USB_EVT_OUT:
+            recvChunk();
+            break;
+        case USB_EVT_IN:  // this gets called upon completion
+            sendChunk();
+            break;
+        default:
+            return;
+    }
 }
-
 
 /*
  *  USB Endpoint 3 Event Callback
@@ -247,8 +211,7 @@ void USB_EndPoint2 (uint32_t event) {
  *    Parameter:       event
  */
 
-void USB_EndPoint3 (uint32_t event) {
-}
+void USB_EndPoint3 (uint32_t event) { }
 
 
 /*
@@ -257,8 +220,7 @@ void USB_EndPoint3 (uint32_t event) {
  *    Parameter:       event
  */
 
-void USB_EndPoint4 (uint32_t event) {
-}
+void USB_EndPoint4 (uint32_t event) { }
 
 
 /*
@@ -271,36 +233,28 @@ void USB_EndPoint5 (uint32_t event) {
   event = event;
 }
 
-void USB_UserInit(void)
-{
-	LPC_USBDRV_INIT_T usb_cb;
+void USB_UserInit() {
+    LPC_USBDRV_INIT_T usb_cb;
 
-	/* initilize call back structures */
-	memset((void*)&usb_cb, 0, sizeof(LPC_USBDRV_INIT_T));
-	usb_cb.USB_Reset_Event = USB_Reset_Event;
-	usb_cb.USB_P_EP[0] = USB_EndPoint0;
-	usb_cb.USB_P_EP[1] = USB_EndPoint1;
-	usb_cb.USB_P_EP[2] = USB_EndPoint2;
-	usb_cb.ep0_maxp = USB_MAX_PACKET0;
+    /* initilize call back structures */
+    memset((void*)&usb_cb, 0, sizeof(LPC_USBDRV_INIT_T));
+    usb_cb.USB_Reset_Event = USB_Reset_Event;
+    usb_cb.USB_P_EP[0] = USB_EndPoint0;
+    usb_cb.USB_P_EP[1] = USB_EndPoint1;
+    usb_cb.USB_P_EP[2] = USB_EndPoint2;
+    usb_cb.ep0_maxp = USB_MAX_PACKET0;
 
-  USB_Init(&usb_cb);                               // USB Initialization
-  // delay?
-  //for(i=0; i<10000000; i++);
-  USB_Connect(TRUE);                        // USB Connect
-  //for(i=0; i<100000000; i++);
-  //while (!USB_Configuration);
+    USB_Init(&usb_cb);                        // USB Initialization
+    USB_Connect(true);                        // USB Connect
 }
 
 // monitor usb connector plug/unplugs
-uint32_t USB_handleState(void)
-{
+uint32_t USB_handleState() {
 	uint32_t susp;
 
-	if (USB_Configuration)
-	{
-		susp = LPC_USB->PORTSC1_D&(1<<7); 
-		if (susp)
-		{
+	if (USB_Configuration) {
+		susp = LPC_USB->PORTSC1_D & (1u<<7u);
+		if (susp) {
 			USB_ResetEP(USB_BULK_OUT_EP);
 			USB_ResetEP(USB_BULK_IN_EP);
 			USB_Configuration = 0;
@@ -312,19 +266,19 @@ uint32_t USB_handleState(void)
 	return USB_Configuration;
 }
 
-void bulkOutNak(void){
+void bulkOutNak(){
     //USB_ReadReqEP(USB_BULK_OUT_EP, (uint8_t *)buf, len);
 }
 
 #define MAX_CHUNK		     0x4000
 
-const uint8_t *g_recvData = NULL;
+const uint8_t *g_recvData = nullptr;
 uint32_t g_recvLen = 0;
 uint32_t g_recvOffset = 0;
 volatile uint8_t g_recvComplete = 0;
 volatile uint32_t g_recvTimerStart = 0;
 
-const uint8_t *g_sendData = NULL;
+const uint8_t *g_sendData = nullptr;
 uint32_t g_sendLen = 0;
 uint32_t g_sendOffset = 0;
 volatile uint8_t g_sendComplete = 0;
@@ -332,25 +286,24 @@ volatile uint32_t g_sendTimerStart = 0;
 
 
 
-void sendChunk(void)
-{
+void sendChunk() {
 	uint32_t chunk;
 	uint8_t *data;
 
 	// reset timer
 	g_sendTimerStart = LPC_TIMER1->TC;
 
-	if (g_sendOffset>=g_sendLen)
-	{
+	if (g_sendOffset>=g_sendLen) {
 		g_sendComplete = 1;
 		return;
 	}
 
-	if (g_sendLen-g_sendOffset>=USB_MAX_CHUNK)
-		chunk = USB_MAX_CHUNK;
-	else
-		chunk = g_sendLen-g_sendOffset;
-	
+	if (g_sendLen-g_sendOffset>=USB_MAX_CHUNK) {
+        chunk = USB_MAX_CHUNK;
+	} else {
+        chunk = g_sendLen-g_sendOffset;
+	}
+
 	data = (uint8_t *)g_sendData + g_sendOffset;
 	// advance g_sendOffset before we call USB_WriteEP, 
 	// otherwise we create a race condition which can cause multiple 
@@ -359,25 +312,24 @@ void sendChunk(void)
 	USB_WriteEP(USB_BULK_IN_EP, data, chunk);
 }
 
-void recvChunk(void)
-{
+void recvChunk() {
 	uint32_t chunk;
 	uint8_t *data;
 
 	// reset timer
 	g_recvTimerStart = LPC_TIMER1->TC;
 
-	if (g_recvOffset>=g_recvLen)
-	{
+	if (g_recvOffset>=g_recvLen) {
 		g_recvComplete = 1;
 		return;
 	}
 
-	if (g_recvLen-g_recvOffset>=USB_MAX_CHUNK)
-		chunk = USB_MAX_CHUNK;
-	else
-		chunk = g_recvLen-g_recvOffset;
-		
+	if (g_recvLen-g_recvOffset>=USB_MAX_CHUNK) {
+        chunk = USB_MAX_CHUNK;
+	} else {
+        chunk = g_recvLen-g_recvOffset;
+	}
+
 	data = (uint8_t *)g_recvData + g_recvOffset;
 	// advance g_recvOffset before we call USB_ReadReqEP, 
 	// otherwise we create a race condition which can cause us 
@@ -386,10 +338,10 @@ void recvChunk(void)
 	USB_ReadReqEP(USB_BULK_OUT_EP, data, chunk);
 }								 
 
-void USB_Send(const uint8_t *data, uint32_t len)
-{
-	if ((uint32_t)data&0x3)
-		return;
+void USB_Send(const uint8_t *data, uint32_t len) {
+	if ((uint32_t)data & 0x3u) {
+        return;
+	}
 
 	g_sendData = data;
 	g_sendLen = len;
@@ -400,10 +352,10 @@ void USB_Send(const uint8_t *data, uint32_t len)
 }
 
 
-void USB_Recv(uint8_t *data, uint32_t len)
-{
-	if ((uint32_t)data&0x03)
-		return;
+void USB_Recv(const uint8_t *data, uint32_t len) {
+	if ((uint32_t)data & 0x03u) {
+        return;
+	}
 
 	g_recvData = data;
 	g_recvLen = len;
@@ -413,12 +365,10 @@ void USB_Recv(uint8_t *data, uint32_t len)
 	recvChunk();
 }  
 
-void USB_RecvReset(void)
-{
+void USB_RecvReset() {
 	USB_ResetEP(USB_BULK_OUT_EP);
 }
 
-void USB_SendReset(void)
-{
+void USB_SendReset() {
 	USB_ResetEP(USB_BULK_IN_EP);
 }

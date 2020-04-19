@@ -43,36 +43,17 @@
 * copyright, permission, and disclaimer notice must appear in all copies of
 * this code.
 **********************************************************************/
-#include <string.h>
-//#include "lpc43xx.h"                        /* lpc43xx definitions */
+#include <cstring>
 #include "chip.h"
 #include "lpc_types.h"
 #include "usb.h"
 #include "usbhw.h"
 #include "usbcfg.h"
 #include "usbcore.h"
-//#import "NXP_SCU.hpp"
-//#include "lpc43xx_scu.h"
-//#include "lpc43xx_cgu.h"
 
-#ifdef __CC_ARM
-#pragma diag_suppress 1441
-#endif
-
-#ifdef __ICCARM__
-#pragma data_alignment=2048
-DQH_T ep_QH[EP_NUM_MAX];
-#pragma data_alignment=32
-DTD_T ep_TD[EP_NUM_MAX];
-#pragma data_alignment=4
-#elif defined   (  __GNUC__  )
 #define __align(x) __attribute__((aligned(x)))
 DQH_T ep_QH[EP_NUM_MAX] __attribute__((aligned(2048)));
 DTD_T ep_TD[EP_NUM_MAX] __attribute__((aligned(32)));
-#else
-DQH_T __align(2048) ep_QH[EP_NUM_MAX];
-DTD_T __align(32) ep_TD[EP_NUM_MAX];
-#endif
 
 typedef enum {
     CGU_ERROR_SUCCESS = 0,
@@ -88,19 +69,19 @@ typedef enum {
  * @param[in]	None
  * @return 		Returned clock value
  **********************************************************************/
-uint32_t CGU_SetPLL0(void){
+uint32_t CGU_SetPLL0(){
     // Setup PLL550 to generate 480MHz from 12 MHz crystal
-    LPC_CGU->PLL[CGU_USB_PLL].PLL_CTRL |= 1;
+    LPC_CGU->PLL[CGU_USB_PLL].PLL_CTRL |= 1u;
 //    LPC_CGU->PLL0USB_CTRL |= 1; 	// Power down PLL
     //	P			N
 //    LPC_CGU->PLL0USB_NP_DIV = (98<<0) | (514<<12);
-    LPC_CGU->PLL[CGU_USB_PLL].PLL_NP_DIV = (98<<0) | (514<<12);
+    LPC_CGU->PLL[CGU_USB_PLL].PLL_NP_DIV = (98u<<0u) | (514u<<12u);
     //	SELP	SELI	SELR	MDEC
 //    LPC_CGU->PLL0USB_MDIV = (0xB<<17)|(0x10<<22)|(0<<28)|(0x7FFA<<0);
-    LPC_CGU->PLL[CGU_USB_PLL].PLL_MDIV = (0xB<<17)|(0x10<<22)|(0<<28)|(0x7FFA<<0);
+    LPC_CGU->PLL[CGU_USB_PLL].PLL_MDIV = (0xBu<<17u)|(0x10u<<22u)|(0u<<28u)|(0x7FFAu<<0u);
 //    LPC_CGU->PLL0USB_CTRL =(CGU_CLKSRC_XTAL_OSC<<24) | (0x3<<2) | (1<<4);
 // TODO CGU_CLKSRC_XTAL_OSC = 6
-    LPC_CGU->PLL[CGU_USB_PLL].PLL_CTRL = (6<<24) | (0x3<<2) | (1<<4);
+    LPC_CGU->PLL[CGU_USB_PLL].PLL_CTRL = (6u<<24u) | (0x3u<<2u) | (1u<<4u);
     return CGU_ERROR_SUCCESS;
 }
 
@@ -117,13 +98,13 @@ LPC_USBDRV_INIT_T g_drv;
  */
 
 uint32_t EPAdr (uint32_t EPNum) {
-  uint32_t val;
+    uint32_t val;
 
-  val = (EPNum & 0x0F) << 1;
-  if (EPNum & 0x80) {
-    val += 1;
-  }
-  return (val);
+    val = (EPNum & 0x0Fu) << 1u;
+    if (EPNum & 0x80u) {
+        val += 1;
+    }
+    return (val);
 }
 
 /*
@@ -132,12 +113,13 @@ uint32_t EPAdr (uint32_t EPNum) {
  *    Return Value:    None
  */
 
-void USB_Init (LPC_USBDRV_INIT_T* cbs)
-{
-  memcpy(&g_drv, cbs, sizeof(LPC_USBDRV_INIT_T));
-  /*maxp for EP0 should be atleast 8 */
-  if( g_drv.ep0_maxp == 0)
-    g_drv.ep0_maxp = 64;
+void USB_Init (LPC_USBDRV_INIT_T* cbs) {
+    memcpy(&g_drv, cbs, sizeof(LPC_USBDRV_INIT_T));
+    /*maxp for EP0 should be atleast 8 */
+    if( g_drv.ep0_maxp == 0) {
+        g_drv.ep0_maxp = 64;
+    }
+
 
 #ifdef USE_USB0
   // TODO
@@ -184,7 +166,7 @@ void USB_Init (LPC_USBDRV_INIT_T* cbs)
 	/* set OTG transcever in proper state, device is present
 	on the port(CCS=1), port enable/disable status change(PES=1). */
 #ifdef USE_USB0	
-	LPC_USB->OTGSC = (1<<3) | (1<<0) /*| (1<<16)| (1<<24)| (1<<25)| (1<<26)| (1<<27)| (1<<28)| (1<<29)| (1<<30)*/;
+	LPC_USB->OTGSC = (1u<<3u) | (1u<<0u) /*| (1<<16)| (1<<24)| (1<<25)| (1<<26)| (1<<27)| (1<<28)| (1<<29)| (1<<30)*/;
 #else
 	/* force full speed */
 	LPC_USB->PORTSC1_D |= (1<<24);
@@ -200,7 +182,6 @@ void USB_Init (LPC_USBDRV_INIT_T* cbs)
 
 	USB_Reset();
 	USB_SetAddress(0);
-	return;
 }
 
 /*
@@ -210,10 +191,11 @@ void USB_Init (LPC_USBDRV_INIT_T* cbs)
  *    Return Value:    None
  */
 void USB_Connect (uint32_t con) {
-  if (con)
-    LPC_USB->USBCMD_D |= USBCMD_RS;
-  else
-    LPC_USB->USBCMD_D &= ~USBCMD_RS;
+    if (con) {
+        LPC_USB->USBCMD_D |= USBCMD_RS;
+    } else {
+        LPC_USB->USBCMD_D &= ~USBCMD_RS;
+    }
 }
 
 
@@ -223,65 +205,50 @@ void USB_Connect (uint32_t con) {
  *    Return Value:    None
  */
 
-void USB_Reset (void)
-{
-  uint32_t i;
+void USB_Reset () {
+    uint32_t i;
 
-  DevStatusFS2HS = FALSE;
-  /* disable all EPs */
-  LPC_USB->ENDPTCTRL[0] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL0
-  LPC_USB->ENDPTCTRL[2] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL2
-  LPC_USB->ENDPTCTRL[3] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL3
+    DevStatusFS2HS = FALSE;
+    /* disable all EPs */
+    LPC_USB->ENDPTCTRL[0] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL0
+    LPC_USB->ENDPTCTRL[2] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL2
+    LPC_USB->ENDPTCTRL[3] &= ~(EPCTRL_RXE | EPCTRL_TXE); // ENDPTCTRL3
 
-  /* Clear all pending interrupts */
-  LPC_USB->ENDPTNAK   = 0xFFFFFFFF;
-  LPC_USB->ENDPTNAKEN = 0;
-  LPC_USB->USBSTS_D     = 0xFFFFFFFF;
-  LPC_USB->ENDPTSETUPSTAT = LPC_USB->ENDPTSETUPSTAT;
-  LPC_USB->ENDPTCOMPLETE  = LPC_USB->ENDPTCOMPLETE;
-  while (LPC_USB->ENDPTPRIME)                  /* Wait until all bits are 0 */
-  {
-  }
-  LPC_USB->ENDPTFLUSH = 0xFFFFFFFF;
-  while (LPC_USB->ENDPTFLUSH); /* Wait until all bits are 0 */
+    /* Clear all pending interrupts */
+    LPC_USB->ENDPTNAK   = 0xFFFFFFFF;
+    LPC_USB->ENDPTNAKEN = 0;
+    LPC_USB->USBSTS_D     = 0xFFFFFFFF;
+    LPC_USB->ENDPTSETUPSTAT = LPC_USB->ENDPTSETUPSTAT;
+    LPC_USB->ENDPTCOMPLETE  = LPC_USB->ENDPTCOMPLETE;
+    while (LPC_USB->ENDPTPRIME) { } // Wait until all bits are 0
 
+    LPC_USB->ENDPTFLUSH = 0xFFFFFFFF;
+    while (LPC_USB->ENDPTFLUSH) { }; /* Wait until all bits are 0 */
 
-  /* Set the interrupt Threshold control interval to 0 */
-  LPC_USB->USBCMD_D &= ~0x00FF0000;
+    /* Set the interrupt Threshold control interval to 0 */
+    LPC_USB->USBCMD_D &= ~0x00FF0000u;
 
-  /* Zero out the Endpoint queue heads */
-  memset((void*)ep_QH, 0, EP_NUM_MAX * sizeof(DQH_T));
-  /* Zero out the device transfer descriptors */
-  memset((void*)ep_TD, 0, EP_NUM_MAX * sizeof(DTD_T));
-  memset((void*)ep_read_len, 0, sizeof(ep_read_len));
-  /* Configure the Endpoint List Address */
-  /* make sure it in on 64 byte boundary !!! */
-  /* init list address */
-  LPC_USB->ENDPOINTLISTADDR = (uint32_t)ep_QH;
-  /* Initialize device queue heads for non ISO endpoint only */
-  for (i = 0; i < EP_NUM_MAX; i++)
-  {
-    ep_QH[i].next_dTD = (uint32_t)&ep_TD[i];
-  }
-  /* Enable interrupts */
-  LPC_USB->USBINTR_D =  USBSTS_UI
-                     | USBSTS_UEI
-                     | USBSTS_PCI
-                     | USBSTS_URI
-                     | USBSTS_SLI
-                     | USBSTS_NAKI;
-//  LPC_USB->usbintr |= (0x1<<7);		/* Test SOF */
-  /* enable ep0 IN and ep0 OUT */
-  ep_QH[0].cap  = QH_MAXP(g_drv.ep0_maxp)
-                  | QH_IOS
-                  | QH_ZLT;
-  ep_QH[1].cap  = QH_MAXP(g_drv.ep0_maxp)
-                  | QH_IOS
-                  | QH_ZLT;
-  /* enable EP0 */
-  LPC_USB->ENDPTCTRL[0] = EPCTRL_RXE | EPCTRL_RXR | EPCTRL_TXE | EPCTRL_TXR; // ENDPTCTRL0
-  return;
-
+    /* Zero out the Endpoint queue heads */
+    memset((void*)ep_QH, 0, EP_NUM_MAX * sizeof(DQH_T));
+    /* Zero out the device transfer descriptors */
+    memset((void*)ep_TD, 0, EP_NUM_MAX * sizeof(DTD_T));
+    memset((void*)ep_read_len, 0, sizeof(ep_read_len));
+    /* Configure the Endpoint List Address */
+    /* make sure it in on 64 byte boundary !!! */
+    /* init list address */
+    LPC_USB->ENDPOINTLISTADDR = (uint32_t)ep_QH;
+    /* Initialize device queue heads for non ISO endpoint only */
+    for (i = 0; i < EP_NUM_MAX; i++) {
+        ep_QH[i].next_dTD = (uint32_t)&ep_TD[i];
+    }
+    /* Enable interrupts */
+    LPC_USB->USBINTR_D =  USBSTS_UI | USBSTS_UEI | USBSTS_PCI | USBSTS_URI | USBSTS_SLI | USBSTS_NAKI;
+    //  LPC_USB->usbintr |= (0x1<<7);		/* Test SOF */
+    /* enable ep0 IN and ep0 OUT */
+    ep_QH[0].cap  = QH_MAXP(g_drv.ep0_maxp) | QH_IOS | QH_ZLT;
+    ep_QH[1].cap  = QH_MAXP(g_drv.ep0_maxp) | QH_IOS | QH_ZLT;
+    /* enable EP0 */
+    LPC_USB->ENDPTCTRL[0] = EPCTRL_RXE | EPCTRL_RXR | EPCTRL_TXE | EPCTRL_TXR; // ENDPTCTRL0
 }
 
 
@@ -314,12 +281,7 @@ void USB_Resume (void) {
  */
 
 void USB_WakeUp (void) {
-
-  //if (USB_DeviceStatus & USB_GETSTATUS_REMOTE_WAKEUP)
-  {
-    /* Set FPR bit in PORTSCX reg p63 */
     LPC_USB->PORTSC1_D |= USBPRTS_FPR ;
-  }
 }
 
 
@@ -330,7 +292,7 @@ void USB_WakeUp (void) {
  */
 
 void USB_WakeUpCfg (uint32_t cfg) {
-  /* Not needed */
+    (void) cfg;
 }
 
 
@@ -341,8 +303,8 @@ void USB_WakeUpCfg (uint32_t cfg) {
  */
 
 void USB_SetAddress (uint32_t adr) {
-  LPC_USB->DEVICEADDR = USBDEV_ADDR(adr);
-  LPC_USB->DEVICEADDR |= USBDEV_ADDR_AD;
+    LPC_USB->DEVICEADDR = USBDEV_ADDR(adr);
+    LPC_USB->DEVICEADDR |= USBDEV_ADDR_AD;
 }
 
 /*
@@ -351,18 +313,16 @@ void USB_SetAddress (uint32_t adr) {
 *    Return Value:    TRUE if supported else FALSE
 */
 
-uint32_t USB_SetTestMode(uint8_t mode)
-{
-  uint32_t portsc;
+uint32_t USB_SetTestMode(uint8_t mode) {
+    uint32_t portsc;
 
-  if ((mode > 0) && (mode < 8))
-  {
-    portsc = LPC_USB->PORTSC1_D & ~(0xF << 16);
+    if ((mode > 0) && (mode < 8)) {
+        portsc = LPC_USB->PORTSC1_D & ~(0xFu << 16u);
 
-    LPC_USB->PORTSC1_D = portsc | (mode << 16);
-    return TRUE;
-  }
-  return (FALSE);
+        LPC_USB->PORTSC1_D = portsc | (mode << 16u);
+        return true;
+    }
+    return false;
 }
 
 /*
@@ -372,7 +332,7 @@ uint32_t USB_SetTestMode(uint8_t mode)
  */
 
 void USB_Configure (uint32_t cfg) {
-
+    (void) cfg;
 }
 
 
@@ -383,45 +343,35 @@ void USB_Configure (uint32_t cfg) {
  */
 
 void USB_ConfigEP (USB_ENDPOINT_DESCRIPTOR *pEPD) {
-  uint32_t num, lep;
-  uint32_t ep_cfg;
-  uint8_t  bmAttributes;
+    uint32_t num, lep;
+    uint32_t ep_cfg;
+    uint8_t  bmAttributes;
 
-  lep = pEPD->bEndpointAddress & 0x7F;
-  num = EPAdr(pEPD->bEndpointAddress);
+    lep = pEPD->bEndpointAddress & 0x7Fu;
+    num = EPAdr(pEPD->bEndpointAddress);
 
-  ep_cfg = ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep];
-  /* mask the attributes we are not-intersetd in */
-  bmAttributes = pEPD->bmAttributes & USB_ENDPOINT_TYPE_MASK;
-  /* set EP type */
-  if (bmAttributes != USB_ENDPOINT_TYPE_ISOCHRONOUS)
-  {
-    /* init EP capabilities */
-    ep_QH[num].cap  = QH_MAXP(pEPD->wMaxPacketSize)
-                      | QH_IOS | QH_ZLT ;
-    /* The next DTD pointer is INVALID */
-    ep_TD[num].next_dTD = 0x01 ;
-  }
-  else
-  {
-    /* init EP capabilities */
-    ep_QH[num].cap  = QH_MAXP(0x400) | QH_ZLT;
-  }
-  /* setup EP control register */
-  if (pEPD->bEndpointAddress & 0x80)
-  {
-    ep_cfg &= ~0xFFFF0000;
-    ep_cfg |= EPCTRL_TX_TYPE(bmAttributes)
-              | EPCTRL_TXR;
-  }
-  else
-  {
-    ep_cfg &= ~0xFFFF;
-    ep_cfg |= EPCTRL_RX_TYPE(bmAttributes)
-              | EPCTRL_RXR;
-  }
-  ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] = ep_cfg; // ENDPTCTRL0
-  return;
+    ep_cfg = ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep];
+    /* mask the attributes we are not-intersetd in */
+    bmAttributes = pEPD->bmAttributes & USB_ENDPOINT_TYPE_MASK;
+    /* set EP type */
+    if (bmAttributes != USB_ENDPOINT_TYPE_ISOCHRONOUS) {
+        /* init EP capabilities */
+        ep_QH[num].cap  = QH_MAXP(pEPD->wMaxPacketSize) | QH_IOS | QH_ZLT ;
+        /* The next DTD pointer is INVALID */
+        ep_TD[num].next_dTD = 0x01 ;
+    } else {
+        /* init EP capabilities */
+        ep_QH[num].cap  = QH_MAXP(0x400u) | QH_ZLT;
+    }
+    /* setup EP control register */
+    if (pEPD->bEndpointAddress & 0x80u) {
+        ep_cfg &= ~0xFFFF0000;
+        ep_cfg |= EPCTRL_TX_TYPE(bmAttributes) | EPCTRL_TXR;
+    } else {
+        ep_cfg &= ~0xFFFFu;
+        ep_cfg |= EPCTRL_RX_TYPE(bmAttributes) | EPCTRL_RXR;
+    }
+    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] = ep_cfg; // ENDPTCTRL0
 }
 
 /*
@@ -431,7 +381,7 @@ void USB_ConfigEP (USB_ENDPOINT_DESCRIPTOR *pEPD) {
  */
 
 void USB_DirCtrlEP (uint32_t dir) {
-  /* Not needed */
+    (void) dir;
 }
 
 
@@ -444,21 +394,18 @@ void USB_DirCtrlEP (uint32_t dir) {
  */
 
 void USB_EnableEP (uint32_t EPNum) {
-  uint32_t lep, bitpos;
+    uint32_t lep, bitpos;
 
-  lep = EPNum & 0x0F;
+    lep = EPNum & 0x0Fu;
 
-  if (EPNum & 0x80)
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXE; // ENDPTCTRL0
-  }
-  else
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXE; // ENDPTCTRL0
-    /* enable NAK interrupt */
-    bitpos = USB_EP_BITPOS(EPNum);
-    LPC_USB->ENDPTNAKEN |= (1<<bitpos);
-  }
+    if (EPNum & 0x80u) {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXE; // ENDPTCTRL0
+    } else {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXE; // ENDPTCTRL0
+        /* enable NAK interrupt */
+        bitpos = USB_EP_BITPOS(EPNum);
+        LPC_USB->ENDPTNAKEN |= (1u<<bitpos);
+    }
 }
 
 /*
@@ -470,20 +417,17 @@ void USB_EnableEP (uint32_t EPNum) {
  */
 
 void USB_DisableEP (uint32_t EPNum) {
-  uint32_t lep, bitpos;
+    uint32_t lep, bitpos;
 
-  lep = EPNum & 0x0F;
-  if (EPNum & 0x80)
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_TXE;
-  }
-  else
-  {
-    /* disable NAK interrupt */
-    bitpos = USB_EP_BITPOS(EPNum);
-    LPC_USB->ENDPTNAKEN &= ~(1<<bitpos);
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_RXE;
-  }
+    lep = EPNum & 0x0Fu;
+    if (EPNum & 0x80u) {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_TXE;
+    } else {
+        /* disable NAK interrupt */
+        bitpos = USB_EP_BITPOS(EPNum);
+        LPC_USB->ENDPTNAKEN &= ~(1u<<bitpos);
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_RXE;
+    }
 }
 
 /*
@@ -495,21 +439,18 @@ void USB_DisableEP (uint32_t EPNum) {
  */
 
 void USB_ResetEP (uint32_t EPNum) {
-  uint32_t bit_pos = USB_EP_BITPOS(EPNum);
-  uint32_t lep = EPNum & 0x0F;
+    uint32_t bit_pos = USB_EP_BITPOS(EPNum);
+    uint32_t lep = EPNum & 0x0Fu;
 
-  /* flush EP buffers */
-  LPC_USB->ENDPTFLUSH = (1<<bit_pos);
-  while (LPC_USB->ENDPTFLUSH & (1<<bit_pos));
-  /* reset data toggles */
-  if (EPNum & 0x80)
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXR;
-  }
-  else
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXR;
-  }
+    /* flush EP buffers */
+    LPC_USB->ENDPTFLUSH = (1u<<bit_pos);
+    while (LPC_USB->ENDPTFLUSH & (1u<<bit_pos));
+    /* reset data toggles */
+    if (EPNum & 0x80u) {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXR;
+    } else {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXR;
+    }
 }
 
 /*
@@ -521,17 +462,14 @@ void USB_ResetEP (uint32_t EPNum) {
  */
 
 void USB_SetStallEP (uint32_t EPNum) {
-  uint32_t lep;
+    uint32_t lep;
 
-  lep = EPNum & 0x0F;
-  if (EPNum & 0x80)
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXS;
-  }
-  else
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXS;
-  }
+    lep = EPNum & 0x0Fu;
+    if (EPNum & 0x80u) {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXS;
+    } else {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXS;
+    }
 }
 
 /*
@@ -543,21 +481,18 @@ void USB_SetStallEP (uint32_t EPNum) {
  */
 
 void USB_ClrStallEP (uint32_t EPNum) {
-  uint32_t lep;
+    uint32_t lep;
 
-  lep = EPNum & 0x0F;
-  if (EPNum & 0x80)
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_TXS;
-    /* reset data toggle */
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXR;
-  }
-  else
-  {
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_RXS;
-    /* reset data toggle */
-    ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXR;
-  }
+    lep = EPNum & 0x0Fu;
+    if (EPNum & 0x80u) {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_TXS;
+        /* reset data toggle */
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_TXR;
+    } else {
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] &= ~EPCTRL_RXS;
+        /* reset data toggle */
+        ((uint32_t*)&(LPC_USB->ENDPTCTRL[0]))[lep] |= EPCTRL_RXR;
+    }
 }
 
 /*
@@ -569,30 +504,29 @@ void USB_ClrStallEP (uint32_t EPNum) {
  *                     Transfer buffer size
  *    Return Value:    None
  */
-void USB_ProgDTD(uint32_t Edpt, uint32_t ptrBuff, uint32_t TsfSize)
-{
-  DTD_T*  pDTD;
+void USB_ProgDTD(uint32_t Edpt, uint32_t ptrBuff, uint32_t TsfSize) {
+    DTD_T*  pDTD;
 
-  pDTD = (DTD_T*)&ep_TD[ Edpt ];
+    pDTD = (DTD_T*)&ep_TD[ Edpt ];
 
-  /* Zero out the device transfer descriptors */
-  memset((void*)pDTD, 0, sizeof(DTD_T));
-  /* The next DTD pointer is INVALID */
-  pDTD->next_dTD = 0x01 ;
+    /* Zero out the device transfer descriptors */
+    memset((void*)pDTD, 0, sizeof(DTD_T));
+    /* The next DTD pointer is INVALID */
+    pDTD->next_dTD = 0x01 ;
 
-  /* Length */
-  pDTD->total_bytes = ((TsfSize & 0x7fff) << 16);
-  pDTD->total_bytes |= TD_IOC ;
-  pDTD->total_bytes |= 0x80 ;
+    /* Length */
+    pDTD->total_bytes = ((TsfSize & 0x7fffu) << 16u);
+    pDTD->total_bytes |= TD_IOC ;
+    pDTD->total_bytes |= 0x80u ;
 
-  pDTD->buffer0 = ptrBuff;
-  pDTD->buffer1 = (ptrBuff + 0x1000) & 0xfffff000;
-  pDTD->buffer2 = (ptrBuff + 0x2000) & 0xfffff000;
-  pDTD->buffer3 = (ptrBuff + 0x3000) & 0xfffff000;
-  pDTD->buffer4 = (ptrBuff + 0x4000) & 0xfffff000;
+    pDTD->buffer0 = ptrBuff;
+    pDTD->buffer1 = (ptrBuff + 0x1000) & 0xfffff000;
+    pDTD->buffer2 = (ptrBuff + 0x2000) & 0xfffff000;
+    pDTD->buffer3 = (ptrBuff + 0x3000) & 0xfffff000;
+    pDTD->buffer4 = (ptrBuff + 0x4000) & 0xfffff000;
 
-  ep_QH[Edpt].next_dTD = (uint32_t)(&ep_TD[ Edpt ]);
-  ep_QH[Edpt].total_bytes &= (~0xC0) ;
+    ep_QH[Edpt].next_dTD = (uint32_t)(&ep_TD[ Edpt ]);
+    ep_QH[Edpt].total_bytes &= (~0xC0u) ;
 }
 
 /*
@@ -603,44 +537,38 @@ void USB_ProgDTD(uint32_t Edpt, uint32_t ptrBuff, uint32_t TsfSize)
 *                     pData: Pointer to Data Buffer
 *    Return Value:    Number of bytes read
 */
-uint32_t USB_ReadSetupPkt(uint32_t EPNum, uint32_t *pData)
-{
-  uint32_t setup_int, cnt = 0;
-  uint32_t num = EPAdr(EPNum);
+uint32_t USB_ReadSetupPkt(uint32_t EPNum, uint32_t *pData) {
+    uint32_t setup_int, cnt = 0;
+    uint32_t num = EPAdr(EPNum);
 
-  setup_int = LPC_USB->ENDPTSETUPSTAT ;
-  /* Clear the setup interrupt */
-  LPC_USB->ENDPTSETUPSTAT = setup_int;
-
-  /* ********************************** */
-  /*  Check if we have received a setup */
-  /* ********************************** */
-  if (setup_int & (1<<0))                    /* Check only for bit 0 */
-    /* No setup are admitted on other endpoints than 0 */
-  {
-    do
-    {
-      /* Setup in a setup - must considere only the second setup */
-      /*- Set the tripwire */
-      LPC_USB->USBCMD_D |= USBCMD_SUTW ;
-
-      /* Transfer Set-up data to the gtmudsCore_Request buffer */
-      pData[0] = ep_QH[num].setup[0];
-      pData[1] = ep_QH[num].setup[1];
-      cnt = 8;
-
-    }
-    while (!(LPC_USB->USBCMD_D & USBCMD_SUTW)) ;
-
-    /* setup in a setup - Clear the tripwire */
-    LPC_USB->USBCMD_D &= (~USBCMD_SUTW);
-  }
-  while ((setup_int = LPC_USB->ENDPTSETUPSTAT) != 0)
-  {
+    setup_int = LPC_USB->ENDPTSETUPSTAT ;
     /* Clear the setup interrupt */
     LPC_USB->ENDPTSETUPSTAT = setup_int;
-  }
-  return cnt;
+
+    /* ********************************** */
+    /*  Check if we have received a setup */
+    /* ********************************** */
+    if (setup_int & (1u<<0u))  {                  /* Check only for bit 0 */
+        /* No setup are admitted on other endpoints than 0 */
+        do {
+            /* Setup in a setup - must considere only the second setup */
+            /*- Set the tripwire */
+            LPC_USB->USBCMD_D |= USBCMD_SUTW ;
+
+            /* Transfer Set-up data to the gtmudsCore_Request buffer */
+            pData[0] = ep_QH[num].setup[0];
+            pData[1] = ep_QH[num].setup[1];
+            cnt = 8;
+        } while (!(LPC_USB->USBCMD_D & USBCMD_SUTW)) ;
+
+        /* setup in a setup - Clear the tripwire */
+        LPC_USB->USBCMD_D &= (~USBCMD_SUTW);
+    }
+    while ((setup_int = LPC_USB->ENDPTSETUPSTAT) != 0) {
+        /* Clear the setup interrupt */
+        LPC_USB->ENDPTSETUPSTAT = setup_int;
+    }
+    return cnt;
 }
 
 /*
@@ -652,16 +580,15 @@ uint32_t USB_ReadSetupPkt(uint32_t EPNum, uint32_t *pData)
 *    Return Value:    Number of bytes read
 */
 
-uint32_t USB_ReadReqEP(uint32_t EPNum, uint8_t *pData, uint32_t len)
-{
-  uint32_t num = EPAdr(EPNum);
-  uint32_t n = USB_EP_BITPOS(EPNum);
+uint32_t USB_ReadReqEP(uint32_t EPNum, uint8_t *pData, uint32_t len) {
+    uint32_t num = EPAdr(EPNum);
+    uint32_t n = USB_EP_BITPOS(EPNum);
 
-  USB_ProgDTD(num, (uint32_t)pData, len);
-  ep_read_len[EPNum & 0x0F] = len;
-  /* prime the endpoint for read */
-  LPC_USB->ENDPTPRIME |= (1<<n);
-  return len;
+    USB_ProgDTD(num, (uint32_t)pData, len);
+    ep_read_len[EPNum & 0x0Fu] = len;
+    /* prime the endpoint for read */
+    LPC_USB->ENDPTPRIME |= (1u<<n);
+    return len;
 }
 /*
 *  Read USB Endpoint Data
@@ -672,18 +599,18 @@ uint32_t USB_ReadReqEP(uint32_t EPNum, uint8_t *pData, uint32_t len)
 *    Return Value:    Number of bytes read
 */
 
-uint32_t USB_ReadEP(uint32_t EPNum, uint8_t *pData)
-{
-  uint32_t cnt, n;
-  DTD_T*  pDTD ;
+uint32_t USB_ReadEP(uint32_t EPNum, const uint8_t *pData) {
+    (void) pData;
+    uint32_t cnt, n;
+    DTD_T*  pDTD ;
 
-  n = EPAdr(EPNum);
-  pDTD = (DTD_T*)&ep_TD[n];
+    n = EPAdr(EPNum);
+    pDTD = (DTD_T*)&ep_TD[n];
 
-  /* return the total bytes read */
-  cnt  = (pDTD->total_bytes >> 16) & 0x7FFF;
-  cnt = ep_read_len[EPNum & 0x0F] - cnt;
-  return (cnt);	   
+    /* return the total bytes read */
+    cnt  = (pDTD->total_bytes >> 16u) & 0x7FFFu;
+    cnt = ep_read_len[EPNum & 0x0Fu] - cnt;
+    return (cnt);
 }
 
 /*
@@ -695,174 +622,119 @@ uint32_t USB_ReadEP(uint32_t EPNum, uint8_t *pData)
 *                     cnt:   Number of bytes to write
 *    Return Value:    Number of bytes written
 */
-uint32_t USB_WriteEP(uint32_t EPNum, uint8_t *pData, uint32_t cnt)
-{
-  uint32_t n = USB_EP_BITPOS(EPNum);
+uint32_t USB_WriteEP(uint32_t EPNum, uint8_t *pData, uint32_t cnt) {
+    uint32_t n = USB_EP_BITPOS(EPNum);
 
-  USB_ProgDTD(EPAdr(EPNum), (uint32_t)pData, cnt);
-  /* prime the endpoint for transmit */
-  LPC_USB->ENDPTPRIME |= (1<<n);
+    USB_ProgDTD(EPAdr(EPNum), (uint32_t)pData, cnt);
+    /* prime the endpoint for transmit */
+    LPC_USB->ENDPTPRIME |= (1u<<n);
 
-  /* check if priming succeeded */
-  while (LPC_USB->ENDPTPRIME & (1<<n));
-  return (cnt);
+    /* check if priming succeeded */
+    while (LPC_USB->ENDPTPRIME & (1u<<n));
+    return (cnt);
 }
 
 /*
  *  USB Interrupt Service Routine
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
-#ifdef USE_USB0
+extern "C" void USB0_IRQHandler (void) {
+    uint32_t disr, val, n;
 
-void USB0_IRQHandler (void)
-#else
-void USB1_IRQHandler (void)
-#endif
-{
-  uint32_t disr, val, n;
+    disr = LPC_USB->USBSTS_D; // Device Interrupt Status
+    LPC_USB->USBSTS_D = disr;
 
-  disr = LPC_USB->USBSTS_D;                      /* Device Interrupt Status */
-  LPC_USB->USBSTS_D = disr;
-
-//  printf("USB interrupt: 0x%08x\n",disr);
-
-//	LPC_UART1->THR = 'U';
-//	LPC_UART1->THR = 'S';
-//	LPC_UART1->THR = 'B';
-//	LPC_UART1->THR = '\n';
-
-
-  /* Device Status Interrupt (Reset, Connect change, Suspend/Resume) */
-  if (disr & USBSTS_URI)                      /* Reset */
-  {
-//												  	LPC_UART1->THR = 'R';
-//												  	LPC_UART1->THR = '\n';
-    USB_Reset();
-    if (g_drv.USB_Reset_Event)
-      g_drv.USB_Reset_Event();
-    return;
-	//goto isr_end;
-}
-
-if (disr & USBSTS_SLI)                   /* Suspend */
-  {
-//												  LPC_UART1->THR = 'U';
-//												  	LPC_UART1->THR = '\n';
-    if (g_drv.USB_Suspend_Event)
-      g_drv.USB_Suspend_Event();
-  }
-
-  if (disr & USBSTS_PCI)                  /* Resume */
-  {
-//												  	LPC_UART1->THR = 'P';
-//												  	LPC_UART1->THR = '\n';
-    /* check if device isoperating in HS mode or full speed */
-    if (LPC_USB->PORTSC1_D & (1<<9))
-      DevStatusFS2HS = TRUE;
-
-    if (g_drv.USB_Resume_Event)
-      g_drv.USB_Resume_Event();
-  }
-
-  /* handle setup status interrupts */
-  val = LPC_USB->ENDPTSETUPSTAT;
-  /* Only EP0 will have setup packets so call EP0 handler */
-  if (val)
-  {
-//												    LPC_UART1->THR = 'S';
-//												  	LPC_UART1->THR = '\n';
-    /* Clear the endpoint complete CTRL OUT & IN when */
-    /* a Setup is received */
-    LPC_USB->ENDPTCOMPLETE = 0x00010001;
-    /* enable NAK inetrrupts */
-    LPC_USB->ENDPTNAKEN |= 0x00010001;
-    if (g_drv.USB_P_EP[0]){
-//														LPC_UART1->THR = 's';
-//												  		LPC_UART1->THR = '\n';
-        g_drv.USB_P_EP[0](USB_EVT_SETUP);
-	}
-  }
-
-  /* handle completion interrupts */
-  val = LPC_USB->ENDPTCOMPLETE;
-  if (val)
-  {
-//														LPC_UART1->THR = 'C';
-//													  	LPC_UART1->THR = '\n';
-
-    LPC_USB->ENDPTNAK = val;
-    for (n = 0; n < EP_NUM_MAX / 2; n++)
-    {
-      if (val & (1<<n))
-      {
-        if (g_drv.USB_P_EP[n])
-          g_drv.USB_P_EP[n](USB_EVT_OUT);
-
-        LPC_USB->ENDPTCOMPLETE = (1<<n);
-      }
-      if (val & (1<<(n + 16)))
-      {
-        ep_TD [(n << 1) + 1 ].total_bytes &= 0xC0;
-        if (g_drv.USB_P_EP[n])
-          g_drv.USB_P_EP[n](USB_EVT_IN);
-        LPC_USB->ENDPTCOMPLETE = (1<<(n + 16));
-      }
-    }
-  }
-
-  if (disr & USBSTS_NAKI)
-  {
-//												  	LPC_UART1->THR = 'N';
-//												  	LPC_UART1->THR = '\n';
-    val = LPC_USB->ENDPTNAK;
-    val &= LPC_USB->ENDPTNAKEN;
-    /* handle NAK interrupts */
-    if (val)
-    {
-      for (n = 0; n < EP_NUM_MAX / 2; n++)
-      {
-        if (val & (1<<n))
-        {
-          if (g_drv.USB_P_EP[n])
-            g_drv.USB_P_EP[n](USB_EVT_OUT_NAK);
+    // Device Status Interrupt (Reset, Connect change, Suspend/Resume)
+    if (disr & USBSTS_URI) { // Reset
+        USB_Reset();
+        if (g_drv.USB_Reset_Event) {
+            g_drv.USB_Reset_Event();
         }
-        if (val & (1<<(n + 16)))
-        {
-          if (g_drv.USB_P_EP[n])
-            g_drv.USB_P_EP[n](USB_EVT_IN_NAK);
-        }
-      }
-      LPC_USB->ENDPTNAK = val;
+        return;
     }
-  }
 
-  /* Start of Frame Interrupt */
-  if (disr & USBSTS_SRI)
-  {
-//												  	LPC_UART1->THR = 'F';
-//												  	LPC_UART1->THR = '\n';
-    if (g_drv.USB_SOF_Event)
-      g_drv.USB_SOF_Event();
-  }
+    if (disr & USBSTS_SLI) { // Suspend
+        if (g_drv.USB_Suspend_Event) {
+            g_drv.USB_Suspend_Event();
+        }
+    }
 
-  /* Error Interrupt */
-  if (disr & USBSTS_UEI)
-  {
-//													  LPC_UART1->THR = 'E';
-//													  	LPC_UART1->THR = '\n';
-    if (g_drv.USB_Error_Event)
-      g_drv.USB_Error_Event(disr);
-  }
+    if (disr & USBSTS_PCI) { // Resume
+        if (LPC_USB->PORTSC1_D & (1u<<9u)) { //  check if device isoperating in HS mode or full speed
+            DevStatusFS2HS = true;
+        }
 
-//    LPC_UART1->THR = 'r';
-//  	LPC_UART1->THR = '\n';
-//isr_end:
-//  LPC_VIC->VectAddr = 0;                   /* Acknowledge Interrupt */
-  return;
+        if (g_drv.USB_Resume_Event) {
+            g_drv.USB_Resume_Event();
+        }
+    }
+
+    val = LPC_USB->ENDPTSETUPSTAT; // handle setup status interrupts
+    /* Only EP0 will have setup packets so call EP0 handler */
+    if (val) {
+        /* Clear the endpoint complete CTRL OUT & IN when */
+        /* a Setup is received */
+        LPC_USB->ENDPTCOMPLETE = 0x00010001u;
+        /* enable NAK inetrrupts */
+        LPC_USB->ENDPTNAKEN |= 0x00010001u;
+        if (g_drv.USB_P_EP[0]){
+            g_drv.USB_P_EP[0](USB_EVT_SETUP);
+        }
+    }
+
+    /* handle completion interrupts */
+    val = LPC_USB->ENDPTCOMPLETE;
+    if (val) {
+        LPC_USB->ENDPTNAK = val;
+        for (n = 0; n < EP_NUM_MAX / 2; n++) {
+            if (val & (1u<<n)) {
+                if (g_drv.USB_P_EP[n]) {
+                    g_drv.USB_P_EP[n](USB_EVT_OUT);
+                }
+                LPC_USB->ENDPTCOMPLETE = (1u<<n);
+            }
+
+            if (val & (1u<<(n + 16u))) {
+                ep_TD [(n << 1u) + 1u ].total_bytes &= 0xC0u;
+                if (g_drv.USB_P_EP[n]) {
+                    g_drv.USB_P_EP[n](USB_EVT_IN);
+                }
+                LPC_USB->ENDPTCOMPLETE = (1u<<(n + 16u));
+            }
+        }
+    }
+
+    if (disr & USBSTS_NAKI) {
+        val = LPC_USB->ENDPTNAK;
+        val &= LPC_USB->ENDPTNAKEN;
+        /* handle NAK interrupts */
+        if (val) {
+            for (n = 0; n < EP_NUM_MAX / 2; n++)  {
+                if (val & (1u<<n)) {
+                    if (g_drv.USB_P_EP[n]) {
+                        g_drv.USB_P_EP[n](USB_EVT_OUT_NAK);
+                    }
+                }
+                if (val & (1u<<(n + 16u))) {
+                    if (g_drv.USB_P_EP[n]) {
+                        g_drv.USB_P_EP[n](USB_EVT_IN_NAK);
+                    }
+                }
+            }
+            LPC_USB->ENDPTNAK = val;
+        }
+    }
+
+    /* Start of Frame Interrupt */
+    if (disr & USBSTS_SRI) {
+        if (g_drv.USB_SOF_Event)
+        g_drv.USB_SOF_Event();
+        }
+
+    /* Error Interrupt */
+    if (disr & USBSTS_UEI) {
+        if (g_drv.USB_Error_Event) {
+            g_drv.USB_Error_Event(disr);
+        }
+    }
 }
 
-#ifdef __cplusplus
-}
-#endif
