@@ -47,6 +47,10 @@
 #ifndef __USB_H__
 #define __USB_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define USE_USB0 			// Else use USB1
 #ifdef USE_USB0
 #define LPC_USB LPC_USB0	// Use USB0
@@ -386,17 +390,17 @@ typedef __packed struct _USB_OTHER_SPEED_CONFIGURATION {
 typedef struct __packed _USB_OTHER_SPEED_CONFIGURATION {
 #elif defined   (  __IAR_SYSTEMS_ICC__  )
 #pragma pack(1)
-typedef struct _USB_OTHER_SPEED_CONFIGURATION {
+    typedef struct _USB_OTHER_SPEED_CONFIGURATION {
 #endif
 
-  uint8_t  bLength;
-  uint8_t  bDescriptorType;
-  uint16_t wTotalLength;
-  uint8_t  bNumInterfaces;
-  uint8_t  bConfigurationValue;
-  uint8_t  IConfiguration;
-  uint8_t  bmAttributes;
-  uint8_t  bMaxPower;
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint16_t wTotalLength;
+    uint8_t bNumInterfaces;
+    uint8_t bConfigurationValue;
+    uint8_t IConfiguration;
+    uint8_t bmAttributes;
+    uint8_t bMaxPower;
 } USB_OTHER_SPEED_CONFIGURATION;
 
 
@@ -416,27 +420,41 @@ typedef struct _USB_OTHER_SPEED_CONFIGURATION {
 #define USB_EVT_IN_DMA_ERR  13  /* DMA  IN EP - Error */
 
 /* call back structure */
-typedef struct _USB_INIT_
-{
-  uint32_t ep0_maxp;
-  /* USB Device Events Callback Functions */
-  void (* USB_Power_Event)(uint32_t  power);
-  void (* USB_Reset_Event)(void);
-  void (* USB_Suspend_Event)(void);
-  void (* USB_Resume_Event)(void);
-  void (* USB_WakeUp_Event)(void);
-  void (* USB_SOF_Event)(void);
-  void (* USB_Error_Event)(uint32_t error);
-  /* USB Core Events Callback Functions */
-  void (* USB_Configure_Event)(void);
-  void (* USB_Interface_Event)(void);
-  void (* USB_Feature_Event)(void);
-  /* USB Endpoint Events Callback Pointers */
-  void (* USB_P_EP[4])(uint32_t event);
+typedef struct _USB_INIT_ {
+    uint32_t ep0_maxp;
+
+    /* USB Device Events Callback Functions */
+    void (*USB_Power_Event)(uint32_t power);
+
+    void (*USB_Reset_Event)(void);
+
+    void (*USB_Suspend_Event)(void);
+
+    void (*USB_Resume_Event)(void);
+
+    void (*USB_WakeUp_Event)(void);
+
+    void (*USB_SOF_Event)(void);
+
+    void (*USB_Error_Event)(uint32_t error);
+
+    /* USB Core Events Callback Functions */
+    void (*USB_Configure_Event)(void);
+
+    void (*USB_Interface_Event)(void);
+
+    void (*USB_Feature_Event)(void);
+
+    /* USB Endpoint Events Callback Pointers */
+    void (*USB_P_EP[4])(uint32_t event);
 } LPC_USBDRV_INIT_T;
 
 #ifdef __IAR_SYSTEMS_ICC__
 #pragma pack()
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif  /* __USB_H__ */

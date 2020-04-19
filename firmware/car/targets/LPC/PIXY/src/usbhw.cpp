@@ -711,7 +711,11 @@ uint32_t USB_WriteEP(uint32_t EPNum, uint8_t *pData, uint32_t cnt)
 /*
  *  USB Interrupt Service Routine
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef USE_USB0
+
 void USB0_IRQHandler (void)
 #else
 void USB1_IRQHandler (void)
@@ -740,9 +744,9 @@ void USB1_IRQHandler (void)
       g_drv.USB_Reset_Event();
     return;
 	//goto isr_end;
-  }
+}
 
-  if (disr & USBSTS_SLI)                   /* Suspend */
+if (disr & USBSTS_SLI)                   /* Suspend */
   {
 //												  LPC_UART1->THR = 'U';
 //												  	LPC_UART1->THR = '\n';
@@ -858,3 +862,7 @@ void USB1_IRQHandler (void)
 //  LPC_VIC->VectAddr = 0;                   /* Acknowledge Interrupt */
   return;
 }
+
+#ifdef __cplusplus
+}
+#endif

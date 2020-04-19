@@ -13,16 +13,12 @@
 // end license header
 //
 
-#include <string.h>
+#include <cstring>
 #include "lpc_types.h"
 #include "pixyvals.h"
-#include "usb.h"
-#include "usbcfg.h"
 #include "usblink.h"
 #include "usbuser.h"
-#include "usbhw.h"
 #include "chip.h"
-//#include "lpc43xx.h"
 #include "misc.h"
 
 #define GBUF_SIZE 64

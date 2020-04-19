@@ -34,6 +34,9 @@
 #ifndef __USBDESC_H__
 #define __USBDESC_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define WBVAL(x) (x & 0xFF),((x >> 8) & 0xFF)
 
@@ -52,5 +55,8 @@ extern const uint8_t USB_DeviceQualifier[];
 extern const uint8_t USB_FSOtherSpeedConfiguration[];
 extern const uint8_t USB_HSOtherSpeedConfiguration[];
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __USBDESC_H__ */
