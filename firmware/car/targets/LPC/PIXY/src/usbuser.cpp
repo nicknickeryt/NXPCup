@@ -31,8 +31,8 @@
  * Copyright (c) 2009 Keil - An ARM Company. All rights reserved.
  *---------------------------------------------------------------------------*/
 
-#include <string.h>
-//#include "lpc43xx.h"                        /* LPC23xx definitions */
+#include <cstring>
+
 #include "chip.h"
 #include "lpc_types.h"
 
@@ -41,8 +41,6 @@
 #include "usbhw.h"
 #include "usbcore.h"
 #include "usbuser.h"
-
-//#include "debug.h"
 
 void sendChunk(void);
 void recvChunk(void);

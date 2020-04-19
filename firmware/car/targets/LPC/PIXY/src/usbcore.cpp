@@ -36,10 +36,7 @@
  *                Reworked Endpoint0
  *          V1.00 Initial Version
  *----------------------------------------------------------------------------*/
-//#include "lpc43xx.h"
-#include "chip.h"
 #include "lpc_types.h"
-
 #include "usb.h"
 #include "usbcfg.h"
 #include "usbhw.h"
@@ -171,7 +168,7 @@ void USB_DataOutStage (void) {
  */
 
 void USB_StatusInStage (void) {
-  USB_WriteEP(0x80, NULL, 0);
+  USB_WriteEP(0x80, nullptr, 0);
 }
 
 
