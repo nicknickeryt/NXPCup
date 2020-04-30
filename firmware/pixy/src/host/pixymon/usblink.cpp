@@ -72,10 +72,6 @@ int USBLink::openDevice()
         {
             if (libusb_open(device, &m_handle)==0)
             {
-            #ifdef __MACOS__
-                libusb_reset_device(m_handle);
-                Sleeper::msleep(100);
-            #endif
                 if (libusb_set_configuration(m_handle, 1)<0)
                 {
                     libusb_close(m_handle);
@@ -88,9 +84,6 @@ int USBLink::openDevice()
                     m_handle = 0;
                     continue;
                 }
-#ifdef __LINUX__
-                libusb_reset_device(m_handle);
-#endif
                 break;
             }
         }
@@ -112,9 +105,6 @@ int USBLink::send(const uint8_t *data, uint32_t len, uint16_t timeoutMs)
 
     if ((res=libusb_bulk_transfer(m_handle, 0x02, (unsigned char *)data, len, &transferred, timeoutMs))<0)
     {
-#ifdef __MACOS__
-        libusb_clear_halt(m_handle, 0x02);
-#endif
         DBG("libusb_bulk_write %d", res);
         return res;
     }
@@ -132,9 +122,6 @@ int USBLink::receive(uint8_t *data, uint32_t len, uint16_t timeoutMs)
     // cause us to revert to a 1.0 connection.
     if ((res=libusb_bulk_transfer(m_handle, 0x82, (unsigned char *)data, len, &transferred, timeoutMs))<0)
     {
-#ifdef __MACOS__
-        libusb_clear_halt(m_handle, 0x82);
-#endif
         //DBG("libusb_bulk_read %d", res);
         return res;
     }

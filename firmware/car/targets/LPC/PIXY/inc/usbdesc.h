@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define WBVAL(x) (x & 0xFF),((x >> 8) & 0xFF)
+#define WBVAL(x) (x & 0xFFu),((x >> 8u) & 0xFFu)
 
 #define USB_DEVICE_DESC_SIZE        (sizeof(USB_DEVICE_DESCRIPTOR))
 #define USB_CONFIGUARTION_DESC_SIZE (sizeof(USB_CONFIGURATION_DESCRIPTOR))

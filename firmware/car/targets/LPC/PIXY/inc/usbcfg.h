@@ -87,17 +87,17 @@
 // </h>
 */
 
-#define USB_POWER_EVENT     0
-#define USB_RESET_EVENT     1
-#define USB_SUSPEND_EVENT   1
-#define USB_RESUME_EVENT    1
-#define USB_WAKEUP_EVENT    0
-#define USB_SOF_EVENT       0
-#define USB_ERROR_EVENT     0
-#define USB_EP_EVENT        0x0007
-#define USB_CONFIGURE_EVENT 1
-#define USB_INTERFACE_EVENT 0
-#define USB_FEATURE_EVENT   0
+#define USB_POWER_EVENT     0u
+#define USB_RESET_EVENT     1u
+#define USB_SUSPEND_EVENT   1u
+#define USB_RESUME_EVENT    1u
+#define USB_WAKEUP_EVENT    0u
+#define USB_SOF_EVENT       0u
+#define USB_ERROR_EVENT     0u
+#define USB_EP_EVENT        0x0007u
+#define USB_CONFIGURE_EVENT 1u
+#define USB_INTERFACE_EVENT 0u
+#define USB_FEATURE_EVENT   0u
 
 
 /*
@@ -123,26 +123,26 @@
 // </e>
 */
 
-#define USB_CLASS           1
-#define USB_HID             0
-#define USB_HID_IF_NUM      0
-#define USB_MSC             0
-#define USB_MSC_IF_NUM      0
-#define USB_AUDIO           0
-#define USB_ADC_CIF_NUM     0
-#define USB_ADC_SIF1_NUM    1
-#define USB_ADC_SIF2_NUM    2
-#define USB_CDC  			0
+#define USB_CLASS           1u
+#define USB_HID             0u
+#define USB_HID_IF_NUM      0u
+#define USB_MSC             0u
+#define USB_MSC_IF_NUM      0u
+#define USB_AUDIO           0u
+#define USB_ADC_CIF_NUM     0u
+#define USB_ADC_SIF1_NUM    1u
+#define USB_ADC_SIF2_NUM    2u
+#define USB_CDC  			0u
 			
-#define USB_DEV_BUFSIZE     64
-#define USB_BULK_IN_EP      0x82
-#define USB_BULK_OUT_EP     0x02
+#define USB_DEV_BUFSIZE     64u
+#define USB_BULK_IN_EP      0x82u
+#define USB_BULK_OUT_EP     0x02u
 /*
 // <e0> USB Vendor Support
 //   <i> enables USB Vendor specific Requests
 // </e>
 */
-#define USB_VENDOR          0
+#define USB_VENDOR          0u
 
 
 #endif  /* __USBCFG_H__ */

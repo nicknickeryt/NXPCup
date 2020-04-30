@@ -137,27 +137,27 @@ typedef union _REQUEST_TYPE {
 #endif
 
 /* USB Standard Request Codes */
-#define USB_REQUEST_GET_STATUS                 0
-#define USB_REQUEST_CLEAR_FEATURE              1
-#define USB_REQUEST_SET_FEATURE                3
-#define USB_REQUEST_SET_ADDRESS                5
-#define USB_REQUEST_GET_DESCRIPTOR             6
-#define USB_REQUEST_SET_DESCRIPTOR             7
-#define USB_REQUEST_GET_CONFIGURATION          8
-#define USB_REQUEST_SET_CONFIGURATION          9
-#define USB_REQUEST_GET_INTERFACE              10
-#define USB_REQUEST_SET_INTERFACE              11
-#define USB_REQUEST_SYNC_FRAME                 12
+#define USB_REQUEST_GET_STATUS                 0u
+#define USB_REQUEST_CLEAR_FEATURE              1u
+#define USB_REQUEST_SET_FEATURE                3u
+#define USB_REQUEST_SET_ADDRESS                5u
+#define USB_REQUEST_GET_DESCRIPTOR             6u
+#define USB_REQUEST_SET_DESCRIPTOR             7u
+#define USB_REQUEST_GET_CONFIGURATION          8u
+#define USB_REQUEST_SET_CONFIGURATION          9u
+#define USB_REQUEST_GET_INTERFACE              10u
+#define USB_REQUEST_SET_INTERFACE              11u
+#define USB_REQUEST_SYNC_FRAME                 12u
 
 /* USB GET_STATUS Bit Values */
-#define USB_GETSTATUS_SELF_POWERED             0x01
-#define USB_GETSTATUS_REMOTE_WAKEUP            0x02
-#define USB_GETSTATUS_ENDPOINT_STALL           0x01
+#define USB_GETSTATUS_SELF_POWERED             0x01u
+#define USB_GETSTATUS_REMOTE_WAKEUP            0x02u
+#define USB_GETSTATUS_ENDPOINT_STALL           0x01u
 
 /* USB Standard Feature selectors */
-#define USB_FEATURE_ENDPOINT_STALL             0
-#define USB_FEATURE_REMOTE_WAKEUP              1
-#define USB_FEATURE_TEST_MODE                  2
+#define USB_FEATURE_ENDPOINT_STALL             0u
+#define USB_FEATURE_REMOTE_WAKEUP              1u
+#define USB_FEATURE_TEST_MODE                  2u
 
 /* USB Default Control Pipe Setup Packet */
 #if defined     (  __CC_ARM  )
@@ -180,45 +180,45 @@ typedef struct _USB_SETUP_PACKET {
 
 
 /* USB Descriptor Types */
-#define USB_DEVICE_DESCRIPTOR_TYPE                  1
-#define USB_CONFIGURATION_DESCRIPTOR_TYPE           2
-#define USB_STRING_DESCRIPTOR_TYPE                  3
-#define USB_INTERFACE_DESCRIPTOR_TYPE               4
-#define USB_ENDPOINT_DESCRIPTOR_TYPE                5
-#define USB_DEVICE_QUALIFIER_DESCRIPTOR_TYPE        6
-#define USB_OTHER_SPEED_CONFIG_DESCRIPTOR_TYPE      7
-#define USB_INTERFACE_POWER_DESCRIPTOR_TYPE         8
-#define USB_OTG_DESCRIPTOR_TYPE                     9
-#define USB_DEBUG_DESCRIPTOR_TYPE                  10
-#define USB_INTERFACE_ASSOCIATION_DESCRIPTOR_TYPE  11
+#define USB_DEVICE_DESCRIPTOR_TYPE                  1u
+#define USB_CONFIGURATION_DESCRIPTOR_TYPE           2u
+#define USB_STRING_DESCRIPTOR_TYPE                  3u
+#define USB_INTERFACE_DESCRIPTOR_TYPE               4u
+#define USB_ENDPOINT_DESCRIPTOR_TYPE                5u
+#define USB_DEVICE_QUALIFIER_DESCRIPTOR_TYPE        6u
+#define USB_OTHER_SPEED_CONFIG_DESCRIPTOR_TYPE      7u
+#define USB_INTERFACE_POWER_DESCRIPTOR_TYPE         8u
+#define USB_OTG_DESCRIPTOR_TYPE                     9u
+#define USB_DEBUG_DESCRIPTOR_TYPE                  10u
+#define USB_INTERFACE_ASSOCIATION_DESCRIPTOR_TYPE  11u
 
 /* USB Device Classes */
-#define USB_DEVICE_CLASS_RESERVED              0x00
-#define USB_DEVICE_CLASS_AUDIO                 0x01
-#define USB_DEVICE_CLASS_COMMUNICATIONS        0x02
-#define USB_DEVICE_CLASS_HUMAN_INTERFACE       0x03
-#define USB_DEVICE_CLASS_MONITOR               0x04
-#define USB_DEVICE_CLASS_PHYSICAL_INTERFACE    0x05
-#define USB_DEVICE_CLASS_POWER                 0x06
-#define USB_DEVICE_CLASS_PRINTER               0x07
-#define USB_DEVICE_CLASS_STORAGE               0x08
-#define USB_DEVICE_CLASS_HUB                   0x09
-#define USB_DEVICE_CLASS_MISCELLANEOUS         0xEF
-#define USB_DEVICE_CLASS_VENDOR_SPECIFIC       0xFF
+#define USB_DEVICE_CLASS_RESERVED              0x00u
+#define USB_DEVICE_CLASS_AUDIO                 0x01u
+#define USB_DEVICE_CLASS_COMMUNICATIONS        0x02u
+#define USB_DEVICE_CLASS_HUMAN_INTERFACE       0x03u
+#define USB_DEVICE_CLASS_MONITOR               0x04u
+#define USB_DEVICE_CLASS_PHYSICAL_INTERFACE    0x05u
+#define USB_DEVICE_CLASS_POWER                 0x06u
+#define USB_DEVICE_CLASS_PRINTER               0x07u
+#define USB_DEVICE_CLASS_STORAGE               0x08u
+#define USB_DEVICE_CLASS_HUB                   0x09u
+#define USB_DEVICE_CLASS_MISCELLANEOUS         0xEFu
+#define USB_DEVICE_CLASS_VENDOR_SPECIFIC       0xFFu
 
 /* bmAttributes in Configuration Descriptor */
-#define USB_CONFIG_POWERED_MASK                0x40
-#define USB_CONFIG_BUS_POWERED                 0x80
-#define USB_CONFIG_SELF_POWERED                0xC0
-#define USB_CONFIG_REMOTE_WAKEUP               0x20
+#define USB_CONFIG_POWERED_MASK                0x40u
+#define USB_CONFIG_BUS_POWERED                 0x80u
+#define USB_CONFIG_SELF_POWERED                0xC0u
+#define USB_CONFIG_REMOTE_WAKEUP               0x20u
 
 /* bMaxPower in Configuration Descriptor */
-#define USB_CONFIG_POWER_MA(mA)                ((mA)/2)
+#define USB_CONFIG_POWER_MA(mA)                ((mA)/2u)
 
 /* bEndpointAddress in Endpoint Descriptor */
 #define USB_ENDPOINT_DIRECTION_MASK            0x80
-#define USB_ENDPOINT_OUT(addr)                 ((addr) | 0x00)
-#define USB_ENDPOINT_IN(addr)                  ((addr) | 0x80)
+#define USB_ENDPOINT_OUT(addr)                 ((addr) | 0x00u)
+#define USB_ENDPOINT_IN(addr)                  ((addr) | 0x80u)
 
 /* bmAttributes in Endpoint Descriptor */
 #define USB_ENDPOINT_TYPE_MASK                 0x03u

@@ -37,6 +37,7 @@ SOURCES += main.cpp\
     linemodule.cpp
 
 HEADERS  += mainwindow.h \
+    newMainWindow.h \
     videowidget.h \
     usblink.h \
     console.h \

@@ -29,7 +29,7 @@ public:
     virtual uint32_t getTimer();
 
 private:
-	uint32_t m_timer;
+	uint32_t m_timer{};
 };
 #endif
 

@@ -18,6 +18,7 @@
 #include <QDebug>
 #include "mainwindow.h"
 #include "httpserver.h"
+#include "newMainWindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,7 +45,10 @@ int main(int argc, char *argv[])
     a.setPalette(darkPalette);
 #endif
 
-    MainWindow w(argc, argv);
+//    MainWindow w(argc, argv);
+//    w.show();
+
+    newMainWindow w(argc, argv);
     w.show();
 
     return a.exec();
