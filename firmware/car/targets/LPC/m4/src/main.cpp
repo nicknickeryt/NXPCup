@@ -107,8 +107,15 @@ int main() {
     NXP_UART uart(LPC_USART0, 115200);
     uart.init();
 
-    uart.write("kupa", 4);
-    uart.write_u(1000);
+//    uart.write("kupajajajjajajajajjajajajjajdrjchuj", 34);
+//    LPC_TIMER1->TC = 0;
+//    uart.write("\r\n", 2);
+//    uart.write_u(1234);
+//    uart.write("\r\n", 2);
+//    uart.write_u(4321);
+//    uart.write("\r\n", 2);
+//    uart.write_u(9876);
+//    uart.write("\r\n", 2);
 
     volatile uint32_t ddd = LPC_TIMER1->TC;
 
@@ -126,6 +133,7 @@ int main() {
 	while(true) {
         ddd = LPC_TIMER1->TC;
 	    if (ddd < 10000000) {
+            uart.write_u(10000000);
             continue;
 	    }
 

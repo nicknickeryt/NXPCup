@@ -7,15 +7,16 @@ void NXP_UART::write(uint8_t data)  {
 }
 
 void NXP_UART::write(void const* data, uint16_t length) {
-
+    __disable_irq();
     for(uint16_t i=(!txWorking); i<length; i++){
         HRingBuffer_PutChar(&txRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
     }
+
     if (!txWorking) {
         Chip_UART_SendByte(uart, ((uint8_t*)data)[0]);
         txWorking = true;
     }
-
+    __enable_irq();
 }
 
 
