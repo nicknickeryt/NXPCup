@@ -95,208 +95,208 @@ typedef struct {					/*!< USARTn Structure       */
 /**
  * @brief Macro defines for UART Receive Buffer register
  */
-#define UART_RBR_MASKBIT    (0xFF)		        /*!< UART Received Buffer mask bit (8 bits) */
+#define UART_RBR_MASKBIT    (0xFFu)		        /*!< UART Received Buffer mask bit (8 bits) */
 
 /**
  * @brief Macro defines for UART Divisor Latch LSB register
  */
-#define UART_LOAD_DLL(div)  ((div) & 0xFF)		/*!< Macro for loading LSB of divisor */
+#define UART_LOAD_DLL(div)  ((div) & 0xFFu)		/*!< Macro for loading LSB of divisor */
 #define UART_DLL_MASKBIT    (0xFF)	            /*!< Divisor latch LSB bit mask */
 
 /**
  * @brief Macro defines for UART Divisor Latch MSB register
  */
-#define UART_LOAD_DLM(div)  (((div) >> 8) & 0xFF)	/*!< Macro for loading MSB of divisors */
+#define UART_LOAD_DLM(div)  (((div) >> 8u) & 0xFFu)	/*!< Macro for loading MSB of divisors */
 #define UART_DLM_MASKBIT    (0xFF)		            /*!< Divisor latch MSB bit mask */
 
 /**
  * @brief Macro defines for UART Interrupt Enable Register
  */
-#define UART_IER_RBRINT      (1 << 0)	/*!< RBR Interrupt enable */
-#define UART_IER_THREINT     (1 << 1)	/*!< THR Interrupt enable */
-#define UART_IER_RLSINT      (1 << 2)	/*!< RX line status interrupt enable */
-#define UART_IER_MSINT       (1 << 3)	/*!< Modem status interrupt enable - valid for 11xx, 17xx/40xx UART1, 18xx/43xx UART1  only */
-#define UART_IER_CTSINT      (1 << 7)	/*!< CTS signal transition interrupt enable - valid for 17xx/40xx UART1, 18xx/43xx UART1 only */
-#define UART_IER_ABEOINT     (1 << 8)	/*!< Enables the end of auto-baud interrupt */
-#define UART_IER_ABTOINT     (1 << 9)	/*!< Enables the auto-baud time-out interrupt */
-#define UART_IER_BITMASK     (0x307)	/*!< UART interrupt enable register bit mask  - valid for 13xx, 17xx/40xx UART0/2/3, 18xx/43xx UART0/2/3 only*/
-#define UART1_IER_BITMASK    (0x30F)	/*!< UART1 interrupt enable register bit mask - valid for 11xx only */
-#define UART2_IER_BITMASK    (0x38F)	/*!< UART2 interrupt enable register bit mask - valid for 17xx/40xx UART1, 18xx/43xx UART1 only */
+#define UART_IER_RBRINT      (1u << 0u)	/*!< RBR Interrupt enable */
+#define UART_IER_THREINT     (1u << 1u)	/*!< THR Interrupt enable */
+#define UART_IER_RLSINT      (1u << 2u)	/*!< RX line status interrupt enable */
+#define UART_IER_MSINT       (1u << 3u)	/*!< Modem status interrupt enable - valid for 11xx, 17xx/40xx UART1, 18xx/43xx UART1  only */
+#define UART_IER_CTSINT      (1u << 7u)	/*!< CTS signal transition interrupt enable - valid for 17xx/40xx UART1, 18xx/43xx UART1 only */
+#define UART_IER_ABEOINT     (1u << 8u)	/*!< Enables the end of auto-baud interrupt */
+#define UART_IER_ABTOINT     (1u << 9u)	/*!< Enables the auto-baud time-out interrupt */
+#define UART_IER_BITMASK     (0x307u)	/*!< UART interrupt enable register bit mask  - valid for 13xx, 17xx/40xx UART0/2/3, 18xx/43xx UART0/2/3 only*/
+#define UART1_IER_BITMASK    (0x30Fu)	/*!< UART1 interrupt enable register bit mask - valid for 11xx only */
+#define UART2_IER_BITMASK    (0x38Fu)	/*!< UART2 interrupt enable register bit mask - valid for 17xx/40xx UART1, 18xx/43xx UART1 only */
 
 /**
  * @brief Macro defines for UART Interrupt Identification Register
  */
-#define UART_IIR_INTSTAT_PEND   (1 << 0)	/*!< Interrupt pending status - Active low */
-#define UART_IIR_FIFO_EN        (3 << 6)	/*!< These bits are equivalent to FCR[0] */
-#define UART_IIR_ABEO_INT       (1 << 8)	/*!< End of auto-baud interrupt */
-#define UART_IIR_ABTO_INT       (1 << 9)	/*!< Auto-baud time-out interrupt */
-#define UART_IIR_BITMASK        (0x3CF)		/*!< UART interrupt identification register bit mask */
+#define UART_IIR_INTSTAT_PEND   (1u << 0u)	/*!< Interrupt pending status - Active low */
+#define UART_IIR_FIFO_EN        (3u << 6u)	/*!< These bits are equivalent to FCR[0] */
+#define UART_IIR_ABEO_INT       (1u << 8u)	/*!< End of auto-baud interrupt */
+#define UART_IIR_ABTO_INT       (1u << 9u)	/*!< Auto-baud time-out interrupt */
+#define UART_IIR_BITMASK        (0x3CFu)		/*!< UART interrupt identification register bit mask */
 
 /* Interrupt ID bit definitions */
-#define UART_IIR_INTID_MASK     (7 << 1)	/*!< Interrupt identification: Interrupt ID mask */
-#define UART_IIR_INTID_RLS      (3 << 1)	/*!< Interrupt identification: Receive line interrupt */
-#define UART_IIR_INTID_RDA      (2 << 1)	/*!< Interrupt identification: Receive data available interrupt */
-#define UART_IIR_INTID_CTI      (6 << 1)	/*!< Interrupt identification: Character time-out indicator interrupt */
-#define UART_IIR_INTID_THRE     (1 << 1)	/*!< Interrupt identification: THRE interrupt */
-#define UART_IIR_INTID_MODEM    (0 << 1)	/*!< Interrupt identification: Modem interrupt */
+#define UART_IIR_INTID_MASK     (7u << 1u)	/*!< Interrupt identification: Interrupt ID mask */
+#define UART_IIR_INTID_RLS      (3u << 1u)	/*!< Interrupt identification: Receive line interrupt */
+#define UART_IIR_INTID_RDA      (2u << 1u)	/*!< Interrupt identification: Receive data available interrupt */
+#define UART_IIR_INTID_CTI      (6u << 1u)	/*!< Interrupt identification: Character time-out indicator interrupt */
+#define UART_IIR_INTID_THRE     (1u << 1u)	/*!< Interrupt identification: THRE interrupt */
+#define UART_IIR_INTID_MODEM    (0u << 1u)	/*!< Interrupt identification: Modem interrupt */
 
 /**
  * @brief Macro defines for UART FIFO Control Register
  */
-#define UART_FCR_FIFO_EN        (1 << 0)	/*!< UART FIFO enable */
-#define UART_FCR_RX_RS          (1 << 1)	/*!< UART RX FIFO reset */
-#define UART_FCR_TX_RS          (1 << 2)	/*!< UART TX FIFO reset */
-#define UART_FCR_DMAMODE_SEL    (1 << 3)	/*!< UART DMA mode selection - valid for 17xx/40xx, 18xx/43xx only */
-#define UART_FCR_BITMASK        (0xCF)		/*!< UART FIFO control bit mask */
+#define UART_FCR_FIFO_EN        (1u << 0u)	/*!< UART FIFO enable */
+#define UART_FCR_RX_RS          (1u << 1u)	/*!< UART RX FIFO reset */
+#define UART_FCR_TX_RS          (1u << 2u)	/*!< UART TX FIFO reset */
+#define UART_FCR_DMAMODE_SEL    (1u << 3u)	/*!< UART DMA mode selection - valid for 17xx/40xx, 18xx/43xx only */
+#define UART_FCR_BITMASK        (0xCFu)		/*!< UART FIFO control bit mask */
 
-#define UART_TX_FIFO_SIZE       (16)
+#define UART_TX_FIFO_SIZE       (16u)
 
 /* FIFO trigger level bit definitions */
-#define UART_FCR_TRG_LEV0       (0)			/*!< UART FIFO trigger level 0: 1 character */
-#define UART_FCR_TRG_LEV1       (1 << 6)	/*!< UART FIFO trigger level 1: 4 character */
-#define UART_FCR_TRG_LEV2       (2 << 6)	/*!< UART FIFO trigger level 2: 8 character */
-#define UART_FCR_TRG_LEV3       (3 << 6)	/*!< UART FIFO trigger level 3: 14 character */
+#define UART_FCR_TRG_LEV0       (0u)			/*!< UART FIFO trigger level 0: 1 character */
+#define UART_FCR_TRG_LEV1       (1u << 6u)	/*!< UART FIFO trigger level 1: 4 character */
+#define UART_FCR_TRG_LEV2       (2u << 6u)	/*!< UART FIFO trigger level 2: 8 character */
+#define UART_FCR_TRG_LEV3       (3u << 6u)	/*!< UART FIFO trigger level 3: 14 character */
 
 /**
  * @brief Macro defines for UART Line Control Register
  */
 /* UART word length select bit definitions */
-#define UART_LCR_WLEN_MASK      (3 << 0)		/*!< UART word length select bit mask */
-#define UART_LCR_WLEN5          (0 << 0)		/*!< UART word length select: 5 bit data mode */
-#define UART_LCR_WLEN6          (1 << 0)		/*!< UART word length select: 6 bit data mode */
-#define UART_LCR_WLEN7          (2 << 0)		/*!< UART word length select: 7 bit data mode */
-#define UART_LCR_WLEN8          (3 << 0)		/*!< UART word length select: 8 bit data mode */
+#define UART_LCR_WLEN_MASK      (3u << 0u)		/*!< UART word length select bit mask */
+#define UART_LCR_WLEN5          (0u << 0u)		/*!< UART word length select: 5 bit data mode */
+#define UART_LCR_WLEN6          (1u << 0u)		/*!< UART word length select: 6 bit data mode */
+#define UART_LCR_WLEN7          (2u << 0u)		/*!< UART word length select: 7 bit data mode */
+#define UART_LCR_WLEN8          (3u << 0u)		/*!< UART word length select: 8 bit data mode */
 
 /* UART Stop bit select bit definitions */
-#define UART_LCR_SBS_MASK       (1 << 2)		/*!< UART stop bit select: bit mask */
-#define UART_LCR_SBS_1BIT       (0 << 2)		/*!< UART stop bit select: 1 stop bit */
-#define UART_LCR_SBS_2BIT       (1 << 2)		/*!< UART stop bit select: 2 stop bits (in 5 bit data mode, 1.5 stop bits) */
+#define UART_LCR_SBS_MASK       (1u << 2u)		/*!< UART stop bit select: bit mask */
+#define UART_LCR_SBS_1BIT       (0u << 2u)		/*!< UART stop bit select: 1 stop bit */
+#define UART_LCR_SBS_2BIT       (1u << 2u)		/*!< UART stop bit select: 2 stop bits (in 5 bit data mode, 1.5 stop bits) */
 
 /* UART Parity enable bit definitions */
-#define UART_LCR_PARITY_EN      (1 << 3)		/*!< UART Parity Enable */
-#define UART_LCR_PARITY_DIS     (0 << 3)		/*!< UART Parity Disable */
-#define UART_LCR_PARITY_ODD     (0 << 4)		/*!< UART Parity select: Odd parity */
-#define UART_LCR_PARITY_EVEN    (1 << 4)		/*!< UART Parity select: Even parity */
-#define UART_LCR_PARITY_F_1     (2 << 4)		/*!< UART Parity select: Forced 1 stick parity */
-#define UART_LCR_PARITY_F_0     (3 << 4)		/*!< UART Parity select: Forced 0 stick parity */
-#define UART_LCR_BREAK_EN       (1 << 6)		/*!< UART Break transmission enable */
-#define UART_LCR_DLAB_EN        (1 << 7)		/*!< UART Divisor Latches Access bit enable */
-#define UART_LCR_BITMASK        (0xFF)			/*!< UART line control bit mask */
+#define UART_LCR_PARITY_EN      (1u << 3u)		/*!< UART Parity Enable */
+#define UART_LCR_PARITY_DIS     (0u << 3u)		/*!< UART Parity Disable */
+#define UART_LCR_PARITY_ODD     (0u << 4u)		/*!< UART Parity select: Odd parity */
+#define UART_LCR_PARITY_EVEN    (1u << 4u)		/*!< UART Parity select: Even parity */
+#define UART_LCR_PARITY_F_1     (2u << 4u)		/*!< UART Parity select: Forced 1 stick parity */
+#define UART_LCR_PARITY_F_0     (3u << 4u)		/*!< UART Parity select: Forced 0 stick parity */
+#define UART_LCR_BREAK_EN       (1u << 6u)		/*!< UART Break transmission enable */
+#define UART_LCR_DLAB_EN        (1u << 7u)		/*!< UART Divisor Latches Access bit enable */
+#define UART_LCR_BITMASK        (0xFFu)			/*!< UART line control bit mask */
 
 /**
  * @brief Macro defines for UART Modem Control Register
  */
-#define UART_MCR_DTR_CTRL       (1 << 0)		/*!< Source for modem output pin DTR */
-#define UART_MCR_RTS_CTRL       (1 << 1)		/*!< Source for modem output pin RTS */
-#define UART_MCR_LOOPB_EN       (1 << 4)		/*!< Loop back mode select */
-#define UART_MCR_AUTO_RTS_EN    (1 << 6)		/*!< Enable Auto RTS flow-control */
-#define UART_MCR_AUTO_CTS_EN    (1 << 7)		/*!< Enable Auto CTS flow-control */
-#define UART_MCR_BITMASK        (0xD3)			/*!< UART bit mask value */
+#define UART_MCR_DTR_CTRL       (1u << 0u)		/*!< Source for modem output pin DTR */
+#define UART_MCR_RTS_CTRL       (1u << 1u)		/*!< Source for modem output pin RTS */
+#define UART_MCR_LOOPB_EN       (1u << 4u)		/*!< Loop back mode select */
+#define UART_MCR_AUTO_RTS_EN    (1u << 6u)		/*!< Enable Auto RTS flow-control */
+#define UART_MCR_AUTO_CTS_EN    (1u << 7u)		/*!< Enable Auto CTS flow-control */
+#define UART_MCR_BITMASK        (0xD3u)			/*!< UART bit mask value */
 
 /**
  * @brief Macro defines for UART Line Status Register
  */
-#define UART_LSR_RDR        (1 << 0)	/*!< Line status: Receive data ready */
-#define UART_LSR_OE         (1 << 1)	/*!< Line status: Overrun error */
-#define UART_LSR_PE         (1 << 2)	/*!< Line status: Parity error */
-#define UART_LSR_FE         (1 << 3)	/*!< Line status: Framing error */
-#define UART_LSR_BI         (1 << 4)	/*!< Line status: Break interrupt */
-#define UART_LSR_THRE       (1 << 5)	/*!< Line status: Transmit holding register empty */
-#define UART_LSR_TEMT       (1 << 6)	/*!< Line status: Transmitter empty */
-#define UART_LSR_RXFE       (1 << 7)	/*!< Line status: Error in RX FIFO */
-#define UART_LSR_TXFE       (1 << 8)	/*!< Line status: Error in RX FIFO */
-#define UART_LSR_BITMASK    (0xFF)		/*!< UART Line status bit mask */
-#define UART1_LSR_BITMASK   (0x1FF)		/*!< UART1 Line status bit mask - valid for 11xx, 18xx/43xx UART0/2/3 only */
+#define UART_LSR_RDR        (1u << 0u)	/*!< Line status: Receive data ready */
+#define UART_LSR_OE         (1u << 1u)	/*!< Line status: Overrun error */
+#define UART_LSR_PE         (1u << 2u)	/*!< Line status: Parity error */
+#define UART_LSR_FE         (1u << 3u)	/*!< Line status: Framing error */
+#define UART_LSR_BI         (1u << 4u)	/*!< Line status: Break interrupt */
+#define UART_LSR_THRE       (1u << 5u)	/*!< Line status: Transmit holding register empty */
+#define UART_LSR_TEMT       (1u << 6u)	/*!< Line status: Transmitter empty */
+#define UART_LSR_RXFE       (1u << 7u)	/*!< Line status: Error in RX FIFO */
+#define UART_LSR_TXFE       (1u << 8u)	/*!< Line status: Error in RX FIFO */
+#define UART_LSR_BITMASK    (0xFFu)		/*!< UART Line status bit mask */
+#define UART1_LSR_BITMASK   (0x1FFu)		/*!< UART1 Line status bit mask - valid for 11xx, 18xx/43xx UART0/2/3 only */
 
 /**
  * @brief Macro defines for UART Modem Status Register
  */
-#define UART_MSR_DELTA_CTS      (1 << 0)	/*!< Modem status: State change of input CTS */
-#define UART_MSR_DELTA_DSR      (1 << 1)	/*!< Modem status: State change of input DSR */
-#define UART_MSR_LO2HI_RI       (1 << 2)	/*!< Modem status: Low to high transition of input RI */
-#define UART_MSR_DELTA_DCD      (1 << 3)	/*!< Modem status: State change of input DCD */
-#define UART_MSR_CTS            (1 << 4)	/*!< Modem status: Clear To Send State */
-#define UART_MSR_DSR            (1 << 5)	/*!< Modem status: Data Set Ready State */
-#define UART_MSR_RI             (1 << 6)	/*!< Modem status: Ring Indicator State */
-#define UART_MSR_DCD            (1 << 7)	/*!< Modem status: Data Carrier Detect State */
-#define UART_MSR_BITMASK        (0xFF)		/*!< Modem status: MSR register bit-mask value */
+#define UART_MSR_DELTA_CTS      (1u << 0u)	/*!< Modem status: State change of input CTS */
+#define UART_MSR_DELTA_DSR      (1u << 1u)	/*!< Modem status: State change of input DSR */
+#define UART_MSR_LO2HI_RI       (1u << 2u)	/*!< Modem status: Low to high transition of input RI */
+#define UART_MSR_DELTA_DCD      (1u << 3u)	/*!< Modem status: State change of input DCD */
+#define UART_MSR_CTS            (1u << 4u)	/*!< Modem status: Clear To Send State */
+#define UART_MSR_DSR            (1u << 5u)	/*!< Modem status: Data Set Ready State */
+#define UART_MSR_RI             (1u << 6u)	/*!< Modem status: Ring Indicator State */
+#define UART_MSR_DCD            (1u << 7u)	/*!< Modem status: Data Carrier Detect State */
+#define UART_MSR_BITMASK        (0xFFu)		/*!< Modem status: MSR register bit-mask value */
 
 /**
  * @brief Macro defines for UART Auto baudrate control register
  */
-#define UART_ACR_START              (1 << 0)	/*!< UART Auto-baud start */
-#define UART_ACR_MODE               (1 << 1)	/*!< UART Auto baudrate Mode 1 */
-#define UART_ACR_AUTO_RESTART       (1 << 2)	/*!< UART Auto baudrate restart */
-#define UART_ACR_ABEOINT_CLR        (1 << 8)	/*!< UART End of auto-baud interrupt clear */
-#define UART_ACR_ABTOINT_CLR        (1 << 9)	/*!< UART Auto-baud time-out interrupt clear */
-#define UART_ACR_BITMASK            (0x307)		/*!< UART Auto Baudrate register bit mask */
+#define UART_ACR_START              (1u << 0u)	/*!< UART Auto-baud start */
+#define UART_ACR_MODE               (1u << 1u)	/*!< UART Auto baudrate Mode 1 */
+#define UART_ACR_AUTO_RESTART       (1u << 2u)	/*!< UART Auto baudrate restart */
+#define UART_ACR_ABEOINT_CLR        (1u << 8u)	/*!< UART End of auto-baud interrupt clear */
+#define UART_ACR_ABTOINT_CLR        (1u << 9u)	/*!< UART Auto-baud time-out interrupt clear */
+#define UART_ACR_BITMASK            (0x307u)		/*!< UART Auto Baudrate register bit mask */
 
 /**
  * Autobaud modes
  */
-#define UART_ACR_MODE0              (0)	/*!< Auto baudrate Mode 0 */
-#define UART_ACR_MODE1              (1)	/*!< Auto baudrate Mode 1 */
+#define UART_ACR_MODE0              (0u)	/*!< Auto baudrate Mode 0 */
+#define UART_ACR_MODE1              (1u)	/*!< Auto baudrate Mode 1 */
 
 /**
  * @brief Macro defines for UART RS485 Control register
  */
-#define UART_RS485CTRL_NMM_EN       (1 << 0)	/*!< RS-485/EIA-485 Normal Multi-drop Mode (NMM) is disabled */
-#define UART_RS485CTRL_RX_DIS       (1 << 1)	/*!< The receiver is disabled */
-#define UART_RS485CTRL_AADEN        (1 << 2)	/*!< Auto Address Detect (AAD) is enabled */
-#define UART_RS485CTRL_SEL_DTR      (1 << 3)	/*!< If direction control is enabled (bit DCTRL = 1), pin DTR is
+#define UART_RS485CTRL_NMM_EN       (1u << 0u)	/*!< RS-485/EIA-485 Normal Multi-drop Mode (NMM) is disabled */
+#define UART_RS485CTRL_RX_DIS       (1u << 1u)	/*!< The receiver is disabled */
+#define UART_RS485CTRL_AADEN        (1u << 2u)	/*!< Auto Address Detect (AAD) is enabled */
+#define UART_RS485CTRL_SEL_DTR      (1u << 3u)	/*!< If direction control is enabled (bit DCTRL = 1), pin DTR is
 												        used for direction control */
-#define UART_RS485CTRL_DCTRL_EN     (1 << 4)	/*!< Enable Auto Direction Control */
-#define UART_RS485CTRL_OINV_1       (1 << 5)	/*!< This bit reverses the polarity of the direction
+#define UART_RS485CTRL_DCTRL_EN     (1u << 4u)	/*!< Enable Auto Direction Control */
+#define UART_RS485CTRL_OINV_1       (1u << 5u)	/*!< This bit reverses the polarity of the direction
 												       control signal on the RTS (or DTR) pin. The direction control pin
 												       will be driven to logic "1" when the transmitter has data to be sent */
-#define UART_RS485CTRL_BITMASK      (0x3F)		/*!< RS485 control bit-mask value */
+#define UART_RS485CTRL_BITMASK      (0x3Fu)		/*!< RS485 control bit-mask value */
 
 /**
  * @brief Macro defines for UART IrDA Control Register - valid for 11xx, 17xx/40xx UART0/2/3, 18xx/43xx UART3 only
  */
-#define UART_ICR_IRDAEN         (1 << 0)			/*!< IrDA mode enable */
-#define UART_ICR_IRDAINV        (1 << 1)			/*!< IrDA serial input inverted */
-#define UART_ICR_FIXPULSE_EN    (1 << 2)			/*!< IrDA fixed pulse width mode */
-#define UART_ICR_PULSEDIV(n)    ((n & 0x07) << 3)	/*!< PulseDiv - Configures the pulse when FixPulseEn = 1 */
-#define UART_ICR_BITMASK        (0x3F)				/*!< UART IRDA bit mask */
+#define UART_ICR_IRDAEN         (1u << 0u)			/*!< IrDA mode enable */
+#define UART_ICR_IRDAINV        (1u << 1u)			/*!< IrDA serial input inverted */
+#define UART_ICR_FIXPULSE_EN    (1u << 2u)			/*!< IrDA fixed pulse width mode */
+#define UART_ICR_PULSEDIV(n)    ((n & 0x07u) << 3u)	/*!< PulseDiv - Configures the pulse when FixPulseEn = 1 */
+#define UART_ICR_BITMASK        (0x3Fu)				/*!< UART IRDA bit mask */
 
 /**
  * @brief Macro defines for UART half duplex register - ????
  */
-#define UART_HDEN_HDEN          ((1 << 0))			/*!< enable half-duplex mode*/
+#define UART_HDEN_HDEN          ((1u << 0u))			/*!< enable half-duplex mode*/
 
 /**
  * @brief Macro defines for UART Smart card interface Control Register - valid for 11xx, 18xx/43xx UART0/2/3 only
  */
-#define UART_SCICTRL_SCIEN        (1 << 0)			/*!< enable asynchronous half-duplex smart card interface*/
-#define UART_SCICTRL_NACKDIS      (1 << 1)			/*!< NACK response is inhibited*/
-#define UART_SCICTRL_PROTSEL_T1   (1 << 2)			/*!< ISO7816-3 protocol T1 is selected*/
-#define UART_SCICTRL_TXRETRY(n)   ((n & 0x07) << 5)	/*!< number of retransmission*/
-#define UART_SCICTRL_GUARDTIME(n) ((n & 0xFF) << 8)	/*!< Extra guard time*/
+#define UART_SCICTRL_SCIEN        (1u << 0u)			/*!< enable asynchronous half-duplex smart card interface*/
+#define UART_SCICTRL_NACKDIS      (1u << 1u)			/*!< NACK response is inhibited*/
+#define UART_SCICTRL_PROTSEL_T1   (1u << 2u)			/*!< ISO7816-3 protocol T1 is selected*/
+#define UART_SCICTRL_TXRETRY(n)   ((n & 0x07u) << 5u)	/*!< number of retransmission*/
+#define UART_SCICTRL_GUARDTIME(n) ((n & 0xFFu) << 8u)	/*!< Extra guard time*/
 
 /**
  * @brief Macro defines for UART Fractional Divider Register
  */
-#define UART_FDR_DIVADDVAL(n)   (n & 0x0F)			/*!< Baud-rate generation pre-scaler divisor */
-#define UART_FDR_MULVAL(n)      ((n << 4) & 0xF0)	/*!< Baud-rate pre-scaler multiplier value */
-#define UART_FDR_BITMASK        (0xFF)				/*!< UART Fractional Divider register bit mask */
+#define UART_FDR_DIVADDVAL(n)   (n & 0x0Fu)			/*!< Baud-rate generation pre-scaler divisor */
+#define UART_FDR_MULVAL(n)      ((n << 4u) & 0xF0u)	/*!< Baud-rate pre-scaler multiplier value */
+#define UART_FDR_BITMASK        (0xFFu)				/*!< UART Fractional Divider register bit mask */
 
 /**
  * @brief Macro defines for UART Tx Enable Register
  */
-#define UART_TER1_TXEN      (1 << 7)		/*!< Transmit enable bit  - valid for 11xx, 13xx, 17xx/40xx only */
-#define UART_TER2_TXEN      (1 << 0)		/*!< Transmit enable bit  - valid for 18xx/43xx only */
+#define UART_TER1_TXEN      (1u << 7u)		/*!< Transmit enable bit  - valid for 11xx, 13xx, 17xx/40xx only */
+#define UART_TER2_TXEN      (1u << 0u)		/*!< Transmit enable bit  - valid for 18xx/43xx only */
 
 /**
  * @brief Macro defines for UART Synchronous Control Register - 11xx, 18xx/43xx UART0/2/3 only
  */
-#define UART_SYNCCTRL_SYNC             (1 << 0)			/*!< enable synchronous mode*/
-#define UART_SYNCCTRL_CSRC_MASTER      (1 << 1)  		/*!< synchronous master mode*/
-#define UART_SYNCCTRL_FES              (1 << 2)			/*!< sample on falling edge*/
-#define UART_SYNCCTRL_TSBYPASS         (1 << 3)			/*!< to be defined*/
-#define UART_SYNCCTRL_CSCEN            (1 << 4)			/*!< Continuous running clock enable (master mode only)*/
-#define UART_SYNCCTRL_STARTSTOPDISABLE (1 << 5)	        /*!< Do not send start/stop bit*/
-#define UART_SYNCCTRL_CCCLR            (1 << 6)			/*!< stop continuous clock*/
+#define UART_SYNCCTRL_SYNC             (1u << 0u)			/*!< enable synchronous mode*/
+#define UART_SYNCCTRL_CSRC_MASTER      (1u << 1u)  		/*!< synchronous master mode*/
+#define UART_SYNCCTRL_FES              (1u << 2u)			/*!< sample on falling edge*/
+#define UART_SYNCCTRL_TSBYPASS         (1u << 3u)			/*!< to be defined*/
+#define UART_SYNCCTRL_CSCEN            (1u << 4u)			/*!< Continuous running clock enable (master mode only)*/
+#define UART_SYNCCTRL_STARTSTOPDISABLE (1u << 5u)	        /*!< Do not send start/stop bit*/
+#define UART_SYNCCTRL_CCCLR            (1u << 6u)			/*!< stop continuous clock*/
 
 /**
  * @brief	Enable transmission on UART TxD pin

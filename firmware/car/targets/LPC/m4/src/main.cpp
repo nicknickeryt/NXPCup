@@ -6,10 +6,14 @@
 #include "Camera.hpp"
 #include "init.hpp"
 #include "usbuser.h"
+#include "usblink.h"
+#include "NXP_UART_M4.hpp"
 
 static const uint32_t xDelay = 99;
 
 void MSleep(int32_t msecs) {
+
+
 	auto curr = (int32_t) Chip_RIT_GetCounter(LPC_RITIMER);
 	int32_t final = curr + ((SystemCoreClock / 1000) * msecs);
 
@@ -52,6 +56,10 @@ void Board_SystemInit(void);
 }
 
 Camera camera;
+USBLink usblink;
+const char myData[] = "to sa moje nowe dane";
+uint8_t length = sizeof(myData);
+
 
 int main() {
     auto *pSCB_VTOR = (unsigned int *) 0xE000ED08;
@@ -74,14 +82,32 @@ int main() {
 
 	uint8_t index = 0;
 
-    NXP_GPIO LED_blue = {1,11};
-    LED_blue.init();
 
+    NXP_GPIO LED_blue = {1,11};
     NXP_GPIO LED_green = {1,12};
+    LED_blue.init();
     LED_green.init();
+
+//    LED_blue.reset();
+//    LED_blue.set();
 
 //    camera.init();
     timerInit();
+
+    NXP_SCU::enable(NXP_SCU::Type::PIN, NXP_SCU::Function::_2,
+                    NXP_SCU::Mode_PULLDOWN,
+                    0x6, 4);
+
+    NXP_SCU::enable(NXP_SCU::Type::PIN, NXP_SCU::Function::_2,
+                    NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS,
+                    0x6, 5);
+
+    NXP_UART uart(LPC_USART0, 115200);
+    uart.init();
+
+    uart.write("kupa", 4);
+
+    volatile uint32_t ddd = LPC_TIMER1->TC;
 
     NXP_SCU::enable(NXP_SCU::Type::PIN, NXP_SCU::Function::_1,
                     NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS | NXP_SCU::Mode_HIGHSPEEDSLEW_EN,
@@ -90,16 +116,26 @@ int main() {
                     NXP_SCU::Mode_INACT | NXP_SCU::Mode_INBUFF_EN | NXP_SCU::Mode_ZIF_DIS | NXP_SCU::Mode_HIGHSPEEDSLEW_EN,
                     0x8, 2);
     USB_UserInit();
-
+    LPC_TIMER1->TC = 0;
+//    LED_blue.reset();
+//    LED_blue.reset();
+    LED_green.set();
 	while(true) {
+        ddd = LPC_TIMER1->TC;
+	    if (ddd < 10000000) {
+            continue;
+	    }
+
+
 		if (!blink_delay()) {
             ipc.push(index++);
 		}
 
         if (irq) {
             irq = false;
-            LED_blue.toggle();
+//            LED_blue.toggle();
             LED_green.toggle();
+            usblink.send(reinterpret_cast<const uint8_t *>(myData), length, 100);
         }
 	}
 	return 0;

@@ -5,7 +5,7 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-set(TARGET "MKV" CACHE STRING "Target platform")
+set(TARGET "LPC" CACHE STRING "Target platform")
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
 if(NOT EXISTS ${PLATFORM_PATH})
   message(FATAL_ERROR "Target platform ${TARGET} does not exist")
