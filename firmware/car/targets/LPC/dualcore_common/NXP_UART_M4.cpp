@@ -1,18 +1,4 @@
 #include "NXP_UART_M4.hpp"
-#include "HALina_ring_buffer_MB.hpp"
-#include "NXP_GPIO.hpp"
-
-//extern NXP_GPIO LED_blue;
-
-/* UART Autobaud command interrupt handler */
-static void Chip_UART_ABIntHandler(LPC_USART_T *pUART)
-{
-    /* Handle Autobaud Timeout interrupt */
-    if((Chip_UART_ReadIntIDReg(pUART) & UART_IIR_ABTO_INT) != 0) {
-        Chip_UART_SetAutoBaudReg(pUART, UART_ACR_ABTOINT_CLR);
-        Chip_UART_IntDisable(pUART, UART_IER_ABTOINT);
-    }
-}
 
 NXP_UART* nxpUartHandlers[4];
 
@@ -21,11 +7,15 @@ void NXP_UART::write(uint8_t data)  {
 }
 
 void NXP_UART::write(void const* data, uint16_t length) {
-    for(uint16_t i=1; i<length; i++){
+
+    for(uint16_t i=(!txWorking); i<length; i++){
         HRingBuffer_PutChar(&txRingBuffer, *(reinterpret_cast<char*>(const_cast<void*>(data)) + i));
     }
+    if (!txWorking) {
+        Chip_UART_SendByte(uart, ((uint8_t*)data)[0]);
+        txWorking = true;
+    }
 
-    Chip_UART_SendByte(uart, ((uint8_t*)data)[0]);
 }
 
 
@@ -76,24 +66,21 @@ void UART_IRQ(NXP_UART* nxpUartHandler) {
         /* Fill FIFO until full or until TX ring buffer is empty (Chip_UART_ReadLineStatus(nxpUartHandler->uart) & UART_LSR_THRE) != 0 &&  */
         while (HRingBuffer_GetChar(&(nxpUartHandler->txRingBuffer), &ch)) {
             Chip_UART_SendByte(nxpUartHandler->uart, ch);
-
         }
 
         /* Turn off interrupt if the ring buffer is empty */
         if (HRingBuffer_IsEmpty(&(nxpUartHandler->rxRingBuffer))) {
             /* Shut down transmit */
             Chip_UART_IntDisable(nxpUartHandler->uart, UART_IER_THREINT);
-            Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, 1, 11);
+            nxpUartHandler->txWorking = false;
         }
     }
 
     /* Handle receive interrupt */
     while (Chip_UART_ReadLineStatus(nxpUartHandler->uart) & UART_LSR_RDR) {
+        Chip_GPIO_SetPinToggle(LPC_GPIO_PORT, 1, 11);
         HRingBuffer_PutChar(&(nxpUartHandler->rxRingBuffer), nxpUartHandler->uart->RBR & UART_RBR_MASKBIT);
     }
-
-    /* Handle Autobaud interrupts */
-    // Chip_UART_ABIntHandler(nxpUartHandler->uart);
 }
 
 extern "C" {

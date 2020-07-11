@@ -1,12 +1,13 @@
 #pragma once
 
-#include <HALina_ring_buffer_MB.hpp>
+#include "HALina_ring_buffer_MB.hpp"
 #include "HALina_uart.hpp"
 #include "chip.h"
 
 
 class NXP_UART : public halina::UART {
     uint32_t baudrate;
+
 
     constexpr static auto txBufferSize = 2048;
     constexpr static auto rxBufferSize = 1024;
@@ -26,6 +27,13 @@ public:
 
     void write(void const* data, uint16_t length) override;
     void write(uint8_t data) override;
+    void write_u(uint32_t data) {
+        char buffer[10];
+        itoa (data,buffer,10);
+        write(buffer, strlen(buffer));
+    }
+
+    bool txWorking = false;
 
     uint8_t read() override {
 
