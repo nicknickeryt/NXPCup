@@ -1,0 +1,107 @@
+[33mcommit 98de9659cf59e2206fbed25bb4cfbf0b6149ede4[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Sat Feb 29 18:02:53 2020 +0100
+
+    redukcja kodu, magia Janka poki co dziala
+
+[33mcommit 3737dd1e128cab2709fb5bbdd5192c56dcd1839b[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Sat Feb 29 16:44:44 2020 +0100
+
+    testowy commit
+
+[33mcommit 624053efba1c7824b73d8e1dc4fac448930f5b84[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Sat Feb 29 12:34:53 2020 +0100
+
+    pamiec wieksza
+
+[33mcommit 79a3a2fd3022c1f0eeaad4912a1babc846933608[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Sat Feb 29 11:32:29 2020 +0100
+
+    dobrze rozpoznaje boczne linie, class
+
+[33mcommit 3490a2c473b64224f0a1dbc5ffb885e7d3ebcbb0[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Thu Feb 27 23:23:06 2020 +0100
+
+    dobrze rozpoznaje boczne linie
+
+[33mcommit 87e7dbb42b84bb2d8a20424caf3bdd820c323d93[m
+Author: abalys <abalys@student.agh.edu.pl>
+Date:   Thu Feb 27 20:46:48 2020 +0100
+
+    uruchomiono wykrywanie linii
+
+[33mcommit 918d2b456ce79b549a8a14bfc0ffd7fea240f2fb[m
+Author: abalys <abalys@student.agh.edu.pl>
+Date:   Thu Feb 27 20:03:06 2020 +0100
+
+    wysyla wsp linii
+
+[33mcommit 9d7ef60eccb6e904c5952e4c6c79d068aee4a611[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Wed Feb 26 22:39:56 2020 +0100
+
+    serial na uartcie dziala
+
+[33mcommit 3817cdf093d6568ab2359605203f87696fc6374c[m
+Author: abalys <abalys@student.agh.edu.pl>
+Date:   Wed Feb 26 21:07:34 2020 +0100
+
+    uruchomienie naszej ramki
+
+[33mcommit 987e932884a3c1bdc0e2f9a3bd46f518d523f593[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Wed Feb 26 09:03:02 2020 +0100
+
+    kilka linii
+
+[33mcommit df5b06dd6b47a55087e6177b445549037f537661[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Wed Feb 26 02:30:55 2020 +0100
+
+    bez warningów
+
+[33mcommit 6ae39fca37a1a0ca6d5275b20b867ee2f474060f[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Wed Feb 26 01:13:25 2020 +0100
+
+    nie dziala wyswietalanie linii
+
+[33mcommit 1e70fb4c7192c2be6da8d5d2d2d06c3a124bdb65[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Wed Feb 26 00:19:48 2020 +0100
+
+    wyciaga przejcia z linii 50
+
+[33mcommit 31c31cbb285b92212e2315a10c98bffea842b51b[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Tue Feb 25 22:22:00 2020 +0100
+
+    czesciowo usuniete barcody, dziala natal
+
+[33mcommit 93ddc02e26dfc22510068b3e5ce76152b3f73879[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Tue Feb 25 01:51:35 2020 +0100
+
+    czyciej
+
+[33mcommit 7dcc8cf41fa7f18aca339292ebbdbbf54e09ed2d[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Tue Feb 25 01:01:14 2020 +0100
+
+    line tracking default
+
+[33mcommit 496465d1803a61dc50812217a4cf2e94acc49cfd[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Mon Feb 24 23:56:45 2020 +0100
+
+    posprztany main
+
+[33mcommit 97bc32cf8d50262c1e106f2b4d7a84858ca38a60[m
+Author: Witold Łukasik <witek117@gmaill.com>
+Date:   Mon Feb 24 22:38:01 2020 +0100
+
+    dziala
