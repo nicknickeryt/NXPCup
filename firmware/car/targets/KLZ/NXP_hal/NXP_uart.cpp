@@ -7,7 +7,7 @@
  */
 
 #include "NXP_uart.hpp"
-#include <drivers/fsl_clock.h>
+#include "fsl_clock.h"
 
 using namespace halina;
 

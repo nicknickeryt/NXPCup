@@ -1,32 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
+# @purpose   NXP_CUP 2021 KnightRider::Kitty
+# @brief     CMake script defining the build process of the NXP_CUP Project firmware
+cmake_minimum_required(VERSION 3.2)
 
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+# KLZ
+# MKV
+# x86
+if(NOT TARGET)
+	set(TARGET KLZ)
 endif()
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
-set(TARGET "LPC" CACHE STRING "Target platform")
-set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
-if(NOT EXISTS ${PLATFORM_PATH})
-  message(FATAL_ERROR "Target platform ${TARGET} does not exist")
-endif()
-message(STATUS "Target platform ${TARGET}")
-
-include(functions.cmake)
-include(${PLATFORM_PATH}/toolchain.cmake)
-
-project(PROJECT_NAME C CXX ASM)
-
-SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -DNDEBUG -flto -DLOG_LEVEL=LOG_LEVEL_ALL")
-SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -DNDEBUG -flto")
-
-SET(CMAKE_CXX_FLAGS_DEBUG  "-Os -g -DLOG_LEVEL=LOG_LEVEL_ALL")
-SET(CMAKE_C_FLAGS_DEBUG  "-Os -g")
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-
-include(${PLATFORM_PATH}/settings.cmake)
 
 set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET})
 set(REPORTS_PATH ${OUTPUT_PATH}/reports)
@@ -39,6 +20,29 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_PATH}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_PATH}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
 
-add_subdirectory(core)
+include(functions.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET}/target.cmake)
+# include(${CMAKE_CURRENT_SOURCE_DIR}/core/core.cmake)
 
-add_subdirectory(${PLATFORM_PATH})
+
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+
+set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
+if(NOT EXISTS ${PLATFORM_PATH})
+  message(FATAL_ERROR "Target platform ${TARGET} does not exist")
+endif()
+message(STATUS "Target platform ${TARGET}")
+
+
+include(${PLATFORM_PATH}/toolchain.cmake)
+
+project(NXP_CUP C CXX ASM)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -g -DNDEBUG -flto -DLOG_LEVEL=LOG_LEVEL_ALL")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os -DNDEBUG -flto -g -DLOG_LEVEL=LOG_LEVEL_ALL")
+
+add_subdirectory(halina)

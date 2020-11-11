@@ -12,7 +12,7 @@
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
 
 #include "logger.h"
-#include "algorithm.h"
+#include "NXP_algorithm.h"
 
 void Algorithm::init() {
     for(auto i = 0; i < 4; i++){

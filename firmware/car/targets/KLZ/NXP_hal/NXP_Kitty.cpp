@@ -7,6 +7,9 @@
  */
 
 #include "NXP_Kitty.hpp"
+extern "C"{
+    #include "clock_config.h"
+}
 
 #define LOG_CHANNEL KITTY
 #define KITTY_LOG_CHANNEL 2

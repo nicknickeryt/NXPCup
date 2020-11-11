@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include <NXP_hal/VL53L0X.h>
+#include "VL53L0X.h"
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
-#include "algorithm.h"
+#include "NXP_algorithm.h"
 
 class Kitty{
 private:

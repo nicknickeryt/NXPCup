@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <drivers/fsl_port.h>
-#include <drivers/fsl_gpio.h>
+#include "fsl_port.h"
+#include "fsl_gpio.h"
 #include "HALina_gpio.hpp"
 
 class NXP_GPIO : public halina::GPIO {
