@@ -1,10 +1,10 @@
 #pragma once
 
 #include "HALina.hpp"
-#include <device/MKV58F24.h>
+#include "MKV58F24.h"
 #include <functional>
 #include <utility>
-#include <drivers/fsl_clock.h>
+#include "fsl_clock.h"
 
 class NXP_PIT {
 private:

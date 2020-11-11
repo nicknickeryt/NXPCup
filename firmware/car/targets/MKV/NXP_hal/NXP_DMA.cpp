@@ -6,7 +6,7 @@
  *
  */
 
-#include <device/MKV58F24_features.h>
+#include "MKV58F24_features.h"
 #include "NXP_DMA.h"
 
 NXP_DMA* dmaHandlers[32];

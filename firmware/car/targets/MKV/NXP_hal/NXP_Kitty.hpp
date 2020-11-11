@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <NXP_hal/VL53L0X.h>
-#include <source/pixy.hpp>
+#include "VL53L0X.h"
+#include "NXP_pixy.hpp"
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
@@ -24,8 +24,6 @@
 #include "NXP_menu.hpp"
 #include "NXP_encoder.hpp"
 #include "NXP_frame.hpp"
-#include "commandManager.h"
-#include "command_terminal/command_manager.h"
 #include "algorithm_unit.hpp"
 
 void pit_generalHandler(uint32_t*);
@@ -116,13 +114,13 @@ private:
     NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 30, pit_generalHandler, nullptr};
     NXP_PIT encodersPit = {NXP_PIT::CHANNEL::_2, 50, nullptr, nullptr};
 
-    // COMMAND TERMINAL
-    CommandManager<3, '\n', false> commandManager{__enable_irq, __disable_irq,
-                                                    {
-                                                            Command("m", "", motorsCallback),
-                                                            Command("s", "", servoCallback),
-                                                            Command("st", "", stopCallback)
-                                                    }};
+    // // COMMAND TERMINAL
+    // CommandManager<3, '\n', false> commandManager{__enable_irq, __disable_irq,
+    //                                                 {
+    //                                                         Command("m", "", motorsCallback),
+    //                                                         Command("s", "", servoCallback),
+    //                                                         Command("st", "", stopCallback)
+    //                                                 }};
 
     // I2C
     NXP_PORT sdaPort = {PORTE, 0, 6, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};

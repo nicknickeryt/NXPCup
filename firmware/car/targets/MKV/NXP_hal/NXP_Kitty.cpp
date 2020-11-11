@@ -6,8 +6,10 @@
  *
  */
 
-#include <algorithms/algorithm_unit.hpp>
+#include "algorithm_unit.hpp"
 #include "NXP_Kitty.hpp"
+#include "clock_config.h"
+#include "pin_mux.h"
 
 #define LOG_CHANNEL KITTY
 #define KITTY_LOG_CHANNEL 2
@@ -19,7 +21,8 @@ bool commandTerminalTrigger = false;
 bool frameTrigger = false;
 
 bool pixyTrigger = false;
-void pit_generalHandler(uint32_t*) {
+void pit_generalHandler(uint32_t *)
+{
     algorithmTrigger = true;
     commandTerminalTrigger = true;
     frameTrigger = true;
@@ -27,15 +30,18 @@ void pit_generalHandler(uint32_t*) {
 }
 
 uint_fast64_t Kitty::milliseconds = 0;
-extern "C" {
-bool systickTrigger = false;
-void SysTick_Handler(void) {
-    Kitty::millisIncrease();
-    systickTrigger = true;
-}
+extern "C"
+{
+    bool systickTrigger = false;
+    void SysTick_Handler(void)
+    {
+        Kitty::millisIncrease();
+        systickTrigger = true;
+    }
 }
 
-void Kitty::init() {
+void Kitty::init()
+{
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     SysTick_Config(SystemCoreClock / 1000);
@@ -59,7 +65,7 @@ void Kitty::init() {
     encoderLeft.init();
     menu.init();
     motors.init();
-    commandManager.init(printCommandManager);
+    // commandManager.init(printCommandManager);
     pixy.init();
 
     motors.run();
@@ -67,7 +73,7 @@ void Kitty::init() {
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t *>(&encoderLeft));
     encodersPit.init();
-    uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
+    // uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
     display.enable();
 
     uartCommunication.write("Bejbi don't hurt me", 19);
@@ -79,7 +85,8 @@ void Kitty::init() {
     algorithmUnit.checkSwitches();
 }
 
-void Kitty::proc() {
+void Kitty::proc()
+{
     static int16_t motorsValues[2];
     static int16_t encodersValues[2];
     static uint8_t linesValues[2];
@@ -87,14 +94,16 @@ void Kitty::proc() {
     float rightSpeedToModify = algorithmUnit.speed;
     uint16_t encoderLeftSample = encoderLeft.getTicks();
     uint16_t encoderRightSample = encoderRight.getTicks();
-    if (!menu.proc(systickTrigger)) {
+    if (!menu.proc(systickTrigger))
+    {
         log_notice("L_in: %f R_in: %f", algorithmUnit.speed, algorithmUnit.speed);
-//        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
+        //        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
         log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
         motors.setValue(leftSpeedToModify, rightSpeedToModify);
     }
 
-    if (frameTrigger) {
+    if (frameTrigger)
+    {
         static uint8_t line1 = 10;
         static uint8_t line2 = 5;
         motorsValues[0] = int16_t(algorithmUnit.speed * 100.0);
@@ -109,15 +118,16 @@ void Kitty::proc() {
         frameTrigger = false;
     }
 
-//    if (pixyTrigger) {
-//        pixyTrigger = false;
-//        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
-//        algorithmUnit.analyze();
-//    }
+    //    if (pixyTrigger) {
+    //        pixyTrigger = false;
+    //        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
+    //        algorithmUnit.analyze();
+    //    }
     magicDiodComposition();
 }
 
-void Kitty::FTM_Init() {
+void Kitty::FTM_Init()
+{
     SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;
     SIM->SOPT2 |= SIM_SOPT2_TIMESRC(1);
     SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;
@@ -127,28 +137,35 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-void Kitty::magicDiodComposition(){
+void Kitty::magicDiodComposition()
+{
     static uint32_t licznik = 0;
     static int8_t led_index = 0;
     static uint8_t direction = 0;
     static uint8_t old_led = 0;
     licznik++;
-    if (licznik == 50000) {
+    if (licznik == 50000)
+    {
         licznik = 0;
-        if (direction == 0) {
+        if (direction == 0)
+        {
             old_led = led_index;
             led_index++;
-            if (led_index == 8) {
+            if (led_index == 8)
+            {
                 led_index = 6;
                 direction = 1;
                 old_led = 7;
             }
             ledLine.at(led_index).set();
             ledLine.at(old_led).reset();
-        } else if (direction == 1) {
+        }
+        else if (direction == 1)
+        {
             old_led = led_index;
             led_index--;
-            if (led_index == -1) {
+            if (led_index == -1)
+            {
                 led_index = 1;
                 direction = 0;
                 old_led = 0;

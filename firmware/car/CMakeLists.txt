@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.2)
 # MKV
 # x86
 if(NOT TARGET)
-	set(TARGET KLZ)
+	set(TARGET MKV)
 endif()
 
 set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET})

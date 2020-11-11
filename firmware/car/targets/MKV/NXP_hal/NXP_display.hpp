@@ -10,7 +10,7 @@
 
 #include <HALina_display.hpp>
 #include "HALina.hpp"
-#include "HALina_config.hpp"
+#include "halina_config.hpp"
 
 class NXP_Display : public HALina_Display{
 private:

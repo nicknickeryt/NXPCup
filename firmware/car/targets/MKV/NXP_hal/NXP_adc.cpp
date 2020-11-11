@@ -6,7 +6,7 @@
  *
  */
 
-#include <drivers/fsl_hsadc.h>
+#include "fsl_hsadc.h"
 #include "NXP_adc.hpp"
 
 NXP_ADC* HSADCInstances[2];

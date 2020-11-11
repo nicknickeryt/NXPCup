@@ -13,7 +13,7 @@
 #define ALGORITHM_LOG_CHANNEL 3
 #define ALGORITHM_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
 #include "logger.h"
-#include "pixy.hpp"
+#include "NXP_pixy.hpp"
 #include <algorithm>
 
 void AlgorithmUnit::analyze() {

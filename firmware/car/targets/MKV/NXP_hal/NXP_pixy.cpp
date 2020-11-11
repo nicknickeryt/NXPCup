@@ -5,7 +5,7 @@
  *
  *
  */
-#include "Pixy.hpp"
+#include "NXP_pixy.hpp"
 
 #define LOG_CHANNEL PIXY
 #define PIXY_LOG_CHANNEL 5

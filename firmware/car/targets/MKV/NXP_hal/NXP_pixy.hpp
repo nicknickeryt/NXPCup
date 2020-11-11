@@ -7,9 +7,9 @@
  */
 #pragma once
 
-#include <algorithms/algorithm_unit.hpp>
+#include <algorithm_unit.hpp>
 #include "NXP_uart.hpp"
-#include "pixy_packet.hpp"
+#include "NXP_pixy_packet.hpp"
 
 class Pixy{
     public:
