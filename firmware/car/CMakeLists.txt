@@ -22,7 +22,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
 
 include(functions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET}/target.cmake)
-# include(${CMAKE_CURRENT_SOURCE_DIR}/core/core.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/code_formatting.cmake)
+
+formatting_support()
 
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
