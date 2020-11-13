@@ -22,7 +22,7 @@ set(SOURCES ${CMAKE_CURRENT_LIST_DIR}/source/cpp_config.cpp
 			${CMAKE_CURRENT_LIST_DIR}/source/semihost_hardfault.c)
 
 add_executable(${NAME} ${SOURCES})
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/source)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/source)
 
 set (CWARN "-Wall -Wstrict-prototypes -Wextra ")
 set (CXXWARN "-Wall -Wextra")

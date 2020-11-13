@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.2)
 # MKV
 # x86
 if(NOT TARGET)
-	set(TARGET KLZ)
+	set(TARGET MKV)
 endif()
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
 if(NOT EXISTS ${PLATFORM_PATH})
