@@ -1,8 +1,6 @@
 #ifndef VL53L0X_h
 #define VL53L0X_h
 
-//#include <Arduino.h>
-#include <stdio.h>
 #include "NXP_I2C.hpp"
 
 class VL53L0X

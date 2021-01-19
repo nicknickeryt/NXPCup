@@ -5,11 +5,10 @@
 
 #include "VL53L0X.h"
 #include "NXP_Kitty.hpp"
-//#include <Wire.h>
 
 #define LOG_CHANNEL SENSOR
 #define SENSOR_LOG_CHANNEL 2
-#define SENSOR_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
+#define SENSOR_LOG_CHANNEL_LEVEL LOG_LEVEL_NOTICE
 
 #include "logger.h"
 
@@ -78,7 +77,6 @@ void VL53L0X::setAddress(uint8_t new_addr)
 bool VL53L0X::init(bool io_2v8)
 {
     Wire.init();
-
   // check model ID register (value specified in datasheet)
   if (readReg(IDENTIFICATION_MODEL_ID) != 0xEE) { return false; }
 

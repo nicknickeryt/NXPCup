@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.2)
 # MKV
 # x86
 if(NOT TARGET)
-	set(TARGET MKV)
+	set(TARGET KLZ)
 endif()
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
 if(NOT EXISTS ${PLATFORM_PATH})
@@ -35,10 +35,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
 ##################################################################################
 # Includes
 ##################################################################################
-include(functions.cmake)
+# include(functions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET}/target.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/code_formatting.cmake)
 include(${PLATFORM_PATH}/toolchain.cmake)
+
 
 ##################################################################################
 # Supports functions
