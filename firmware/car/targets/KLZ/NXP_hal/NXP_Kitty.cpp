@@ -37,10 +37,12 @@ void Kitty::init() {
 //    NVIC_EnableIRQ(SysTick_IRQn);
 //
 //    uartCommunication.init();
-//    uartDebug.init();
+   uartDebug.init();
+   sensors.init();
 //    algorithm.init();
 //    uartCommunication.write("xD", 2);
-//    log_notice("Procek wstal pomyslnie!");
+   log_notice("Procek wstal pomyslnie!");
+   sensors.selectOutput(1);
 }
 
 void Kitty::proc() {

@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "VL53L0X.h"
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
 #include "NXP_algorithm.h"
+#include "NXP_sensors.hpp"
 
 class Kitty{
 private:
@@ -36,6 +36,9 @@ private:
     NXP_GPIO ledRight = {PORTE, GPIOE, 2, NXP_GPIO::Mode::OUTPUT};
     NXP_GPIO ledRightFront = {PORTE, GPIOE, 22, NXP_GPIO::Mode::OUTPUT};
     std::array<NXP_GPIO, 4> leds = {ledLeft, ledLeftFront, ledRight, ledRightFront};
+
+    // SENSORS
+    NXP_Sensors sensors = {i2c};
 
 public:
     // UART

@@ -24,7 +24,7 @@ TCA95x5::TCA95x5(NXP_I2C& Wire) : Wire(Wire) {}
  * @param address: Register address to read (or starting address in burst reads)
  * @param length: Number of bytes to read.
  */
-bool TCA95x5::read([[maybe_unused]] uint8_t* output, tca95x5_reg_address_t address, [[maybe_unused]] uint8_t length) {
+bool TCA95x5::read( uint8_t* output, tca95x5_reg_address_t address, uint8_t length) {
     bool success = true;
     Wire.beginTransmission(_device_address);
     Wire.write(address);
@@ -33,11 +33,11 @@ bool TCA95x5::read([[maybe_unused]] uint8_t* output, tca95x5_reg_address_t addre
 
     // else // OK, all worked, keep going
     // {
-    //     Wire.requestFrom(_device_address, uint8_t(length));
-    //     for (size_t i = 0; (i < length) and Wire.available(); i++) {
-    //         uint8_t c = Wire.read();
-    //         output[i] = c;
-    //     }
+    Wire.requestFrom(_device_address, uint8_t(length));
+    for (size_t i = 0; (i < length); i++) {
+        uint8_t c = Wire.read();
+        output[i] = c;
+    }
     // }
     return success;
 }
