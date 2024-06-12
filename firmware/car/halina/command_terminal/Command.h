@@ -6,6 +6,8 @@
 #include <tuple>
 #include <array>
 #include <cstring>
+#include <string_view>
+#include <cstdint>
 
 class Command {
     const char* name;
