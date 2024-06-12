@@ -16,7 +16,25 @@ int main() {
     BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
     kitty.init();
+
+
+    uint16_t dataBuf[128] = {0};
+    NXP_Camera::Type type = NXP_Camera::Type::CAMERA_1;
+    size_t i = 0;
+
+
     while (true) {
         kitty.proc();
+
+    kitty.algorithmUnit.analyze();
+        //kitty.camera.getData(type, dataBuf);
+
+        /*delay_ms(1000);
+        // log_notice("%d", dataBuf[i%128]);
+
+        for (int j = 0; j<128; j++) {
+            delay_ms(1);
+            log_notice("%d",dataBuf[j]);
+        }*/
     }
 }
