@@ -8,6 +8,7 @@
 #include <cstring>
 #include <string_view>
 #include <cstdint>
+#include <cstdlib>
 
 class Command {
     const char* name;
