@@ -149,7 +149,7 @@ public:
     NXP_Display display;
 
     // SERVO
-    NXP_Servo servo = {servoPwm, 70, 2.0f};
+    NXP_Servo servo = {0.1, servoPwm, 40, 2.0f};
 
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};

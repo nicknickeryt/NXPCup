@@ -16,6 +16,7 @@ class Kitty;
 
 class NXP_Servo : public halina::Servo{
 private:
+    float offset;
     uint16_t centerTicks;
     NXP_PWM& pwm;
     uint8_t maxDegreeDeviation;
@@ -24,13 +25,15 @@ private:
     float currentValue = 0.0;
 
 public:
-    NXP_Servo(NXP_PWM& pwm, uint8_t maxDegreeDeviation, float servoMultiplier) :  pwm(pwm), servoMultiplier(servoMultiplier) {
+    NXP_Servo(float offset, NXP_PWM& pwm, uint8_t maxDegreeDeviation, float servoMultiplier) : offset(offset), pwm(pwm), servoMultiplier(servoMultiplier) {
         this->maxDegreeDeviation = std::clamp(maxDegreeDeviation, (uint8_t)0, (uint8_t)90);
     }
 
     void init() override;
 
     void set(float) override;
+
+    void setOffset(float offset);
 
     float get(){return currentValue;};
 

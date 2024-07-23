@@ -17,16 +17,21 @@ int main() {
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 
+    kitty.display.print(1234);
+
+    
 
     uint16_t dataBuf[128] = {0};
     NXP_Camera::Type type = NXP_Camera::Type::CAMERA_1;
     size_t i = 0;
 
 
+    kitty.servo.set(-1.0);
+
     while (true) {
         kitty.proc();
 
-    kitty.algorithmUnit.analyze();
+    //kitty.algorithmUnit.analyze();
         //kitty.camera.getData(type, dataBuf);
 
         /*delay_ms(1000);
