@@ -1,0 +1,2 @@
+// co to jest hard_fault??
+// gsl nie powinien wywalac bledu jesli jest buildowany z gcc a nie clang

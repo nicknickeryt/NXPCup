@@ -1,27 +1,21 @@
 # @purpose   NXP_CUP 2021 KnightRider::Kitty
 # @brief     CMake script defining the build process of the NXP_CUP Project firmware
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.30)
 
 ##################################################################################
 # Platform definitions
 ##################################################################################
-# KLZ
-# MKV
-# x86
-set(TARGET MKV)
-if(NOT TARGET)
-	set(TARGET KLZ)
-endif()
-set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET})
+# always MKV
+set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/MKV)
 if(NOT EXISTS ${PLATFORM_PATH})
-  message(FATAL_ERROR "Target platform ${TARGET} does not exist")
+  message(FATAL_ERROR "Cos jest nie tak")
 endif()
-message(STATUS "Target platform ${TARGET}")
+message(STATUS "Target platform MKV")
 
 ##################################################################################
 # Paths definitions
 ##################################################################################
-set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET})
+set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/MKV)
 set(REPORTS_PATH ${OUTPUT_PATH}/reports)
 file(MAKE_DIRECTORY ${OUTPUT_PATH})
 
@@ -37,7 +31,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
 # Includes
 ##################################################################################
 # include(functions.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/targets/${TARGET}/target.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/MKV/mkv.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/code_formatting.cmake)
 include(${PLATFORM_PATH}/toolchain.cmake)
 

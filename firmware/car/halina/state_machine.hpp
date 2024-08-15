@@ -84,7 +84,7 @@ namespace fsm {
     };
 
 /// Defines structure that merges all default-handled actions.
-    template<typename ...Ts> class Transitions : Ts... {
+    template<typename ...Ts> class  Transitions : Ts... {
     public:
         using Ts::handle...;
         template<Event E> NoTransition handle(E const&) const noexcept {return {};}
