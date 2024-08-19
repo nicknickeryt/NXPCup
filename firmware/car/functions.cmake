@@ -127,14 +127,9 @@ endfunction(target_jlink_flash)
 
 function(target_stlink_flash TARGET)
     add_custom_target(${TARGET}.flash_stlink
-            openocd -f interface/stlink-v2-1.cfg
-            -c "transport select hla_swd"
-            -f target/stm32f1x.cfg
-            -c "init"
-            -c "reset halt"
-            -c "flash write_image erase ${TARGET}"
-            -c "reset run"
-            -c "shutdown"
+            openocd 
+            -f ${CMAKE_SOURCE_DIR}/${TARGET}/openocd.cfg 
+            -c "program ${CMAKE_SOURCE_DIR}/build/build/${TARGET}/${TARGET}.elf verify reset exit"
             DEPENDS ${TARGET}
             COMMENT "Flashing target hardware"
             WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

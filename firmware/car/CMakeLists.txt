@@ -30,7 +30,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
 ##################################################################################
 # Includes
 ##################################################################################
-# include(functions.cmake)
+include(functions.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/MKV/mkv.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/code_formatting.cmake)
 include(${PLATFORM_PATH}/toolchain.cmake)
