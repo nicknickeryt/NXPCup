@@ -11,10 +11,10 @@
 
 namespace halina {
 
-    class UART {
+    class Uart {
 
     public:
-        UART() {
+        Uart() {
         }
 
         virtual void init() = 0;
