@@ -1,5 +1,0 @@
-add_library(halina STATIC ${CMAKE_CURRENT_LIST_DIR}/core.cpp)
-target_include_directories(halina PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(halina mftgsl)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/external)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/command_terminal)
