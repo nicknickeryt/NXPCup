@@ -137,7 +137,7 @@ public:
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
 
     // KAMERA
-    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartCommunication};
+    NXP_Camera camera = {NXP_Camera::Type::BOTH, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartDebug};
 
     // UART
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
