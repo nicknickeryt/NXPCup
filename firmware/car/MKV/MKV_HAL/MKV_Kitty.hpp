@@ -8,6 +8,7 @@
 #include "MKV_display.hpp"
 #include "MKV_frame.hpp"
 #include "MKV_gpio.hpp"
+#include "MKV_menu.hpp"
 #include "MKV_motor.hpp"
 #include "MKV_servo.hpp"
 #include "MKV_uart.hpp"
@@ -109,11 +110,15 @@ class Kitty {
     MKV_Uart uartDebug         = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
     MKV_Uart uartToKLZ         = {UART4, 115200, uart4RXmux, uart4TXmux, MKV_DMA::emptyDMA()};
 
+    // MENU
+    MKV_Menu menu = {buttons, switches, display, motors};
+
   private:
     Kitty() = default;
 
   public:
     void init();
+    void proc();
 
     static Kitty& kitty() {
         static Kitty staticKitty;

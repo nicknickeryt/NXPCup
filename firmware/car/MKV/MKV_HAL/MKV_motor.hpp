@@ -59,6 +59,10 @@ public:
         right.setValue(rightValue);
     }
 
+    bool enabled() {
+        return left.enablePin.get() && right.enablePin.get();
+    }
+
     std::pair<float, float> getValue() {
         std::pair<float, float> ret;
         ret.first = left.getValue();

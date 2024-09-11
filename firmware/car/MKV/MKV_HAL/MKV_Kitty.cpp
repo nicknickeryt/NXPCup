@@ -51,6 +51,8 @@ void Kitty::init() {
 
     uartDebug.init();
 
+    menu.init();
+
 
 
     uartCommunication.write("Kitty initializing...", 19);
@@ -64,3 +66,8 @@ void Kitty::init() {
 
     log_notice("KiTTy init finished");
 }
+
+// TODO: proc logic
+void Kitty::proc() {
+    menu.proc();
+    }
