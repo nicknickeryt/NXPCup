@@ -1,6 +1,6 @@
 # @purpose   NXP_CUP 2021 KnightRider::Kitty
 # @brief     CMake script defining the build process of the NXP_CUP Project firmware
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 
 ##################################################################################
 # Platform definitions
