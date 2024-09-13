@@ -85,9 +85,6 @@ void Kitty::init() {
     log_notice("KiTTy init finished");
 }
 
-void Kitty::proc() {
-    magicDiodComposition();
-}
 
 void Kitty::FTM_Init() {
     SIM->SOPT2 |= SIM_SOPT2_PLLFLLSEL_MASK;

@@ -174,17 +174,17 @@ class Kitty {
 
     static void FTM_Init();
 
-    void magicDiodComposition();
+    
 
   public:
+    void magicDiodComposition();
+
     static Kitty& kitty() {
         static Kitty staticKitty;
         return staticKitty;
     }
 
     void init();
-
-    void proc();
 
     static void millisIncrease() { milliseconds++; }
 

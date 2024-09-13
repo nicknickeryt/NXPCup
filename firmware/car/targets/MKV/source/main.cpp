@@ -19,7 +19,7 @@ int main() {
 
 
     while (true) {
-        kitty.proc();
+        kitty.magicDiodComposition();
         if (!kitty.menu.proc()) break;
     }
 
