@@ -13,10 +13,6 @@
 class NXP_Menu {
   private:
     bool    initialized = false;
-    uint8_t currPage    = 0; // 0-> toggle start/stop page; 1-> change speed page
-    uint8_t maxPage     = 1;
-    uint8_t startPage   = 0;
-    uint8_t speedPage   = 1;
 
     halina::Buttons&  buttons;
     halina::Switches& switches;
@@ -36,7 +32,7 @@ class NXP_Menu {
 
     bool proc();
 
-    void displayMenuPage(uint8_t page);
+    void displayMenuPage();
 
     void runMotors();
 };

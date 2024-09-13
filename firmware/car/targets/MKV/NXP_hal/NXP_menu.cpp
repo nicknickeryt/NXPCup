@@ -18,7 +18,7 @@ bool NXP_Menu::proc() {
     } else if (!buttons.at(3).get()) {
         runMotors();
     }
-    displayMenuPage(currPage);
+    displayMenuPage();
     display.update();
 
     return true;
@@ -36,7 +36,7 @@ const char* formatString(float value) {
     return s.c_str();
 }
 
-void NXP_Menu::displayMenuPage(uint8_t page) {
+void NXP_Menu::displayMenuPage() {
     display.print(formatString(motors.getValue().first)); // this should later be changed to algorithm-based control
 }
 
