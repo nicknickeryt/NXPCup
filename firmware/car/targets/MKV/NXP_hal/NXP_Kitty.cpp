@@ -66,10 +66,10 @@ void Kitty::init() {
     encoderLeft.init();
     menu.init();
     motors.init();
+    motors.setValue(0.2, 0.2);
     // commandManager.init(printCommandManager);
     pixy.init();
 
-    motors.run();
     camera.start();
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderLeft));
@@ -79,47 +79,13 @@ void Kitty::init() {
 
     uartCommunication.write("Bejbi don't hurt me", 19);
 
-    menu.addParameter(&algorithmUnit.speed, 0.01);
+    menu.init();
     servo.set(0.0);
     camera.start();
     log_notice("KiTTy init finished");
-    // algorithmUnit.checkSwitches();
 }
 
 void Kitty::proc() {
-    static int16_t motorsValues[2];
-    static int16_t encodersValues[2];
-    static uint8_t linesValues[2];
-    float          leftSpeedToModify  = algorithmUnit.speed;
-    float          rightSpeedToModify = algorithmUnit.speed;
-    uint16_t       encoderLeftSample  = encoderLeft.getTicks();
-    uint16_t       encoderRightSample = encoderRight.getTicks();
-    if (!menu.proc(systickTrigger)) {
-        log_notice("L_in: %f R_in: %f", algorithmUnit.speed, algorithmUnit.speed);
-        //        algorithmUnit.pid.calculate(&leftSpeedToModify, &rightSpeedToModify, encoderLeftSample, encoderRightSample);
-        log_notice("L_out: %f R_out: %f", leftSpeedToModify, rightSpeedToModify);
-        motors.setValue(leftSpeedToModify, rightSpeedToModify);
-    }
-
-    if (frameTrigger) {
-        static uint8_t line1 = 10;
-        static uint8_t line2 = 5;
-        motorsValues[0]      = int16_t(algorithmUnit.speed * 100.0);
-        motorsValues[1]      = int16_t(algorithmUnit.speed * 100.0);
-        encodersValues[0]    = int16_t(encoderLeftSample);
-        encodersValues[1]    = int16_t(encoderRightSample);
-        linesValues[0]       = line1;
-        linesValues[1]       = line2;
-        frame.setPayload(linesValues, motorsValues, encodersValues, int16_t(servo.get() * 100), 0, 0, 0, 0, 0, 0);
-        frame.sendFrameProc();
-        frameTrigger = false;
-    }
-
-    //    if (pixyTrigger) {
-    //        pixyTrigger = false;
-    //        pixy.getLines(algorithmUnit.lineLeft, algorithmUnit.lineRight);
-    //        algorithmUnit.analyze();
-    //    }
     magicDiodComposition();
 }
 
@@ -139,7 +105,7 @@ void Kitty::magicDiodComposition() {
     static uint8_t  direction = 0;
     static uint8_t  oldLed    = 0;
     licznik++;
-    if (licznik == 10000) {
+    if (licznik == 5000) {
         licznik = 0;
         if (direction == 0) {
             oldLed = ledIndex;

@@ -17,33 +17,16 @@ int main() {
     Kitty& kitty = Kitty::kitty();
     kitty.init();
 
-    kitty.display.print(1234);
-
-
-    uint16_t         dataBuf[128] = {0};
-    NXP_Camera::Type type         = NXP_Camera::Type::CAMERA_1;
-    // size_t           i            = 0;
-
-
-    // kitty.servo.set(-1.0);
-
-    // Ustawia obydwa silniki na 10% mocy do przodu (zakres od -1.0 do 1.0, podobnie jak w servo)
-    kitty.motors.setValue(0.3, 0.3);
-    // log_notice("left: %d, right: %d", kitty.motors.getValue().first, kitty.motors.getValue().second);
-
-    // motors.run() chyba włącza silniki, a motors.block() wyłącza.
-    kitty.motors.run();
-
-    // Po 10s wyłączamy silniki
-    // delay_ms(10000);
-    // kitty.motors.block();
 
     while (true) {
         kitty.proc();
-        // kitty.algorithmUnit.analyze();
-        kitty.camera.getData(type, dataBuf);
-        int32_t position = kitty.newAlgorithm.calculatePosition(dataBuf);
-        // int32_t position = kitty.newAlgorithm.proc(dataBuf);
-        kitty.servo.set(static_cast<float>(position)/51.0f);
+        if (!kitty.menu.proc()) break;
+    }
+
+    while (true) {
+        kitty.proc();
+        kitty.camera.getData(kitty.cameraType, kitty.cameraDataBuf);
+        int32_t position = kitty.newAlgorithm.calculatePosition(kitty.cameraDataBuf);
+        kitty.servo.set(static_cast<float>(position) / 51.0f);
     }
 }
