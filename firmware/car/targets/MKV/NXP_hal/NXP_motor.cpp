@@ -18,7 +18,8 @@ void NXP_Motor::init(){
 }
 
 void NXP_Motor::setValue(float value) {
-    value = std::clamp(value, -1.0f, 1.0f);
+
+    value = std::clamp(value, 0.0f, 0.5f);;
 
     if (value <= 0.0f) {
         motorDirection = MotorDirection::FORWARDS;
