@@ -45,7 +45,7 @@ template <class T> class CyclicBuffer {
         return false;
     }
     inline void append_unsafe(T data) noexcept __attribute__((always_inline)) {
-        count++;
+        count+=1;
         writePos = (writePos + 1) % size;
         dataTab[writePos] = data;
     }
@@ -139,7 +139,7 @@ template <class T> class CyclicBuffer {
         return {};
     }
     inline T get_unsafe(void) noexcept __attribute__((always_inline)) {
-        count--;
+        count-=1;
         readPos = (readPos + 1) % size;
         return dataTab[readPos];
     }

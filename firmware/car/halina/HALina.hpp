@@ -20,5 +20,5 @@
 #include "HALina_buttons.hpp"
 
 #ifndef delay_ms
-#define delay_ms(ms) for(volatile int i = 0; i < (int)CLOCK_GetFreq(kCLOCK_CoreSysClk)/1000000*4 * (int)ms; i++){ asm("NOP"); }
+#define delay_ms(ms) for(volatile int i = 0; i < (int)CLOCK_GetFreq(kCLOCK_CoreSysClk)/10000000*4 * (int)ms; i+=1){ asm("NOP"); }
 #endif
