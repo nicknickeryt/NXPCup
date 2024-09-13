@@ -3,9 +3,15 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
+
+
 set(CMAKE_ASM_COMPILER "arm-none-eabi-gcc" CACHE STRING "Assembler selected" FORCE)
-set(CMAKE_C_COMPILER "arm-none-eabi-gcc" CACHE STRING "C Compiler selected" FORCE)
-set(CMAKE_CXX_COMPILER "arm-none-eabi-g++" CACHE STRING "C++ Compiler selected" FORCE)
+
+set(CMAKE_C_COMPILER /usr/share/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc CACHE PATH "" FORCE)
+set(CMAKE_CXX_COMPILER /usr/share/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-g++ CACHE PATH "" FORCE)
+
+# set(CMAKE_C_COMPILER "arm-none-eabi-gcc" CACHE STRING "C Compiler selected" FORCE)
+# set(CMAKE_CXX_COMPILER "arm-none-eabi-g++" CACHE STRING "C++ Compiler selected" FORCE)
 set(CMAKE_LINKER "arm-none-eabi-ld" CACHE STRING "Linker selected" FORCE)
 SET(CMAKE_RANLIB "arm-none-eabi-gcc-ranlib" CACHE STRING "Ranlib selected" FORCE)
 set(CMAKE_AR "arm-none-eabi-gcc-ar" CACHE STRING "Archiver selected" FORCE)

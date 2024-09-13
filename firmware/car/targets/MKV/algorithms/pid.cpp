@@ -23,7 +23,7 @@ int32_t PID::calculate(int32_t setpoint, int32_t current) {
     float error = setpoint - current;
 
     integral += Ki * (error + previousError);
-    float maxIntegral = maxValue * 0.3f;
+    float maxIntegral = maxValue * 0.12f;
     if (integral > maxIntegral) integral = maxIntegral;
     if (integral < -maxIntegral) integral = -maxIntegral;
 
