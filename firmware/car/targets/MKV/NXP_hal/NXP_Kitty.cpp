@@ -83,7 +83,7 @@ void Kitty::init() {
     servo.set(0.0);
     camera.start();
     log_notice("KiTTy init finished");
-    algorithmUnit.checkSwitches();
+    // algorithmUnit.checkSwitches();
 }
 
 void Kitty::proc() {

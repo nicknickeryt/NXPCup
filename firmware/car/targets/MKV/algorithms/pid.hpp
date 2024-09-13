@@ -1,76 +1,23 @@
-#pragma once
 #include <stdint.h>
+#include <stdbool.h>
 
-class PID{
-private:
-    float kp;
-    float ki;
-    float kd;
-    float maxSummaryError;
-    float a;
-    float b;
-    float previousLeftMotorOutput = 0;
-    float previousRightMotorOutput = 0;
-    float summaryErrorLeftMotor = 0;
-    float summaryErrorRightMotor = 0;
-    float previousErrorLeftMotor = 0;
-    float previousErrorRightMotor = 0;
+#pragma once
 
-public:
-    PID(float kp, float ki, float kd, float maxSummaryError, float a, float b) : kp(kp), ki(ki), kd(kd), maxSummaryError(maxSummaryError), a(a), b(b){}
+class PID {
+    private:
+        float Kp;
+        float Ki;
+        float Kd;
 
-    void calculate(float* leftMotorValue, float* rightMotorValue, uint16_t leftEncoderValue, uint16_t rightEncoderValue){
-        float outputLeftMotorValue;
-        float outputRightMotorValue;
+        float integral = 0;
+        float previousError = 0;
+        float previousTarget = 0;
+        float previousDerivative = 0;
 
-        const float leftEncoder = convertEncoderData(leftEncoderValue);
-        const float rightEncoder = convertEncoderData(rightEncoderValue);
-
-        // get current error
-        const float errorLeftMotor = *leftMotorValue - leftEncoder;
-        const float errorRightMotor = *rightMotorValue - rightEncoder;
-
-        // update summary errors
-        summaryErrorLeftMotor += errorLeftMotor;
-        summaryErrorRightMotor += errorRightMotor;
-        if(summaryErrorLeftMotor >= maxSummaryError){
-            summaryErrorLeftMotor = maxSummaryError;
-        }
-        if(summaryErrorRightMotor >= maxSummaryError){
-            summaryErrorRightMotor = maxSummaryError;
-        }
-
-        // calculate output signals
-        outputLeftMotorValue = kp*errorLeftMotor +  summaryErrorLeftMotor*ki + (errorLeftMotor-previousErrorLeftMotor)*kd;
-        outputLeftMotorValue += previousLeftMotorOutput;
-        if(outputLeftMotorValue > 1){
-            outputLeftMotorValue = 1;
-        } else if(outputLeftMotorValue < 0){
-            outputLeftMotorValue = 0;
-        }
-        outputRightMotorValue = kp*errorRightMotor +  summaryErrorRightMotor*ki + (errorRightMotor-previousErrorRightMotor)*kd;
-        outputRightMotorValue += previousRightMotorOutput;
-        if(outputRightMotorValue > 1){
-            outputRightMotorValue = 1;
-        } else if(outputRightMotorValue < 0){
-            outputRightMotorValue = 0;
-        }
-
-        // remember signals 
-        previousLeftMotorOutput = outputLeftMotorValue;
-        previousRightMotorOutput = outputRightMotorValue;
-
-        // remember errors
-        previousErrorLeftMotor = errorLeftMotor;
-        previousErrorRightMotor = errorRightMotor;
-
-        *leftMotorValue = outputLeftMotorValue;
-        *rightMotorValue = outputRightMotorValue;
-    }
-
-private:
-    // encoderData = f(motorData) = a*motorData + b
-    float convertEncoderData(uint16_t encoderValue){
-        return (((float)encoderValue) - b)/a;
-    }
+        float maxValue;
+        float bias;
+    public:
+        PID(float kp = -1.0f, float ki = -0.1f, float kd = 0.0f,
+            float maxIntegral = 90.0f, float bias = 90.0f);
+        int32_t calculate(int32_t setpoint, int32_t current);
 };

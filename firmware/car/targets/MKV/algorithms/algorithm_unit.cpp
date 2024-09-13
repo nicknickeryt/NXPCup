@@ -19,16 +19,16 @@
 void AlgorithmUnit::analyze() {
     state = State::CAMERA_DATA_PREPROCESSING;
 
-    state = State::FINDING_TRACK_LINES;
-    auto result = computeCarPositionOnTrack();
+    // state = State::FINDING_TRACK_LINES;
+    // auto result = computeCarPositionOnTrack();
 
-    setServo(result);
+    // setServo(result);
 
     state = State::OBSTACLE_AVOIDING;
-    // avoid obstacle if any
+    // // avoid obstacle if any
 
     state = State::PATTERN_DETECTION;
-    // detect patterns
+    // // detect patterns
 }
 
 int16_t AlgorithmUnit::computeCarPositionOnTrack(){

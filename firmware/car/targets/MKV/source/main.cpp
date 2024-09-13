@@ -41,16 +41,19 @@ int main() {
     while (true) {
         kitty.proc();
 
-        // Resztki starego algorytmu do kamery, tutaj tylko odczyt danych
         kitty.algorithmUnit.analyze();
         kitty.camera.getData(type, dataBuf);
+        int32_t position = kitty.newAlgorithm.calculatePosition(dataBuf);
 
         delay_ms(1000);
-        log_notice("%d", dataBuf[i % 128]);
 
-        for (int j = 0; j < 128; j++) {
-            delay_ms(1);
-            log_notice("%d", dataBuf[j]);
-        }
+        log_notice("position: %d", position);
+
+        // log_notice("%d", dataBuf[i % 128]);
+
+        // for (int j = 0; j < 128; j++) {
+        //     delay_ms(1);
+        //     log_notice("%d", dataBuf[j]);
+        // }
     }
 }

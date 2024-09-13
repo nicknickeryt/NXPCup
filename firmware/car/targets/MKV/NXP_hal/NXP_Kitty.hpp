@@ -25,6 +25,7 @@
 #include "NXP_encoder.hpp"
 #include "NXP_frame.hpp"
 #include "algorithm_unit.hpp"
+#include "algorithm.hpp"
 
 void pit_generalHandler(uint32_t*);
 
@@ -159,6 +160,7 @@ public:
 
     // ALGORITHM
     AlgorithmUnit algorithmUnit = {servo, uartCommunication, switches};
+    Algorithm newAlgorithm;
 
     Pixy pixy = {uartPixy, true};
 

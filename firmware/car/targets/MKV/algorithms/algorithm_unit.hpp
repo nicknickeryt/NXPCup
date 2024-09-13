@@ -9,9 +9,9 @@
 #pragma once
 
 #include "HALina.hpp"
-#include "track_lines_detector.hpp"
-#include "obstacle_detector.hpp"
-#include "patterns_detector.hpp"
+// #include "track_lines_detector.hpp"
+// #include "obstacle_detector.hpp"
+// #include "patterns_detector.hpp"
 #include "NXP_uart.hpp"
 #include "NXP_servo.hpp"
 #include "pid.hpp"
@@ -45,7 +45,6 @@ private:
     float speed = 0.2;
     Line lineRight{};
     Line lineLeft{};
-    PID pid ={0.01, 0.0, 0.7, 0.3, 454.375,-71.875};
     int16_t carPosition = 0;
     uint16_t keepWheelsPositionCounter = 0;
 
