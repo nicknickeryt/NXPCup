@@ -24,7 +24,6 @@ int main() {
     }
 
     while (true) {
-        kitty.proc();
         kitty.camera.getData(kitty.cameraType, kitty.cameraDataBuf);
         int32_t position = kitty.newAlgorithm.calculatePosition(kitty.cameraDataBuf);
         kitty.servo.set(static_cast<float>(position) / 51.0f);
