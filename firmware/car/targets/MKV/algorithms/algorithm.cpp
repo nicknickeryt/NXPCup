@@ -50,7 +50,7 @@ int32_t Algorithm::calculatePosition(uint16_t *data) {
     return leftSideDelta - rightSideDelta;
 }
 
-int32_t Algorithm::proc(uint16_t *data) {
+float Algorithm::proc(uint16_t *data) {
   assert(data != nullptr);
   // Calculate the position of the vehicle based on the camera image
   int32_t position = calculatePosition(data);

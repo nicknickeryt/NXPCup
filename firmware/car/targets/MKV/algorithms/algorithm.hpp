@@ -24,5 +24,5 @@ private:
 public:
     Algorithm(){ };
     int32_t calculatePosition(uint16_t *data);
-    int32_t proc(uint16_t *data);
+    float proc(uint16_t *data);
 };

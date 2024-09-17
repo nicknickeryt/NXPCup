@@ -14,10 +14,9 @@ static uint16_t right_side_far[128] = {
 };
 
 TEST(PIDTest, RightSideFar) {
-  Algorithm algorithm;
-
-    int32_t output = algorithm.proc(right_side_far);
-    for (auto i = 0; i < 4; i++) {
+    Algorithm algorithm;
+    float output;
+    for (auto i = 0; i < 6; i++) {
         output = algorithm.proc(right_side_far);
         std::cerr << "Output: " << output << std::endl;
     }
