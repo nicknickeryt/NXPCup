@@ -12,7 +12,7 @@
 
 class NXP_Menu {
   private:
-    bool    initialized = false;
+    bool initialized = false;
 
     halina::Buttons&  buttons;
     halina::Switches& switches;

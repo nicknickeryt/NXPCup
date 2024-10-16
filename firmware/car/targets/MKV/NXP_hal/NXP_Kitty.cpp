@@ -10,7 +10,6 @@
 
 #include "NXP_Kitty.hpp"
 
-#include "algorithm_unit.hpp"
 #include "clock_config.h"
 #include "pin_mux.h"
 
@@ -53,8 +52,6 @@ void Kitty::init() {
     log_setWriteFunction(logWrite);
     uartCommunication.init();
     uartCommunication.initDMA();
-    uartToKLZ.init();
-    uartPixy.init();
 
     ledLine.init();
     display.init();
@@ -68,7 +65,6 @@ void Kitty::init() {
     motors.init();
     motors.setValue(0.2, 0.2);
     // commandManager.init(printCommandManager);
-    pixy.init();
 
     camera.start();
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderRight));
@@ -80,7 +76,6 @@ void Kitty::init() {
     uartCommunication.write("Bejbi don't hurt me", 19);
 
     menu.init();
-    servo.set(0.0);
     camera.start();
     log_notice("KiTTy init finished");
 }

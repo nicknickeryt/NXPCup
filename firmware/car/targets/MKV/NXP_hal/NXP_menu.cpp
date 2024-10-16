@@ -9,11 +9,11 @@ bool NXP_Menu::proc() {
 
     else if (!buttons.at(0).get()) {
         motors.setValue(motors.getValue().first + 0.05, motors.getValue().second + 0.05);
-        delay_ms(300);
+        delay_ms(3000);
 
     } else if (!buttons.at(1).get()) {
         motors.setValue(motors.getValue().first - 0.05, motors.getValue().second - 0.05);
-        delay_ms(300);
+        delay_ms(3000);
 
     } else if (!buttons.at(3).get()) {
         runMotors();

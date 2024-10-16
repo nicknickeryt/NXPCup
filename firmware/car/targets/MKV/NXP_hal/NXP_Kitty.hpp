@@ -20,12 +20,9 @@
 #include "NXP_gpio.hpp"
 #include "NXP_menu.hpp"
 #include "NXP_motor.hpp"
-#include "NXP_pixy.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_uart.hpp"
-#include "VL53L0X.h"
 #include "algorithm.hpp"
-#include "algorithm_unit.hpp"
 
 void pit_generalHandler(uint32_t*);
 
@@ -144,8 +141,6 @@ class Kitty {
     // UART
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartDebug         = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
-    NXP_Uart uartToKLZ         = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartPixy          = {UART1, 115200, uart1RXmux, uart1TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY
     NXP_Display display;
@@ -156,14 +151,8 @@ class Kitty {
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
 
-    // DISTANCE SENSOR
-    VL53L0X sensor = {i2c};
-
-    // ALGORITHM
-    AlgorithmUnit algorithmUnit = {servo, uartCommunication, switches};
+    // ALGORITHMzzzz
     Algorithm     newAlgorithm;
-
-    Pixy pixy = {uartPixy, true};
 
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors};

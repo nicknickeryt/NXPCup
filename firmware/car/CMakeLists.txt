@@ -1,6 +1,6 @@
 # @purpose   NXP_CUP 2021 KnightRider::Kitty
 # @brief     CMake script defining the build process of the NXP_CUP Project firmware
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.24)
 
 ##################################################################################
 # Platform definitions
@@ -63,6 +63,6 @@ project(NXP_CUP C CXX ASM)
 ##################################################################################
 # Additional linker / compiler / subirectories
 ##################################################################################
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -g -DNDEBUG -flto -DLOG_LEVEL=LOG_LEVEL_ALL")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os -DNDEBUG -flto -g -DLOG_LEVEL=LOG_LEVEL_ALL")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Ofast -g0 -DNDEBUG -flto -DLOG_LEVEL=LOG_LEVEL_ALL")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -g0 -DNDEBUG -flto -DLOG_LEVEL=LOG_LEVEL_ALL")
 add_subdirectory(halina)
