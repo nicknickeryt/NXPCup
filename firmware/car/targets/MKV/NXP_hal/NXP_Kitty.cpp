@@ -56,6 +56,8 @@ void Kitty::init() {
     ledLine.init();
     display.init();
     servo.init();
+    servo.set(0.0);
+    servo.disable();
     camera.init();
     pitCamera.init();
     pitSendCameraData.init();
