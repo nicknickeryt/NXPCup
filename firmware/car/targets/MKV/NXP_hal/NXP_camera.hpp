@@ -37,10 +37,8 @@ public:
 
 private:
     uint16_t buffer1Data [128] = {0};
-    uint16_t buffer2Data [128] = {0};
     int16_t currentPixelIndex = 0;
     uint8_t camera1DataBuffer [260];
-    uint8_t camera2DataBuffer [260];
     CameraState cameraState = CameraState::STOPPED;
     Type type;
     NXP_ADC& adc;
@@ -62,7 +60,7 @@ public:
     void start() {
         cameraState = CameraState::START;
     }
-    bool getData(Type camera, uint16_t* dataBuffer);
+    bool getData(uint16_t* dataBuffer);
 
 
 };

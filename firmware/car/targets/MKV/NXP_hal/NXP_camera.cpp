@@ -15,24 +15,9 @@ void NXP_Camera::init() {
     clockPin.init();
     SIPin.init();
 
-    if (type == NXP_Camera::Type::BOTH) {
-        adc.appendSample(&sampleCamera1);
-        adc.appendSample(&sampleCamera1);
-        adc.appendSample(&sampleCamera1);
-        adc.appendSample(&sampleCamera1);
-        adc.appendSample(&sampleCamera2);
-        adc.appendSample(&sampleCamera2);
-        adc.appendSample(&sampleCamera2);
-        adc.appendSample(&sampleCamera2);
-    } else if (type == NXP_Camera::Type::CAMERA_1) {
         for (uint8_t i = 0; i < 8; i ++) {
             adc.appendSample(&sampleCamera1);
         }
-    } else if (type == NXP_Camera::Type::CAMERA_2) {
-        for (uint8_t i = 0; i < 8; i ++) {
-            adc.appendSample(&sampleCamera2);
-        }
-    }
 
     adc.init();
     clockPin.reset();
@@ -62,33 +47,12 @@ void NXP_Camera::pitInterruptStatic(uint32_t*) {
 }
 
 void NXP_Camera::adcInterruptEndOfMeasurement() {
-    if (type == NXP_Camera::Type::BOTH) {
-        uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
-        uint32_t result = 0;
-        for (uint8_t i = 0; i < 4; i++) {
-            result += data[i];
-        }
-        buffer1Data[currentPixelIndex] = result / 4;
-        result = 0;
-        for (uint8_t i = 4; i < 8; i++) {
-            result += data[i];
-        }
-        buffer2Data[currentPixelIndex] = result / 4;
-    } else if (type == NXP_Camera::Type::CAMERA_1) {
         uint16_t* data = adc.getBufferValues(sampleCamera1.converterType);
         uint32_t result = 0;
         for (uint8_t i = 0; i < 8; i++) {
             result += data[i];
         }
         buffer1Data[currentPixelIndex] = result / 8;
-    } else if (type == NXP_Camera::Type::CAMERA_2) {
-        uint16_t* data = adc.getBufferValues(sampleCamera2.converterType);
-        uint32_t result = 0;
-        for (uint8_t i = 0; i < 8; i++) {
-            result += data[i];
-        }
-        buffer2Data[currentPixelIndex] = result / 8;
-    }
 }
 
 void NXP_Camera::pitInterrupt() {
@@ -139,18 +103,12 @@ void NXP_Camera::pitInterrupt() {
     }
 }
 
-bool NXP_Camera::getData(Type camera, uint16_t* dataBuffer){
+bool NXP_Camera::getData(uint16_t* dataBuffer){
     bool result = false;
     if(nullptr != dataBuffer){
-        if(camera == Type::CAMERA_1){
             __disable_irq();
             memcpy(dataBuffer, buffer1Data, 256);
             __enable_irq();
-        } else if(camera == Type::CAMERA_2){
-            __disable_irq();
-            memcpy(dataBuffer, buffer2Data, 256);
-            __enable_irq();
-        }
     }
     return result;
 }

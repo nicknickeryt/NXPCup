@@ -24,7 +24,7 @@ int main() {
 
     while (true) {
         kitty.magicDiodComposition();
-        kitty.camera.getData(kitty.cameraType, kitty.cameraDataBuf);
+        kitty.camera.getData(kitty.cameraDataBuf);
         int32_t position = kitty.newAlgorithm.calculatePosition(kitty.cameraDataBuf);
         kitty.servo.set(static_cast<float>(position) / 51.0f);
     }
