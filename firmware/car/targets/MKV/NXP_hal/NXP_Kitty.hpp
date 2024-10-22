@@ -28,6 +28,8 @@ void pit_generalHandler(uint32_t*);
 
 void pit_sendCameraData(uint8_t);
 
+void logWrite(char c,[[maybe_unused]] void* const context);
+
 class Kitty {
   private:
     // SYSTICK

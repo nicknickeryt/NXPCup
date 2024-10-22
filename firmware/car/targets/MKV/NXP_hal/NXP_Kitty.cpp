@@ -9,7 +9,6 @@
 #define LOG_CHANNEL KITTY
 
 #include "NXP_Kitty.hpp"
-
 #include "clock_config.h"
 #include "pin_mux.h"
 
@@ -27,7 +26,7 @@ void pit_generalHandler(uint32_t*) {
     pixyTrigger            = true;
 }
 
-static void logWrite(char c, [[maybe_unused]] void* const context) {
+void logWrite(char c, [[maybe_unused]] void* const context) {
     Kitty::kitty().uartDebug.write(c);
 }
 
