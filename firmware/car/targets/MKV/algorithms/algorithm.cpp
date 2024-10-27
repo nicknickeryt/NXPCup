@@ -33,25 +33,43 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     #ifdef ALGORITHM_LOWPASS_EN
     lowPassFilter(data, 128);
     #endif
-
-    // Calculate average brightness of the left half of the image
-    brightness = 0;
-    for (auto i = imageCut; i < HALF_CAMERA_WIDTH + imageCut; i++) {
-        brightness += data[i] / 64; // tu ma byc int
-    }
-    // brightness += bightnessBias; //mnozymy zamiast dodawac
+    
+    // Find brightest pixel of the image
+    brightnessMax = data[imageCut];
+    for (auto i = imageCut + 5; i < 128 - imageCut; i+= 5) {
+        if(data[i] > brightnessMax)
+            brightnessMax = data[i]; 
+    } 
+    // Calculate brightness
+    brightness = brightnessMax * brightnesMaxModifier;   
    
-    // Calculate the distance from the center of the image
-    uint32_t leftSideDistance  = 0;  // Distance from the center
-    uint32_t rightSideDistance = 0;  // Distance from the center
-    for (auto i = imageCut; i < 64; i++) {
-        if (data[i] < brightness) 
-          leftSideDistance = i;
-        if (data[127 - i] < brightness) 
-          rightSideDistance = i + 1;
-    }
+    // Calculate the distance from the center of the image 
+    for (auto i = imageCut; i < 128 - imageCut; i++) {
+        if(leftLineFound == false && data[i] > brightness){
+            leftLinePixel = i;       // Left line pixel at [i]
+            leftLineFound = true;
+        }    
 
-    return leftSideDistance - rightSideDistance;
+        else if (leftLineFound == true && data[i] < brightness){
+            rightLinePixel = i - 1;  // Right line pixel at [i]
+            leftLineFound = false;
+        }
+    }
+    
+    // Calculate turning value from camera feed
+    cameraTurnValuePrevious = cameraTurnValueActual;
+    cameraTurnValueActual = (leftLinePixel + rightLinePixel) - 128;   
+
+    // Check if lost the line and try to come back  
+    // If turn value is (maxCameraTurnValueChange) smaller than previous turn value => use previous value
+    if(cameraTurnValueActual > cameraTurnValuePrevious + maxCameraTurnValueChange){
+        cameraTurnValueActual = cameraTurnValuePrevious;
+    }   
+    else if(cameraTurnValueActual < cameraTurnValuePrevious - maxCameraTurnValueChange){
+        cameraTurnValueActual = cameraTurnValuePrevious;
+    }
+    
+    return cameraTurnValueActual + imageCenterOffset * 2;
 }
 
 int32_t Algorithm::proc(uint16_t* data) {

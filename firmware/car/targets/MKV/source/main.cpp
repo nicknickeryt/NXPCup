@@ -29,17 +29,20 @@ int main() {
         kitty.magicDiodComposition();
         kitty.camera.getData(kitty.cameraDataBuf);
         int32_t position = kitty.newAlgorithm.calculatePosition(kitty.cameraDataBuf);
-        kitty.servo.set(static_cast<float>(position) / 51.0f);
+        kitty.servo.set(static_cast<float>(position) / 60.0f);
 
         if(lastLogTimepoint + LOG_UPDATE_INTERVAL < kitty.millis()) {
             lastLogTimepoint = kitty.millis();
-            fctprintf(logWrite, NULL, "99999,");
-            fctprintf(logWrite, NULL, "%u", kitty.newAlgorithm.getBrightness());
-            fctprintf(logWrite, NULL, "%u", position + 60);
+
+            fctprintf(logWrite, NULL, "99999");
+            fctprintf(logWrite, NULL, "%u,", kitty.newAlgorithm.getBrightness());
+            fctprintf(logWrite, NULL, "%u,", position + 64);
+
             for(size_t i = 0; i<sizeof(kitty.cameraDataBuf)/sizeof(uint16_t); i++) { 
                 uint16_t *buffer = static_cast<uint16_t*>(kitty.cameraDataBuf);
                 fctprintf(logWrite, NULL, "%d,", buffer[i]);
             }
+
             fctprintf(logWrite, NULL, "\r\n");
         }
     }
