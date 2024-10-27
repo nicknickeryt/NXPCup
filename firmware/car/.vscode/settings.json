@@ -4,6 +4,10 @@
         "string": "cpp",
         "*.tcc": "cpp",
         "ios": "cpp",
-        "algorithm": "cpp"
-    }
+        "algorithm": "cpp",
+        "cstdint": "cpp",
+        "regex": "cpp",
+        "__node_handle": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

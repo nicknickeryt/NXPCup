@@ -14,8 +14,7 @@
 #include "printf.h"
 
 size_t lastLogTimepoint;
-#define LOG_UPDATE_INTERVAL 1000
-
+#define LOG_UPDATE_INTERVAL 100
 int main() {
     BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
@@ -34,11 +33,12 @@ int main() {
 
         if(lastLogTimepoint + LOG_UPDATE_INTERVAL < kitty.millis()) {
             lastLogTimepoint = kitty.millis();
-            //fctprintf(logWrite, NULL, "%d ", kitty.millis()); //milis test
-
+            fctprintf(logWrite, NULL, "99999,");
+            fctprintf(logWrite, NULL, "%u", kitty.newAlgorithm.getBrightness());
+            fctprintf(logWrite, NULL, "%u", position + 60);
             for(size_t i = 0; i<sizeof(kitty.cameraDataBuf)/sizeof(uint16_t); i++) { 
                 uint16_t *buffer = static_cast<uint16_t*>(kitty.cameraDataBuf);
-                fctprintf(logWrite, NULL, "%d, ", buffer[i]);
+                fctprintf(logWrite, NULL, "%d,", buffer[i]);
             }
             fctprintf(logWrite, NULL, "\r\n");
         }

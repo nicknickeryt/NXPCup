@@ -1,0 +1,5 @@
+matplotlib>=3.9.2
+numpy>=2.1.2
+PyBluez>=0.30
+pyserial>=3.5
+PyYAML>=6.0.2
