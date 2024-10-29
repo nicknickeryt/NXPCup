@@ -23,6 +23,7 @@
 #include "NXP_servo.hpp"
 #include "NXP_uart.hpp"
 #include "algorithm.hpp"
+#include "algorithm_motor.hpp"
 
 void pit_generalHandler(uint32_t*);
 
@@ -155,7 +156,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm;
-
+    Motor_algorithm motoAlgorithm;
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors};
 
