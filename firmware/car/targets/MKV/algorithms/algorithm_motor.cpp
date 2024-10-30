@@ -1,29 +1,27 @@
 #include "algorithm_motor.hpp"
-#include <utility>
-#define A 3600.0 //enter the square of engine cut value based on camera algorithm return value (float)
-                // be careful of what value you enter (A > max_position^2) 
+#include <utility> 
 
 /*
 *@brief set velocity adequate to current conditions on track
-*@param st_velocity is the default speed of the car
+*@param startVelocity is the default speed of the car
 *@param position is the current position of the car on the track
 */
 
-std::pair<float, float> differential(float st_velocity, int position){ 
+Differential::Differential(float startVelocityValue) : startVelocity(startVelocityValue) {}
 
-        std::pair<float, float> ret;
-
-        ret.first = st_velocity; //ret.first is left engine
-        ret.second = st_velocity; //ret.second is right engine
+void Differential::proc(int position) { 
+        //valueLeft = startVelocity;
+        //valueRight = startVelocity;
 
         if(position < 0){
-            ret.first = (st_velocity*(A - (position*position)))/A;
+            valueRight = (startVelocity*(ENGINE_CUT + (position)))/ENGINE_CUT;
+            valueLeft  = (startVelocity*(ENGINE_BREAKE + (position)))/ENGINE_BREAKE;
         }
         else if(position > 0){
-            ret.second = (st_velocity*(A - (position*position)))/A;
+            valueLeft  =  (startVelocity*(ENGINE_CUT - (position)))/ENGINE_CUT;
+            valueRight =  (startVelocity*(ENGINE_BREAKE - (position)))/ENGINE_BREAKE;
         }
-
-        return ret;
-
-        }
+}
+float Differential::getLeft() { return valueLeft; }
+float Differential::getRight() { return valueRight; }
 

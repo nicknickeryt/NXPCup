@@ -8,6 +8,7 @@
 
 #include "algorithm.hpp"
 #include <assert.h>
+#include <cstdlib> 
 
 enum {
     HALF_CAMERA_WIDTH = 63,
@@ -43,23 +44,60 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     // Calculate brightness
     brightness = brightnessMax * brightnesMaxModifier;   
    
-    // Calculate the distance from the center of the image 
+    // Calculate crossings with brightness 
     for (auto i = imageCut; i < 128 - imageCut; i++) {
-        if(leftLineFound == false && data[i] > brightness){
-            leftLinePixel = i;       // Left line pixel at [i]
-            leftLineFound = true;
-        }    
+        switch (crossNumber) {
+            case 1:{
+                 if(data[i] > brightness){
+                    firstCross  = i;
+                    crossNumber = 2;
+                }
+                break;
+            }
+             case 2:{
+                 if(data[i] < brightness){
+                    secondCross  = i - 1;
+                    crossNumber = 3;
+                }
+                break;
+            }     
+            case 3:{
+                if(data[i] > brightness){
+                    thirdCross  = i;
+                    crossNumber = 4;
+                }
+                break;
+            }
+            case 4:{
+                if(data[i] < brightness){
+                    fourthCross  = i - 1;
+                }
+                break;
+            }
+        } 
+    } 
+      
+    // Calculate center between two crosses (for each line)
+    cameraTurnValueFirst = firstCross + secondCross;
+    cameraTurnValueSecond = thirdCross + fourthCross;
 
-        else if (leftLineFound == true && data[i] < brightness){
-            rightLinePixel = i - 1;  // Right line pixel at [i]
-            leftLineFound = false;
+    // Check if cameraTurnValueSecond is used
+    if(crossNumber < 4){
+        cameraTurnValueActual = cameraTurnValueFirst;
+    }
+    // Chose closest value to the last value
+    else{ 
+        if(abs(cameraTurnValueSecond - cameraTurnValueActual) < abs(cameraTurnValueFirst - cameraTurnValueActual)){
+            cameraTurnValueActual = cameraTurnValueSecond;
+        }
+        else{
+            cameraTurnValueActual = cameraTurnValueFirst;
         }
     }
-    
-    // Calculate turning value from camera feed
-    cameraTurnValuePrevious = cameraTurnValueActual;
-    cameraTurnValueActual = (leftLinePixel + rightLinePixel) - 128;   
 
+    // Reset 
+    crossNumber = 1; 
+    
     // Check if lost the line and try to come back  
     // If turn value is (maxCameraTurnValueChange) smaller than previous turn value => use previous value
     if(cameraTurnValueActual > cameraTurnValuePrevious + maxCameraTurnValueChange){
@@ -69,7 +107,10 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
         cameraTurnValueActual = cameraTurnValuePrevious;
     }
     
-    return cameraTurnValueActual + imageCenterOffset * 2;
+    // Save last value
+    cameraTurnValuePrevious = cameraTurnValueActual;
+    
+    return cameraTurnValueActual - imageCenterOffset;
 }
 
 int32_t Algorithm::proc(uint16_t* data) {

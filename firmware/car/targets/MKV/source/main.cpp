@@ -19,24 +19,33 @@ int main() {
     BOARD_BootClockRUN();
     Kitty& kitty = Kitty::kitty();
     kitty.init();
-
+    
     while (true) {
         kitty.magicDiodComposition();
         if (!kitty.menu.proc()) break;
     }
 
     while (true) {
+
         kitty.magicDiodComposition();
         kitty.camera.getData(kitty.cameraDataBuf);
+
         int32_t position = kitty.newAlgorithm.calculatePosition(kitty.cameraDataBuf);
-        kitty.servo.set(static_cast<float>(position) / 60.0f);
+        kitty.servo.set(static_cast<float>(position) / 70.0f);
+        kitty.differential.proc(position);
+        kitty.motors.setValue(kitty.differential.getLeft(), kitty.differential.getRight());
+
+       
+
+
+        ////////////////////////////// Uart Log ////////////////////////////////
 
         if(lastLogTimepoint + LOG_UPDATE_INTERVAL < kitty.millis()) {
             lastLogTimepoint = kitty.millis();
 
-            fctprintf(logWrite, NULL, "99999");
+            fctprintf(logWrite, NULL, "99999,");
             fctprintf(logWrite, NULL, "%u,", kitty.newAlgorithm.getBrightness());
-            fctprintf(logWrite, NULL, "%u,", position + 64);
+            fctprintf(logWrite, NULL, "%u,", (position + 120) / 2);
 
             for(size_t i = 0; i<sizeof(kitty.cameraDataBuf)/sizeof(uint16_t); i++) { 
                 uint16_t *buffer = static_cast<uint16_t*>(kitty.cameraDataBuf);

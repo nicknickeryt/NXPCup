@@ -156,7 +156,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm;
-    Motor_algorithm motoAlgorithm;
+    Differential  differential = Differential(0.3);
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors};
 
