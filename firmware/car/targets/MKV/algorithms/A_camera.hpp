@@ -6,7 +6,7 @@
  *
  */
 
-#include "pid.hpp"
+#include "A_servo.hpp"
 #include <cstddef>
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,8 +47,8 @@ class Algorithm {
     uint32_t cameraTurnValueFirst = 0;              // Calculated first turn value
     uint32_t cameraTurnValueSecond = 0;             // Calculated second turn value
 
-    uint32_t cameraTurnValueActual = 0;            // Actual Turn Value
-    uint32_t cameraTurnValuePrevious = 120;            // Previous turn value             
+    uint32_t cameraTurnValueActual = 0;             // Actual Turn Value
+    uint32_t cameraTurnValuePrevious = 120;         // Previous turn value             
    
 
 

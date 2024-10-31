@@ -6,7 +6,7 @@
  *
  */
 
-#include "algorithm.hpp"
+#include "A_camera.hpp"
 #include <assert.h>
 #include <cstdlib> 
 

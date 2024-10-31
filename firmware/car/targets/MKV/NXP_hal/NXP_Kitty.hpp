@@ -22,8 +22,9 @@
 #include "NXP_motor.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_uart.hpp"
-#include "algorithm.hpp"
-#include "algorithm_motor.hpp"
+#include "A_camera.hpp"
+#include "A_motor.hpp"
+#include "A_servo.hpp"
 
 void pit_generalHandler(uint32_t*);
 

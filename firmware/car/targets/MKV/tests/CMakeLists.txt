@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(MKV_tests)
 
 set(MKV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
-set(ALGORITHMS_DIR ${MKV_DIR}/algorithms)
+set(ALGORITHMS_DIR ${MKV_DIR}/Algorithms)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
