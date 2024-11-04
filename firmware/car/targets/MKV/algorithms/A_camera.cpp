@@ -34,18 +34,18 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     #ifdef ALGORITHM_LOWPASS_EN
     lowPassFilter(data, 128);
     #endif
-    
+I
     // Find brightest pixel of the image
-    brightnessMax = data[imageCut];
-    for (auto i = imageCut + 5; i < 128 - imageCut; i+= 5) {
+    brightnessMax = data[IMAGE_CUT];
+    for (auto i = IMAGE_CUT + 5; i < 128 - IMAGE_CUT; i+= 5) {
         if(data[i] > brightnessMax)
             brightnessMax = data[i]; 
     } 
     // Calculate brightness
-    brightness = brightnessMax * brightnesMaxModifier;   
+    brightness = brightnessMax * BRIGHTNESMAX_MODIFIER;   
    
     // Calculate crossings with brightness 
-    for (auto i = imageCut; i < 128 - imageCut; i++) {
+    for (auto i = IMAGE_CUT; i < 128 - IMAGE_CUT; i++) {
         switch (crossNumber) {
             case 1:{
                  if(data[i] > brightness){
@@ -100,17 +100,17 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     
     // Check if lost the line and try to come back  
     // If turn value is (maxCameraTurnValueChange) smaller than previous turn value => use previous value
-    if(cameraTurnValueActual > cameraTurnValuePrevious + maxCameraTurnValueChange){
+    if(cameraTurnValueActual > cameraTurnValuePrevious + MAX_OUTPUT_CHANGE){
         cameraTurnValueActual = cameraTurnValuePrevious;
     }   
-    else if(cameraTurnValueActual < cameraTurnValuePrevious - maxCameraTurnValueChange){
+    else if(cameraTurnValueActual < cameraTurnValuePrevious - MAX_OUTPUT_CHANGE){
         cameraTurnValueActual = cameraTurnValuePrevious;
     }
     
     // Save last value
     cameraTurnValuePrevious = cameraTurnValueActual;
     
-    return cameraTurnValueActual - imageCenterOffset;
+    return cameraTurnValueActual - RETURN_MODIFIER;
 }
 
 int32_t Algorithm::proc(uint16_t* data) {
