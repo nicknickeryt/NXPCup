@@ -1,8 +1,8 @@
 include(ExternalProject)
 
 ExternalProject_Add(gsl_source
-  GIT_REPOSITORY https://github.com/beinhaerter/GSL.git
-  GIT_TAG "fix-gcc-build"
+  GIT_REPOSITORY https://github.com/microsoft/GSL.git
+  GIT_TAG "main"
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gsl
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
