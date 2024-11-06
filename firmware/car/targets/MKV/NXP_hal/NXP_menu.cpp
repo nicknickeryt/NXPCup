@@ -8,15 +8,15 @@ bool NXP_Menu::proc() {
 
 
     else if (!buttons.at(0).get()) {
-        //motors.setValue(motors.getValue().first + 0.05, motors.getValue().second + 0.05);
+        differential.setStartVelocity(differential.getStartVelocity() + 0.05);
         delay_ms(300);
 
     } else if (!buttons.at(1).get()) {
-        //motors.setValue(motors.getValue().first - 0.05, motors.getValue().second - 0.05);
+        differential.setStartVelocity(differential.getStartVelocity() - 0.05);
         delay_ms(300);
 
     } else if (!buttons.at(3).get()) {
-        runMotors();
+        startRace();
     }
     displayMenuPage();
     display.update();
@@ -37,11 +37,10 @@ const char* formatString(float value) {
 }
 
 void NXP_Menu::displayMenuPage() {
-    display.print(formatString(motors.getValue().first)); // this should later be changed to algorithm-based control
+    display.print(formatString(differential.getStartVelocity())); // this is now algorithm-based control
 }
 
-void NXP_Menu::runMotors() {
-    motors.run();
+void NXP_Menu::startRace() {
     menuTrigger = true;
     display.disable();
 }

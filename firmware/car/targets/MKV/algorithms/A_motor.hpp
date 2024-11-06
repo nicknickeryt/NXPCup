@@ -17,4 +17,6 @@ class Differential {
     void proc(int position);
     float getLeft();
     float getRight();
+    void setStartVelocity(float value);
+    float getStartVelocity();
 };

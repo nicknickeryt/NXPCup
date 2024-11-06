@@ -3,6 +3,7 @@
 #include "HALina_switches.hpp"
 #include "NXP_display.hpp"
 #include "NXP_motor.hpp"
+#include "A_motor.hpp"
 
 #include <cstdint>
 #include <iomanip>
@@ -18,11 +19,12 @@ class NXP_Menu {
     halina::Switches& switches;
     NXP_Display&      display;
     NXP_Motors&       motors;
+    Differential& differential;
 
     bool menuTrigger = false;
 
   public:
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors) : buttons(buttons), switches(switches), display(display), motors(motors) {}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential) : buttons(buttons), switches(switches), display(display), motors(motors) , differential(differential) {}
 
     void init() {
         buttons.init();
@@ -34,5 +36,5 @@ class NXP_Menu {
 
     void displayMenuPage();
 
-    void runMotors();
+    void startRace();
 };

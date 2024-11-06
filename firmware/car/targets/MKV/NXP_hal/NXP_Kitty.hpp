@@ -159,7 +159,7 @@ class Kitty {
     Algorithm     newAlgorithm;
     Differential  differential = Differential(0.3);
     // MENU
-    NXP_Menu menu = {buttons, switches, display, motors};
+    NXP_Menu menu = {buttons, switches, display, motors, differential};
 
 
   private:

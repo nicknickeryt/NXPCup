@@ -24,4 +24,6 @@ void Differential::proc(int position) {
 }
 float Differential::getLeft() { return valueLeft; }
 float Differential::getRight() { return valueRight; }
+void Differential::setStartVelocity(float value) { startVelocity = value; }
+float Differential::getStartVelocity() { return startVelocity; }
 
