@@ -34,7 +34,7 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     #ifdef ALGORITHM_LOWPASS_EN
     lowPassFilter(data, 128);
     #endif
-I
+
     // Find brightest pixel of the image
     brightnessMax = data[IMAGE_CUT];
     for (auto i = IMAGE_CUT + 5; i < 128 - IMAGE_CUT; i+= 5) {

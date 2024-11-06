@@ -18,7 +18,7 @@
 #define BRIGHTNESMAX_MODIFIER 0.75                 // Multiply brigtnessMax by [value] to get brightness
 #define CENTER_OFFSET 4                            // Move the center of the image (value) to the left
 
-#define RETURN_MODIFIER = 128 - CENTER_OFFSET * 2  // Move values from [0,128] to [-64,64] and add offset
+#define RETURN_MODIFIER 128 - CENTER_OFFSET * 2  // Move values from [0,128] to [-64,64] and add offset
 
 class Algorithm {
 
