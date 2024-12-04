@@ -60,7 +60,7 @@ public:
     void start() {
         cameraState = CameraState::START;
     }
-    bool getData(uint16_t* dataBuffer);
+    void getData(uint16_t*& dataBuffer);
 
 
 };

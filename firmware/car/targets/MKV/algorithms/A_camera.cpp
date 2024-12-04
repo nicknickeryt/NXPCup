@@ -27,8 +27,8 @@ static void lowPassFilter(uint16_t* data, const uint32_t size) {
 #endif
 
 
-int32_t Algorithm::calculatePosition(uint16_t* data) {
-    assert(data != nullptr);
+int32_t Algorithm::calculatePosition(uint16_t* dataBuf) {
+    assert(dataBuf != nullptr);
     
     // Apply low pass filter on camera image
     #ifdef ALGORITHM_LOWPASS_EN
@@ -36,10 +36,10 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     #endif
 
     // Find brightest pixel of the image
-    brightnessMax = data[IMAGE_CUT];
+    brightnessMax = dataBuf[IMAGE_CUT];
     for (auto i = IMAGE_CUT + 5; i < 128 - IMAGE_CUT; i+= 5) {
-        if(data[i] > brightnessMax)
-            brightnessMax = data[i]; 
+        if(dataBuf[i] > brightnessMax)
+            brightnessMax = dataBuf[i]; 
     } 
     // Calculate brightness
     brightness = brightnessMax * BRIGHTNESMAX_MODIFIER;   
@@ -48,28 +48,28 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
     for (auto i = IMAGE_CUT; i < 128 - IMAGE_CUT; i++) {
         switch (crossNumber) {
             case 1:{
-                 if(data[i] > brightness){
+                 if(dataBuf[i] > brightness){
                     firstCross  = i;
                     crossNumber = 2;
                 }
                 break;
             }
              case 2:{
-                 if(data[i] < brightness){
+                 if(dataBuf[i] < brightness){
                     secondCross  = i - 1;
                     crossNumber = 3;
                 }
                 break;
             }     
             case 3:{
-                if(data[i] > brightness){
+                if(dataBuf[i] > brightness){
                     thirdCross  = i;
                     crossNumber = 4;
                 }
                 break;
             }
             case 4:{
-                if(data[i] < brightness){
+                if(dataBuf[i] < brightness){
                     fourthCross  = i - 1;
                 }
                 break;

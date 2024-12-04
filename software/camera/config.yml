@@ -1,0 +1,5 @@
+baud_rate: 115200
+bluetooth_mac: 00:21:13:00:1F:26
+debugEnable: 0
+logEnable: 1
+serial_port: /dev/ttyUSB1

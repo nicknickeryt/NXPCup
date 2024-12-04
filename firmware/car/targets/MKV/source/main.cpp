@@ -47,7 +47,7 @@ int main() {
             fctprintf(logWrite, NULL, "%u,", kitty.newAlgorithm.getBrightness());
             fctprintf(logWrite, NULL, "%u,", (position + 120) / 2);
 
-            for(size_t i = 0; i<sizeof(kitty.cameraDataBuf)/sizeof(uint16_t); i++) { 
+            for(size_t i = 0; i< 128; i++) { 
                 uint16_t *buffer = static_cast<uint16_t*>(kitty.cameraDataBuf);
                 fctprintf(logWrite, NULL, "%d,", buffer[i]);
             }

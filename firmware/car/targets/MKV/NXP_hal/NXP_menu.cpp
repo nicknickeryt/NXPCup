@@ -41,6 +41,7 @@ void NXP_Menu::displayMenuPage() {
 }
 
 void NXP_Menu::startRace() {
+    motors.run();
     menuTrigger = true;
     display.disable();
 }

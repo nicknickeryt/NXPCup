@@ -15,9 +15,9 @@ void NXP_Camera::init() {
     clockPin.init();
     SIPin.init();
 
-        for (uint8_t i = 0; i < 8; i ++) {
-            adc.appendSample(&sampleCamera1);
-        }
+    for (uint8_t i = 0; i < 8; i ++) {
+        adc.appendSample(&sampleCamera1);
+    }
 
     adc.init();
     clockPin.reset();
@@ -57,58 +57,70 @@ void NXP_Camera::adcInterruptEndOfMeasurement() {
 
 void NXP_Camera::pitInterrupt() {
     static uint8_t waitEnd = 0;
-    if (cameraState == CameraState::START) {
-        cameraState = CameraState::SET_SI_PIN;
-    }
-    if (cameraState == CameraState::SET_SI_PIN) {
-        SIPin.set();
-        cameraState = CameraState::SET_FIRST_CLOCK_PIN;
-    } else if (cameraState == CameraState::SET_FIRST_CLOCK_PIN) {
-        clockPin.set();
-        cameraState = CameraState::RESET_SI_PIN;
-    } else if (cameraState == CameraState::RESET_SI_PIN) {
-        SIPin.reset();
-        cameraState = CameraState::RESET_FIRST_CLOCK_PIN;
-    } else if (cameraState == CameraState::RESET_FIRST_CLOCK_PIN) {
-        clockPin.reset();
-        currentPixelIndex = -1;
-        waitEnd = 0;
-        cameraState = CameraState::WAIT_1;
-    } else if (cameraState == CameraState::WAIT_1) {
-        cameraState = CameraState::WAIT_2;
-    } else if (cameraState == CameraState::WAIT_2) {
 
-        cameraState = CameraState::SET_CLOCK_PIN;
-    } else if (cameraState == CameraState::SET_CLOCK_PIN) {
-        currentPixelIndex++;
-        clockPin.set();
-
-        if (currentPixelIndex == 128) {
-            cameraState = CameraState::STOPPED;
+    switch(cameraState) {
+        case CameraState::START:
+            cameraState = CameraState::SET_SI_PIN;
+        break;
+        case CameraState::SET_SI_PIN:
+            SIPin.set();
+            cameraState = CameraState::SET_FIRST_CLOCK_PIN;
+        break;
+        case CameraState::SET_FIRST_CLOCK_PIN:
+            clockPin.set();
+            cameraState = CameraState::RESET_SI_PIN;
+        break;
+        case CameraState::RESET_SI_PIN:
+            SIPin.reset();
+            cameraState = CameraState::RESET_FIRST_CLOCK_PIN;
+        break;
+        case CameraState::RESET_FIRST_CLOCK_PIN:
             clockPin.reset();
-            cameraState = CameraState::WAIT_END_1;
-        } else {
-            cameraState = CameraState::RESET_CLOCK_PIN;
-        }
-    } else if (cameraState == CameraState::RESET_CLOCK_PIN) {
-        adc.startConversion();
-        clockPin.reset();
-        cameraState = CameraState::SET_CLOCK_PIN;
-    } else if (cameraState == CameraState::WAIT_END_1) {
-        waitEnd++;
-        if (waitEnd > 7) {
+            currentPixelIndex = -1;
             waitEnd = 0;
-            cameraState = CameraState::START;
-        }
+            cameraState = CameraState::WAIT_1;
+        break;
+        case CameraState::WAIT_1:
+            cameraState = CameraState::WAIT_2;
+        break;
+        case CameraState::WAIT_2:
+            cameraState = CameraState::SET_CLOCK_PIN;
+        break;
+        case CameraState::SET_CLOCK_PIN:
+            currentPixelIndex++;
+            clockPin.set();
+
+            if (currentPixelIndex == 128) {
+                cameraState = CameraState::STOPPED;
+                clockPin.reset();
+                cameraState = CameraState::WAIT_END_1;
+            } else
+                cameraState = CameraState::RESET_CLOCK_PIN;
+        break;
+        case CameraState::RESET_CLOCK_PIN:
+            adc.startConversion();
+            clockPin.reset();
+            cameraState = CameraState::SET_CLOCK_PIN;
+        break;
+        case CameraState::WAIT_END_1:
+            waitEnd++;
+            if (waitEnd > 7) {
+                waitEnd = 0;
+                cameraState = CameraState::START;
+            }
+        break;
+
+        case CameraState::STOPPED:
+        break;
+
+        default: // CAMERA_WAIT_END_2 etc
+        break;
     }
 }
 
-bool NXP_Camera::getData(uint16_t* dataBuffer){
-    bool result = false;
-    if(nullptr != dataBuffer){
-            __disable_irq();
-            memcpy(dataBuffer, buffer1Data, 256);
-            __enable_irq();
-    }
-    return result;
+void NXP_Camera::getData(uint16_t*& dataBuffer){
+    __disable_irq();
+    // Avoid copying the same thing twice, just point to the same buffer
+    dataBuffer = buffer1Data;
+    __enable_irq();
 }

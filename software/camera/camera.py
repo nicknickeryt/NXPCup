@@ -12,7 +12,7 @@ default_config = {
     'serial_port': '/dev/cu.NXP',
     'baud_rate': 115200,
     'bluetooth_mac': '00:1A:7D:DA:71:13',
-    'debugEnable': 0,
+    'debugEnable': 1,
     'logEnable': 1  
 }
 
@@ -90,82 +90,86 @@ def read_camera_data():
 
     logDebug(f"Raw data received: {line}")
 
+    # Initialize data array
     data = []
 
+    # Use try-except to handle all operations that might fail
     try:
+        # Extract numbers and validate length in one go
         numbers = re.findall(r'\d+', line)
-        if len(numbers) == 131:  
-            data = list(map(int, numbers))
+        if len(numbers) == 129:  # Check if we have exactly 129 numbers
+            data = list(map(int, numbers))  # Convert to integers
 
-            if data[0] == 99999: 
+            if data[0] == 9999:  # Check if the first number is the flag
                 logDebug(f"Valid data received: {data[1:]}")
-                brightness = data[1]
-                center = data[2]
-                camera_data = data[3:]
-                return brightness, center, camera_data
-                
+                return data[1:]  # Exclude the first flag value
+
     except ValueError:
         logDebug("ValueError: Unable to convert received data to integers.")
 
     logDebug("Data is invalid or does not match expected format.")
-    return [], [], []
+    return []  # Return an empty list if conditions are not met
 
 
 def cleanup(event=None):
     logInfo("Disconnecting from Bluetooth...")
     if bluetooth_socket:
-        bluetooth_socket.close()  
+        bluetooth_socket.close()  # Close Bluetooth socket if it exists
     logInfo("Bye <3")
-    exit()  
+    exit()  # Exit the program
 
 # Initial plot setup
-fig, ax = plt.subplots(figsize=(6, 4)) 
+fig, ax = plt.subplots(figsize=(6, 4))  # Adjust size (width, height) to make it smaller
 ax.set_title("Camera", color='white')
 ax.set_xlabel("Pixel", color='white')
 ax.set_ylabel("Value", color='white')
-ax.set_xlim(0, 127) 
-ax.set_ylim(0, 35000)  
+ax.set_xlim(0, 127)  # 128 pixels (0-127)
+ax.set_ylim(0, 35000)  # Adjust based on your data range
 ax.set_facecolor('black')
 fig.patch.set_facecolor('black')
 
+# Hook into the window close event
 fig.canvas.mpl_connect('close_event', cleanup)
 
+# Add vertical guidelines
 ax.axvline(x=15, color='red', linestyle='--')
 ax.axvline(x=104, color='red', linestyle='--')
 ax.axvline(x=59, color='red', linestyle='--')
 ax.axvline(x=60, color='red', linestyle='--')
 
+# Set dark theme for ticks
 ax.tick_params(colors='white')
 
+# Disable minor grid lines and keep only major grid (simplified for speed)
 ax.set_xticks(np.arange(0, 128, 5))
 ax.grid(True, which='major', color='gray', linestyle='-', linewidth=0.5)
 
-line, = ax.plot([], [], linestyle='-', color='cyan') 
-brightness_line = ax.axhline(y=0, color='yellow', linestyle='-', linewidth=1)
-center_line = ax.axvline(x=0, color='green', linestyle='-', linewidth=1.5)
+# Initialize the plot with an empty line object
+line, = ax.plot([], [], linestyle='-', color='cyan')  # Line without markers for performance
 
 def init():
+    # Initialize the line object for blitting
     line.set_data([], [])
     return line,
 
 def update(frame):
-    brightness, center, camera_data = read_camera_data()
-    if len(camera_data) == 128: 
-        line.set_data(np.arange(128), camera_data) 
-        brightness_line.set_ydata([brightness])
-        center_line.set_xdata([center])
-        
-    return line, brightness_line, center_line
+    camera_data = read_camera_data()
+    if len(camera_data) == 128:  # Ensure we have 128 data points
+        line.set_data(np.arange(128), camera_data)  # Set x data as range(128)
+    return line,
 
+# Use FuncAnimation for real-time updates with a limit on cached frames (save_count=100)
 ani = animation.FuncAnimation(fig, update, init_func=init, interval=25, blit=True, save_count=100)
 
+# Keep the plot window open and interactive
+# plt.ion()
 plt.show()
 
 
 try:
     while True:
-        plt.pause(0.0001)  
+        plt.pause(0.0001)  # Allow the plot to update with a small pause
 except KeyboardInterrupt:
-    cleanup(None)  
+    cleanup(None)  # Call cleanup on keyboard interrupt
 finally:
-    cleanup(None)  
+    cleanup(None)  # Call cleanup on keyboard interrupt

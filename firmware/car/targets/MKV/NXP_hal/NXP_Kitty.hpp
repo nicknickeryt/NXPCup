@@ -138,9 +138,10 @@ class Kitty {
     NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
 
     // KAMERA
-    NXP_Camera::Type cameraType   = NXP_Camera::Type::CAMERA_1;
-    NXP_Camera       camera       = {cameraType, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartDebug};
-    uint16_t         cameraDataBuf[128] = {0};
+    NXP_Camera::Type cameraType    = NXP_Camera::Type::CAMERA_1;
+    NXP_Camera       camera        = {cameraType, adc, cameraClockPin, cameraSIPin, camera1Sample, camera2Sample, uartDebug};
+    // This is now a pointer to avoid copying buffer data from one buffer to another
+    uint16_t*        cameraDataBuf = nullptr;
 
     // UART
     NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
@@ -157,7 +158,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm;
-    Differential  differential = Differential(0.3);
+    Differential  differential = Differential(0.1);
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors, differential};
 
