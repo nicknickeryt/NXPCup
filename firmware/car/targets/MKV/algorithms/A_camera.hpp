@@ -15,7 +15,7 @@
 
 #define IMAGE_CUT 15                               // Cut unused pixels from both sides
 #define MAX_OUTPUT_CHANGE 20                       // Max allowed change between previous and actual turnvalue
-#define BRIGHTNESMAX_MODIFIER 0.75                 // Multiply brigtnessMax by [value] to get brightness
+#define BRIGHTNESMAX_MODIFIER 0.85                 // Multiply brigtnessMax by [value] to get brightness
 #define CENTER_OFFSET 4                            // Move the center of the image (value) to the left
 
 #define RETURN_MODIFIER 128 - CENTER_OFFSET * 2  // Move values from [0,128] to [-64,64] and add offset
