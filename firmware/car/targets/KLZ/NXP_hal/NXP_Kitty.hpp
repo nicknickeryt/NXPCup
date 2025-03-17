@@ -42,7 +42,7 @@ private:
 
 public:
     // UART
-    NXP_Uart uartDebug = {(UART_Type*)UART1, 115200, uartDebugRx, uartDebugTx};
+    NXP_Uart uartDebug = {(UART_Type*)UART1, 921600, uartDebugRx, uartDebugTx};
     NXP_Uart uartCommunication = {(UART_Type*)UART2, 115200, uartRx, uartTx};
 
     Algorithm algorithm = {i2c, uartCommunication, leds};

@@ -141,8 +141,8 @@ class Kitty {
     uint16_t         cameraDataBuf[128] = {0};
 
     // UART
-    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartDebug         = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
 
     // DISPLAY
     NXP_Display display;
