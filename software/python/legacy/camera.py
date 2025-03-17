@@ -9,7 +9,7 @@ import bluetooth
 
 # Define default configuration
 default_config = {
-    'serial_port': '/dev/cu.NXP',
+    'serial_port': '/dev/rfcomm0',
     'baud_rate': 115200,
     'bluetooth_mac': '00:1A:7D:DA:71:13',
     'debugEnable': 0,
