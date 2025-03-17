@@ -51,7 +51,7 @@ int32_t Algorithm::calculatePosition(uint16_t* data) {
           rightSideDistance = i + 1;
     }
 
-    return leftSideDistance - rightSideDistance;
+    return rightSideDistance - leftSideDistance;
 }
 
 int32_t Algorithm::proc(uint16_t* data) {
