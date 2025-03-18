@@ -131,9 +131,8 @@ class Kitty {
     NXP_Frame frame = {uartCommunication};
 
   public:
-    // ENKODER
-    NXP_Encoder encoderLeft  = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter};
-    NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter};
+    NXP_Encoder encoderLeft  = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter, 60};
+    NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter, 60};
 
     // KAMERA
     NXP_Camera::Type cameraType   = NXP_Camera::Type::CAMERA_1;

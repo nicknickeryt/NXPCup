@@ -23,8 +23,10 @@ private:
     NXP_PORT& pinB;
     Mode mode;
     uint16_t lastTicksValue = 0;
+    uint16_t ticksPerRevolution = 0;
+    uint16_t lastRPMValue = 0;
 public:
-    NXP_Encoder(FTM_Type* ftm, NXP_PORT& pinA, NXP_PORT& pinB, Mode mode) : ftm(ftm), pinA(pinA), pinB(pinB), mode(mode) { }
+    NXP_Encoder(FTM_Type* ftm, NXP_PORT& pinA, NXP_PORT& pinB, Mode mode, uint16_t ticksPerRevolution) : ftm(ftm), pinA(pinA), pinB(pinB), mode(mode), ticksPerRevolution(ticksPerRevolution) { }
 
     void init() {
         pinA.setMux();
@@ -59,13 +61,22 @@ public:
         return lastTicksValue;
     }
 
+    uint16_t getRPM() {
+        return lastRPMValue;
+    }
+
     void updateTicks() {
         lastTicksValue = ftm->CNT;
         ftm->CNT = 0;
     }
 
+    void updateRPM() {
+        lastRPMValue = (lastTicksValue / ticksPerRevolution) * 50 * 60;
+    }
+
     static void ISR(uint32_t* arg) {
         auto encoder = (NXP_Encoder*) arg;
         encoder->updateTicks();
+        encoder->updateRPM();
     }
 };
