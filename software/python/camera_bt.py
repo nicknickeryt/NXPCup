@@ -3,10 +3,18 @@ import numpy as np
 from pyqtgraph.Qt import QtCore
 import serial
 import bluetooth
+import csv
+import os
+
+from PySide6.QtWidgets import QApplication, QPushButton, QWidget, QHBoxLayout
+from pyqtgraph.Qt import QtWidgets
 
 # Serial configuration
 BAUD_RATE = 921600  
 BT_MAC = "00:21:13:00:1F:26"
+
+isRecording = False
+routeFile = "route.csv" 
 
 def connect_bluetooth_rfcomm(mac_address):
     try:
@@ -25,16 +33,57 @@ def connect_bluetooth_rfcomm(mac_address):
         print(f"{e}\n");
         return None
 
+def on_start_click():
+    global isRecording
+    print("[Record] Started")
+    isRecording = True
+    
+    if os.path.exists(routeFile):
+        os.remove(routeFile)
+
+    # Utwórz nowy plik i zapisz nagłówki
+    with open(routeFile, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        header_pixels = [f'p{i}' for i in range(128)]
+        header_brightness = [f'b{i}' for i in range(128)]
+        writer.writerow(header_pixels + header_brightness)  # Combine headers for pixels and brightness
+
+def on_stop_click():
+    global isRecording
+    print("[Record] Stopped")
+    isRecording = False
+    
+app = QApplication([])
+
 bluetooth_socket = connect_bluetooth_rfcomm(BT_MAC)
 serial_port = bluetooth_socket.makefile('r')  # Use the socket like a file for reading
 
 graphics_layout = pg.GraphicsLayoutWidget(show=True, title="Kitty")
+
+button_start = QPushButton("Rozpocznij zapis")
+button_stop = QPushButton("Zakończ zapis")
+
+button_start.clicked.connect(on_start_click)
+button_stop.clicked.connect(on_stop_click)
+
+button_widget = QWidget()
+button_layout = QHBoxLayout()
+button_layout.addWidget(button_start)
+button_layout.addWidget(button_stop)
+button_widget.setLayout(button_layout)
+button_widget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
+
+proxy = QtWidgets.QGraphicsProxyWidget()
+proxy.setWidget(button_widget)
+
+graphics_layout.addItem(proxy, row=2, col=0) 
 
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
 plot1 = graphics_layout.addPlot(row=1, col=0, title="Obraz")
 
 graphics_layout.ci.layout.setRowStretchFactor(0, 4) 
 graphics_layout.ci.layout.setRowStretchFactor(1, 1) 
+graphics_layout.ci.layout.setRowStretchFactor(2, 0) 
 
 graphics_layout.setBackground("#f1f1f1")
 
@@ -80,13 +129,22 @@ def update_plot():
         
         img[:, 0] = data
         img_item.setImage(img)
+        
+# Write data to route.csv
+        if isRecording:
+            with open(routeFile, 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                row_data = data + data  # Combine pixel data and brightness (assuming pixel and brightness are the same)
+                writer.writerow(row_data)  # Write combined data (p0..p127, b0..b127)
 
 timer = QtCore.QTimer()
 timer.timeout.connect(update_plot)
 timer.start(0)  
 
 # Start the Qt event loop
-pg.QtCore.QCoreApplication.instance().exec()
+#pg.QtCore.QCoreApplication.instance().exec()
+
+app.exec()
 
 serial_port.close()
 
