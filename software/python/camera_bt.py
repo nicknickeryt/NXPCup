@@ -33,25 +33,28 @@ def connect_bluetooth_rfcomm(mac_address):
         print(f"{e}\n");
         return None
 
-def on_start_click():
-    global isRecording
-    print("[Record] Started")
-    isRecording = True
-    
-    if os.path.exists(routeFile):
-        os.remove(routeFile)
+def on_start_stop_click():
+    global isRecording, button_start_stop
+    if(not isRecording):
+        print("[Record] Started")
+        isRecording = True
+        
+        if os.path.exists(routeFile):
+            os.remove(routeFile)
 
-    # Utwórz nowy plik i zapisz nagłówki
-    with open(routeFile, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        header_pixels = [f'p{i}' for i in range(128)]
-        header_brightness = [f'b{i}' for i in range(128)]
-        writer.writerow(header_pixels + header_brightness)  # Combine headers for pixels and brightness
+        # Utwórz nowy plik i zapisz nagłówki
+        with open(routeFile, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            header_pixels = [f'p{i}' for i in range(128)]
+            header_brightness = [f'b{i}' for i in range(128)]
+            writer.writerow(header_pixels + header_brightness)  # Combine headers for pixels and brightness
+        
+        button_start_stop.setText("Zatrzymaj zapis")
+    else:
+        isRecording = False
+        print("[Record] Stopped")
+        button_start_stop.setText("Rozpocznij zapis")
 
-def on_stop_click():
-    global isRecording
-    print("[Record] Stopped")
-    isRecording = False
     
 app = QApplication([])
 
@@ -60,16 +63,13 @@ serial_port = bluetooth_socket.makefile('r')  # Use the socket like a file for r
 
 graphics_layout = pg.GraphicsLayoutWidget(show=True, title="Kitty")
 
-button_start = QPushButton("Rozpocznij zapis")
-button_stop = QPushButton("Zakończ zapis")
+button_start_stop = QPushButton("Rozpocznij zapis")
 
-button_start.clicked.connect(on_start_click)
-button_stop.clicked.connect(on_stop_click)
+button_start_stop.clicked.connect(on_start_stop_click)
 
 button_widget = QWidget()
 button_layout = QHBoxLayout()
-button_layout.addWidget(button_start)
-button_layout.addWidget(button_stop)
+button_layout.addWidget(button_start_stop)
 button_widget.setLayout(button_layout)
 button_widget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
 

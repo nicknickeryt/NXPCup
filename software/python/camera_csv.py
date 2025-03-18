@@ -19,6 +19,8 @@ currentRow = 1
 
 timer = QtCore.QTimer() # Plot update timer
 
+isTimerRunning = False
+
 def read_csv_data():
     """Reads the CSV file and returns the latest data line."""
     global data, all_data, currentRow
@@ -35,6 +37,9 @@ def read_csv_data():
                     all_data.append(data)  # Append new data to all_data list
                     
                     currentRow = currentRow + 1
+                else:
+                    on_start_stop_click()
+                    
     except Exception as e:
         print(f"Error reading CSV: {e}")
         data = np.zeros(128)  # If error occurs, reset data
@@ -52,15 +57,18 @@ def update_plot():
         img = np.array(all_data)  # Convert list of data to a numpy array
         img_item.setImage(img.T)  # Transpose the image for correct orientation
 
-def on_start_click():
-    global timer
-    print("[Play] Started")
-    timer.start(14) 
-
-def on_stop_click():
-    global timer
-    print("[Play] Stopped")
-    timer.stop();
+def on_start_stop_click():
+    global timer, isTimerRunning, button_start_stop
+    if(not isTimerRunning):
+        print("[Play] Started")
+        timer.start(14)
+        button_start_stop.setText("Pauza")
+        isTimerRunning = True
+    else:
+        print("[Play] Stopped")
+        timer.stop();
+        button_start_stop.setText("Start")
+        isTimerRunning = False
     
 def on_route_click():
     global timer
@@ -83,20 +91,17 @@ app = QApplication([])
 graphics_layout = pg.GraphicsLayoutWidget(show=True, title="Kitty reader")
 
 # Creating buttons for start and stop functionality (no functionality in this simple example)
-button_start = QPushButton("Start")
-button_stop = QPushButton("Stop")
+button_start_stop = QPushButton("Start")
 button_route = QPushButton("Trasa")
 button_reset = QPushButton("Reset")
 
-button_start.clicked.connect(on_start_click)
-button_stop.clicked.connect(on_stop_click)
+button_start_stop.clicked.connect(on_start_stop_click)
 button_route.clicked.connect(on_route_click)
 button_reset.clicked.connect(on_reset_click)
 
 button_widget = QWidget()
 button_layout = QHBoxLayout()
-button_layout.addWidget(button_start)
-button_layout.addWidget(button_stop)
+button_layout.addWidget(button_start_stop)
 button_layout.addWidget(button_route)
 button_layout.addWidget(button_reset)
 
