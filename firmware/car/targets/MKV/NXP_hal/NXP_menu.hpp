@@ -3,7 +3,7 @@
 #include "HALina_switches.hpp"
 #include "NXP_display.hpp"
 #include "NXP_motor.hpp"
-#include "A_motor.hpp"
+#include  <algorithms/motor.hpp>
 
 #include <cstdint>
 #include <iomanip>

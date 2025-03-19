@@ -11,6 +11,8 @@
 #include "NXP_Kitty.hpp"
 #include "clock_config.h"
 #include "pin_mux.h"
+#include "printf.h"
+
 
 
 #include "logger.h"
@@ -90,6 +92,38 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM0_MASK;
     SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
+}
+
+void Kitty::proc() {
+    magicDiodComposition();
+    camera.getData(cameraDataBuf);
+
+    int32_t position = newAlgorithm.calculatePosition(cameraDataBuf);
+
+    ////////////////////////////// Uart Log ////////////////////////////////
+    if(lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
+        lastLogTimepoint = millis();
+
+        fctprintf(logWrite, NULL, "99999,");
+        fctprintf(logWrite, NULL, "%u,", newAlgorithm.getBrightness());
+        fctprintf(logWrite, NULL, "%u,", (position + 120) / 2);
+
+        for(size_t i = 0; i< 128; i++) { 
+            uint16_t *buffer = static_cast<uint16_t*>(cameraDataBuf);
+            fctprintf(logWrite, NULL, "%d,", buffer[i]);
+        }
+
+        fctprintf(logWrite, NULL, "\r\n");
+    }
+
+    // If menu is active, do not move
+    if(menu.proc()) {
+        return;
+    }
+      
+    servo.set(static_cast<float>(position) / 40.0f);
+    differential.proc(position);
+    motors.setValue(differential.getLeft(), differential.getRight());
 }
 
 void Kitty::magicDiodComposition() {
