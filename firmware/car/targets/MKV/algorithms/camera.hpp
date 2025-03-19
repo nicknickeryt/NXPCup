@@ -22,7 +22,7 @@ class Algorithm {
     constexpr static float   brightnessModifier = 1.0f;                   // Multiply brigtnessMax by [value] to get brightness
 
     constexpr static float alpha           = 0.04f; // Filter parameter
-    constexpr static float delta           = 3; // Filter parameter
+    constexpr static float delta           = 10; // Filter parameter
     float                  average         = 0;   // Average value of the measurements
     float                  lastMeasurement = 0;   // Last measurement
 

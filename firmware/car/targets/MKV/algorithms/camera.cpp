@@ -54,7 +54,6 @@ int32_t Algorithm::calculatePosition(uint16_t* dataBuf) {
             leftLinePosition = i - imageWindowSize;
         }
     }
-
     
     int32_t position = leftLinePosition - rightLinePosition;
     
