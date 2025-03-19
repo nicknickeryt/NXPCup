@@ -13,10 +13,10 @@ Differential::Differential(float startVelocityValue) : startVelocity(startVeloci
 void Differential::proc(int position) {
     if (position < 0) {
         valueRight = (startVelocity * (ENGINE_CUT + (position))) / ENGINE_CUT;
-        valueLeft  = (startVelocity * (ENGINE_BREAKE + (position))) / ENGINE_BREAKE;
+        valueLeft  = (startVelocity * (ENGINE_BRAKE + (position))) / ENGINE_BRAKE;
     } else if (position > 0) {
         valueLeft  = (startVelocity * (ENGINE_CUT - (position))) / ENGINE_CUT;
-        valueRight = (startVelocity * (ENGINE_BREAKE - (position))) / ENGINE_BREAKE;
+        valueRight = (startVelocity * (ENGINE_BRAKE - (position))) / ENGINE_BRAKE;
     }
 }
 float Differential::getLeft() { return valueLeft; }

@@ -22,7 +22,7 @@ uint32_t Algorithm::calculateBrightness(uint16_t* dataBuf) {
 }
 
 void Algorithm::differentiate(uint16_t* input, int16_t* output) {
-    for (size_t i = 0; i < 128; i++) {
+    for (size_t i = imageWindowSize; i < 128 - imageWindowSize; i++) {
         output[i] = input[i] - input[i + 1];
     }
 }
@@ -50,12 +50,13 @@ int32_t Algorithm::calculatePosition(uint16_t* dataBuf) {
 
     // find left line
     for (size_t i = imageWindowSize; i < cmaeraDataSize / 2 - imageWindowSize; ++i) {
-        if (dataBuf[cmaeraDataSize - i] < brightness) {
+        if (dataBuf[cmaeraDataSize - 1 - i] < brightness) {
             leftLinePosition = i - imageWindowSize;
         }
     }
 
+    
     int32_t position = leftLinePosition - rightLinePosition;
-
+    
     return meanFilter(position);
 }

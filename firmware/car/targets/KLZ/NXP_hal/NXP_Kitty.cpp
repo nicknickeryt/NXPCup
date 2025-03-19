@@ -20,10 +20,18 @@ extern "C" {
 uint_fast64_t Kitty::milliseconds = 0;
 extern "C" {
 volatile bool systickTrigger = false;
+<<<<<<< HEAD
 void          SysTick_Handler(void) {
     Kitty::millisIncrease();
     static auto counter = 0;
     if (200 == counter++) {
+=======
+
+void SysTick_Handler(void) {
+    Kitty::millisIncrease();
+    static auto counter = 0;
+    if (100 == counter++) {
+>>>>>>> klz_sensors
         systickTrigger = true;
         counter        = 0;
     }
@@ -32,6 +40,7 @@ void          SysTick_Handler(void) {
 
 void Kitty::init() {
     BOARD_InitBootClocks();
+<<<<<<< HEAD
     //    SysTick_Config(SystemCoreClock / 1000);
     //    NVIC_ClearPendingIRQ(SysTick_IRQn);
     //    NVIC_EnableIRQ(SysTick_IRQn);
@@ -73,4 +82,19 @@ void Kitty::proc() {
 
         fctprintf(logWrite, NULL, "\r\n");
     }
+=======
+    SysTick_Config(SystemCoreClock / 1000);
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
+    
+    uartCommunication.init();
+    uartDebug.init();
+    log_notice("Procek wstal pomyslnie!");
+    
+    algorithm.init();
+}
+
+void Kitty::proc() {
+    algorithm.proc(systickTrigger);
+>>>>>>> klz_sensors
 }
