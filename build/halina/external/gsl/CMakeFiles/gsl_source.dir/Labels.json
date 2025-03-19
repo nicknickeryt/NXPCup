@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/CMakeFiles/gsl_source"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/CMakeFiles/gsl_source.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/CMakeFiles/gsl_source-complete.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-build.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-configure.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-download.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-install.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-mkdir.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-patch_disconnected.rule"
+		},
+		{
+			"file" : "/home/dom/Documents/Coding/NXP/NXPCup/build/halina/external/gsl/gsl/src/gsl_source-stamp/gsl_source-update_disconnected.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"gsl_source"
+		],
+		"name" : "gsl_source"
+	}
+}

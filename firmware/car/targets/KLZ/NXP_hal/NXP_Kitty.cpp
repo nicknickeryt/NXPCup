@@ -7,12 +7,12 @@
  */
 
 #include "NXP_Kitty.hpp"
-extern "C"{
-    #include "clock_config.h"
+extern "C" {
+#include "clock_config.h"
 }
 
-#define LOG_CHANNEL KITTY
-#define KITTY_LOG_CHANNEL 2
+#define LOG_CHANNEL             KITTY
+#define KITTY_LOG_CHANNEL       2
 #define KITTY_LOG_CHANNEL_LEVEL LOG_LEVEL_DEBUG
 
 #include "logger.h"
@@ -20,31 +20,30 @@ extern "C"{
 uint_fast64_t Kitty::milliseconds = 0;
 extern "C" {
 volatile bool systickTrigger = false;
+
 void SysTick_Handler(void) {
     Kitty::millisIncrease();
     static auto counter = 0;
-    if(200 == counter++) {
+    if (100 == counter++) {
         systickTrigger = true;
-        counter = 0;
+        counter        = 0;
     }
 }
 }
 
 void Kitty::init() {
     BOARD_InitBootClocks();
-//    SysTick_Config(SystemCoreClock / 1000);
-//    NVIC_ClearPendingIRQ(SysTick_IRQn);
-//    NVIC_EnableIRQ(SysTick_IRQn);
-//
-//    uartCommunication.init();
-   uartDebug.init();
-   sensors.init();
-//    algorithm.init();
-//    uartCommunication.write("xD", 2);
-   log_notice("Procek wstal pomyslnie!");
-   sensors.selectOutput(1);
+    SysTick_Config(SystemCoreClock / 1000);
+    NVIC_ClearPendingIRQ(SysTick_IRQn);
+    NVIC_EnableIRQ(SysTick_IRQn);
+    
+    uartCommunication.init();
+    uartDebug.init();
+    log_notice("Procek wstal pomyslnie!");
+    
+    algorithm.init();
 }
 
 void Kitty::proc() {
-//    algorithm.proc(systickTrigger);
+    algorithm.proc(systickTrigger);
 }
