@@ -44,6 +44,7 @@
 x64/
 [Bb]in/
 [Oo]bj/
+build
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -163,3 +164,6 @@ $RECYCLE.BIN/
 
 _NCrunch*
 firmware/car/.clang-format
+
+# Visual Studio Code
+.vscode/
