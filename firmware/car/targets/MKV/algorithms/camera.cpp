@@ -55,7 +55,7 @@ int32_t Algorithm::calculatePosition(uint16_t* dataBuf) {
         }
     }
     
-    int32_t position = leftLinePosition - rightLinePosition;
+    int32_t position = poistionOffset + leftLinePosition - rightLinePosition;
     
     return meanFilter(position);
 }

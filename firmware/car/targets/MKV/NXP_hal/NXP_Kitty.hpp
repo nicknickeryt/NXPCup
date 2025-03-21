@@ -36,7 +36,7 @@ void logWrite(char c,[[maybe_unused]] void* const context);
 class Kitty {
   private:
     size_t lastLogTimepoint;
-    constexpr static uint32_t LOG_UPDATE_INTERVAL = 100;
+    constexpr static uint32_t LOG_UPDATE_INTERVAL = 25;
 
     // SYSTICK
     static uint_fast64_t milliseconds;
@@ -148,8 +148,8 @@ class Kitty {
     uint16_t*        cameraDataBuf = nullptr;
 
     // UART
-    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartDebug         = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
 
     // DISPLAY
     NXP_Display display;
