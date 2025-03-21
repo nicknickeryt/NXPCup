@@ -17,10 +17,10 @@
 class Algorithm {
   private:
     constexpr static uint8_t cmaeraDataSize     = 128;  // Size of the camera data
-    constexpr static uint8_t imageWindowSize    = 15;   // Cut unused pixels from both sides
+    constexpr static uint8_t imageWindowSize    = 10;   // Cut unused pixels from both sides
     constexpr static uint8_t maxOutputChange    = 5;    // Max allowed change between previous and actual turnvalue
     constexpr static float   brightnessModifier = 1.0f; // Multiply brigtnessMax by [value] to get brightness
-    constexpr static int16_t poistionOffset     = -4;
+    constexpr static int16_t poistionOffset     = -5;
 
     constexpr static float alpha           = 0.05f; // Filter parameter
     constexpr static float delta           = 3;     // Filter parameter
