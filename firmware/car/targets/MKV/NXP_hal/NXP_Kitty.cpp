@@ -117,7 +117,7 @@ void Kitty::proc() {
         return;
     }
       
-    servo.set(static_cast<float>(position) / 40.0f);
+    servo.set(static_cast<float>(position) / 30.0f);
     differential.proc(position);
     motors.setValue(differential.getLeft(), differential.getRight());
 }
