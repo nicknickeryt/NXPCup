@@ -1,5 +1,0 @@
-baud_rate: 115200
-bluetooth_mac: 00:21:13:00:1F:26
-debugEnable: 1
-logEnable: 0
-serial_port: /dev/rfcomm0
