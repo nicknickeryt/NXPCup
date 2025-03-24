@@ -22,9 +22,10 @@
 #include "NXP_motor.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_uart.hpp"
-#include "A_camera.hpp"
-#include "A_motor.hpp"
-#include "A_servo.hpp"
+
+#include <algorithms/camera.hpp>
+#include <algorithms/motor.hpp>
+#include <algorithms/servo.hpp> 
 
 void pit_generalHandler(uint32_t*);
 
@@ -34,9 +35,12 @@ void logWrite(char c,[[maybe_unused]] void* const context);
 
 class Kitty {
   private:
+    size_t lastLogTimepoint;
+    constexpr static uint32_t LOG_UPDATE_INTERVAL = 25;
+
     // SYSTICK
     static uint_fast64_t milliseconds;
-
+    
     // LEDS
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
     NXP_GPIO LED1 = NXP_GPIO(PORTA, GPIOA, 17U);
@@ -144,8 +148,8 @@ class Kitty {
     uint16_t*        cameraDataBuf = nullptr;
 
     // UART
-    NXP_Uart uartCommunication = {UART2, 115200, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartDebug         = {UART0, 115200, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
+    NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
 
     // DISPLAY
     NXP_Display display;
@@ -158,7 +162,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm;
-    Differential  differential = Differential(0.1);
+    Differential  differential = Differential(0.3);
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors, differential};
 
@@ -179,6 +183,8 @@ class Kitty {
     }
 
     void init();
+
+    void proc();
 
     static void millisIncrease() { milliseconds++; }
 

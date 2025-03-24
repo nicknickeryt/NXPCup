@@ -11,7 +11,7 @@
 #include "HALina.hpp"
 #include "NXP_gpio.hpp"
 #include "NXP_uart.hpp"
-#include "NXP_algorithm.h"
+#include "NXP_algorithm.hpp"
 #include "NXP_sensors.hpp"
 
 class Kitty{
@@ -38,7 +38,7 @@ private:
     std::array<NXP_GPIO, 4> leds = {ledLeft, ledLeftFront, ledRight, ledRightFront};
 
     // SENSORS
-    NXP_Sensors sensors = {i2c};
+    // NXP_Sensors sensor = {i2c};
 
 public:
     // UART
