@@ -103,7 +103,7 @@ void Kitty::proc() {
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
         lastLogTimepoint = millis();
-        fctprintf(logWrite, NULL, "\nCAML");
+        fctprintf(logWrite, NULL, "\r\nCAML");
         for (size_t i = 0; i < 128; i++) {
             uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf); 
             fctprintf(logWrite, NULL, ".%hhu", buffer[i] / 158);
