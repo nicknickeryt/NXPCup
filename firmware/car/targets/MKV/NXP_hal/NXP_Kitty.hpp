@@ -69,9 +69,9 @@ class Kitty {
     halina::LedLine ledLine = {LED0, LED1, LED2, LED3, LED4, LED5, LED6, LED7};
 
     // ENCODERS
-    NXP_PORT encoderRightA = {PORTB, 18, 0x06};
+    NXP_PORT encoderRightA = {PORTB, 18, 0x06, NXP_PORT::Pull::PullUp};
     NXP_PORT encoderRightB = {PORTB, 19, 0x06};
-    NXP_PORT encoderLeftA  = {PORTA, 12, 0x07};
+    NXP_PORT encoderLeftA  = {PORTA, 12, 0x07, NXP_PORT::Pull::PullUp};
     NXP_PORT encoderLeftB  = {PORTA, 13, 0x07};
 
     // MOTORS
@@ -137,8 +137,8 @@ class Kitty {
     NXP_Frame frame = {uartCommunication};
 
   public:
-    NXP_Encoder encoderLeft  = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter, 60};
-    NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter, 60};
+    NXP_Encoder encoderLeft  = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter, 40};
+    NXP_Encoder encoderRight = {FTM2, encoderRightA, encoderRightB, NXP_Encoder::Mode::SingleCounter, 40};
 
     // KAMERA
     NXP_Camera::Type cameraType    = NXP_Camera::Type::CAMERA_1;
