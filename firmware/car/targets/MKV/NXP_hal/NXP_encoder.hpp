@@ -71,7 +71,7 @@ public:
     }
 
     void updateRPM() {
-        lastRPMValue = (lastTicksValue / ticksPerRevolution) * 50 * 60;
+        lastRPMValue = (float) ((float)lastTicksValue / (float)ticksPerRevolution) * 50.0f * 60.0f;
     }
 
     static void ISR(uint32_t* arg) {
