@@ -84,8 +84,8 @@ graphics_layout.addItem(proxy, row=2, col=0)
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
 plot1 = graphics_layout.addPlot(row=1, col=0, title="Obraz")
 
-graphics_layout.ci.layout.setRowStretchFactor(0, 4) 
-graphics_layout.ci.layout.setRowStretchFactor(1, 1) 
+graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
+graphics_layout.ci.layout.setRowStretchFactor(1, 2) 
 graphics_layout.ci.layout.setRowStretchFactor(2, 0) 
 
 graphics_layout.setBackground("#f1f1f1")
@@ -101,7 +101,7 @@ plot0.setXRange(0, 128)
 
 line0 = plot0.plot(pen='r')
 
-img = np.ones((128, 5))  
+img = np.ones((128, 10))  
 img_item = pg.ImageItem(img) 
 plot1.addItem(img_item)  
 plot1.getAxis('left').setVisible(False)
@@ -120,7 +120,7 @@ servo_position = None
 brightness = None
 raw_servo = None
 
-last_five_data = [data, data, data, data, data]
+last_ten_data = [data, data, data, data, data, data, data, data, data, data]
 
 def read_serial_data(serial_port):
     """Reads data from UART and returns a list of 128 values."""
@@ -129,16 +129,16 @@ def read_serial_data(serial_port):
         # Próba odczytu z portu szeregowego
         raw_line = serial_port.readline()
         line = raw_line.strip()
-        
+
         if line.startswith("CAML"):
             data_str = line[6:]  # Remove "CAML."
             data_str = data_str.replace("\x00", "")
             values = list(map(int, data_str.split('.')))
             
-            if len(values) == 131:
+            if len(values) == 130:
                 servo_position = values[128]
                 brightness = values[129] / 2  # Przyjmujemy, że brightness jest podzielony przez 2
-                raw_servo = values[130]
+                #raw_servo = values[130]
                 return values[:128]
     
     except ValueError:
@@ -155,17 +155,22 @@ def read_serial_data(serial_port):
 
 
 def update_plot():
-    global data, servo_position, last_five_data
+    global data, servo_position, last_ten_data
     data = read_serial_data(serial_port)
 
     if data:
         line0.setData(x, data)
         
-        img[:, 0] = last_five_data[0]
-        img[:, 1] = last_five_data[1]
-        img[:, 2] = last_five_data[2]
-        img[:, 3] = last_five_data[3]
-        img[:, 4] = last_five_data[4]
+        img[:, 0] = last_ten_data[0]
+        img[:, 1] = last_ten_data[1]
+        img[:, 2] = last_ten_data[2]
+        img[:, 3] = last_ten_data[3]
+        img[:, 4] = last_ten_data[4]
+        img[:, 5] = last_ten_data[5]
+        img[:, 6] = last_ten_data[6]
+        img[:, 7] = last_ten_data[7]
+        img[:, 8] = last_ten_data[8]
+        img[:, 9] = last_ten_data[9]
         img_item.setImage(img)
         
         if servo_position is not None:
@@ -178,9 +183,9 @@ def update_plot():
             brightness_line.setPos(brightness)  # Aktualizacja pozycji linii
         
         # Dodaj nowe dane do listy i usuń najstarsze, jeśli jest ich więcej niż 5
-        last_five_data.append(data)
-        if len(last_five_data) > 5:
-            last_five_data.pop(0)
+        last_ten_data.append(data)
+        if len(last_ten_data) > 10:
+            last_ten_data.pop(0)
 
         # Zapisz dane do pliku, jeśli trwa nagrywanie
         if isRecording:
