@@ -7,8 +7,9 @@ import bluetooth
 import csv
 import os
 
-from PySide6.QtWidgets import QApplication, QPushButton, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QPushButton, QWidget, QHBoxLayout, QLabel
 from pyqtgraph.Qt import QtWidgets
+from PySide6.QtGui import QFont
 
 # Serial configuration
 BAUD_RATE = 921600  
@@ -76,17 +77,44 @@ button_layout.addWidget(button_start_stop)
 button_widget.setLayout(button_layout)
 button_widget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
 
-proxy = QtWidgets.QGraphicsProxyWidget()
-proxy.setWidget(button_widget)
+buttonProxy = QtWidgets.QGraphicsProxyWidget()
+buttonProxy.setWidget(button_widget)
 
-graphics_layout.addItem(proxy, row=2, col=0) 
+############
+# ENCODERS #
+############
+
+encodersWidget = QWidget()
+encodersLayout = QHBoxLayout()
+
+font = QFont("Arial", 20)  # Arial, rozmiar 20
+
+left_label = QLabel("0")
+right_label = QLabel("0")
+
+left_label.setFont(font)
+right_label.setFont(font)
+
+encodersLayout.addWidget(left_label)
+encodersLayout.addStretch()  # Dodaje elastyczną przestrzeń między tekstami
+encodersLayout.addWidget(right_label)
+
+encodersWidget.setLayout(encodersLayout)
+encodersWidget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
+
+encodersProxy = QtWidgets.QGraphicsProxyWidget()
+encodersProxy.setWidget(encodersWidget)
+
+graphics_layout.addItem(buttonProxy, row=4, col=0) 
+graphics_layout.addItem(encodersProxy, row=3, col=0) 
 
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
-plot1 = graphics_layout.addPlot(row=1, col=0, title="Obraz")
+plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
 
 graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
-graphics_layout.ci.layout.setRowStretchFactor(1, 2) 
-graphics_layout.ci.layout.setRowStretchFactor(2, 0) 
+graphics_layout.ci.layout.setRowStretchFactor(1, 0) 
+graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
+graphics_layout.ci.layout.setRowStretchFactor(3, 0) 
 
 graphics_layout.setBackground("#f1f1f1")
 
@@ -119,12 +147,14 @@ data = [0] * 128
 servo_position = None 
 brightness = None
 raw_servo = None
+encoderLeftRPM = 0
+encoderRightRPM = 0
 
 last_ten_data = [data, data, data, data, data, data, data, data, data, data]
 
 def read_serial_data(serial_port):
     """Reads data from UART and returns a list of 128 values."""
-    global servo_position, brightness, raw_servo
+    global servo_position, brightness, raw_servo, encoderLeftRPM, encoderRightRPM
     try:
         # Próba odczytu z portu szeregowego
         raw_line = serial_port.readline()
@@ -135,10 +165,11 @@ def read_serial_data(serial_port):
             data_str = data_str.replace("\x00", "")
             values = list(map(int, data_str.split('.')))
             
-            if len(values) == 130:
+            if len(values) == 132:
                 servo_position = values[128]
                 brightness = values[129]  # Przyjmujemy, że brightness jest podzielony przez 2
-                #raw_servo = values[130]
+                encoderLeftRPM = values[130]
+                encoderRightRPM = values[131]
                 return values[:128]
     
     except ValueError:
@@ -155,7 +186,8 @@ def read_serial_data(serial_port):
 
 
 def update_plot():
-    global data, servo_position, last_ten_data
+    global data, servo_position, last_ten_data, encoderLeftRPM, encoderRightRPM, left_label, right_label
+    
     data = read_serial_data(serial_port)
 
     if data:
@@ -181,6 +213,9 @@ def update_plot():
         
         if brightness is not None:
             brightness_line.setPos(brightness)  # Aktualizacja pozycji linii
+                
+        left_label.setText(str(encoderLeftRPM) + "RPM")
+        right_label.setText(str(encoderRightRPM) + "RPM")
         
         # Dodaj nowe dane do listy i usuń najstarsze, jeśli jest ich więcej niż 5
         last_ten_data.append(data)
