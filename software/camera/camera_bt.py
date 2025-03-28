@@ -137,7 +137,7 @@ def read_serial_data(serial_port):
             
             if len(values) == 130:
                 servo_position = values[128]
-                brightness = values[129] / 2  # Przyjmujemy, że brightness jest podzielony przez 2
+                brightness = values[129]  # Przyjmujemy, że brightness jest podzielony przez 2
                 #raw_servo = values[130]
                 return values[:128]
     

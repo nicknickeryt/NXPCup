@@ -109,7 +109,7 @@ void Kitty::proc() {
             fctprintf(logWrite, NULL, ".%hhu", buffer[i] / 158);
         }
         fctprintf(logWrite, NULL, ".%hhu", position + 63);
-        fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness());
+        fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
     }
 
     // If menu is active, do not move
@@ -117,7 +117,10 @@ void Kitty::proc() {
         return;
     }
       
-    servo.set(static_cast<float>(position) / 30.0f);
+    float signum = position > 0 ? 1.0f : -1.0f;
+    float servoPosition = static_cast<float>(signum * (position*position*0.05)) / 15.0f;
+
+    servo.set(servoPosition);
     differential.proc(position);
     motors.setValue(differential.getLeft(), differential.getRight());
 }

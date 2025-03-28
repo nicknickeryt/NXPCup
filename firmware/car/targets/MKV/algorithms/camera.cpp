@@ -1,61 +1,74 @@
 /**
- * Copyright (c) Kolo Naukowe Elektronikow, Akademia Gorniczo-Hutnicza im. Stanislawa Staszica w Krakowie 2020
- * Authors: Dominik Michalczyk, Kacper Cwiokowski
+ * Copyright (c) Kolo Naukowe Elektronikow, Akademia Gorniczo-Hutnicza im. Stanislawa Staszica w Krakowie 2025
+ * Authors: Kacper Cwiokowski
  *
  * Kitty algorithm
  *
  */
 
-#include "camera.hpp"
+ #include "camera.hpp"
 
-#include <cmath>
-#include <cstring>
+ #include <assert.h>
+ 
+ float Algorithm::calculatePosition(uint16_t* data) {
+     assert(data != nullptr);
+     
+     // Brightness
+     brightness = 0;
+     for (auto i = (brightnessCut - 1); i <= (127 - brightnessCut); i++)
+         brightness += data[i];   
 
-uint32_t Algorithm::calculateBrightness(uint16_t* dataBuf) {
-    uint32_t brightness = 0;
-    for (size_t i = 0; i < 128; i++) {
-        brightness += dataBuf[i];
-    }
+     brightness /= (127 - (2 * brightnessCut));
+ 
+     // Left line position
+     for (auto i = 0; i <= position; i++) {
+         if(data[i] < brightness){
+             rightLinePosition = i;
+         }
+     }
+ 
+     // Right line position
+     for (auto i = 127; i >= position; i--) {
+         if(data[i] < brightness){
+            leftLinePosition = i;
+         }
+     }
+ 
+     // Calculte position
+     position = (leftLinePosition + rightLinePosition) / 2;
+ 
+     // Lo pass filter position
+     filteredPosition = filteredPosition * (1 - alpha) + position * alpha;
+ 
+     // Find patterns
+     // findPatterns(data);
 
-    float modifiedBrightness = (float)(brightness / 128) * brightnessModifier;
-    return modifiedBrightness;
-}
-
-void Algorithm::differentiate(uint16_t* input, int16_t* output) {
-    for (size_t i = imageWindowSize; i < 128 - imageWindowSize; i++) {
-        output[i] = input[i] - input[i + 1];
-    }
-}
-
-int32_t Algorithm::meanFilter(int32_t position) {
-    float measurement = static_cast<float>(position);
-    average           = average * (1 - alpha) + measurement * alpha;
-    lastMeasurement   = fabsf(measurement - average) < delta ? measurement : lastMeasurement;
-    return static_cast<int32_t>(lastMeasurement);
-}
-
-int32_t Algorithm::calculatePosition(uint16_t* dataBuf) {
-    uint32_t brightness = calculateBrightness(dataBuf);
-
-    // Calculate the distance from the center of the image
-    uint16_t leftLinePosition  = 0;
-    uint16_t rightLinePosition = 0;
-
-    // find right line
-    for (size_t i = imageWindowSize; i < cmaeraDataSize / 2; ++i) {
-        if (dataBuf[i] < brightness) {
-            rightLinePosition = i - imageWindowSize;
-        }
-    }
-
-    // find left line
-    for (size_t i = imageWindowSize; i < cmaeraDataSize / 2 - imageWindowSize; ++i) {
-        if (dataBuf[cmaeraDataSize - 1 - i] < brightness) {
-            leftLinePosition = i - imageWindowSize;
-        }
-    }
+     // Return filtered position
+     return - (filteredPosition - 63.5) + servoOffset;
+ 
+ }
+ 
+ void Algorithm::findPatterns(uint16_t* data) {
+     // Smoothing
+     for (auto i = 1; i <= 126; i++) {
+         smoothedData[i]= (data[i-1] + data[i] + data[i+1]) / 3;     
+     } 
+ 
+     // Crossings with brightness
+     for (auto i = 1; i <= 125; i++) {
+         // down-up crossing
+         if(smoothedData[i-1] < brightness && smoothedData[i] < brightness && smoothedData[i+1] > brightness && smoothedData[i+2] > brightness){
+             crossings++;
+         }
+         // up-down crossing
+         if(smoothedData[i-1] > brightness && smoothedData[i] > brightness && smoothedData[i+1] < brightness && smoothedData[i+2] < brightness){
+             crossings++;
+         }
+     }
+ 
+     // Find Patterns
+     if(crossings > 6){
+     // Pattern found
+     }
     
-    int32_t position = poistionOffset + leftLinePosition - rightLinePosition;
-    
-    return meanFilter(position);
-}
+ }
