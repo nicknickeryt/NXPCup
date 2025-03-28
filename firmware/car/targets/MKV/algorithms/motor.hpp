@@ -1,10 +1,9 @@
 #pragma once
 #include <utility>
 
-#define ENGINE_CUT 50.0 // enter the square of engine cut value based on camera algorithm return value (float)
-// be careful of what value you enter (A > max_position^2)
-#define ENGINE_CUT_SQ ENGINE_CUT * ENGINE_CUT
-#define ENGINE_BRAKE ENGINE_CUT * 1.5
+#include "NXP_encoder.hpp"
+
+#define DIFF_RATIO 0.007
 
 class Differential {
     int   position;
@@ -12,9 +11,12 @@ class Differential {
     float valueLeft;
     float valueRight;
 
+    NXP_Encoder& encoderLeft;
+    NXP_Encoder& encoderRight;
+
   public:
-    Differential(float startVelocity);
-    void  proc(int position);
+    Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
+    void  proc(float position);
     float getLeft();
     float getRight();
     void  setStartVelocity(float value);

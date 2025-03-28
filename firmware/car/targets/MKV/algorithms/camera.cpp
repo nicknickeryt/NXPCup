@@ -9,43 +9,51 @@
  #include "camera.hpp"
 
  #include <assert.h>
- 
  float Algorithm::calculatePosition(uint16_t* data) {
      assert(data != nullptr);
      
      // Brightness
      brightness = 0;
-     for (auto i = (brightnessCut - 1); i <= (127 - brightnessCut); i++)
-         brightness += data[i];   
+     for (auto i = (brightnessCut - 1); i <= (127 - brightnessCut); i++){
+        brightness += data[i]; 
+     }  
 
-     brightness /= (127 - (2 * brightnessCut));
- 
-     // Left line position
-     for (auto i = 0; i <= position; i++) {
-         if(data[i] < brightness){
-             rightLinePosition = i;
-         }
-     }
+    brightness /= (127 - (2 * brightnessCut));
+
  
      // Right line position
-     for (auto i = 127; i >= position; i--) {
-         if(data[i] < brightness){
-            leftLinePosition = i;
-         }
+     for (auto i = 0; i < ( (position / 2) - 10); i++){
+        if(data[i] < brightness){
+            rightLinePosition = i;
+        }
+     }
+     
+ 
+     // Left line position
+     for (auto i = 127; i > ( (position / 2) + 10); i--){
+        if(data[i] < brightness){
+           leftLinePosition = i;
+        }
      }
  
      // Calculte position
-     position = (leftLinePosition + rightLinePosition) / 2;
+     position = (leftLinePosition + rightLinePosition);
  
+     // TODO - speed-adjusted alpha
+     float rpmAverage = ((float) encoderLeft.getRPM() + (float) encoderRight.getRPM()) / 2.0f;
+     //  float rpmAlpha = (0.001996 * rpmAverage) + 0.01;
+     float rpmAlpha = -exp(- rpmAverage / 500) + 1;
+
+     if(rpmAlpha < 0) rpmAlpha = 0;
+
      // Lo pass filter position
-     filteredPosition = filteredPosition * (1 - alpha) + position * alpha;
+     filteredPosition = filteredPosition * (1 - (alpha * rpmAlpha)) + ((static_cast<float>(position) / 2.0f) - 60.5f) * alpha * rpmAlpha;
  
      // Find patterns
      // findPatterns(data);
 
-     // Return filtered position
-     return - (filteredPosition - 63.5) + servoOffset;
- 
+     // Return filtered position 
+     return (filteredPosition);
  }
  
  void Algorithm::findPatterns(uint16_t* data) {
