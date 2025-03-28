@@ -10,11 +10,12 @@ bool NXP_Menu::proc() {
     else if (!buttons.at(0).get()) {
         differential.setStartVelocity(differential.getStartVelocity() + 0.05);
         delay_ms(300);
-
     } else if (!buttons.at(1).get()) {
         differential.setStartVelocity(differential.getStartVelocity() - 0.05);
         delay_ms(300);
-
+    } else if (!buttons.at(2).get()) {
+        differential.setStartVelocity(0.0);
+        startRace();
     } else if (!buttons.at(3).get()) {
         startRace();
     }
@@ -28,8 +29,8 @@ const char* formatString(float value) {
     std::string s = "  ";
 
     int intValue = static_cast<int>(value * 100.0f);
-    if (intValue > 99) intValue = 99; 
-    if (intValue < 0) intValue = 0;  
+    if (intValue > 99) intValue = 99;
+    if (intValue < 0) intValue = 0;
 
     s.append(std::to_string(intValue));
 
