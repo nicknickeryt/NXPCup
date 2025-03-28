@@ -154,14 +154,16 @@ class Kitty {
     NXP_Display display;
 
     // SERVO
-    NXP_Servo servo = {0.1, servoPwm, 40, 2.0f};
+    // Offset PWM MaxDegreeDeviation ServoMultiplier
+    NXP_Servo servo = {0.07f, servoPwm, 35, 2.0f};
 
     // MOTORS
     NXP_Motors motors = {motorLeft, motorRight};
 
     // ALGORITHMzzzz
-    Algorithm     newAlgorithm;
-    Differential  differential = Differential(0.3);
+    Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
+    Differential  differential = Differential(0.3, encoderLeft, encoderRight);
+    
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors, differential};
 

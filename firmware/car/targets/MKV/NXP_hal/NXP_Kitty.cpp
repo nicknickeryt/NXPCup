@@ -98,7 +98,7 @@ void Kitty::proc() {
     magicDiodComposition();
     camera.getData(cameraDataBuf);
 
-    int32_t position = newAlgorithm.calculatePosition(cameraDataBuf);
+    float position = newAlgorithm.calculatePosition(cameraDataBuf);
 
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
@@ -108,8 +108,10 @@ void Kitty::proc() {
             uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf); 
             fctprintf(logWrite, NULL, ".%hhu", buffer[i] / 158);
         }
-        fctprintf(logWrite, NULL, ".%hhu", position + 63);
+        fctprintf(logWrite, NULL, ".%hhu", (uint8_t) (position + 63));
         fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
+        fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
+        fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
     }
 
     // If menu is active, do not move
@@ -117,8 +119,7 @@ void Kitty::proc() {
         return;
     }
       
-    float signum = position > 0 ? 1.0f : -1.0f;
-    float servoPosition = static_cast<float>(signum * (position*position*0.05)) / 15.0f;
+    float servoPosition = -(position / 12.0f);
 
     servo.set(servoPosition);
     differential.proc(position);
