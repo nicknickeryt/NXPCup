@@ -3,7 +3,7 @@
 
 #include "NXP_encoder.hpp"
 
-#define DIFF_RATIO 0.007
+#define DIFF_RATIO 170
 
 class Differential {
     int   position;

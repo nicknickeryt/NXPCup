@@ -50,6 +50,16 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().servo.set(0);
             kitty().servo.disable();
             break;
+        case 'p':
+            fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
+            kitty().differential.setStartVelocity(0);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            break;
+        case 'o':
+            fctprintf(logWrite, NULL, "\nkittyResume\n", 0);
+            kitty().differential.setStartVelocity(0.3);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            break;
         case 'r':
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
             kitty().menu.setTriggeredOff(true);
@@ -152,7 +162,7 @@ void Kitty::proc() {
         return;
     }
       
-    float servoPosition = -(position / 12.0f);
+    float servoPosition = -(position / 13.0f);
 
     servo.set(servoPosition);
     differential.proc(position);

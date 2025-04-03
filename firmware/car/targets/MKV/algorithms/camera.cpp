@@ -47,7 +47,7 @@
      if(rpmAlpha < 0) rpmAlpha = 0;
 
      // Lo pass filter position
-     filteredPosition = filteredPosition * (1 - (alpha * rpmAlpha)) + ((static_cast<float>(position) / 2.0f) - 60.5f) * alpha * rpmAlpha;
+     filteredPosition = filteredPosition * (1 - (alpha)) + ((static_cast<float>(position) / 2.0f) - 60.5f) * alpha;
  
      // Find patterns
      // findPatterns(data);

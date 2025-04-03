@@ -10,16 +10,15 @@
  *@param position is the current position of the car on the track
  */
 
-Differential::Differential(float startVelocityValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight)
- : startVelocity(startVelocityValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
+Differential::Differential(float startVelocityValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startVelocity(startVelocityValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
 void Differential::proc(float position) {
     if (position >= 0) {
-        valueRight = startVelocity;
-        valueLeft  = startVelocity - (abs(position) * DIFF_RATIO);
-    } else if (position < 0) {
         valueLeft  = startVelocity;
-        valueRight = startVelocity - (abs(position) * DIFF_RATIO);
+        valueRight = startVelocity - (abs(position) / DIFF_RATIO);
+    } else if (position < 0) {
+        valueRight = startVelocity;
+        valueLeft  = startVelocity - (abs(position) / DIFF_RATIO);
     }
 }
 
