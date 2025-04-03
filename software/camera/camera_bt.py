@@ -16,6 +16,7 @@ BAUD_RATE = 921600
 BT_MAC = "00:21:13:00:1F:26"
 
 isRecording = False
+is_running = False 
 routeFile = "route.csv" 
 
 def connect_bluetooth_rfcomm(mac_address):
@@ -35,6 +36,26 @@ def connect_bluetooth_rfcomm(mac_address):
         print(f"{e}\n");
         return None
 
+# Car run/stop
+def on_stop_start_click():
+    global is_running
+    if is_running:
+        write_serial_data(serial_port, "s")  # Wysyła "s" (STOP)
+        button_stop_start.setText("START")
+        is_running = False
+    else:
+        write_serial_data(serial_port, "r")  # Wysyła "r" (RUN)
+        button_stop_start.setText("STOP")
+        is_running = True
+
+# Car startVelocity
+def on_plus_click():
+    write_serial_data(serial_port, "+")
+
+def on_minus_click():
+    write_serial_data(serial_port, "-")
+
+# Recording start/stop
 def on_start_stop_click():
     global isRecording, button_start_stop
     if(not isRecording):
@@ -69,7 +90,27 @@ graphics_layout = pg.GraphicsLayoutWidget(show=True, title="Kitty")
 
 button_start_stop = QPushButton("Rozpocznij zapis")
 
+# Car control buttons
 button_start_stop.clicked.connect(on_start_stop_click)
+
+button_stop_start = QPushButton("STOP")
+button_plus = QPushButton("+")
+button_minus = QPushButton("-")
+
+control_layout = QHBoxLayout()
+control_layout.addWidget(button_stop_start)
+control_layout.addWidget(button_plus)
+control_layout.addWidget(button_minus)
+
+control_widget = QWidget()
+control_widget.setLayout(control_layout)
+
+controlProxy = QtWidgets.QGraphicsProxyWidget()
+controlProxy.setWidget(control_widget)
+
+button_stop_start.clicked.connect(on_stop_start_click)
+button_plus.clicked.connect(on_plus_click)
+button_minus.clicked.connect(on_minus_click)
 
 button_widget = QWidget()
 button_layout = QHBoxLayout()
@@ -91,12 +132,16 @@ font = QFont("Arial", 20)  # Arial, rozmiar 20
 
 left_label = QLabel("0")
 right_label = QLabel("0")
+startVelocityLabel = QLabel("0")
 
 left_label.setFont(font)
 right_label.setFont(font)
+startVelocityLabel.setFont(font)
 
 encodersLayout.addWidget(left_label)
-encodersLayout.addStretch()  # Dodaje elastyczną przestrzeń między tekstami
+encodersLayout.addStretch()  
+encodersLayout.addWidget(startVelocityLabel)
+encodersLayout.addStretch()
 encodersLayout.addWidget(right_label)
 
 encodersWidget.setLayout(encodersLayout)
@@ -105,12 +150,15 @@ encodersWidget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
 encodersProxy = QtWidgets.QGraphicsProxyWidget()
 encodersProxy.setWidget(encodersWidget)
 
-graphics_layout.addItem(buttonProxy, row=4, col=0) 
-graphics_layout.addItem(encodersProxy, row=3, col=0) 
 
+# Graphics layout
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
 plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
+graphics_layout.addItem(encodersProxy, row=3, col=0) 
+graphics_layout.addItem(buttonProxy, row=4, col=0) 
+graphics_layout.addItem(controlProxy, row=5, col=0)
 
+# Stretch
 graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
 graphics_layout.ci.layout.setRowStretchFactor(1, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
@@ -149,12 +197,13 @@ brightness = None
 raw_servo = None
 encoderLeftRPM = 0
 encoderRightRPM = 0
+startVelocity = 0
 
 last_ten_data = [data, data, data, data, data, data, data, data, data, data]
 
 def read_serial_data(serial_port):
     """Reads data from UART and returns a list of 128 values."""
-    global servo_position, brightness, raw_servo, encoderLeftRPM, encoderRightRPM
+    global servo_position, brightness, raw_servo, encoderLeftRPM, encoderRightRPM, startVelocityLabel
     try:
         # Próba odczytu z portu szeregowego
         raw_line = serial_port.readline()
@@ -171,6 +220,14 @@ def read_serial_data(serial_port):
                 encoderLeftRPM = values[130]
                 encoderRightRPM = values[131]
                 return values[:128]
+        elif line.startswith("kittySV"):  
+            try:
+                startVelocity = int(line[7:]) 
+                startVelocityLabel.setText("SV: " + str(startVelocity / 100))
+                print(f"[UART] Otrzymano startVelocity: {startVelocity}")
+            except ValueError:
+                print(f"⚠ Błąd parsowania startVelocity: {line}")
+            
     
     except ValueError:
         print("⚠ Error parsing data:", line)
@@ -184,6 +241,11 @@ def read_serial_data(serial_port):
 
     return None
 
+def write_serial_data(serial_port, data_str):
+    try:
+        bluetooth_socket.send(data_str)
+    except Exception as e:
+        print(f"⚠ Error writing data: {e}")
 
 def update_plot():
     global data, servo_position, last_ten_data, encoderLeftRPM, encoderRightRPM, left_label, right_label
