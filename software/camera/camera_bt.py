@@ -54,6 +54,13 @@ def on_plus_click():
 
 def on_minus_click():
     write_serial_data(serial_port, "-")
+    
+# Car startVelocity
+def on_dplus_click():
+    write_serial_data(serial_port, "a")
+
+def on_dminus_click():
+    write_serial_data(serial_port, "b")
 
 # Recording start/stop
 def on_start_stop_click():
@@ -94,13 +101,17 @@ button_start_stop = QPushButton("Rozpocznij zapis")
 button_start_stop.clicked.connect(on_start_stop_click)
 
 button_stop_start = QPushButton("STOP")
-button_plus = QPushButton("+")
-button_minus = QPushButton("-")
+button_plus = QPushButton("SV+")
+button_minus = QPushButton("SV-")
+button_dplus = QPushButton("DR+")
+button_dminus = QPushButton("DR-")
 
 control_layout = QHBoxLayout()
 control_layout.addWidget(button_stop_start)
 control_layout.addWidget(button_plus)
 control_layout.addWidget(button_minus)
+control_layout.addWidget(button_dplus)
+control_layout.addWidget(button_dminus)
 
 control_widget = QWidget()
 control_widget.setLayout(control_layout)
@@ -111,6 +122,8 @@ controlProxy.setWidget(control_widget)
 button_stop_start.clicked.connect(on_stop_start_click)
 button_plus.clicked.connect(on_plus_click)
 button_minus.clicked.connect(on_minus_click)
+button_dplus.clicked.connect(on_dplus_click)
+button_dminus.clicked.connect(on_dminus_click)
 
 button_widget = QWidget()
 button_layout = QHBoxLayout()
@@ -133,14 +146,18 @@ font = QFont("Arial", 20)  # Arial, rozmiar 20
 left_label = QLabel("0")
 right_label = QLabel("0")
 startVelocityLabel = QLabel("0")
+diffRatioLabel = QLabel("170?")
 
 left_label.setFont(font)
 right_label.setFont(font)
 startVelocityLabel.setFont(font)
+diffRatioLabel.setFont(font)
 
 encodersLayout.addWidget(left_label)
 encodersLayout.addStretch()  
 encodersLayout.addWidget(startVelocityLabel)
+encodersLayout.addStretch()
+encodersLayout.addWidget(diffRatioLabel)
 encodersLayout.addStretch()
 encodersLayout.addWidget(right_label)
 
@@ -198,6 +215,7 @@ raw_servo = None
 encoderLeftRPM = 0
 encoderRightRPM = 0
 startVelocity = 0
+diffRatio = 0
 
 last_ten_data = [data, data, data, data, data, data, data, data, data, data]
 
@@ -208,7 +226,9 @@ def read_serial_data(serial_port):
         # Próba odczytu z portu szeregowego
         raw_line = serial_port.readline()
         line = raw_line.strip()
-
+        
+        #line = bluetooth_socket.recv(1000000).decode('utf-8').strip()
+        
         if line.startswith("CAML"):
             data_str = line[6:]  # Remove "CAML."
             data_str = data_str.replace("\x00", "")
@@ -224,6 +244,12 @@ def read_serial_data(serial_port):
             try:
                 startVelocity = int(line[7:]) 
                 startVelocityLabel.setText("SV: " + str(startVelocity / 100))
+            except ValueError:
+                print(f"⚠ Błąd parsowania startVelocity: {line}")
+        elif line.startswith("kittyDR"):  
+            try:
+                diffRatio = int(line[7:]) 
+                diffRatioLabel.setText("DR: " + str(diffRatio))
             except ValueError:
                 print(f"⚠ Błąd parsowania startVelocity: {line}")
             
