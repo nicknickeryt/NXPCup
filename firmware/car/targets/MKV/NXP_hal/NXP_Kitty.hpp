@@ -36,7 +36,7 @@ void logWrite(char c,[[maybe_unused]] void* const context);
 class Kitty {
   private:
     size_t lastLogTimepoint;
-    constexpr static uint32_t LOG_UPDATE_INTERVAL = 25;
+    constexpr static uint32_t LOG_UPDATE_INTERVAL = 33;
 
     // SYSTICK
     static uint_fast64_t milliseconds;
@@ -173,7 +173,7 @@ class Kitty {
 
     static void FTM_Init();
 
-    
+    static void uartCallback(uint8_t receivedByte);
 
   public:
     void magicDiodComposition();

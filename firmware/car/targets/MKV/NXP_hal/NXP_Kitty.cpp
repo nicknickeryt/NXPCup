@@ -41,6 +41,34 @@ void SysTick_Handler(void) {
 }
 }
 
+void Kitty::uartCallback(uint8_t receivedByte) {
+    switch (receivedByte) {
+        case 's':
+            fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
+            kitty().menu.setTriggeredOff(false);
+            kitty().motors.setValue(0, 0);
+            kitty().servo.set(0);
+            kitty().servo.disable();
+            break;
+        case 'r':
+            fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
+            kitty().menu.setTriggeredOff(true);
+            kitty().menu.startRace();
+            kitty().servo.init();
+            break;
+        case '+': // 43
+            kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() + 0.05);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            break;
+        case '-': // 45
+            kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() - 0.05);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            break;
+        default:
+            break;
+    }
+}
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -50,6 +78,8 @@ void Kitty::init() {
 
     FTM_Init();
     uartDebug.init();
+    uartDebug.enableInterrupt(NXP_Uart::InterruptType::RX_FULL);
+    uartDebug.setRedirectHandler(uartCallback);
     log_setWriteFunction(logWrite);
     uartCommunication.init();
     uartCommunication.initDMA();
@@ -112,6 +142,9 @@ void Kitty::proc() {
         fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
         fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
+
+        if(!menu.isTriggeredOff())
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
     }
 
     // If menu is active, do not move

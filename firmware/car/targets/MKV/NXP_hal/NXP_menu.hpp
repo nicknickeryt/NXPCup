@@ -37,4 +37,14 @@ class NXP_Menu {
     void displayMenuPage();
 
     void startRace();
+    
+    bool isTriggeredOff() {
+      return menuTrigger;
+    }
+
+    void setTriggeredOff(bool state) {
+      menuTrigger = state;
+      motors.block();
+      display.enable();
+    }
 };
