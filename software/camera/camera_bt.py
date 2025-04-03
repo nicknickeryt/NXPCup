@@ -224,7 +224,6 @@ def read_serial_data(serial_port):
             try:
                 startVelocity = int(line[7:]) 
                 startVelocityLabel.setText("SV: " + str(startVelocity / 100))
-                print(f"[UART] Otrzymano startVelocity: {startVelocity}")
             except ValueError:
                 print(f"⚠ Błąd parsowania startVelocity: {line}")
             
