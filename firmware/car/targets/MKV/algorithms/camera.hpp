@@ -13,7 +13,7 @@
  #include "NXP_encoder.hpp"
  
  #define brightnessCut 0
- #define alpha 0.2
+ #define alpha 0.1
  
  
  #pragma once

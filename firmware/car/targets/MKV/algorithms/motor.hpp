@@ -1,15 +1,15 @@
 #pragma once
-#include <utility>
-
 #include "NXP_encoder.hpp"
 
-#define DIFF_RATIO 170
+#include <utility>
 
 class Differential {
     int   position;
     float startVelocity;
     float valueLeft;
     float valueRight;
+
+    uint8_t diffRatio = 170;
 
     NXP_Encoder& encoderLeft;
     NXP_Encoder& encoderRight;
@@ -21,4 +21,8 @@ class Differential {
     float getRight();
     void  setStartVelocity(float value);
     float getStartVelocity();
+
+    uint8_t getDiffRatio() { return diffRatio; }
+
+    void setDiffRatio(uint8_t newRatio) { diffRatio = newRatio; }
 };

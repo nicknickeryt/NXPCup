@@ -15,10 +15,10 @@ Differential::Differential(float startVelocityValue, NXP_Encoder& encoderLeft, N
 void Differential::proc(float position) {
     if (position >= 0) {
         valueLeft  = startVelocity;
-        valueRight = startVelocity - (abs(position) / DIFF_RATIO);
+        valueRight = startVelocity - (abs(position) / diffRatio);
     } else if (position < 0) {
         valueRight = startVelocity;
-        valueLeft  = startVelocity - (abs(position) / DIFF_RATIO);
+        valueLeft  = startVelocity - (abs(position) / diffRatio);
     }
 }
 

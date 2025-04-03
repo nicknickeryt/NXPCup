@@ -8,14 +8,13 @@
 
 #define LOG_CHANNEL KITTY
 
+#include "logger.h"
+
 #include "NXP_Kitty.hpp"
+
 #include "clock_config.h"
 #include "pin_mux.h"
 #include "printf.h"
-
-
-
-#include "logger.h"
 bool algorithmTrigger       = false;
 bool commandTerminalTrigger = false;
 bool frameTrigger           = false;
@@ -28,9 +27,7 @@ void pit_generalHandler(uint32_t*) {
     pixyTrigger            = true;
 }
 
-void logWrite(char c, [[maybe_unused]] void* const context) {
-    Kitty::kitty().uartDebug.write(c);
-}
+void logWrite(char c, [[maybe_unused]] void* const context) { Kitty::kitty().uartDebug.write(c); }
 
 uint_fast64_t Kitty::milliseconds = 0;
 extern "C" {
@@ -70,12 +67,19 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() + 0.05);
             fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
             break;
-        case '-': // 45
+        case '-': // startVelocity--
             kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() - 0.05);
             fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
             break;
-        default:
+        case 'a': // diffRatio++  
+            kitty().differential.setDiffRatio(kitty().differential.getDiffRatio() + 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffRatio()));
             break;
+        case 'b': // diffRatio--
+            kitty().differential.setDiffRatio(kitty().differential.getDiffRatio() - 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffRatio()));
+            break;
+        default: break;
     }
 }
 
@@ -145,24 +149,23 @@ void Kitty::proc() {
         lastLogTimepoint = millis();
         fctprintf(logWrite, NULL, "\r\nCAML");
         for (size_t i = 0; i < 128; i++) {
-            uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf); 
+            uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf);
             fctprintf(logWrite, NULL, ".%hhu", buffer[i] / 158);
         }
-        fctprintf(logWrite, NULL, ".%hhu", (uint8_t) (position + 63));
+        fctprintf(logWrite, NULL, ".%hhu", (uint8_t)(position + 63));
         fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
         fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
 
-        if(!menu.isTriggeredOff())
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+        if (!menu.isTriggeredOff()) fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
     }
 
     // If menu is active, do not move
-    if(menu.proc()) {
+    if (menu.proc()) {
         return;
     }
-      
-    float servoPosition = -(position / 13.0f);
+
+    float servoPosition = -(position / 14.0f);
 
     servo.set(servoPosition);
     differential.proc(position);
