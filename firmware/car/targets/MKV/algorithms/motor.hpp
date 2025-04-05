@@ -9,7 +9,11 @@ class Differential {
     float valueLeft;
     float valueRight;
 
-    uint8_t diffRatio = 170;
+    uint8_t diffRatio = 160;
+    uint32_t breakRatio = 60;
+
+    uint32_t breakHoldTimer = 0;
+    bool breakPunch = false;
 
     NXP_Encoder& encoderLeft;
     NXP_Encoder& encoderRight;

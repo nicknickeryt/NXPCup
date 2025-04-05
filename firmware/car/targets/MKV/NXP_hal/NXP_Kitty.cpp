@@ -165,7 +165,7 @@ void Kitty::proc() {
         return;
     }
 
-    float servoPosition = -(position / 14.0f);
+    float servoPosition = -(position / 18.0f);
 
     servo.set(servoPosition);
     differential.proc(position);

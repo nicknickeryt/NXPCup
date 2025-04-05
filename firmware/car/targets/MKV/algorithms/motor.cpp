@@ -13,12 +13,29 @@
 Differential::Differential(float startVelocityValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startVelocity(startVelocityValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
 void Differential::proc(float position) {
+    
+    float breakComponent = (abs(position) / breakRatio);
+    float diffComponent = (abs(position) / diffRatio);
+
+    if(abs(position) > 13 && breakHoldTimer < 5000) {
+        valueLeft = 0;
+        valueRight = 0;
+        breakPunch = true;
+        breakHoldTimer++;
+        return; 
+    }
+
     if (position >= 0) {
-        valueLeft  = startVelocity;
-        valueRight = startVelocity - (abs(position) / diffRatio);
+        valueLeft  = startVelocity - breakComponent;
+        valueRight = startVelocity - diffComponent - breakComponent;
     } else if (position < 0) {
-        valueRight = startVelocity;
-        valueLeft  = startVelocity - (abs(position) / diffRatio);
+        valueRight = startVelocity - breakComponent;
+        valueLeft  = startVelocity - diffComponent - breakComponent;
+    }
+
+    if(abs(position) < 2) {
+        breakPunch = false;
+        breakHoldTimer = 0;
     }
 }
 
