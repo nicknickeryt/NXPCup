@@ -14,6 +14,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/debug_module/debug_module.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/drivers/drivers.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/NXP_hal/NXP_hal.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/algorithms/algorithms.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/application/application.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/toolchain.cmake)
 
 set(SOURCES ${CMAKE_CURRENT_LIST_DIR}/source/cpp_config.cpp
@@ -37,7 +38,7 @@ set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/source/cpp_config.cpp PROP
 set(PLATFORM_LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/MKV58F1M0xxx24.ld)
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} ${ARMFLOAT} -flto -Wl,--gc-sections -specs=nano.specs -specs=nosys.specs -flto -lc")
 
-target_link_libraries(${NAME} halina board CMSIS debug_module drivers NXP_hal)
+target_link_libraries(${NAME} halina board CMSIS debug_module drivers NXP_hal application)
 
 
 add_custom_command(TARGET ${NAME}

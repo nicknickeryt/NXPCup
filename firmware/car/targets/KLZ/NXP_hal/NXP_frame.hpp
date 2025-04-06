@@ -14,7 +14,7 @@ struct NXP_Frame{
 private:
     NXP_Uart &uart;
     uint8_t dataLength;
-    uint8_t startFlag[startFlagLength] = {255, 255, 255, 255};
+    uint8_t startOfFrame[startFlagLength] = {255, 255, 255, 255};
     uint8_t dataBuffer[256];
 
 public:
@@ -23,7 +23,7 @@ public:
     }
 
     void send(uint8_t* data){
-        memcpy(dataBuffer, startFlag, startFlagLength);
+        memcpy(dataBuffer, startOfFrame, startFlagLength);
         memcpy(dataBuffer + startFlagLength, data, dataLength);
         uart.write(dataBuffer, dataLength + startFlagLength);
     }

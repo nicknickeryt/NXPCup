@@ -19,11 +19,6 @@ private:
     // SYSTICK
     static uint_fast64_t milliseconds;
 
-    // I2C
-    NXP_PORT sclPort = {PORTC, 10, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
-    NXP_PORT sdaPort = {PORTC, 11, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
-    NXP_I2C i2c = {I2C1, sdaPort, sclPort, 100000};
-
     // UART
     NXP_PORT uartDebugRx = {PORTC, 3, 3};
     NXP_PORT uartDebugTx = {PORTC, 4, 3};
@@ -38,14 +33,20 @@ private:
     std::array<NXP_GPIO, 4> leds = {ledLeft, ledLeftFront, ledRight, ledRightFront};
 
     // SENSORS
-    // NXP_Sensors sensor = {i2c};
-
+    // I2C
+    NXP_PORT sclPort = {PORTC, 10, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+    NXP_PORT sdaPort = {PORTC, 11, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+    NXP_I2C i2c = {I2C1, sdaPort, sclPort, 100000};
+    // GPIO
+    NXP_GPIO enable = {PORTB, GPIOB, 19, NXP_GPIO::Mode::OUTPUT};
+    
+    
 public:
     // UART
     NXP_Uart uartDebug = {(UART_Type*)UART1, 115200, uartDebugRx, uartDebugTx};
     NXP_Uart uartCommunication = {(UART_Type*)UART2, 115200, uartRx, uartTx};
 
-    Algorithm algorithm = {i2c, uartCommunication, leds};
+    Algorithm algorithm = {i2c, enable, uartCommunication};
 
 
 private:

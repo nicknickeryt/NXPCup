@@ -46,5 +46,5 @@ add_custom_command(TARGET ${NAME}
         COMMAND ${CMAKE_OBJCOPY} -v -O ihex "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.hex"
         COMMAND ${CMAKE_OBJCOPY} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.elf")
 
-
+target_stlink_flash(${NAME})
 # arm-none-eabi-gcc -nostdlib -Xlinker --gc-sections -Xlinker -Map="frdmkl25z_driver_examples_i2c_dma_transfer.map" -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m0plus -mthumb -T frdmkl25z_driver_examples_i2c_dma_transfer_Debug.ld -o "frdmkl25z_driver_examples_i2c_dma_transfer.axf" ./utilities/fsl_debug_console.o  ./startup/startup_mkl25z4.o  ./source/i2c_dma_transfer.o ./source/mtb.o ./source/semihost_hardfault.o  ./drivers/fsl_clock.o ./drivers/fsl_common.o ./drivers/fsl_dma.o ./drivers/fsl_dmamux.o ./drivers/fsl_flash.o ./drivers/fsl_gpio.o ./drivers/fsl_i2c.o ./drivers/fsl_i2c_dma.o ./drivers/fsl_lpsci.o ./drivers/fsl_lpsci_dma.o ./drivers/fsl_smc.o ./drivers/fsl_uart.o ./drivers/fsl_uart_dma.o  ./board/board.o ./board/clock_config.o ./board/pin_mux.o  ./CMSIS/system_MKL25Z4.o   

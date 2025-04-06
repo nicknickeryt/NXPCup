@@ -10,10 +10,15 @@
 #include "logger.h"
 
 enum {
-  SENSOR_MAX_VALUE = 8190,
+  SENSOR_MIN_VALUE = 50,
+  SENSOR_MAX_VALUE = 300,
 };
 
 uint16_t NXP_Sensors::filterMeasurement(uint16_t value) {
+    if (value < SENSOR_MIN_VALUE || value > SENSOR_MAX_VALUE) {
+        value = static_cast<uint16_t>(SENSOR_MAX_VALUE);
+    } 
+    
     filter.average = static_cast<uint16_t>(filter.average * (1 - filter.alpha) + value * filter.alpha);
     filter.lastValue = abs(value - filter.average) < filter.delta ? value : static_cast<uint16_t>(SENSOR_MAX_VALUE);
     return filter.lastValue;
@@ -30,15 +35,12 @@ void NXP_Sensors::init() {
     log_debug("VL53L0X sensor initailized corectly");
 
     // Initalize filter
-    filter.alpha     = 0.5f;
+    filter.alpha     = 0.1f;
     filter.delta     = 100;
     filter.average   = 0;
     filter.lastValue = 0;
 }
 
 uint16_t NXP_Sensors::getDistance() {
-    uint16_t distance = filterMeasurement(device.readRangeSingleMillimeters());
-
-    log_debug("Sensor mesurament: %" PRIu16, distance);
-    return distance;
+    return filterMeasurement(device.readRangeSingleMillimeters());
 }

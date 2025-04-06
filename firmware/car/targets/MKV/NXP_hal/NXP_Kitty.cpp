@@ -11,7 +11,6 @@
 #include "logger.h"
 
 #include "NXP_Kitty.hpp"
-
 #include "clock_config.h"
 #include "pin_mux.h"
 #include "printf.h"
@@ -83,6 +82,19 @@ void Kitty::uartCallback(uint8_t receivedByte) {
     }
 }
 
+void Kitty::uartKLZCallback(uint8_t data) {
+    fctprintf(logWrite, NULL, "UART KLZ: %d", data);
+    Kitty::kitty().uartFrame.deserialize(&data, sizeof(data));
+}
+
+void Kitty::onKLZDataReceivedCallback(uint8_t* data, size_t length) {
+    if (length == 0 || length > 1) {
+        return;
+    }
+    
+    fctprintf(logWrite, NULL, "UART KLZ: %d", data[0]);   
+}
+
 void Kitty::init() {
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -97,6 +109,11 @@ void Kitty::init() {
     log_setWriteFunction(logWrite);
     uartCommunication.init();
     uartCommunication.initDMA();
+
+    uartKLZ.init();
+    uartKLZ.initDMA();
+    uartKLZ.enableInterrupt(NXP_Uart::InterruptType::RX_FULL);
+    uartKLZ.setRedirectHandler(uartKLZCallback);
 
     ledLine.init();
     display.init();
@@ -164,7 +181,7 @@ void Kitty::proc() {
     if (menu.proc()) {
         return;
     }
-
+      
     float servoPosition = -(position / 18.0f);
 
     servo.set(servoPosition);

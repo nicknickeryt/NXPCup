@@ -25,7 +25,8 @@
 
 #include <algorithms/camera.hpp>
 #include <algorithms/motor.hpp>
-#include <algorithms/servo.hpp> 
+#include <algorithms/servo.hpp>
+#include <application/uart_frame.hpp>
 
 void pit_generalHandler(uint32_t*);
 
@@ -40,7 +41,7 @@ class Kitty {
 
     // SYSTICK
     static uint_fast64_t milliseconds;
-    
+
     // LEDS
     NXP_GPIO LED0 = NXP_GPIO(PORTA, GPIOA, 16U);
     NXP_GPIO LED1 = NXP_GPIO(PORTA, GPIOA, 17U);
@@ -134,7 +135,7 @@ class Kitty {
     NXP_I2C  i2c     = {I2C1, sdaPort, sclPort, 400000};
 
     // FRAME
-    NXP_Frame frame = {uartCommunication};
+    // NXP_Frame frame = {uartCommunication};
 
   public:
     NXP_Encoder encoderLeft  = {FTM1, encoderLeftA, encoderLeftB, NXP_Encoder::Mode::SingleCounter, 40};
@@ -149,6 +150,7 @@ class Kitty {
     // UART
     NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
     NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartKLZ           = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY
     NXP_Display display;
@@ -163,7 +165,10 @@ class Kitty {
     // ALGORITHMzzzz
     Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
     Differential  differential = Differential(0.3, encoderLeft, encoderRight);
-    
+
+    // KLZ communication
+    UART_Frame uartFrame = {onKLZDataReceivedCallback};
+
     // MENU
     NXP_Menu menu = {buttons, switches, display, motors, differential};
 
@@ -174,6 +179,10 @@ class Kitty {
     static void FTM_Init();
 
     static void uartCallback(uint8_t receivedByte);
+
+    static void uartKLZCallback(uint8_t receivedByte);
+
+    static void onKLZDataReceivedCallback(uint8_t* data, size_t length);
 
   public:
     void magicDiodComposition();
