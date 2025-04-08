@@ -83,8 +83,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
 }
 
 void Kitty::uartKLZCallback(uint8_t data) {
-    fctprintf(logWrite, NULL, "UART KLZ: %d", data);
+    // fctprintf(logWrite, NULL, "UART KLZ: %d\r\n", data);
     Kitty::kitty().uartFrame.deserialize(&data, sizeof(data));
+
+    Kitty::kitty().differential.setKlzDistance(data);
 }
 
 void Kitty::onKLZDataReceivedCallback(uint8_t* data, size_t length) {
@@ -92,7 +94,7 @@ void Kitty::onKLZDataReceivedCallback(uint8_t* data, size_t length) {
         return;
     }
     
-    fctprintf(logWrite, NULL, "UART KLZ: %d", data[0]);   
+    // fctprintf(logWrite, NULL, "UART_Des KLZ: %d\r\n", data[0]);   
 }
 
 void Kitty::init() {
@@ -163,7 +165,10 @@ void Kitty::proc() {
 
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
-        lastLogTimepoint = millis();
+        lastLogTimepoint = millis();    
+
+        // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));
+
         fctprintf(logWrite, NULL, "\r\nCAML");
         for (size_t i = 0; i < 128; i++) {
             uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf);
@@ -174,6 +179,10 @@ void Kitty::proc() {
         fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
 
+        fctprintf(logWrite, NULL, ".%u", (uint8_t) differential.getKlzDistance());
+        fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getLeft() + 1)  )); // -1:1 -> 0:200
+        fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getRight() + 1) )); // -1:1 -> 0:200
+
         if (!menu.isTriggeredOff()) fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
     }
 
@@ -181,6 +190,9 @@ void Kitty::proc() {
     if (menu.proc()) {
         return;
     }
+
+    if(differential.isBreakTriggered())
+        position = 0;
       
     float servoPosition = -(position / 18.0f);
 
