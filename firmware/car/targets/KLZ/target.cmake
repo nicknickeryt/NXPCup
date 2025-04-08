@@ -25,7 +25,7 @@ set(SOURCES ${CMAKE_CURRENT_LIST_DIR}/source/cpp_config.cpp
 add_executable(${NAME} ${SOURCES})
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/source)
 
-set (CWARN "-Wall -Wstrict-prototypes -Wextra ")
+set (CWARN "-Wall -Wstrict-prototypes -Wextra -Wno-error=incompatible-pointer-types")
 set (CXXWARN "-Wall -Wextra")
 set (CTUNING "-fomit-frame-pointer -ffunction-sections -fdata-sections")
 set (ARMFLOAT "-mfloat-abi=soft")
