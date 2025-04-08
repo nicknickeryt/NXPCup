@@ -26,7 +26,10 @@ void Algorithm::proc(volatile bool &trigger) {
       data[0] = distance;
       log_debug("Distance send: %d", distance);
     }
+    else data[0] = 255;
 
+    log_debug("Distance over threshold: %d", distance);
+    
     frame.send(data);
     trigger = false;
   }
