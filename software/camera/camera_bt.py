@@ -139,7 +139,9 @@ buttonProxy.setWidget(button_widget)
 ############
 
 encodersWidget = QWidget()
+distanceDiffWidget = QWidget()
 encodersLayout = QHBoxLayout()
+distanceDiffLayout = QHBoxLayout()
 
 font = QFont("Arial", 20)  # Arial, rozmiar 20
 
@@ -148,10 +150,18 @@ right_label = QLabel("0")
 startVelocityLabel = QLabel("0")
 diffRatioLabel = QLabel("170?")
 
+klzDistanceMMLabel = QLabel("255?")
+diffLeftLabel = QLabel("70?")
+diffRightLabel = QLabel("70?")
+
 left_label.setFont(font)
 right_label.setFont(font)
 startVelocityLabel.setFont(font)
 diffRatioLabel.setFont(font)
+
+klzDistanceMMLabel.setFont(font)
+diffLeftLabel.setFont(font)
+diffRightLabel.setFont(font)
 
 encodersLayout.addWidget(left_label)
 encodersLayout.addStretch()  
@@ -161,25 +171,41 @@ encodersLayout.addWidget(diffRatioLabel)
 encodersLayout.addStretch()
 encodersLayout.addWidget(right_label)
 
+distanceDiffLayout.addWidget(klzDistanceMMLabel)
+distanceDiffLayout.addStretch()  
+distanceDiffLayout.addWidget(diffLeftLabel)
+distanceDiffLayout.addStretch()  
+distanceDiffLayout.addWidget(diffRightLabel)
+
 encodersWidget.setLayout(encodersLayout)
 encodersWidget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
 
+distanceDiffWidget.setLayout(distanceDiffLayout)
+distanceDiffWidget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
+
 encodersProxy = QtWidgets.QGraphicsProxyWidget()
 encodersProxy.setWidget(encodersWidget)
+
+distanceDiffProxy = QtWidgets.QGraphicsProxyWidget()
+distanceDiffProxy.setWidget(distanceDiffWidget)
 
 
 # Graphics layout
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
 plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
 graphics_layout.addItem(encodersProxy, row=3, col=0) 
-graphics_layout.addItem(buttonProxy, row=4, col=0) 
-graphics_layout.addItem(controlProxy, row=5, col=0)
+graphics_layout.addItem(distanceDiffProxy, row=4, col=0) 
+graphics_layout.addItem(buttonProxy, row=5, col=0) 
+graphics_layout.addItem(controlProxy, row=6, col=0)
 
 # Stretch
 graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
 graphics_layout.ci.layout.setRowStretchFactor(1, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
 graphics_layout.ci.layout.setRowStretchFactor(3, 0) 
+graphics_layout.ci.layout.setRowStretchFactor(4, 0) 
+graphics_layout.ci.layout.setRowStretchFactor(5, 0) 
+graphics_layout.ci.layout.setRowStretchFactor(6, 0) 
 
 graphics_layout.setBackground("#f1f1f1")
 
@@ -208,7 +234,7 @@ plot0.addItem(brightness_line)  # Dodaj linię do wykresu
 servo_raw_line = pg.InfiniteLine(pos=0, angle=90, pen='y')  # Linia pionowa na wykresie
 plot0.addItem(servo_raw_line)  # Dodaj linię do wykresu
 
-data = [0] * 128
+data = [0] * 128    
 servo_position = None 
 brightness = None
 raw_servo = None
@@ -217,15 +243,21 @@ encoderRightRPM = 0
 startVelocity = 0
 diffRatio = 0
 
+klzDistanceMM = 0
+diffLeft = 0
+diffRight = 0
+
 last_ten_data = [data, data, data, data, data, data, data, data, data, data]
 
 def read_serial_data(serial_port):
     """Reads data from UART and returns a list of 128 values."""
-    global servo_position, brightness, raw_servo, encoderLeftRPM, encoderRightRPM, startVelocityLabel
+    global servo_position, brightness, raw_servo, encoderLeftRPM, encoderRightRPM, startVelocityLabel, klzDistanceMM, diffLeft, diffRight
     try:
         # Próba odczytu z portu szeregowego
         raw_line = serial_port.readline()
         line = raw_line.strip()
+        
+        print(line)
         
         #line = bluetooth_socket.recv(1000000).decode('utf-8').strip()
         
@@ -234,11 +266,17 @@ def read_serial_data(serial_port):
             data_str = data_str.replace("\x00", "")
             values = list(map(int, data_str.split('.')))
             
-            if len(values) == 132:
+            if len(values) == 135:
                 servo_position = values[128]
                 brightness = values[129]  # Przyjmujemy, że brightness jest podzielony przez 2
                 encoderLeftRPM = values[130]
                 encoderRightRPM = values[131]
+                
+                klzDistanceMM = values[132]
+                diffLeft = int(values[133]) - 100
+                diffRight = int(values[134]) - 100
+                
+                
                 return values[:128]
         elif line.startswith("kittySV"):  
             try:
@@ -303,6 +341,10 @@ def update_plot():
                 
         left_label.setText(str(encoderLeftRPM) + "RPM")
         right_label.setText(str(encoderRightRPM) + "RPM")
+        
+        klzDistanceMMLabel.setText(str(klzDistanceMM) + "mm")
+        diffLeftLabel.setText(str(diffLeft))
+        diffRightLabel.setText(str(diffRight) )
         
         # Dodaj nowe dane do listy i usuń najstarsze, jeśli jest ich więcej niż 5
         last_ten_data.append(data)
