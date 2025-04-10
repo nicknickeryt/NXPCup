@@ -11,7 +11,7 @@
 
 enum {
   SENSOR_MIN_VALUE = 50,
-  SENSOR_MAX_VALUE = 300,
+  SENSOR_MAX_VALUE = 700,
 };
 
 uint16_t NXP_Sensors::filterMeasurement(uint16_t value) {

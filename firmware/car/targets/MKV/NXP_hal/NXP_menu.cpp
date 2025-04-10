@@ -8,13 +8,13 @@ bool NXP_Menu::proc() {
 
 
     else if (!buttons.at(0).get()) {
-        differential.setStartVelocity(differential.getStartVelocity() + 0.05);
+        differential.setStartRPM(differential.getStartRPM() + 100);
         delay_ms(300);
     } else if (!buttons.at(1).get()) {
-        differential.setStartVelocity(differential.getStartVelocity() - 0.05);
+        differential.setStartRPM(differential.getStartRPM() - 100);
         delay_ms(300);
     } else if (!buttons.at(2).get()) {
-        differential.setStartVelocity(0.0);
+        differential.setStartRPM(0.0);
         startRace();
     } else if (!buttons.at(3).get()) {
         startRace();
@@ -25,20 +25,21 @@ bool NXP_Menu::proc() {
     return true;
 }
 
-const char* formatString(float value) {
-    std::string s = "  ";
+std::string formatString(float value) {
+    int intValue = static_cast<int>(value);
 
-    int intValue = static_cast<int>(value * 100.0f);
-    if (intValue > 99) intValue = 99;
+    if (intValue > 9999) intValue = 9999;
     if (intValue < 0) intValue = 0;
 
-    s.append(std::to_string(intValue));
+    char buffer[5]; // 4 znaki + null terminator
+    snprintf(buffer, sizeof(buffer), "%04d", intValue); // wiodące zera, lub "%4d" dla spacji
 
-    return s.c_str();
+    return std::string(buffer);
 }
 
 void NXP_Menu::displayMenuPage() {
-    display.print(formatString(differential.getStartVelocity())); // this is now algorithm-based control
+    std::string rpmText = formatString(differential.getStartRPM());
+    display.print(rpmText.c_str());
 }
 
 void NXP_Menu::startRace() {

@@ -192,7 +192,7 @@ distanceDiffProxy.setWidget(distanceDiffWidget)
 
 # Graphics layout
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
-plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
+# plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
 graphics_layout.addItem(encodersProxy, row=3, col=0) 
 graphics_layout.addItem(distanceDiffProxy, row=4, col=0) 
 graphics_layout.addItem(buttonProxy, row=5, col=0) 
@@ -201,7 +201,7 @@ graphics_layout.addItem(controlProxy, row=6, col=0)
 # Stretch
 graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
 graphics_layout.ci.layout.setRowStretchFactor(1, 0) 
-graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
+# graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
 graphics_layout.ci.layout.setRowStretchFactor(3, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(4, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(5, 0) 
@@ -222,8 +222,8 @@ line0 = plot0.plot(pen='r')
 
 img = np.ones((128, 10))  
 img_item = pg.ImageItem(img) 
-plot1.addItem(img_item)  
-plot1.getAxis('left').setVisible(False)
+#plot1.addItem(img_item)  
+#plot1.getAxis('left').setVisible(False)
 
 servo_line = pg.InfiniteLine(pos=0, angle=90, pen='g')  # Linia pionowa na wykresie
 plot0.addItem(servo_line)  # Dodaj linię do wykresu
@@ -257,7 +257,7 @@ def read_serial_data(serial_port):
         raw_line = serial_port.readline()
         line = raw_line.strip()
         
-        print(line)
+        # print(line)
         
         #line = bluetooth_socket.recv(1000000).decode('utf-8').strip()
         
@@ -281,7 +281,7 @@ def read_serial_data(serial_port):
         elif line.startswith("kittySV"):  
             try:
                 startVelocity = int(line[7:]) 
-                startVelocityLabel.setText("SV: " + str(startVelocity / 100))
+                startVelocityLabel.setText("SV: " + str(startVelocity * 100))
             except ValueError:
                 print(f"⚠ Błąd parsowania startVelocity: {line}")
         elif line.startswith("kittyDR"):  

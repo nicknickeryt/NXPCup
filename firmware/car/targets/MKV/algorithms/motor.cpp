@@ -1,6 +1,6 @@
 #include "motor.hpp"
 
-#include "NXP_Kitty.hpp"
+#include "pid.hpp"
 
 #include <utility>
 
@@ -12,89 +12,34 @@
  *@param position is the current position of the car on the track
  */
 
-Differential::Differential(float startVelocityValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startVelocity(startVelocityValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
+Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
 void Differential::proc(float position) {
-    float    currentDistance = klzDistance;
-    uint32_t currentTime     = Kitty::kitty().millis();
+    // float breakComponent = (abs(position) / breakRatio);
+    float diffComponent = (1 - (abs(position) / differentialValue));
 
-    if (currentDistance <= 120 && currentDistance != 0) { // jesli jestesmy bardzo blisko to cala wstecz
-        veryClose  = true; 
-        valueLeft  = -1.0f; 
-        valueRight = -1.0f;
-        distanceStopTrigger = true;
-        return;
-    }
+    brakeComponent = 1 - (abs(position) / 105.0f);
+    brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
 
-    if (veryClose && currentDistance > 80) {
-        valueLeft  = 0;
-        valueRight = 0;
-        veryClose = false;
-        distanceStopTrigger = true;
-    }
-
-    if (!veryClose && currentDistance < 220 && currentDistance != 0) {
-        float dt           = (currentTime - lastTime) / 1000.0f; 
-        float dDistance    = (lastDistance - currentDistance);   
-        float distanceRate = (dt > 0) ? dDistance / dt : 0.0f;
-
-        float targetDistance = 250.0f;                           
-        float error          = targetDistance - currentDistance;
-        float Kp             = -1.2f;
-        float Kd             = -0.4f;
-
-        float control = (Kp * error) + (Kd * distanceRate);
-
-        if (control > 0) control = 0;
-        if (control < -0.6f) control = -0.6f;
-
-        valueLeft           = control;
-        valueRight          = control;
-        distanceStopTrigger = true;
-
-        lastDistance = currentDistance;
-        lastTime     = currentTime;
-
-        return;
-    }
-
-    lastDistance = currentDistance;
-    lastTime     = currentTime;
-
-    if (distanceStopTrigger) {
-        valueLeft  = 0;
-        valueRight = 0;
-        return;
-    }
-
-
-    float breakComponent = (abs(position) / breakRatio);
-    float diffComponent  = (abs(position) / diffRatio);
-
-    if (abs(position) > 13 && breakHoldTimer < 5000) {
-        valueLeft  = 0;
-        valueRight = 0;
-        breakPunch = true;
-        breakHoldTimer++;
-        return;
-    }
+    if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
 
     if (position >= 0) {
-        valueLeft  = startVelocity - breakComponent;
-        valueRight = startVelocity - diffComponent - breakComponent;
+        setLeftMotorRPM  = startRPM * brakeComponent;
+        setRightMotorRPM = startRPM * diffComponent * brakeComponent;
     } else if (position < 0) {
-        valueRight = startVelocity - breakComponent;
-        valueLeft  = startVelocity - diffComponent - breakComponent;
+        setRightMotorRPM = startRPM * brakeComponent;
+        setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
     }
 
-    if (abs(position) < 2) {
-        breakPunch     = false;
-        breakHoldTimer = 0;
-    }
+    float pidOutLeft  = (float)pidLeft.calculate(setLeftMotorRPM, encoderRight.getRPM()) / 100.0f;
+    float pidOutRight = (float)pidRight.calculate(setRightMotorRPM, encoderLeft.getRPM()) / 100.0f;
+
+    leftMotorPower  = pidOutLeft;
+    rightMotorPower = pidOutRight;
 }
 
-float Differential::getLeft() { return valueLeft; }
-float Differential::getRight() { return valueRight; }
+float Differential::getLeft() { return leftMotorPower; }
+float Differential::getRight() { return rightMotorPower; }
 
-void  Differential::setStartVelocity(float value) { startVelocity = value; }
-float Differential::getStartVelocity() { return startVelocity; }
+void     Differential::setStartRPM(uint32_t value) { startRPM = value; }
+uint32_t Differential::getStartRPM() { return startRPM; }

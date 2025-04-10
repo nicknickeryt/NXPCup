@@ -10,8 +10,8 @@
 #pragma once
 
 class Algorithm {
-    constexpr static auto sendThreshold = 250;
-    constexpr static auto sensorNumber  = 1;
+    constexpr static auto sendThreshold = 700;
+    constexpr static auto dataSize  = 2;
 
   private:
     NXP_Sensors sensor;
@@ -19,7 +19,7 @@ class Algorithm {
     NXP_GPIO    enable;
 
   public:
-    Algorithm(NXP_I2C& i2c, NXP_GPIO enable, NXP_Uart& toMKV) : sensor(i2c), frame(toMKV, sensorNumber), enable(enable) {}
+    Algorithm(NXP_I2C& i2c, NXP_GPIO enable, NXP_Uart& toMKV) : sensor(i2c), frame(toMKV, dataSize), enable(enable) {}
 
     void init();
 

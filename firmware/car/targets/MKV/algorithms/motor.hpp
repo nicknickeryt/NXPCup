@@ -1,46 +1,48 @@
 #pragma once
 #include "NXP_encoder.hpp"
+#include "pid.hpp"
 
 #include <utility>
 
 class Differential {
     int   position;
-    float startVelocity;
-    float valueLeft;
-    float valueRight;
+    float leftMotorPower;
+    float rightMotorPower;
 
-    uint8_t diffRatio = 160;
-    uint32_t breakRatio = 60;
+    uint32_t startRPM = 0;
 
-    uint32_t breakHoldTimer = 0;
-    bool breakPunch = false;
+    uint32_t setLeftMotorRPM;
+    uint32_t setRightMotorRPM;
 
     NXP_Encoder& encoderLeft;
     NXP_Encoder& encoderRight;
 
-    uint8_t klzDistance = 0;
-    bool distanceStopTrigger = false;
+    uint16_t klzDistance = 0;
 
-    float lastDistance = 0;
-    uint32_t lastTime = 0;
+    float differentialValue = 20.0f;
 
-    bool veryClose = false;
+    float brakeComponent = 0;
+
+    uint32_t cornerRPM = 2700;
+
+                    //Kp     Ki     Kd     maxValue
+    PID pidLeft = PID(0.07f, 0.01f, 0.0f, 100.0f);  
+    PID pidRight = PID(0.07f, 0.01f, 0.0f, 100.0f);
 
   public:
     Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
     void  proc(float position);
     float getLeft();
     float getRight();
-    void  setStartVelocity(float value);
-    float getStartVelocity();
 
-    uint8_t getDiffRatio() { return diffRatio; }
+    void  setStartRPM(uint32_t value);
+    uint32_t getStartRPM();
 
-    void setDiffRatio(uint8_t newRatio) { diffRatio = newRatio; }
+    uint8_t getDiffValue() { return differentialValue; }
 
-    void setKlzDistance(uint8_t distance) { klzDistance = distance; }
+    void setDiffValue(uint8_t newValue) { differentialValue = newValue; }
+
+    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
 
     uint8_t getKlzDistance() { return klzDistance; }
-
-    bool isBreakTriggered() { return distanceStopTrigger; }
 };

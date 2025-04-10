@@ -48,13 +48,13 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
         case 'p':
             fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
-            kitty().differential.setStartVelocity(0);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            kitty().differential.setStartRPM(0);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case 'o':
             fctprintf(logWrite, NULL, "\nkittyResume\n", 0);
-            kitty().differential.setStartVelocity(0.3);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            kitty().differential.setStartRPM(0.3);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case 'r':
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
@@ -63,38 +63,39 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().servo.init();
             break;
         case '+': // 43
-            kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() + 0.05);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            kitty().differential.setStartRPM(kitty().differential.getStartRPM() + 100);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case '-': // startVelocity--
-            kitty().differential.setStartVelocity(kitty().differential.getStartVelocity() - 0.05);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+            kitty().differential.setStartRPM(kitty().differential.getStartRPM() - 100);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case 'a': // diffRatio++  
-            kitty().differential.setDiffRatio(kitty().differential.getDiffRatio() + 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffRatio()));
+            kitty().differential.setDiffValue(kitty().differential.getDiffValue() + 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffValue()));
             break;
         case 'b': // diffRatio--
-            kitty().differential.setDiffRatio(kitty().differential.getDiffRatio() - 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffRatio()));
+            kitty().differential.setDiffValue(kitty().differential.getDiffValue() - 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffValue()));
             break;
         default: break;
     }
 }
 
 void Kitty::uartKLZCallback(uint8_t data) {
-    // fctprintf(logWrite, NULL, "UART KLZ: %d\r\n", data);
     Kitty::kitty().uartFrame.deserialize(&data, sizeof(data));
-
-    Kitty::kitty().differential.setKlzDistance(data);
 }
 
 void Kitty::onKLZDataReceivedCallback(uint8_t* data, size_t length) {
-    if (length == 0 || length > 1) {
+    if (length == 0 || length > 2) {
         return;
     }
     
-    // fctprintf(logWrite, NULL, "UART_Des KLZ: %d\r\n", data[0]);   
+    uint16_t distance = 0;
+    distance = static_cast<uint16_t>(data[0] << 8) | data[1];
+    fctprintf(logWrite, NULL, "UART_Des KLZ: %d\r\n", distance); 
+
+    Kitty::kitty().differential.setKlzDistance(distance);
 }
 
 void Kitty::init() {
@@ -167,7 +168,10 @@ void Kitty::proc() {
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
         lastLogTimepoint = millis();    
 
-        // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));
+        // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));        
+        // fctprintf(logWrite, NULL, "isbrk?: %d\r\n", (kitty().differential.isBreakTriggered()));
+        // fctprintf(logWrite, NULL, "brkPidOut: .%u\r\n", (uint8_t) (100 * (differential.brakingPIDOutput  )));
+
 
         fctprintf(logWrite, NULL, "\r\nCAML");
         for (size_t i = 0; i < 128; i++) {
@@ -183,18 +187,15 @@ void Kitty::proc() {
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getLeft() + 1)  )); // -1:1 -> 0:200
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getRight() + 1) )); // -1:1 -> 0:200
 
-        if (!menu.isTriggeredOff()) fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartVelocity() * 100));
+        if (!menu.isTriggeredOff()) fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
     }
 
     // If menu is active, do not move
     if (menu.proc()) {
         return;
     }
-
-    if(differential.isBreakTriggered())
-        position = 0;
       
-    float servoPosition = -(position / 18.0f);
+    float servoPosition = -(position / 19.0f);
 
     servo.set(servoPosition);
     differential.proc(position);

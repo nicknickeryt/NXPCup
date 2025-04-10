@@ -25,7 +25,7 @@
 
 #include <algorithms/camera.hpp>
 #include <algorithms/motor.hpp>
-#include <algorithms/servo.hpp>
+#include <algorithms/pid.hpp>
 #include <application/uart_frame.hpp>
 
 void pit_generalHandler(uint32_t*);
@@ -164,7 +164,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
-    Differential  differential = Differential(0.3, encoderLeft, encoderRight);
+    Differential  differential = Differential(3500, encoderLeft, encoderRight);
 
     // KLZ communication
     UART_Frame uartFrame = {onKLZDataReceivedCallback};
