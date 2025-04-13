@@ -164,7 +164,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
-    Differential  differential = Differential(3500, encoderLeft, encoderRight);
+    Differential  differential = Differential(3000, encoderLeft, encoderRight);
 
     // KLZ communication
     UART_Frame uartFrame = {onKLZDataReceivedCallback};

@@ -143,7 +143,7 @@ distanceDiffWidget = QWidget()
 encodersLayout = QHBoxLayout()
 distanceDiffLayout = QHBoxLayout()
 
-font = QFont("Arial", 20)  # Arial, rozmiar 20
+font = QFont("Arial", 14)  # Arial, rozmiar 20
 
 left_label = QLabel("0")
 right_label = QLabel("0")
@@ -192,7 +192,7 @@ distanceDiffProxy.setWidget(distanceDiffWidget)
 
 # Graphics layout
 plot0 = graphics_layout.addPlot(row=0, col=0, title="Wykres")
-# plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
+plot1 = graphics_layout.addPlot(row=2, col=0, title="Obraz")
 graphics_layout.addItem(encodersProxy, row=3, col=0) 
 graphics_layout.addItem(distanceDiffProxy, row=4, col=0) 
 graphics_layout.addItem(buttonProxy, row=5, col=0) 
@@ -201,7 +201,7 @@ graphics_layout.addItem(controlProxy, row=6, col=0)
 # Stretch
 graphics_layout.ci.layout.setRowStretchFactor(0, 2) 
 graphics_layout.ci.layout.setRowStretchFactor(1, 0) 
-# graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
+graphics_layout.ci.layout.setRowStretchFactor(2, 3) 
 graphics_layout.ci.layout.setRowStretchFactor(3, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(4, 0) 
 graphics_layout.ci.layout.setRowStretchFactor(5, 0) 
@@ -222,8 +222,8 @@ line0 = plot0.plot(pen='r')
 
 img = np.ones((128, 10))  
 img_item = pg.ImageItem(img) 
-#plot1.addItem(img_item)  
-#plot1.getAxis('left').setVisible(False)
+plot1.addItem(img_item)  
+plot1.getAxis('left').setVisible(False)
 
 servo_line = pg.InfiniteLine(pos=0, angle=90, pen='g')  # Linia pionowa na wykresie
 plot0.addItem(servo_line)  # Dodaj linię do wykresu

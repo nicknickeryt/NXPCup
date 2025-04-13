@@ -26,8 +26,8 @@ class Differential {
     uint32_t cornerRPM = 2700;
 
                     //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(0.07f, 0.01f, 0.0f, 100.0f);  
-    PID pidRight = PID(0.07f, 0.01f, 0.0f, 100.0f);
+    PID pidLeft = PID(0.07f, 0.00f, 0.0f, 100.0f);  
+    PID pidRight = PID(0.07f, 0.00f, 0.0f, 100.0f);
 
   public:
     Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);

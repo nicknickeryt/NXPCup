@@ -18,7 +18,7 @@ void Differential::proc(float position) {
     // float breakComponent = (abs(position) / breakRatio);
     float diffComponent = (1 - (abs(position) / differentialValue));
 
-    brakeComponent = 1 - (abs(position) / 105.0f);
+    brakeComponent = 1 - (abs(position) / 140.0f);
     brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
 
     if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
