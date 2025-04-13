@@ -191,7 +191,7 @@ void Kitty::proc() {
     }
 
     // If menu is active, do not move
-    if (menu.proc()) {
+    if (menu.proc(millis())) {
         return;
     }
       

@@ -1,4 +1,3 @@
-
 #include "HALina_buttons.hpp"
 #include "HALina_switches.hpp"
 #include "NXP_display.hpp"
@@ -23,6 +22,27 @@ class NXP_Menu {
 
     bool menuTrigger = false;
 
+    enum MenuPage {
+      PAGE_STARTRPM,
+      PAGE_DIFFRATIO,
+      PAGE_BREAK,
+      PAGE_0RPM
+    };
+
+    enum MenuButton {
+      BUTTON_PAGE,
+      BUTTON_VALUE_PLUS,
+      BUTTON_VALUE_MINUS,
+      BUTTON_RUN
+    };
+
+    MenuPage currentMenuPage = PAGE_STARTRPM;
+
+    int menuLabelTimer = 0; 
+    uint32_t menuLabelShowTimeMs = 1000;
+
+    int debounceTimer = 200; 
+
   public:
     NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential) : buttons(buttons), switches(switches), display(display), motors(motors) , differential(differential) {}
 
@@ -32,9 +52,7 @@ class NXP_Menu {
         initialized = true;
     }
 
-    bool proc();
-
-    void displayMenuPage();
+    bool proc(uint32_t currentMillis);
 
     void startRace();
     

@@ -23,6 +23,8 @@ class Differential {
 
     float brakeComponent = 0;
 
+    float brakeDivider = 140.0f;
+
     uint32_t cornerRPM = 2700;
 
                     //Kp     Ki     Kd     maxValue
@@ -32,6 +34,7 @@ class Differential {
   public:
     Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
     void  proc(float position);
+
     float getLeft();
     float getRight();
 
@@ -39,10 +42,11 @@ class Differential {
     uint32_t getStartRPM();
 
     uint8_t getDiffValue() { return differentialValue; }
-
     void setDiffValue(uint8_t newValue) { differentialValue = newValue; }
 
-    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
+    uint8_t getBrakeDivider() { return brakeDivider; }
+    void setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
 
+    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
     uint8_t getKlzDistance() { return klzDistance; }
 };
