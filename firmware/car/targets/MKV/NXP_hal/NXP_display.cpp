@@ -34,27 +34,27 @@ uint32_t displayCharacters [] {
     uint32_t(DISPLAY_A | DISPLAY_E | DISPLAY_F | DISPLAY_G),                                       // F
     uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),                           // G
     uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // H
-    uint32_t(DISPLAY_E | DISPLAY_F),                                                               // I (prostokąt)
+    uint32_t(DISPLAY_E | DISPLAY_F),                                                               // I 
     uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D),                                                   // J
-    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // K (zastępczy)`
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // K 
     uint32_t(DISPLAY_D | DISPLAY_E | DISPLAY_F),                                                   // L
-    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_E | DISPLAY_G),                                       // M (zastępczy)
-    uint32_t(DISPLAY_C | DISPLAY_E | DISPLAY_G),                                                   // N (zastępczy)
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_E | DISPLAY_G),                                       // M
+    uint32_t(DISPLAY_C | DISPLAY_E | DISPLAY_G),                                                   // N
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),               // O
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // P
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),               // Q
-    uint32_t(DISPLAY_E | DISPLAY_G),                                                               // R (zastępczy)
+    uint32_t(DISPLAY_E | DISPLAY_G),                                                               // R
     uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),                           // S
-    uint32_t(DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),                                        // T (zastępczy)
+    uint32_t(DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),                                       // T
     uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),                           // U
-    uint32_t(DISPLAY_C | DISPLAY_D | DISPLAY_E),                                                   // V (zastępczy)
-    uint32_t(DISPLAY_B | DISPLAY_D | DISPLAY_F),                                                   // W (zastępczy)
-    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // X (jak H)
+    uint32_t(DISPLAY_C | DISPLAY_D | DISPLAY_E),                                                   // V
+    uint32_t(DISPLAY_B | DISPLAY_D | DISPLAY_F),                                                   // W
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // X
     uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),                           // Y
-    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_D | DISPLAY_E | DISPLAY_G),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_D | DISPLAY_E | DISPLAY_G),                           // Z
 
-    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_F),
-    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_F)
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_F),                                       // M (right half)
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_F)                                        // M (left half)
 };
 
 void NXP_Display::init() {

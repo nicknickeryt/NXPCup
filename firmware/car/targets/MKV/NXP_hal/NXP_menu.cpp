@@ -8,9 +8,8 @@ std::string formatString(float value) {
     if (intValue > 9999) intValue = 9999;
     if (intValue < 0) intValue = 0;
 
-    char buffer[5];                                     // 4 znaki + null terminator
-    snprintf(buffer, sizeof(buffer), "%04d", intValue); // wiodące zera, lub "%4d" dla spacji
-
+    char buffer[5];                                    
+    snprintf(buffer, sizeof(buffer), "%04d", intValue);
     return std::string(buffer);
 }
 
