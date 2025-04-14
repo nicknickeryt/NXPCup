@@ -19,16 +19,16 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 42.0f;
+    float differentialValue = 146.0f;
 
     float brakeComponent = 0;
 
-    float brakeDivider = 180.0f;
+    float brakeDivider = 140.0f;
 
-    uint32_t cornerRPM = 2300;
+    uint32_t cornerRPM = 1500;
 
-    float pidKp = 0.001f;
-    float pidKi = 0.0001f;
+    float pidKp = 1.5f;
+    float pidKi = 0.0002f;
     float pidKd = 0.0f;
 
                     //Kp     Ki     Kd     maxValue
@@ -39,6 +39,8 @@ class Differential {
 
     bool emergencyBrake = false;
     uint32_t emergencyBrakeTimer = 0;
+
+    bool obstacleFinalBrake = false;
 
   public:
     Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
@@ -57,7 +59,7 @@ class Differential {
     void setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
 
     void setKlzDistance(uint16_t distance) { klzDistance = distance; }
-    uint8_t getKlzDistance() { return klzDistance; }
+    uint16_t getKlzDistance() { return klzDistance; }
 
     void setPidKp(float kp) {
         pidKp = kp;

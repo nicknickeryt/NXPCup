@@ -15,6 +15,8 @@
 Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
 void Differential::proc(float position, uint32_t currentMillis) {
+    if(obstacleFinalBrake) return;
+    
     if (emergencyBrake) {
         leftMotorPower  = 0.0f;
         rightMotorPower = 0.0f;
@@ -25,9 +27,21 @@ void Differential::proc(float position, uint32_t currentMillis) {
     }
 
     if (patternDetected) {
-        startRPM     = 1500;
-        cornerRPM    = 1500;
+        startRPM     = 1200;
+        cornerRPM    = 1200;
         brakeDivider = 400.0f;
+
+        // if(klzDistance < 100) {
+        //     leftMotorPower  = 0.0f;
+        //     rightMotorPower = 0.0f;
+        //     obstacleFinalBrake = true;
+        //     return;
+        // }
+        // else if(klzDistance < 150) {
+        //     leftMotorPower  = -0.2f;
+        //     rightMotorPower = -0.2f;
+        //     return;
+        // }
     }
 
     // float breakComponent = (abs(position) / breakRatio);

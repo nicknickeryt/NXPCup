@@ -183,10 +183,10 @@ void Kitty::proc() {
         }
         fctprintf(logWrite, NULL, ".%hhu", (uint8_t)(position + 63));
         fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
-        fctprintf(logWrite, NULL, ".%u", newAlgorithm.getCrossings());
+        fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
 
-        fctprintf(logWrite, NULL, ".%u", (uint8_t) differential.getKlzDistance());
+        fctprintf(logWrite, NULL, ".%u", (uint16_t) differential.getKlzDistance());
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getLeft() + 1)  )); // -1:1 -> 0:200
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getRight() + 1) )); // -1:1 -> 0:200
 
