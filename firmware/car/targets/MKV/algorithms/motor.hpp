@@ -27,8 +27,8 @@ class Differential {
 
     uint32_t cornerRPM = 2300;
 
-    float pidKp = 0.00f;
-    float pidKi = 0.001f;
+    float pidKp = 0.001f;
+    float pidKi = 0.0001f;
     float pidKd = 0.0f;
 
                     //Kp     Ki     Kd     maxValue

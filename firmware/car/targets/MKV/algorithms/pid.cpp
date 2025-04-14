@@ -11,18 +11,17 @@
 
 #include <iostream>
 
-PID::PID(float kp, float ki, float kd, float maxValue, float bias) {
+PID::PID(float kp, float ki, float kd, float maxValue) {
     Kp             = kp;
     Ki             = ki;
     Kd             = kd;
     this->maxValue = maxValue;
-    this->bias     = bias;
 }
 
 float PID::calculate(float setpoint, float current) {
     float error = setpoint - current;
 
-    integral += Ki * (error + previousError);
+    integral += Ki * (error + previousError) / 2.0f;
     float maxIntegral = maxValue;
     if (integral > maxIntegral) integral = maxIntegral;
     if (integral < -maxIntegral) integral = -maxIntegral;
@@ -32,7 +31,7 @@ float PID::calculate(float setpoint, float current) {
     previousError      = error;
     previousTarget     = current;
 
-    float output = Kp * error + integral + derivative + bias;
+    float output = Kp * error + integral + derivative;
     if (output > maxValue) output = maxValue;
     if (output < -maxValue) output = -maxValue;
 

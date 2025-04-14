@@ -15,10 +15,9 @@ class PID {
         float previousDerivative = 0;
 
         float maxValue;
-        float bias;
     public:
         PID(float kp = -1.8f, float ki = -0.0001f, float kd = 0.0f,
-            float maxValue = 1.0f, float bias = 0.0f);
+            float maxValue = 1.0f);
         float calculate(float setpoint, float current);
 
         void setKp(float kp);
