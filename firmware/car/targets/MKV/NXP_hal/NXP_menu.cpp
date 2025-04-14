@@ -22,11 +22,18 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
     // when menu start page is fired, disable menu forever
     if (!initialized || menuTrigger) return false;
 
+    if (currentMillis - menuDebounceTimer < menuDebounceTimeMs) {
+        display.update();
+        return true;
+    }
+
     // Handle display update when label is shown and do nothing else
     if (currentMillis - menuLabelTimer < menuLabelShowTimeMs) {
         display.update();
         return true;
     }
+
+    
 
     if (!buttons.at(MenuButton::BUTTON_PAGE).get()) {
         currentMenuPage = static_cast<MenuPage>(currentMenuPage + 1);
@@ -35,19 +42,21 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
         switch (currentMenuPage) {
             case MenuPage::PAGE_STARTRPM:
                 differential.setStartRPM(3000); // TODO handle this better
-                display.print("RPM");
+                display.print("RP\\[");
                 break;
             case MenuPage::PAGE_DIFFRATIO: display.print("DIFF"); break;
             case MenuPage::PAGE_BREAK: display.print("BRAK"); break;
             case MenuPage::PAGE_0RPM:
                 differential.setStartRPM(0.0);
-                display.print("TEST");
+                display.print("SERV");
                 break;
             default: break;
         }
 
-        delay_ms(debounceTimer);
+        display.update();
+        menuDebounceTimer = currentMillis;
         menuLabelTimer = currentMillis;
+        return true;
     }
 
 
@@ -58,10 +67,10 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
                 differential.setStartRPM(differential.getStartRPM() + 100);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
                 differential.setStartRPM(differential.getStartRPM() - 100);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             }
 
             break;
@@ -72,10 +81,10 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
                 differential.setDiffValue(differential.getDiffValue() + 1);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
                 differential.setDiffValue(differential.getDiffValue() - 1);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             }
             break;
         }
@@ -86,16 +95,16 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
                 differential.setBrakeDivider(differential.getBrakeDivider() + 5);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
                 differential.setBrakeDivider(differential.getBrakeDivider() - 5);
-                delay_ms(debounceTimer);
+                menuDebounceTimer = currentMillis;
             }
             break;
         }
 
         case MenuPage::PAGE_0RPM: {
-            display.print("0-0-");
+            display.print("----");
             break;
         }
         default: break;
