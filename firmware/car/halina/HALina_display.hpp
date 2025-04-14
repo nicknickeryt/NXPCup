@@ -35,6 +35,8 @@ public:
                 displayBuffer[i] = digit - 48;
             } else if (digit == '-') {
                 displayBuffer[i] = static_cast<uint8_t >(SPECIAL_CHARACTERS::DASH);
+            } else if (digit >= 'A' && digit <= '\\') {
+                displayBuffer[i] = (digit - 'A') + 12;
             } else {
                 displayBuffer[i] = static_cast<uint8_t >(SPECIAL_CHARACTERS::SPACE);
             }

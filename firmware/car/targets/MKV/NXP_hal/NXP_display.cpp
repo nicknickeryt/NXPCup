@@ -9,6 +9,7 @@
 #include "NXP_display.hpp"
 
 uint32_t displayCharacters [] {
+    // 0-9
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),
     uint32_t(DISPLAY_B | DISPLAY_C),
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_D | DISPLAY_G),
@@ -19,7 +20,41 @@ uint32_t displayCharacters [] {
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C),
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),
     uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),
-    uint32_t(DISPLAY_G)
+
+    // "-"
+    uint32_t(DISPLAY_G),
+
+    // A-Z
+    uint32_t(),                                                                                    // SPACE
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),               // A
+    uint32_t(DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // B
+    uint32_t(DISPLAY_A | DISPLAY_D | DISPLAY_E | DISPLAY_F),                                       // C
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_G),                           // D
+    uint32_t(DISPLAY_A | DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // E
+    uint32_t(DISPLAY_A | DISPLAY_E | DISPLAY_F | DISPLAY_G),                                       // F
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),                           // G
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // H
+    uint32_t(DISPLAY_E | DISPLAY_F),                                                               // I (prostokąt)
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D),                                                   // J
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // K (zastępczy)`
+    uint32_t(DISPLAY_D | DISPLAY_E | DISPLAY_F),                                                   // L
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_E | DISPLAY_G),                                       // M (zastępczy)
+    uint32_t(DISPLAY_C | DISPLAY_E | DISPLAY_G),                                                   // N (zastępczy)
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),               // O
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // P
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),               // Q
+    uint32_t(DISPLAY_E | DISPLAY_G),                                                               // R (zastępczy)
+    uint32_t(DISPLAY_A | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),                           // S
+    uint32_t(DISPLAY_D | DISPLAY_E | DISPLAY_F | DISPLAY_G),                                        // T (zastępczy)
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_E | DISPLAY_F),                           // U
+    uint32_t(DISPLAY_C | DISPLAY_D | DISPLAY_E),                                                   // V (zastępczy)
+    uint32_t(DISPLAY_B | DISPLAY_D | DISPLAY_F),                                                   // W (zastępczy)
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_E | DISPLAY_F | DISPLAY_G),                           // X (jak H)
+    uint32_t(DISPLAY_B | DISPLAY_C | DISPLAY_D | DISPLAY_F | DISPLAY_G),                           // Y
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_D | DISPLAY_E | DISPLAY_G),
+
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_C | DISPLAY_F),
+    uint32_t(DISPLAY_A | DISPLAY_B | DISPLAY_E | DISPLAY_F)
 };
 
 void NXP_Display::init() {
@@ -81,13 +116,11 @@ void NXP_Display::updateISR(uint32_t prescaler){
                 digitsOff();
             } else {
                 uint8_t character = displayBuffer[bufferCounter];
-                if (character <= 9) {
                     if (dot[bufferCounter]) {
                         DISPLAY_GPIO->PCOR = displayCharacters[character] | static_cast<uint32_t >(SEGMENT::DP);
                     } else {
                         DISPLAY_GPIO->PCOR = displayCharacters[character];
                     }
-                }
             }
 
 
