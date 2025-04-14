@@ -28,6 +28,9 @@ private:
     PWM_Filter filter;
     NXP_GPIO enablePin;
     MotorDirection motorDirection = MotorDirection::FORWARDS;
+
+    bool enabled = true;
+
 public:
     NXP_Motor(NXP_PWM& pwmForward, NXP_PWM& pwmBackward, NXP_GPIO& enablePin) :
             pwmForward(pwmForward), pwmBackward(pwmBackward), enablePin(enablePin) { }
@@ -41,6 +44,8 @@ public:
     void block() override { enablePin.reset(); }
 
     void run() override { enablePin.set(); };
+
+    void setEnabled(bool enable) { this->enabled = enable; }
 
 };
 
@@ -70,6 +75,12 @@ public:
         left.block();
         right.block();
     }
+
+    void setEnabled(bool enable) {
+        left.setEnabled(enable);
+        right.setEnabled(enable);
+    }
+
     void run() {
         left.run();
         right.run();

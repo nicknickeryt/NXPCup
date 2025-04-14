@@ -163,14 +163,14 @@ class Kitty {
     NXP_Motors motors = {motorLeft, motorRight};
 
     // ALGORITHMzzzz
-    Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
-    Differential  differential = Differential(3000, encoderLeft, encoderRight);
+    Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight, differential);
+    Differential  differential = Differential(2700, encoderLeft, encoderRight);
 
     // KLZ communication
     UART_Frame uartFrame = {onKLZDataReceivedCallback};
 
     // MENU
-    NXP_Menu menu = {buttons, switches, display, motors, differential};
+    NXP_Menu menu = {buttons, switches, display, motors, differential, newAlgorithm};
 
 
   private:

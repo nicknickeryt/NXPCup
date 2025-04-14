@@ -39,16 +39,16 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
         switch (currentMenuPage) {
             case MenuPage::PAGE_STARTRPM:
-                differential.setStartRPM(3000); // TODO handle this better
                 display.print("RP\\[");
                 break;
             case MenuPage::PAGE_DIFFRATIO: display.print("DIFF"); break;
             case MenuPage::PAGE_BREAK: display.print("BRAK"); break;
             case MenuPage::PAGE_0RPM:
-                differential.setStartRPM(0.0);
+                motors.setEnabled(false);
                 display.print("SERV");
                 break;
             case MenuPage::PAGE_PID_KP:
+                motors.setEnabled(true);
                 display.print("PIDP");
                 break;
             default: break;
@@ -67,10 +67,10 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
             display.print(rpmText.c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                differential.setStartRPM(differential.getStartRPM() + 100);
+                differential.setStartRPM(differential.getStartRPM() + 50);
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                differential.setStartRPM(differential.getStartRPM() - 100);
+                differential.setStartRPM(differential.getStartRPM() - 50);
                 menuDebounceTimer = currentMillis;
             }
 
@@ -134,6 +134,7 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
 
 void NXP_Menu::startRace() {
+    algorithm.clearPatterns();
     motors.run();
     menuTrigger = true;
     display.disable();

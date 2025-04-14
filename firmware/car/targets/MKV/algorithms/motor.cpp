@@ -14,12 +14,27 @@
 
 Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
-void Differential::proc(float position) {
+void Differential::proc(float position, uint32_t currentMillis) {
+    if (emergencyBrake) {
+        leftMotorPower  = 0.0f;
+        rightMotorPower = 0.0f;
+
+        if (currentMillis - emergencyBrakeTimer > 300) return;
+
+        if (encoderRight.getRPM() < 2000 && encoderLeft.getRPM() < 2000) emergencyBrake = false;
+    }
+
+    if (patternDetected) {
+        startRPM     = 1500;
+        cornerRPM    = 1500;
+        brakeDivider = 400.0f;
+    }
+
     // float breakComponent = (abs(position) / breakRatio);
     float diffComponent = (1 - (abs(position) / differentialValue));
 
     brakeComponent = 1 - (abs(position) / brakeDivider);
-    brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
+    brakeComponent = std::clamp(brakeComponent, -1.0f, 1.0f);
 
     if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
 
@@ -31,11 +46,18 @@ void Differential::proc(float position) {
         setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
     }
 
-    float pidOutLeft  = (float)pidLeft.calculate(setLeftMotorRPM, encoderRight.getRPM()) / 100.0f;
-    float pidOutRight = (float)pidRight.calculate(setRightMotorRPM, encoderLeft.getRPM()) / 100.0f;
+    float pidOutLeft  = (float)pidLeft.calculate(setLeftMotorRPM / 5000, encoderRight.getRPM() / 5000) / 100.0f;
+    float pidOutRight = (float)pidRight.calculate(setRightMotorRPM / 5000, encoderLeft.getRPM() / 5000) / 100.0f;
 
     leftMotorPower  = pidOutLeft;
     rightMotorPower = pidOutRight;
+
+    if (encoderRight.getRPM() > 4000 || encoderLeft.getRPM() > 4000) {
+        leftMotorPower      = 0.0f;
+        rightMotorPower     = 0.0f;
+        emergencyBrakeTimer = currentMillis;
+        emergencyBrake      = true;
+    }
 }
 
 float Differential::getLeft() { return leftMotorPower; }

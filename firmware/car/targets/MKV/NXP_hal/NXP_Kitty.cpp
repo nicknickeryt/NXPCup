@@ -43,6 +43,7 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
             kitty().menu.setTriggeredOff(false);
             kitty().motors.setValue(0, 0);
+            kitty().motors.setEnabled(false);
             kitty().servo.set(0);
             kitty().servo.disable();
             break;
@@ -59,8 +60,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
         case 'r':
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
             kitty().menu.setTriggeredOff(true);
-            kitty().menu.startRace();
+            kitty().motors.setEnabled(true);
+            kitty().newAlgorithm.clearPatterns();
             kitty().servo.init();
+            kitty().menu.startRace();
             break;
         case '+': // 43
             kitty().differential.setStartRPM(kitty().differential.getStartRPM() + 100);
@@ -162,7 +165,7 @@ void Kitty::proc() {
     magicDiodComposition();
     camera.getData(cameraDataBuf);
 
-    float position = newAlgorithm.calculatePosition(cameraDataBuf);
+    float position = newAlgorithm.calculatePosition(cameraDataBuf, millis());
 
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
@@ -180,7 +183,7 @@ void Kitty::proc() {
         }
         fctprintf(logWrite, NULL, ".%hhu", (uint8_t)(position + 63));
         fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
-        fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
+        fctprintf(logWrite, NULL, ".%u", newAlgorithm.getCrossings());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
 
         fctprintf(logWrite, NULL, ".%u", (uint8_t) differential.getKlzDistance());
@@ -198,7 +201,7 @@ void Kitty::proc() {
     float servoPosition = -(position / 19.0f);
 
     servo.set(servoPosition);
-    differential.proc(position);
+    differential.proc(position, millis());
     motors.setValue(differential.getLeft(), differential.getRight());
 }
 

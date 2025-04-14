@@ -19,19 +19,18 @@ PID::PID(float kp, float ki, float kd, float maxValue, float bias) {
     this->bias     = bias;
 }
 
-int32_t PID::calculate(int32_t setpoint, int32_t current) {
+int32_t PID::calculate(float setpoint, float current) {
     float error = setpoint - current;
 
     integral += Ki * (error + previousError);
-    float maxIntegral = maxValue * 0.12f;
+    float maxIntegral = maxValue;
     if (integral > maxIntegral) integral = maxIntegral;
     if (integral < -maxIntegral) integral = -maxIntegral;
 
-    float derivative = (current - previousTarget) * previousDerivative * Kd;
+    float derivative = (current - previousTarget) * Kd;
 
     previousError      = error;
     previousTarget     = current;
-    previousDerivative = derivative;
 
     float output = Kp * error + integral + derivative + bias;
     if (output > maxValue) output = maxValue;

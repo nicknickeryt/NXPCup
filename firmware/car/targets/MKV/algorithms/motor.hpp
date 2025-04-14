@@ -19,22 +19,30 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 20.0f;
+    float differentialValue = 42.0f;
 
     float brakeComponent = 0;
 
-    float brakeDivider = 140.0f;
+    float brakeDivider = 180.0f;
 
-    uint32_t cornerRPM = 2700;
+    uint32_t cornerRPM = 2300;
 
-    float pidKp = 0.07f;
+    float pidKp = 0.00f;
+    float pidKi = 0.01f;
+    float pidKd = 0.0f;
+
                     //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(pidKp, 0.00f, 0.0f, 100.0f);  
-    PID pidRight = PID(pidKp, 0.00f, 0.0f, 100.0f);
+    PID pidLeft = PID(pidKp, pidKi, pidKd, 50.0f);  
+    PID pidRight = PID(pidKp, pidKi, pidKd, 50.0f);
+
+    bool patternDetected = false;
+
+    bool emergencyBrake = false;
+    uint32_t emergencyBrakeTimer = 0;
 
   public:
-    Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
-    void  proc(float position);
+    Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
+    void  proc(float position, uint32_t currentMillis);
 
     float getLeft();
     float getRight();
@@ -59,5 +67,9 @@ class Differential {
 
     float getPidKp() {
         return pidKp;
+    }
+
+    void setPatternDetected(bool detected) {
+        patternDetected = detected;
     }
 };
