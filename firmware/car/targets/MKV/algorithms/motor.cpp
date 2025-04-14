@@ -46,8 +46,8 @@ void Differential::proc(float position, uint32_t currentMillis) {
         setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
     }
 
-    float pidOutLeft  = (float)pidLeft.calculate(setLeftMotorRPM / 5000, encoderRight.getRPM() / 5000) / 100.0f;
-    float pidOutRight = (float)pidRight.calculate(setRightMotorRPM / 5000, encoderLeft.getRPM() / 5000) / 100.0f;
+    float pidOutLeft  = pidLeft.calculate(setLeftMotorRPM / 3000.0f, encoderRight.getRPM() / 3000.0f);
+    float pidOutRight = pidRight.calculate(setRightMotorRPM / 3000.0f, encoderLeft.getRPM() / 3000.0f);
 
     leftMotorPower  = pidOutLeft;
     rightMotorPower = pidOutRight;

@@ -28,12 +28,12 @@ class Differential {
     uint32_t cornerRPM = 2300;
 
     float pidKp = 0.00f;
-    float pidKi = 0.01f;
+    float pidKi = 0.001f;
     float pidKd = 0.0f;
 
                     //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(pidKp, pidKi, pidKd, 50.0f);  
-    PID pidRight = PID(pidKp, pidKi, pidKd, 50.0f);
+    PID pidLeft = PID(pidKp, pidKi, pidKd, 1.0f);  
+    PID pidRight = PID(pidKp, pidKi, pidKd, 1.0f);
 
     bool patternDetected = false;
 
