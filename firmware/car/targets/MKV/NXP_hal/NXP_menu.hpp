@@ -26,7 +26,8 @@ class NXP_Menu {
       PAGE_STARTRPM,
       PAGE_DIFFRATIO,
       PAGE_BREAK,
-      PAGE_0RPM
+      PAGE_0RPM,
+      PAGE_PID_KP
     };
 
     enum MenuButton {
@@ -42,7 +43,7 @@ class NXP_Menu {
     uint32_t menuLabelShowTimeMs = 800;
 
     int menuDebounceTimer = 0;
-    uint32_t menuDebounceTimeMs = 150; 
+    uint32_t menuDebounceTimeMs = 175; 
 
   public:
     NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential) : buttons(buttons), switches(switches), display(display), motors(motors) , differential(differential) {}

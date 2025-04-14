@@ -8,7 +8,7 @@ std::string formatString(float value) {
     if (intValue > 9999) intValue = 9999;
     if (intValue < 0) intValue = 0;
 
-    char buffer[5];                                    
+    char buffer[5];
     snprintf(buffer, sizeof(buffer), "%04d", intValue);
     return std::string(buffer);
 }
@@ -32,11 +32,10 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
         return true;
     }
 
-    
 
     if (!buttons.at(MenuButton::BUTTON_PAGE).get()) {
         currentMenuPage = static_cast<MenuPage>(currentMenuPage + 1);
-        if (currentMenuPage > 3) currentMenuPage = MenuPage::PAGE_STARTRPM;
+        if (currentMenuPage > 4) currentMenuPage = MenuPage::PAGE_STARTRPM;
 
         switch (currentMenuPage) {
             case MenuPage::PAGE_STARTRPM:
@@ -49,12 +48,15 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
                 differential.setStartRPM(0.0);
                 display.print("SERV");
                 break;
+            case MenuPage::PAGE_PID_KP:
+                display.print("PIDP");
+                break;
             default: break;
         }
 
         display.update();
         menuDebounceTimer = currentMillis;
-        menuLabelTimer = currentMillis;
+        menuLabelTimer    = currentMillis;
         return true;
     }
 
@@ -106,6 +108,20 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
             display.print("----");
             break;
         }
+
+        case MenuPage::PAGE_PID_KP: {
+            display.print(formatString(differential.getPidKp() * 100).c_str());
+
+            if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
+                differential.setPidKp(differential.getPidKp() + 0.01f);
+                menuDebounceTimer = currentMillis;
+            } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
+                differential.setPidKp(differential.getPidKp() - 0.01f);
+                menuDebounceTimer = currentMillis;
+            }
+            break;
+        }
+
         default: break;
     }
 
