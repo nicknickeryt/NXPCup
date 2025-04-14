@@ -27,9 +27,10 @@ class Differential {
 
     uint32_t cornerRPM = 2700;
 
+    float pidKp = 0.07f;
                     //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(0.07f, 0.00f, 0.0f, 100.0f);  
-    PID pidRight = PID(0.07f, 0.00f, 0.0f, 100.0f);
+    PID pidLeft = PID(pidKp, 0.00f, 0.0f, 100.0f);  
+    PID pidRight = PID(pidKp, 0.00f, 0.0f, 100.0f);
 
   public:
     Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
@@ -49,4 +50,14 @@ class Differential {
 
     void setKlzDistance(uint16_t distance) { klzDistance = distance; }
     uint8_t getKlzDistance() { return klzDistance; }
+
+    void setPidKp(float kp) {
+        pidKp = kp;
+        pidLeft.setKp(pidKp);
+        pidRight.setKp(pidKp);
+    }
+
+    float getPidKp() {
+        return pidKp;
+    }
 };
