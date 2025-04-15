@@ -66,7 +66,8 @@ void NXP_Uart::init(){
     //FIFO on
 //    uart->PFIFO = 0xAA;
 
-    enableInterrupt(InterruptType::RX_FULL);
+    // We dont need interrupts on receive!!
+    // enableInterrupt(InterruptType::RX_FULL);
 
     if(uart == UART0){
         NVIC_ClearPendingIRQ(UART2_IRQn);

@@ -63,7 +63,7 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
             patternDetected = true;
             patternsStartTime = currentMillis;
         }
-        if (currentMillis - patternsStartTime > 20) {
+        if (currentMillis - patternsStartTime > 7) {
             patternDetected = false;
             return true;
         }

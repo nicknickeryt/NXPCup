@@ -38,7 +38,9 @@ private:
     NXP_PORT sdaPort = {PORTC, 11, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
     NXP_I2C i2c = {I2C1, sdaPort, sclPort, 100000};
     // GPIO
-    NXP_GPIO enable = {PORTB, GPIOB, 19, NXP_GPIO::Mode::OUTPUT};
+
+    NXP_PORT enablePort = {PORTB, 19, 2, NXP_PORT::Pull::PullUp, NXP_PORT::OpenDrain::Enable};
+    NXP_GPIO enable = {PORTB, GPIOB, 19};
     
     
 public:

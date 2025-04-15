@@ -24,7 +24,7 @@ volatile bool systickTrigger = false;
 void SysTick_Handler(void) {
     Kitty::millisIncrease();
     static auto counter = 0;
-    if (20 == counter++) {
+    if (40 == counter++) {
         systickTrigger = true;
         counter        = 0;
     }
@@ -41,6 +41,7 @@ void Kitty::init() {
     uartDebug.init();
     log_notice("Procek wstal pomyslnie!");
     
+    enable.init();
     algorithm.init();
 }
 
