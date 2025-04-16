@@ -125,7 +125,7 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
         default: break;
     }
 
-    if (!buttons.at(MenuButton::BUTTON_RUN).get()) startRace();
+    if (!buttons.at(MenuButton::BUTTON_RUN).get()) startRace(currentMillis);
 
     display.update();
 
@@ -133,8 +133,10 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 }
 
 
-void NXP_Menu::startRace() {
-    algorithm.clearPatterns();
+void NXP_Menu::startRace(uint32_t currentMillis) {
+    delay_ms(3000);
+    algorithm.clearPatterns(currentMillis);
+    algorithm.setAlgorithmStartTime(currentMillis);
     motors.run();
     menuTrigger = true;
     display.disable();

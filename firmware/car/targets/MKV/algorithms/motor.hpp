@@ -74,4 +74,10 @@ class Differential {
     void setPatternDetected(bool detected) {
         patternDetected = detected;
     }
+
+    void clearAllFlags() {
+        patternDetected = false;
+        obstacleFinalBrake = false;
+        emergencyBrake = false;
+    }
 };

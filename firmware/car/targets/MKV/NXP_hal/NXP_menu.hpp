@@ -49,7 +49,7 @@ class NXP_Menu {
 
     bool proc(uint32_t currentMillis);
 
-    void startRace();
+    void startRace(uint32_t currentMillis);
 
     bool isTriggeredOff() { return menuTrigger; }
 

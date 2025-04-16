@@ -61,9 +61,9 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
             kitty().menu.setTriggeredOff(true);
             kitty().motors.setEnabled(true);
-            kitty().newAlgorithm.clearPatterns();
+            kitty().newAlgorithm.clearPatterns(millis());
             kitty().servo.init();
-            kitty().menu.startRace();
+            kitty().menu.startRace(millis());
             break;
         case '+': // 43
             kitty().differential.setStartRPM(kitty().differential.getStartRPM() + 100);

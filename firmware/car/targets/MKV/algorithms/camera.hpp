@@ -42,7 +42,9 @@ class Algorithm {
 
 		Differential& differential;
 
-		
+		uint32_t algorithmStartTime = 0;
+
+		uint32_t patternDetectTimeoutMs = 5000;
 		uint32_t patternsAmount = 0;
 		bool patternDetected = false;
 		uint32_t patternsStartTime = 0;
@@ -54,5 +56,7 @@ class Algorithm {
     uint32_t getBrightness() const { return brightness; }
 	uint32_t getCrossings() const { return crossings; }
 
-	void clearPatterns();
+	void clearPatterns(uint32_t currentMillis);
+
+	void setAlgorithmStartTime(uint32_t currentMillis);
 };
