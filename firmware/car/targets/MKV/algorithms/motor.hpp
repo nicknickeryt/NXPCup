@@ -19,7 +19,7 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 146.0f;
+    float differentialValue = 60.0f;  //start 2600 max
 
     float brakeComponent = 0;
 

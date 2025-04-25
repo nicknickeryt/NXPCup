@@ -31,8 +31,8 @@ void Differential::proc(float position, uint32_t currentMillis) {
     }
 
     if (patternDetected) {
-        startRPM     = 900;
-        cornerRPM    = 900;
+        startRPM     = 800;
+        cornerRPM    = 800;
         brakeDivider = 400.0f;
 
         if (klzDistance < 200) {
@@ -40,7 +40,7 @@ void Differential::proc(float position, uint32_t currentMillis) {
             rightMotorPower    = 0.0f;
             obstacleFinalBrake = true;
             return;
-        } else if (klzDistance < 400) {
+        } else if (klzDistance < 550) {
             leftMotorPower     = -0.1f;
             rightMotorPower    = -0.1f;
             return;
@@ -70,7 +70,7 @@ void Differential::proc(float position, uint32_t currentMillis) {
     leftMotorPower  = pidOutLeft;
     rightMotorPower = pidOutRight;
 
-    if (encoderRight.getRPM() > 4000 || encoderLeft.getRPM() > 4000) {
+    if (encoderRight.getRPM() > 5000 || encoderLeft.getRPM() > 5000) {
         leftMotorPower      = 0.0f;
         rightMotorPower     = 0.0f;
         emergencyBrakeTimer = currentMillis;
