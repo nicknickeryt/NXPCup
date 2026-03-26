@@ -6,6 +6,7 @@
  *
  */
 
+#include "HALina_led_line.hpp"
 #define LOG_CHANNEL KITTY
 
 #include "logger.h"
@@ -140,6 +141,9 @@ void Kitty::init() {
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderLeft));
     encodersPit.init();
+    // Prepare SR04 PIT for one-shot 10us pulse generation (do not run yet)
+
+    sr04.init();
     // uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
     display.enable();
 
@@ -164,12 +168,13 @@ void Kitty::FTM_Init() {
 void Kitty::proc() {
     magicDiodComposition();
     camera.getData(cameraDataBuf);
-
+    
     float position = newAlgorithm.calculatePosition(cameraDataBuf, millis());
 
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
         lastLogTimepoint = millis();    
+        fctprintf(logWrite, NULL, "Distance: %" PRId32 "\r\n", (int32_t)Kitty::kitty().sr04.getDistanceMm());
 
         // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));        
         // fctprintf(logWrite, NULL, "isbrk?: %d\r\n", (kitty().differential.isBreakTriggered()));
