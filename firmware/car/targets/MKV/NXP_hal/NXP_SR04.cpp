@@ -34,12 +34,13 @@ void NXP_SR04::init() {
     pitTimer.init();
 }
 
+// note that with 2ms between pulses we can measure up to 34cm! 
 void NXP_SR04::pitHandler() {
     ticks10us = ticks10us + 1;
     delayTicks = delayTicks + 1;
 
     if (!pulseActive) {
-        if (delayTicks >= 100) { // 1 ms
+        if (delayTicks >= 200) { // 1 ms
             triggerPin.set();
             pulseActive = true;
 
