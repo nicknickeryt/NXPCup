@@ -35,10 +35,13 @@ void pit_sendCameraData(uint8_t);
 
 void logWrite(char c,[[maybe_unused]] void* const context);
 
+extern bool cameraDataReceived;
+
 class Kitty {
   private:
     size_t lastLogTimepoint;
-    constexpr static uint32_t LOG_UPDATE_INTERVAL = 33;
+    constexpr static uint32_t LOG_UPDATE_INTERVAL = 12;
+
 
     // SYSTICK
     static uint_fast64_t milliseconds;
@@ -150,7 +153,7 @@ class Kitty {
 
     // UART
     NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartDebug         = {UART0, 460800, uart0RXmux, uart0TXmux, uart0DMA};
     NXP_Uart uartKLZ           = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY
