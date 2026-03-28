@@ -19,19 +19,33 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 20.0f;
+    float differentialValue = 60.0f;  //start 2600 max
 
     float brakeComponent = 0;
 
-    uint32_t cornerRPM = 2700;
+    float brakeDivider = 140.0f;
+
+    uint32_t cornerRPM = 1500;
+
+    float pidKp = 1.5f;
+    float pidKi = 0.0002f;
+    float pidKd = 0.0f;
 
                     //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(0.07f, 0.00f, 0.0f, 100.0f);  
-    PID pidRight = PID(0.07f, 0.00f, 0.0f, 100.0f);
+    PID pidLeft = PID(pidKp, pidKi, pidKd, 1.0f);  
+    PID pidRight = PID(pidKp, pidKi, pidKd, 1.0f);
+
+    bool patternDetected = false;
+
+    bool emergencyBrake = false;
+    uint32_t emergencyBrakeTimer = 0;
+
+    bool obstacleFinalBrake = false;
 
   public:
-    Differential(float startVelocity, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
-    void  proc(float position);
+    Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
+    void  proc(float position, uint32_t currentMillis);
+
     float getLeft();
     float getRight();
 
@@ -39,10 +53,31 @@ class Differential {
     uint32_t getStartRPM();
 
     uint8_t getDiffValue() { return differentialValue; }
-
     void setDiffValue(uint8_t newValue) { differentialValue = newValue; }
 
-    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
+    uint8_t getBrakeDivider() { return brakeDivider; }
+    void setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
 
-    uint8_t getKlzDistance() { return klzDistance; }
+    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
+    uint16_t getKlzDistance() { return klzDistance; }
+
+    void setPidKp(float kp) {
+        pidKp = kp;
+        pidLeft.setKp(pidKp);
+        pidRight.setKp(pidKp);
+    }
+
+    float getPidKp() {
+        return pidKp;
+    }
+
+    void setPatternDetected(bool detected) {
+        patternDetected = detected;
+    }
+
+    void clearAllFlags() {
+        patternDetected = false;
+        obstacleFinalBrake = false;
+        emergencyBrake = false;
+    }
 };

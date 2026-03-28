@@ -35,7 +35,7 @@ void NXP_Sensors::init() {
     log_debug("VL53L0X sensor initailized corectly");
 
     // Initalize filter
-    filter.alpha     = 0.1f;
+    filter.alpha     = 0.5f;
     filter.delta     = 100;
     filter.average   = 0;
     filter.lastValue = 0;

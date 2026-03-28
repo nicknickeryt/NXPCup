@@ -16,10 +16,10 @@ class Algorithm {
   private:
     NXP_Sensors sensor;
     NXP_Frame   frame;
-    NXP_GPIO    enable;
+    NXP_GPIO&    enable;
 
   public:
-    Algorithm(NXP_I2C& i2c, NXP_GPIO enable, NXP_Uart& toMKV) : sensor(i2c), frame(toMKV, dataSize), enable(enable) {}
+    Algorithm(NXP_I2C& i2c, NXP_GPIO& enable, NXP_Uart& toMKV) : sensor(i2c), frame(toMKV, dataSize), enable(enable) {}
 
     void init();
 

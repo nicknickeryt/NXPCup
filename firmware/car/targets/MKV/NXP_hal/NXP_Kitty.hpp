@@ -22,6 +22,7 @@
 #include "NXP_motor.hpp"
 #include "NXP_servo.hpp"
 #include "NXP_uart.hpp"
+#include "NXP_SR04.hpp"
 
 #include <algorithms/camera.hpp>
 #include <algorithms/motor.hpp>
@@ -163,15 +164,21 @@ class Kitty {
     NXP_Motors motors = {motorLeft, motorRight};
 
     // ALGORITHMzzzz
-    Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight);
-    Differential  differential = Differential(3000, encoderLeft, encoderRight);
+    Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight, differential);
+    Differential  differential = Differential(2600, encoderLeft, encoderRight);
 
     // KLZ communication
     UART_Frame uartFrame = {onKLZDataReceivedCallback};
 
     // MENU
-    NXP_Menu menu = {buttons, switches, display, motors, differential};
+    NXP_Menu menu = {buttons, switches, display, motors, differential, newAlgorithm};
 
+    // HC-SR04
+    NXP_GPIO triggerPin = {PORTD, GPIOD, 7U, NXP_GPIO::Mode::OUTPUT};
+    NXP_GPIO echoPin = {PORTD, GPIOD, 8U, NXP_GPIO::Mode::INTERRUPT,
+                    kPORT_InterruptEitherEdge, NXP_SR04::echoCallback};
+      
+    NXP_SR04 sr04 = {triggerPin, echoPin, NXP_PIT::CHANNEL::_3}; 
 
   private:
     Kitty() = default;

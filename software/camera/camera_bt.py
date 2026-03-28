@@ -107,7 +107,7 @@ button_dplus = QPushButton("DR+")
 button_dminus = QPushButton("DR-")
 
 control_layout = QHBoxLayout()
-control_layout.addWidget(button_stop_start)
+control_layout.addWidget(button_start_stop)
 control_layout.addWidget(button_plus)
 control_layout.addWidget(button_minus)
 control_layout.addWidget(button_dplus)
@@ -127,7 +127,7 @@ button_dminus.clicked.connect(on_dminus_click)
 
 button_widget = QWidget()
 button_layout = QHBoxLayout()
-button_layout.addWidget(button_start_stop)
+button_layout.addWidget(button_stop_start)
 button_widget.setLayout(button_layout)
 button_widget.setStyleSheet("background-color: #f1f1f1; padding: 10px;")
 

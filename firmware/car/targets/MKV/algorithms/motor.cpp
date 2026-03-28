@@ -14,12 +14,45 @@
 
 Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
-void Differential::proc(float position) {
+void Differential::proc(float position, uint32_t currentMillis) {
+    if (obstacleFinalBrake) {
+        leftMotorPower  = 0.0f;
+        rightMotorPower = 0.0f;
+        return;
+    }
+
+    if (emergencyBrake) {
+        leftMotorPower  = 0.0f;
+        rightMotorPower = 0.0f;
+
+        if (currentMillis - emergencyBrakeTimer > 300) return;
+
+        if (encoderRight.getRPM() < 2000 && encoderLeft.getRPM() < 2000) emergencyBrake = false;
+    }
+
+    if (patternDetected) {
+        startRPM     = 800;
+        cornerRPM    = 800;
+        brakeDivider = 400.0f;
+
+        if (klzDistance < 200) {
+            leftMotorPower     = 0.0f;
+            rightMotorPower    = 0.0f;
+            obstacleFinalBrake = true;
+            return;
+        } else if (klzDistance < 550) {
+            leftMotorPower     = -0.1f;
+            rightMotorPower    = -0.1f;
+            return;
+        }
+        return;
+    }
+
     // float breakComponent = (abs(position) / breakRatio);
     float diffComponent = (1 - (abs(position) / differentialValue));
 
-    brakeComponent = 1 - (abs(position) / 140.0f);
-    brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
+    brakeComponent = 1 - (abs(position) / brakeDivider);
+    brakeComponent = std::clamp(brakeComponent, -1.0f, 1.0f);
 
     if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
 
@@ -31,11 +64,18 @@ void Differential::proc(float position) {
         setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
     }
 
-    float pidOutLeft  = (float)pidLeft.calculate(setLeftMotorRPM, encoderRight.getRPM()) / 100.0f;
-    float pidOutRight = (float)pidRight.calculate(setRightMotorRPM, encoderLeft.getRPM()) / 100.0f;
+    float pidOutLeft  = pidLeft.calculate(setLeftMotorRPM / 3000.0f, encoderRight.getRPM() / 3000.0f);
+    float pidOutRight = pidRight.calculate(setRightMotorRPM / 3000.0f, encoderLeft.getRPM() / 3000.0f);
 
     leftMotorPower  = pidOutLeft;
     rightMotorPower = pidOutRight;
+
+    if (encoderRight.getRPM() > 5000 || encoderLeft.getRPM() > 5000) {
+        leftMotorPower      = 0.0f;
+        rightMotorPower     = 0.0f;
+        emergencyBrakeTimer = currentMillis;
+        emergencyBrake      = true;
+    }
 }
 
 float Differential::getLeft() { return leftMotorPower; }

@@ -88,14 +88,15 @@ void NXP_Camera::pitInterrupt() {
         break;
         case CameraState::SET_CLOCK_PIN:
             currentPixelIndex++;
-            clockPin.set();
 
             if (currentPixelIndex == 128) {
+                cameraDataReceived = true;
                 cameraState = CameraState::STOPPED;
-                clockPin.reset();
                 cameraState = CameraState::WAIT_END_1;
-            } else
+            } else {
                 cameraState = CameraState::RESET_CLOCK_PIN;
+                clockPin.set();    
+            }
         break;
         case CameraState::RESET_CLOCK_PIN:
             adc.startConversion();

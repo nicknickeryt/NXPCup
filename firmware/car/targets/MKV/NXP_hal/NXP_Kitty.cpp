@@ -6,6 +6,7 @@
  *
  */
 
+#include "HALina_led_line.hpp"
 #define LOG_CHANNEL KITTY
 
 #include "logger.h"
@@ -43,6 +44,7 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
             kitty().menu.setTriggeredOff(false);
             kitty().motors.setValue(0, 0);
+            kitty().motors.setEnabled(false);
             kitty().servo.set(0);
             kitty().servo.disable();
             break;
@@ -59,8 +61,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
         case 'r':
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
             kitty().menu.setTriggeredOff(true);
-            kitty().menu.startRace();
+            kitty().motors.setEnabled(true);
+            kitty().newAlgorithm.clearPatterns(millis());
             kitty().servo.init();
+            kitty().menu.startRace(millis());
             break;
         case '+': // 43
             kitty().differential.setStartRPM(kitty().differential.getStartRPM() + 100);
@@ -137,6 +141,9 @@ void Kitty::init() {
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderLeft));
     encodersPit.init();
+    // Prepare SR04 PIT for one-shot 10us pulse generation (do not run yet)
+
+    sr04.init();
     // uartCommunication.setRedirectHandler([](uint8_t ch) {Kitty::kitty().commandManager.put_char(ch);});
     display.enable();
 
@@ -161,12 +168,13 @@ void Kitty::FTM_Init() {
 void Kitty::proc() {
     magicDiodComposition();
     camera.getData(cameraDataBuf);
-
-    float position = newAlgorithm.calculatePosition(cameraDataBuf);
+    
+    float position = newAlgorithm.calculatePosition(cameraDataBuf, millis());
 
     ////////////////////////////// Uart Log ////////////////////////////////
     if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
         lastLogTimepoint = millis();    
+        fctprintf(logWrite, NULL, "Distance: %" PRId32 "\r\n", (int32_t)Kitty::kitty().sr04.getDistanceMm());
 
         // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));        
         // fctprintf(logWrite, NULL, "isbrk?: %d\r\n", (kitty().differential.isBreakTriggered()));
@@ -183,7 +191,7 @@ void Kitty::proc() {
         fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
         fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
 
-        fctprintf(logWrite, NULL, ".%u", (uint8_t) differential.getKlzDistance());
+        fctprintf(logWrite, NULL, ".%u", (uint16_t) differential.getKlzDistance());
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getLeft() + 1)  )); // -1:1 -> 0:200
         fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getRight() + 1) )); // -1:1 -> 0:200
 
@@ -191,14 +199,14 @@ void Kitty::proc() {
     }
 
     // If menu is active, do not move
-    if (menu.proc()) {
+    if (menu.proc(millis())) {
         return;
     }
       
     float servoPosition = -(position / 19.0f);
 
     servo.set(servoPosition);
-    differential.proc(position);
+    differential.proc(position, millis());
     motors.setValue(differential.getLeft(), differential.getRight());
 }
 
