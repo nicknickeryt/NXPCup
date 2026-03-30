@@ -7,6 +7,7 @@
  */
 
 #include "HALina_led_line.hpp"
+#include "algorithms/motor.hpp"
 #define LOG_CHANNEL KITTY
 
 #include "logger.h"
@@ -39,6 +40,9 @@ void SysTick_Handler(void) {
     systickTrigger = true;
 }
 }
+
+float motorL = 0.0f;
+float motorR = 0.0f;
 
 void Kitty::uartCallback(uint8_t receivedByte) {
     switch (receivedByte) {
@@ -83,6 +87,41 @@ void Kitty::uartCallback(uint8_t receivedByte) {
         case 'b': // diffRatio--
             kitty().differential.setDiffValue(kitty().differential.getDiffValue() - 1);
             fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffValue()));
+            break;
+        case '1': { // FORWARD
+            Kitty::kitty().motors.run();
+
+            motorL += 0.1f;
+            motorR += 0.1f;
+
+            motorL = std::clamp(motorL, -0.2f, 0.2f);
+            motorR = std::clamp(motorR, -0.2f, 0.2f);
+
+            Kitty::kitty().motors.setValue(motorL, motorR);
+            break;
+        }
+
+        case '2': { // REVERSE
+            Kitty::kitty().motors.run();
+
+            motorL -= 0.1f;
+            motorR -= 0.1f;
+
+            motorL = std::clamp(motorL, -0.2f, 0.2f);
+            motorR = std::clamp(motorR, -0.2f, 0.2f);
+
+            Kitty::kitty().motors.setValue(motorL, motorR);
+            break;
+        }
+        case '3': // right
+            Kitty::kitty().servo.set(Kitty::kitty().servo.get() + 0.2f);
+            break;
+        case '4': // left
+            Kitty::kitty().servo.set(Kitty::kitty().servo.get() - 0.2f);
+            break;
+        case 'x': // resetw
+            fctprintf(logWrite, NULL, "kittyReset\n");
+            NVIC_SystemReset();
             break;
         default: break;
     }
@@ -151,7 +190,7 @@ void Kitty::init() {
 
     menu.init();
     camera.start();
-    // log_notice("KiTTy init finished");
+    log_notice("KiTTy init finished");
 }
 
 
@@ -165,26 +204,26 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-uint8_t frame[132]; // 1 start + 128 danych + 1 end
+uint8_t frame[147]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
 
 uint8_t sr04Triggered = 0;
 
-enum class BrakeState { IDLE, REVERSING, DONE };
-
-BrakeState brakeState     = BrakeState::IDLE;
-uint32_t   brakeStartTime = 0;
-uint32_t   lastDistance   = 0;
 
 void Kitty::proc() {
     if (!sr04Triggered) {
         magicDiodComposition();
     }
 
+    if (differential.isFinalStopDone()) {
+        servo.set(0);
+        motors.setValue(0, 0);
+        return;
+    }
     // TODO
     // zaimplementowac jakiegos PIDa do hamowania, aby stanąć w idealnym miejscu
-    // powinien byc bardzo agresywny zwlaszcza na poczatku - nawet przy niskiej predkosci 1800 
+    // powinien byc bardzo agresywny zwlaszcza na poczatku - nawet przy niskiej predkosci 1800
     // hamowanie z sila 0.7 jest ledwo wystarczajace, doslownie na milimetry od klocka zaczynamy sie cofac
     // tez moze trigger z sr04 jest za pozno otrzymywany?
 
@@ -194,48 +233,6 @@ void Kitty::proc() {
 
     uint32_t dist = sr04.getDistanceMm();
 
-    // aktywacja hamowania
-    if ((dist < 200 || sr04Triggered) && millis() > 10) {
-        sr04Triggered = true;
-
-        switch (brakeState) {
-            case BrakeState::IDLE:
-                brakeState     = BrakeState::REVERSING;
-                brakeStartTime = millis();
-                lastDistance   = dist;
-                break;
-
-            case BrakeState::REVERSING:
-
-                // timeout bezpieczeństwa
-                if (millis() - brakeStartTime > 2000) {
-                    motors.setValue(0, 0);
-                    brakeState = BrakeState::DONE;
-                    break;
-                }
-
-                // jeśli jesteśmy w dobrym zakresie → STOP
-                if (dist > 210) {
-                    motors.setValue(0, 0);
-                    brakeState = BrakeState::DONE;
-                    break;
-                }
-
-
-                // jedź do tyłu
-                motors.setValue(-0.7f, -0.7f);
-
-                lastDistance = dist;
-
-                break;
-
-            case BrakeState::DONE: motors.setValue(0, 0); break;
-        }
-
-        servo.set(0);
-        return;
-    }
-
     if (cameraDataReceived && !sr04Triggered) {
         cameraDataReceived = false;
 
@@ -244,12 +241,7 @@ void Kitty::proc() {
 
         float position = newAlgorithm.calculatePosition(cameraDataBuf, millis());
 
-
-        ////////////////////////////// Uart Log ////////////////////////////////
-        // if (lastLogTimepoint + LOG_UPDATE_INTERVAL < millis()) {
-        // lastLogTimepoint = millis();
-
-
+        ////////////////////////////// LOG ////////////////////////////////
         size_t idx   = 0;
         frame[idx++] = 0;   // start
         frame[idx++] = 255; // start
@@ -258,45 +250,51 @@ void Kitty::proc() {
 
         uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf);
 
-        for (size_t i = 0; i < 128; i++) {
-            frame[idx++] = (uint8_t)(buffer[i] / 158);
-        }
+        for (size_t i = 0; i < 128; i++) frame[idx++] = (uint8_t)(buffer[i] / 158);
 
-        uartDebug.write((char*)frame, idx);
+        frame[132] = (uint8_t)(position + 63);
+
+        uint16_t rpmLeft  = encoderLeft.getRPM();
+        uint16_t rpmRight = encoderRight.getRPM();
+
+        // Left RPM (2 bajty)
+        frame[134] = (rpmLeft >> 8) & 0xFF; // MSB
+        frame[135] = rpmLeft & 0xFF;        // LSB
+
+        // Right RPM (2 bajty)
+        frame[136] = (rpmRight >> 8) & 0xFF; // MSB
+        frame[137] = rpmRight & 0xFF;        // LSB
 
 
-        // fctprintf(logWrite, NULL, "Distance: %" PRId32 "\r\n", (int32_t)Kitty::kitty().sr04.getDistanceMm());
-
-        // fctprintf(logWrite, NULL, "klz: %d\r\n", (kitty().differential.getKlzDistance()));
-        // fctprintf(logWrite, NULL, "isbrk?: %d\r\n", (kitty().differential.isBreakTriggered()));
-        // fctprintf(logWrite, NULL, "brkPidOut: .%u\r\n", (uint8_t) (100 * (differential.brakingPIDOutput  )));
+        uint16_t startRPM = differential.getStartRPM();
+        frame[138]        = (startRPM >> 8) & 0xFF;
+        frame[139]        = startRPM & 0xFF;
 
 
-        // fctprintf(logWrite, NULL, "\r\nCAML");
-        // for (size_t i = 0; i < 128; i++) {
-        //     uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf);
-        //     fctprintf(logWrite, NULL, ".%hhu", buffer[i] / 158);
-        // }
-        // fctprintf(logWrite, NULL, ".%hhu", (uint8_t)(position + 63));
-        // fctprintf(logWrite, NULL, ".%hhu", newAlgorithm.getBrightness() / 158);
-        // fctprintf(logWrite, NULL, ".%u", encoderLeft.getRPM());
-        // fctprintf(logWrite, NULL, ".%u", encoderRight.getRPM());
+        uint16_t sr04Distance = sr04.getDistanceMm();
+        frame[140]            = (sr04Distance >> 8) & 0xFF;
+        frame[141]            = sr04Distance & 0xFF;
 
-        // fctprintf(logWrite, NULL, ".%u", (uint16_t) differential.getKlzDistance());
-        // fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getLeft() + 1)  )); // -1:1 -> 0:200
-        // fctprintf(logWrite, NULL, ".%u", (uint8_t) (100 * (differential.getRight() + 1) )); // -1:1 -> 0:200
 
-        // if (!menu.isTriggeredOff()) fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
-        // }
+        uint16_t diffLeftValue  = (uint16_t)((differential.getLeft() + 1) * 100);  // -1:1 -> 0:200
+        uint16_t diffRightValue = (uint16_t)((differential.getRight() + 1) * 100); // -1:1 -> 0:200
+        frame[142]              = (diffLeftValue >> 8) & 0xFF;
+        frame[143]              = diffLeftValue & 0xFF;
+        frame[144]              = (diffRightValue >> 8) & 0xFF;
+        frame[145]              = diffRightValue & 0xFF;
+        frame[146]              = menuActive ? 0x01 : 0x00;
 
+        uartDebug.write((char*)frame, 147);
+        //////////////////////////////////////////////////////////////////////
 
         if (menuActive) {
             return;
         }
         float servoPosition = -(position / 19.0f);
+        if (differential.isDistanceModeActive()) servoPosition = 0;
 
         servo.set(servoPosition);
-        differential.proc(position, millis());
+        differential.proc(position, millis(), dist);
         motors.setValue(differential.getLeft(), differential.getRight());
     }
 }

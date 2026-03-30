@@ -55,6 +55,7 @@ class Algorithm {
     float    calculatePosition(uint16_t* data, uint32_t currentMillis);
     uint32_t getBrightness() const { return brightness; }
 	uint32_t getCrossings() const { return crossings; }
+	bool isPatternDetected() const { return patternDetected; }
 
 	void clearPatterns(uint32_t currentMillis);
 

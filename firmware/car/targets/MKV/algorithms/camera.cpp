@@ -35,8 +35,8 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     // Lo pass filter position
     filteredPosition = (filteredPosition * (1 - alpha)) + ((adjustedPosition + algorithmOffset) * alpha);
 
-    // if(findPatterns(data, currentMillis))
-    //     differential.setPatternDetected(true);
+    if(findPatterns(data, currentMillis))
+        differential.setPatternDetected(true);
 
     // Return filtered position
     return (filteredPosition);
@@ -44,7 +44,7 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
 
 bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
-    // if(currentMillis - algorithmStartTime < patternDetectTimeoutMs) return false;
+    if(currentMillis - algorithmStartTime < patternDetectTimeoutMs) return false;
 
     crossings = 0;
     // Smoothing
@@ -61,12 +61,12 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
     // Find Patterns
     if (crossings > 6) {
-        return true;
+        // return true;
 
         if (!patternDetected) {
             patternDetected = true;
             patternsStartTime = currentMillis;
-            // return true;
+            return true;
         }
         if (currentMillis - patternsStartTime > 5) {
             patternDetected = false;

@@ -14,37 +14,68 @@
 
 Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
-void Differential::proc(float position, uint32_t currentMillis) {
-    if (obstacleFinalBrake) {
+void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
+    if (1) {
+        setStartRPM(800);
+    }
+
+    if (sr04Distance < 250) {
+        distanceModeActive = true;
+    }
+
+    if(finalStopDone) {
         leftMotorPower  = 0.0f;
         rightMotorPower = 0.0f;
         return;
     }
 
-    if (emergencyBrake) {
-        leftMotorPower  = 0.0f;
-        rightMotorPower = 0.0f;
+    if (1 && distanceModeActive && !finalStopDone) {
+        float target  = 80.0f;
+        float current = sr04Distance;
 
-        if (currentMillis - emergencyBrakeTimer > 300) return;
+        bool inRange = fabs(current - target) < 15.0f;
 
-        if (encoderRight.getRPM() < 2000 && encoderLeft.getRPM() < 2000) emergencyBrake = false;
-    }
+        // 🔥 jeśli jesteśmy blisko → NIE używamy PID
+        if (inRange) {
+            distancePID.reset(); // 🔥 bardzo ważne
 
-    if (patternDetected) {
-        startRPM     = 800;
-        cornerRPM    = 800;
-        brakeDivider = 400.0f;
+            leftMotorPower  = 0.0f;
+            rightMotorPower = 0.0f;
 
-        if (klzDistance < 200) {
-            leftMotorPower     = 0.0f;
-            rightMotorPower    = 0.0f;
-            obstacleFinalBrake = true;
-            return;
-        } else if (klzDistance < 550) {
-            leftMotorPower     = -0.1f;
-            rightMotorPower    = -0.1f;
-            return;
+            if (!stableActive) {
+                stableActive = true;
+                stableTimer  = currentMillis;
+            } else if (currentMillis - stableTimer > 3000) {
+                finalStopDone = true;
+                leftMotorPower  = 0.0f;
+                rightMotorPower = 0.0f;
+                return;
+            }
+
+        } else {
+            stableActive = false;
+
+            float output = distancePID.calculate(current, target);
+            output       = std::clamp(output, -0.7f, 0.18f);
+
+            leftMotorPower  = output;
+            rightMotorPower = output;
+
+            // 🔥 zabezpieczenie max mocy
+            if (fabs(output) >= 0.5f) {
+                if (!maxPowerActive) {
+                    maxPowerActive = true;
+                    maxPowerTimer  = currentMillis;
+                } else if (currentMillis - maxPowerTimer > 1000) {
+                    leftMotorPower  = 0.0f;
+                    rightMotorPower = 0.0f;
+                    return;
+                }
+            } else {
+                maxPowerActive = false;
+            }
         }
+
         return;
     }
 

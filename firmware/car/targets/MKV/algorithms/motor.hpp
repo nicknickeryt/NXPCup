@@ -19,7 +19,7 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 60.0f;  //start 2600 max
+    float differentialValue = 60.0f; // start 2600 max
 
     float brakeComponent = 0;
 
@@ -31,34 +31,49 @@ class Differential {
     float pidKi = 0.0002f;
     float pidKd = 0.0f;
 
-                    //Kp     Ki     Kd     maxValue
-    PID pidLeft = PID(pidKp, pidKi, pidKd, 1.0f);  
+    // Kp     Ki     Kd     maxValue
+    PID pidLeft  = PID(pidKp, pidKi, pidKd, 1.0f);
     PID pidRight = PID(pidKp, pidKi, pidKd, 1.0f);
 
     bool patternDetected = false;
 
-    bool emergencyBrake = false;
+    bool     emergencyBrake      = false;
     uint32_t emergencyBrakeTimer = 0;
 
     bool obstacleFinalBrake = false;
 
+
+PID distancePID = PID(
+    0.035f,   // Kp — szybciej reaguje
+    0.0002f,  // Ki — lekka korekta
+    0.012f    // Kd — tłumienie
+);
+uint32_t maxPowerTimer  = 0;
+    bool     maxPowerActive = false;
+
+    uint32_t stableTimer  = 0;
+    bool     stableActive = false;
+
+    bool finalStopDone      = false;
+    bool distanceModeActive = false;
+
   public:
     Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
-    void  proc(float position, uint32_t currentMillis);
+    void proc(float position, uint32_t currentMillis, uint16_t sr04Distance);
 
     float getLeft();
     float getRight();
 
-    void  setStartRPM(uint32_t value);
+    void     setStartRPM(uint32_t value);
     uint32_t getStartRPM();
 
     uint8_t getDiffValue() { return differentialValue; }
-    void setDiffValue(uint8_t newValue) { differentialValue = newValue; }
+    void    setDiffValue(uint8_t newValue) { differentialValue = newValue; }
 
     uint8_t getBrakeDivider() { return brakeDivider; }
-    void setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
+    void    setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
 
-    void setKlzDistance(uint16_t distance) { klzDistance = distance; }
+    void     setKlzDistance(uint16_t distance) { klzDistance = distance; }
     uint16_t getKlzDistance() { return klzDistance; }
 
     void setPidKp(float kp) {
@@ -67,17 +82,18 @@ class Differential {
         pidRight.setKp(pidKp);
     }
 
-    float getPidKp() {
-        return pidKp;
-    }
+    float getPidKp() { return pidKp; }
 
-    void setPatternDetected(bool detected) {
-        patternDetected = detected;
-    }
+    void setPatternDetected(bool detected) { patternDetected = detected; }
 
     void clearAllFlags() {
-        patternDetected = false;
+        patternDetected    = false;
         obstacleFinalBrake = false;
-        emergencyBrake = false;
+        emergencyBrake     = false;
     }
+
+
+    bool isDistanceModeActive() const { return distanceModeActive; }
+
+    bool isFinalStopDone() const { return finalStopDone; }
 };

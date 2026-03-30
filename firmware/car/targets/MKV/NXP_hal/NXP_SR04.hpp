@@ -15,7 +15,7 @@ public:
     void pitHandler();
     void echoHandler();
 
-    uint32_t getDistanceMm();
+    uint16_t getDistanceMm();
     bool isReady();    
     // ISR entry points
     static void pitCallback(uint32_t*);
@@ -26,6 +26,9 @@ private:
     NXP_GPIO triggerPin;
     NXP_GPIO echoPin;
     NXP_PIT  pitTimer;
+    uint32_t echoTimeotMs = 40;
+    bool echoWaiting = false;
+    uint64_t echoStartTick = 0;
 
     // timing
     volatile uint64_t ticks10us = 0;
@@ -33,7 +36,7 @@ private:
     volatile uint64_t echoStart = 0;
     volatile uint64_t echoEnd   = 0;
 
-    volatile uint32_t distanceMm = 0;
+    volatile uint16_t distanceMm = 0;
     volatile bool dataReady = false;
 
     // trigger state machine

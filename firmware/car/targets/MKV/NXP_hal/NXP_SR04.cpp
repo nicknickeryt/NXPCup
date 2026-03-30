@@ -2,25 +2,20 @@
 
 NXP_SR04* NXP_SR04::instance = nullptr;
 
-NXP_SR04::NXP_SR04(NXP_GPIO trigger,
-                   NXP_GPIO echo,
-                   NXP_PIT::CHANNEL pitChannel)
-    : triggerPin(trigger),
-      echoPin(echo),
-      pitTimer(pitChannel,
-               100000,                 // 10us tick
-               NXP_SR04::pitCallback,
-               nullptr)
-{}
+NXP_SR04::NXP_SR04(NXP_GPIO trigger, NXP_GPIO echo, NXP_PIT::CHANNEL pitChannel) :
+    triggerPin(trigger),
+    echoPin(echo),
+    pitTimer(pitChannel,
+             100000, // 10us tick
+             NXP_SR04::pitCallback,
+             nullptr) {}
 
 void NXP_SR04::pitCallback(uint32_t*) {
-    if (instance)
-        instance->pitHandler();
+    if (instance) instance->pitHandler();
 }
 
 void NXP_SR04::echoCallback() {
-    if (instance)
-        instance->echoHandler();
+    if (instance) instance->echoHandler();
 }
 
 void NXP_SR04::init() {
@@ -34,13 +29,13 @@ void NXP_SR04::init() {
     pitTimer.init();
 }
 
-// note that with 2ms between pulses we can measure up to 34cm! 
+// note that with 2ms between pulses we can measure up to 34cm!
 void NXP_SR04::pitHandler() {
-    ticks10us = ticks10us + 1;
+    ticks10us  = ticks10us + 1;
     delayTicks = delayTicks + 1;
 
     if (!pulseActive) {
-        if (delayTicks >= 200) { // 1 ms
+        if (delayTicks >= 5000) { // 30 ms
             triggerPin.set();
             pulseActive = true;
 
@@ -55,35 +50,50 @@ void NXP_SR04::pitHandler() {
             pulseActive = false;
         }
     }
+
+    if (echoWaiting) {
+        uint64_t now = ticks10us;
+
+        uint64_t elapsed = (now >= echoStartTick) ? (now - echoStartTick) : 0;
+
+        // echoTimeotMs = 25 ms → 2500 ticków (bo 10 µs)
+        uint64_t timeoutTicks = echoTimeotMs * 100;
+
+        if (elapsed > timeoutTicks) {
+            // timeout = brak echa
+            echoWaiting = false;
+            distanceMm  = 0xFFFF; // albo np. 5000 mm
+            dataReady   = true;
+        }
+    }
 }
 
 void NXP_SR04::echoHandler() {
-    bool state = echoPin.get();
-    uint64_t now = ticks10us;
+    bool     state = echoPin.get();
+    uint64_t now   = ticks10us;
 
     if (state) {
-        echoStart = now;
+        echoStart     = now;
+        echoStartTick = now;
+        echoWaiting   = true;
     } else {
-        echoEnd = now;
+        echoEnd     = now;
+        echoWaiting = false;
 
-        uint64_t delta = (echoEnd >= echoStart)
-            ? (echoEnd - echoStart)
-            : 0;
+        uint64_t delta = (echoEnd >= echoStart) ? (echoEnd - echoStart) : 0;
+
+        if (delta == 0 || delta < 5) return;
 
         uint32_t us = delta * 10;
-
-        // mm z zaokrągleniem
-        distanceMm = (us * 10 + 29) / 58;
+        distanceMm  = (us * 10 + 29) / 58;
 
         dataReady = true;
     }
 }
 
-uint32_t NXP_SR04::getDistanceMm() {
+uint16_t NXP_SR04::getDistanceMm() {
     dataReady = false;
     return distanceMm;
 }
 
-bool NXP_SR04::isReady() {
-    return dataReady;
-}
+bool NXP_SR04::isReady() { return dataReady; }
