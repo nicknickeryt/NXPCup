@@ -150,6 +150,7 @@ void Kitty::init() {
 
     FTM_Init();
     uartDebug.init();
+    uartDebug.initDMA();
     uartDebug.enableInterrupt(NXP_Uart::InterruptType::RX_FULL);
     uartDebug.setRedirectHandler(uartCallback);
     log_setWriteFunction(logWrite);
@@ -191,6 +192,7 @@ void Kitty::init() {
     menu.init();
     camera.start();
     log_notice("KiTTy init finished");
+
 }
 
 
@@ -290,6 +292,7 @@ void Kitty::proc() {
         if (menuActive) {
             return;
         }
+
         float servoPosition = -(position / 19.0f);
         if (differential.isDistanceModeActive()) servoPosition = 0;
 

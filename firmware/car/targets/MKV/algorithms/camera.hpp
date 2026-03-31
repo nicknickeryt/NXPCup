@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 #define brightnessCut 0
-#define alpha         0.1
+#define alpha         0.7
 
 #pragma once
 
@@ -44,7 +44,7 @@ class Algorithm {
 
 		uint32_t algorithmStartTime = 0;
 
-		uint32_t patternDetectTimeoutMs = 5000;
+		uint32_t patternDetectTimeoutMs = 1500;
 		uint32_t patternsAmount = 0;
 		bool patternDetected = false;
 		uint32_t patternsStartTime = 0;

@@ -19,15 +19,17 @@ class Differential {
 
     uint16_t klzDistance = 0;
 
-    float differentialValue = 60.0f; // start 2600 max
+  
 
     float brakeComponent = 0;
 
-    float brakeDivider = 140.0f;
+    // Lower - more brake!
+    float brakeAll = 70.0f;  
+    float brakeOne = 63.0f; // start 2600 max
 
-    uint32_t cornerRPM = 1500;
+    uint32_t cornerRPM = 600;
 
-    float pidKp = 1.5f;
+    float pidKp = 1.7f;
     float pidKi = 0.0002f;
     float pidKd = 0.0f;
 
@@ -67,11 +69,11 @@ uint32_t maxPowerTimer  = 0;
     void     setStartRPM(uint32_t value);
     uint32_t getStartRPM();
 
-    uint8_t getDiffValue() { return differentialValue; }
-    void    setDiffValue(uint8_t newValue) { differentialValue = newValue; }
+    uint8_t getDiffValue() { return brakeOne; }
+    void    setDiffValue(uint8_t newValue) { brakeOne = newValue; }
 
-    uint8_t getBrakeDivider() { return brakeDivider; }
-    void    setBrakeDivider(uint8_t newValue) { brakeDivider = newValue; }
+    uint8_t getBrakeDivider() { return brakeAll; }
+    void    setBrakeDivider(uint8_t newValue) { brakeAll = newValue; }
 
     void     setKlzDistance(uint16_t distance) { klzDistance = distance; }
     uint16_t getKlzDistance() { return klzDistance; }

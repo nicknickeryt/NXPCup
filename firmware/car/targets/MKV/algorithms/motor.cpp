@@ -1,116 +1,117 @@
-#include "motor.hpp"
+    #include "motor.hpp"
 
-#include "pid.hpp"
+    #include "pid.hpp"
 
-#include <utility>
+    #include <utility>
 
-#include <cmath>
+    #include <cmath>
 
-/*
- *@brief set velocity adequate to current conditions on track
- *@param startVelocity is the default speed of the car
- *@param position is the current position of the car on the track
- */
+    /*
+    *@brief set velocity adequate to current conditions on track
+    *@param startVelocity is the default speed of the car
+    *@param position is the current position of the car on the track
+    */
 
-Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
+    Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
-void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
-    if (1) {
-        setStartRPM(800);
-    }
+    void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
+        
+        if (patternDetected) {
+            setStartRPM(800);
+        }
 
-    if (sr04Distance < 250) {
-        distanceModeActive = true;
-    }
+        if (sr04Distance < 250 && patternDetected) {
+            distanceModeActive = true;
+        }
 
-    if(finalStopDone) {
-        leftMotorPower  = 0.0f;
-        rightMotorPower = 0.0f;
-        return;
-    }
-
-    if (1 && distanceModeActive && !finalStopDone) {
-        float target  = 80.0f;
-        float current = sr04Distance;
-
-        bool inRange = fabs(current - target) < 15.0f;
-
-        // 🔥 jeśli jesteśmy blisko → NIE używamy PID
-        if (inRange) {
-            distancePID.reset(); // 🔥 bardzo ważne
-
+        if(finalStopDone) {
             leftMotorPower  = 0.0f;
             rightMotorPower = 0.0f;
+            return;
+        }
 
-            if (!stableActive) {
-                stableActive = true;
-                stableTimer  = currentMillis;
-            } else if (currentMillis - stableTimer > 3000) {
-                finalStopDone = true;
+        if (patternDetected && distanceModeActive && !finalStopDone) {
+            float target  = 90.0f;
+            float current = sr04Distance;
+
+            bool inRange = fabs(current - target) < 15.0f;
+
+            // 🔥 jeśli jesteśmy blisko → NIE używamy PID
+            if (inRange) {
+                distancePID.reset(); // 🔥 bardzo ważne
+
                 leftMotorPower  = 0.0f;
                 rightMotorPower = 0.0f;
-                return;
-            }
 
-        } else {
-            stableActive = false;
-
-            float output = distancePID.calculate(current, target);
-            output       = std::clamp(output, -0.7f, 0.18f);
-
-            leftMotorPower  = output;
-            rightMotorPower = output;
-
-            // 🔥 zabezpieczenie max mocy
-            if (fabs(output) >= 0.5f) {
-                if (!maxPowerActive) {
-                    maxPowerActive = true;
-                    maxPowerTimer  = currentMillis;
-                } else if (currentMillis - maxPowerTimer > 1000) {
+                if (!stableActive) {
+                    stableActive = true;
+                    stableTimer  = currentMillis;
+                } else if (currentMillis - stableTimer > 3000) {
+                    finalStopDone = true;
                     leftMotorPower  = 0.0f;
                     rightMotorPower = 0.0f;
                     return;
                 }
+
             } else {
-                maxPowerActive = false;
+                stableActive = false;
+
+                float output = distancePID.calculate(current, target);
+                output       = std::clamp(output, -0.7f, 0.18f);
+
+                leftMotorPower  = output;
+                rightMotorPower = output;
+
+                // 🔥 zabezpieczenie max mocy
+                if (fabs(output) >= 0.5f) {
+                    if (!maxPowerActive) {
+                        maxPowerActive = true;
+                        maxPowerTimer  = currentMillis;
+                    } else if (currentMillis - maxPowerTimer > 1000) {
+                        leftMotorPower  = 0.0f;
+                        rightMotorPower = 0.0f;
+                        return;
+                    }
+                } else {
+                    maxPowerActive = false;
+                }
             }
+
+            return;
         }
 
-        return;
+        // float breakComponent = (abs(position) / breakRatio);
+        float diffComponent = (1 - (abs(position) / brakeOne));
+
+        brakeComponent = 1 - (abs(position) / brakeAll);
+        brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
+
+        if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
+
+        if (position >= 0) {
+            setLeftMotorRPM  = startRPM * brakeComponent;
+            setRightMotorRPM = startRPM * diffComponent * brakeComponent;
+        } else if (position < 0) {
+            setRightMotorRPM = startRPM * brakeComponent;
+            setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
+        }
+
+        float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float)startRPM, encoderRight.getRPM() / (float)startRPM);
+        float pidOutRight = pidRight.calculate((float)setRightMotorRPM / (float) startRPM, encoderLeft.getRPM() / (float)startRPM);
+
+        leftMotorPower  = pidOutLeft;
+        rightMotorPower = pidOutRight;
+
+        if (encoderRight.getRPM() > 5000 || encoderLeft.getRPM() > 5000) {
+            leftMotorPower      = 0.0f;
+            rightMotorPower     = 0.0f;
+            emergencyBrakeTimer = currentMillis;
+            emergencyBrake      = true;
+        }
     }
 
-    // float breakComponent = (abs(position) / breakRatio);
-    float diffComponent = (1 - (abs(position) / differentialValue));
+    float Differential::getLeft() { return leftMotorPower; }
+    float Differential::getRight() { return rightMotorPower; }
 
-    brakeComponent = 1 - (abs(position) / brakeDivider);
-    brakeComponent = std::clamp(brakeComponent, -1.0f, 1.0f);
-
-    if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
-
-    if (position >= 0) {
-        setLeftMotorRPM  = startRPM * brakeComponent;
-        setRightMotorRPM = startRPM * diffComponent * brakeComponent;
-    } else if (position < 0) {
-        setRightMotorRPM = startRPM * brakeComponent;
-        setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
-    }
-
-    float pidOutLeft  = pidLeft.calculate(setLeftMotorRPM / 3000.0f, encoderRight.getRPM() / 3000.0f);
-    float pidOutRight = pidRight.calculate(setRightMotorRPM / 3000.0f, encoderLeft.getRPM() / 3000.0f);
-
-    leftMotorPower  = pidOutLeft;
-    rightMotorPower = pidOutRight;
-
-    if (encoderRight.getRPM() > 5000 || encoderLeft.getRPM() > 5000) {
-        leftMotorPower      = 0.0f;
-        rightMotorPower     = 0.0f;
-        emergencyBrakeTimer = currentMillis;
-        emergencyBrake      = true;
-    }
-}
-
-float Differential::getLeft() { return leftMotorPower; }
-float Differential::getRight() { return rightMotorPower; }
-
-void     Differential::setStartRPM(uint32_t value) { startRPM = value; }
-uint32_t Differential::getStartRPM() { return startRPM; }
+    void     Differential::setStartRPM(uint32_t value) { startRPM = value; }
+    uint32_t Differential::getStartRPM() { return startRPM; }

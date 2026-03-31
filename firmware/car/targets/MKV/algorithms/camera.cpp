@@ -35,55 +35,93 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     // Lo pass filter position
     filteredPosition = (filteredPosition * (1 - alpha)) + ((adjustedPosition + algorithmOffset) * alpha);
 
-    if(findPatterns(data, currentMillis))
-        differential.setPatternDetected(true);
+    if (findPatterns(data, currentMillis)) differential.setPatternDetected(true);
 
     // Return filtered position
     return (filteredPosition);
 }
 
+// przykładowy wzorzec — MUSISZ dopasować z realnych danych!
+static const float pattern[128] = {7,   8,   13,  11, 18, 19, 28, 32, 36, 37, 41, 39, 34, 30, 40, 55, 71, 75, 78, 79,  81,  80,  84,  84,  89,  86,  88,  89,  89,  83,  68,  48,
+                                   36,  37,  37,  37, 38, 37, 40, 40, 41, 44, 44, 45, 48, 47, 52, 51, 62, 78, 97, 105, 108, 105, 107, 107, 110, 108, 109, 108, 106, 111, 112, 108,
+                                   111, 100, 91,  79, 78, 75, 79, 77, 80, 77, 79, 79, 82, 79, 83, 82, 84, 80, 82, 81,  84,  86,  98,  105, 110, 105, 107, 104, 108, 105, 106, 103,
+                                   103, 100, 100, 96, 96, 93, 92, 80, 59, 40, 41, 50, 60, 58, 58, 52, 52, 47, 44, 38,  37,  26,  20,  16,  14,  9,   10,  6,   8,   4,   0,   0};
+
 bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
+    if (currentMillis - algorithmStartTime < patternDetectTimeoutMs) return false;
 
-    if(currentMillis - algorithmStartTime < patternDetectTimeoutMs) return false;
+    // ===== SMOOTH =====
+    for (int i = 1; i < 127; i++) smoothedData[i] = (data[i - 1] + 5 * data[i] + data[i + 1]) / 7;
 
-    crossings = 0;
-    // Smoothing
-    for (auto i = 1; i <= 126; i++) smoothedData[i] = (data[i - 1] + (5*data[i]) + data[i + 1]) / 8;
+    // ===== NORMALIZACJA DATA =====
+    float meanData = 0.0f;
+    for (int i = 0; i < 128; i++) meanData += smoothedData[i];
+    meanData /= 128.0f;
 
-    // Crossings with brightness
-    for (auto i = 1; i <= 125; i++) {
-        // down-up crossing
-        if (smoothedData[i - 1] < brightness && smoothedData[i] < brightness && smoothedData[i + 1] > brightness && smoothedData[i + 2] > brightness) crossings++;
+    float stdData = 0.0f;
+    for (int i = 0; i < 128; i++) {
+        float d = smoothedData[i] - meanData;
+        stdData += d * d;
+    }
+    stdData = sqrtf(stdData);
 
-        // up-down crossing
-        if (smoothedData[i - 1] > brightness && smoothedData[i] > brightness && smoothedData[i + 1] < brightness && smoothedData[i + 2] < brightness) crossings++;
+    if (stdData < 1e-3f) return false;
+
+    // ===== NORMALIZACJA PATTERN =====
+    static float meanPattern = 0.0f;
+    static float stdPattern  = 0.0f;
+    static bool  patternInit = false;
+
+    if (!patternInit) {
+        for (int i = 0; i < 128; i++) meanPattern += pattern[i];
+        meanPattern /= 128.0f;
+
+        for (int i = 0; i < 128; i++) {
+            float d = pattern[i] - meanPattern;
+            stdPattern += d * d;
+        }
+        stdPattern = sqrtf(stdPattern);
+
+        patternInit = true;
     }
 
-    // Find Patterns
-    if (crossings > 6) {
-        // return true;
+    // ===== KORELACJA =====
+    float corr = 0.0f;
 
+    for (int i = 0; i < 128; i++) {
+        float d1 = smoothedData[i] - meanData;
+        float d2 = pattern[i] - meanPattern;
+        corr += d1 * d2;
+    }
+
+    corr /= (stdData * stdPattern);
+
+    // ===== DECYZJA =====
+    const float THRESHOLD = 0.90; // 🔥 do strojenia
+
+    if (corr > THRESHOLD) {
         if (!patternDetected) {
-            patternDetected = true;
+            patternDetected   = true;
             patternsStartTime = currentMillis;
             return true;
         }
+
         if (currentMillis - patternsStartTime > 5) {
             patternDetected = false;
             return true;
         }
-    } else
+
+    } else {
         patternDetected = false;
+    }
 
     return false;
 }
 
 void Algorithm::clearPatterns(uint32_t currentMillis) {
-    patternDetected = false;
+    patternDetected   = false;
     patternsStartTime = currentMillis;
     differential.clearAllFlags();
 }
 
-void Algorithm::setAlgorithmStartTime(uint32_t currentMillis) {
-    algorithmStartTime = currentMillis;
-}
+void Algorithm::setAlgorithmStartTime(uint32_t currentMillis) { algorithmStartTime = currentMillis; }
