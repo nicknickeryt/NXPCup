@@ -71,11 +71,12 @@ def start_logging():
     log_file = open(filename, "w", newline="")
     log_writer = csv.writer(log_file)
 
-    header = [
+    header = []
+    header += [f"cam_{i}" for i in range(128)]
+    header += [
         "time","position","rpmLeft","rpmRight",
         "startRPM","sr04","diffLeft","diffRight","menuActive"
     ]
-    header += [f"cam_{i}" for i in range(128)]
     log_writer.writerow(header)
 
     logging_enabled = True
@@ -497,7 +498,12 @@ def read_uart():
             """)
             
         if logging_enabled and log_writer:
-            row = [
+            row = []
+            
+            # 🔥 dodaj kamerę
+            row += list(last_frame)
+            
+            row += [
                 time.time(),
                 position,
                 rpmLeft,
@@ -508,9 +514,6 @@ def read_uart():
                 diffRight,
                 menuActive
             ]
-
-            # 🔥 dodaj kamerę
-            row += list(last_frame)
 
             log_writer.writerow(row)
   
@@ -524,6 +527,6 @@ sock.setblocking(False)
 
 timer = QtCore.QTimer()
 timer.timeout.connect(read_uart)
-timer.start(15)  # ~60 FPS
+timer.start(6)  # ~150 fps
 
 app.exec()
