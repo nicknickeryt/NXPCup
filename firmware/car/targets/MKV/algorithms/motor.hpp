@@ -24,12 +24,13 @@ class Differential {
     float brakeComponent = 0;
 
     // Lower - more brake!
-    float brakeAll = 70.0f;  
-    float brakeOne = 63.0f; // start 2600 max
+    float brakeAll = 22.0f;   
+    float brakeOne = 35.0f; // start 2600 max
 
-    uint32_t cornerRPM = 600;
+    uint32_t cornerOutsideRPM = 600;
+    uint32_t cornerInsideRPM = 600;
 
-    float pidKp = 1.7f;
+    float pidKp = 2.1f;
     float pidKi = 0.0002f;
     float pidKd = 0.0f;
 

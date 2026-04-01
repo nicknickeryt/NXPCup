@@ -22,6 +22,8 @@ logging_enabled = False
 log_file = None
 log_writer = None
 
+max_rpm_record = 0
+
 class MyWindow(pg.GraphicsLayoutWidget):
     def closeEvent(self, event):
         print("[App] Zamykam aplikację...")
@@ -64,6 +66,19 @@ def send_cmd(cmd):
     except Exception as e:
         print("[BT] Send error:", e)
         
+def reset_all():
+    global max_rpm_record
+    max_rpm_record = 0
+    rpm_record_label.setText("Rekord RPM: 0")
+    send_cmd("x")
+    
+
+def start_all():
+    global max_rpm_record
+    max_rpm_record = 0
+    rpm_record_label.setText("Rekord RPM: 0")
+    send_cmd("r")
+
 def start_logging():
     global logging_enabled, log_file, log_writer
 
@@ -181,6 +196,23 @@ proxy_status = QtWidgets.QGraphicsProxyWidget()
 proxy_status.setWidget(status_label)
 
 
+rpm_record_label = QtWidgets.QLabel("Rekord RPM: 0")
+rpm_record_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+rpm_record_label.setStyleSheet("""
+    QLabel {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        background-color: #34495e;
+        border-radius: 10px;
+        padding: 10px;
+    }
+""")
+
+main_layout.addWidget(rpm_record_label)
+
+
 win.nextRow()
 win.addItem(proxy_status, colspan=1)
 
@@ -281,40 +313,7 @@ def make_btn(text, cmd, color, row, col):
     btn.clicked.connect(lambda: send_cmd(cmd))
     btn_layout.addWidget(btn, row, col)
     return btn  
-
-make_btn("STOP", "s", "#e74c3c", 0, 0)
-make_btn("Pauza", "p", "#4f4f4f", 0, 1)
-
-make_btn("Wznów", "o", "#4f4f4f", 1, 0)
-make_btn("Uruchom", "r", "#27ae60", 1, 1)
-
-make_btn("Początkowe RPM+", "+", "#3498db", 2, 0)
-make_btn("Początkowe RPM-", "-", "#2980b9", 2, 1)
-
-make_btn("DiffRatio+", "a", "#9b59b6", 3, 0)
-make_btn("DiffRatio-", "b", "#8e44ad", 3, 1)
-
-make_btn("RESET", "x", "#f7c214", 4, 0)
-# 🔥 LOGGING BUTTONS (takie same jak reszta)
-
-# 🔥 STATUS OBOK PRZYCISKÓW
-log_status = QtWidgets.QLabel("Zapis: wyłączony")
-log_status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-log_status.setMinimumWidth(120)
-
-log_status.setStyleSheet("""
-    QLabel {
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        background-color: #7f8c8d;
-        border-radius: 8px;
-        padding: 10px;
-    }
-""")
-
-btn_layout.addWidget(log_status)
+    
 
 def make_action_btn(text, func, color, row, col):
     btn = QtWidgets.QPushButton(text)
@@ -341,6 +340,41 @@ def make_action_btn(text, func, color, row, col):
     btn.clicked.connect(func)
     btn_layout.addWidget(btn, row, col)
     return btn
+
+make_btn("STOP", "s", "#e74c3c", 0, 0)
+make_btn("Pauza", "p", "#4f4f4f", 0, 1)
+
+make_btn("Wznów", "o", "#4f4f4f", 1, 0)
+make_action_btn("Uruchom", start_all, "#27ae60", 1, 1)
+
+make_btn("Początkowe RPM+", "+", "#3498db", 2, 0)
+make_btn("Początkowe RPM-", "-", "#2980b9", 2, 1)
+
+make_btn("DiffRatio+", "a", "#9b59b6", 3, 0)
+make_btn("DiffRatio-", "b", "#8e44ad", 3, 1)
+
+make_action_btn("RESET", reset_all, "#f7c214", 4, 0)
+# 🔥 LOGGING BUTTONS (takie same jak reszta)
+
+# 🔥 STATUS OBOK PRZYCISKÓW
+log_status = QtWidgets.QLabel("Zapis: wyłączony")
+log_status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+log_status.setMinimumWidth(120)
+
+log_status.setStyleSheet("""
+    QLabel {
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        background-color: #7f8c8d;
+        border-radius: 8px;
+        padding: 10px;
+    }
+""")
+
+btn_layout.addWidget(log_status)
+
 
 
 make_action_btn("Zapis start", start_logging, "#16a085", 5, 0)
@@ -416,6 +450,13 @@ def read_uart():
         buffer = buffer[start_idx + FRAME_SIZE:]
         
         menuActive = frame[146]  # 1 = STOPPED, 0 = RUNNING
+        
+        global max_rpm_record
+
+        current_max = max(rpmLeft, rpmRight)
+        if current_max <= 15000 and current_max > max_rpm_record:
+            max_rpm_record = current_max
+            rpm_record_label.setText(f"Rekord RPM: {max_rpm_record}")
 
     # 🔥 rysuj tylko najnowsze
     if last_frame:

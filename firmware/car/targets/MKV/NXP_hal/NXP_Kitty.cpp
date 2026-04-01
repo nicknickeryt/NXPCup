@@ -47,17 +47,17 @@ float motorR = 0.0f;
 void Kitty::uartCallback(uint8_t receivedByte) {
     switch (receivedByte) {
         case 's':
-            fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
-            kitty().menu.setTriggeredOff(false);
-            kitty().motors.setValue(0, 0);
+            // fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
+            // kitty().menu.setTriggeredOff(false);
+            // kitty().motors.setValue(0, 0);
+            // kitty().motors.setEnabled(false);
+            // kitty().servo.set(0);
+            // kitty().servo.disable();
+            fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
             kitty().motors.setEnabled(false);
-            kitty().servo.set(0);
-            kitty().servo.disable();
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case 'p':
-            fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
-            kitty().differential.setStartRPM(0);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
             break;
         case 'o':
             fctprintf(logWrite, NULL, "\nkittyResume\n", 0);
@@ -293,7 +293,7 @@ void Kitty::proc() {
             return;
         }
 
-        float servoPosition = -(position / 19.0f);
+        float servoPosition = -(position / 20.0f);
         if (differential.isDistanceModeActive()) servoPosition = 0;
 
         servo.set(servoPosition);

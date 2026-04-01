@@ -105,7 +105,7 @@ void NXP_Camera::pitInterrupt() {
         break;
         case CameraState::WAIT_END_1:
             waitEnd++;
-            if (waitEnd > 7) {
+            if (waitEnd > 1) {
                 waitEnd = 0;
                 cameraState = CameraState::START;
             }

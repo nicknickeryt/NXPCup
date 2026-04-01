@@ -121,7 +121,7 @@ class Kitty {
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 
     // PIT
-    NXP_PIT pitCamera         = {NXP_PIT::CHANNEL::_0, 40000, NXP_Camera::pitInterruptStatic, nullptr};
+    NXP_PIT pitCamera         = {NXP_PIT::CHANNEL::_0, 38000, NXP_Camera::pitInterruptStatic, nullptr};
     NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 30, pit_generalHandler, nullptr};
     NXP_PIT encodersPit       = {NXP_PIT::CHANNEL::_2, 50, nullptr, nullptr};
 
@@ -168,7 +168,7 @@ class Kitty {
 
     // ALGORITHMzzzz
     Algorithm     newAlgorithm = Algorithm(encoderLeft, encoderRight, differential);
-    Differential  differential = Differential(2600, encoderLeft, encoderRight);
+    Differential  differential = Differential(4000, encoderLeft, encoderRight);
 
     // KLZ communication
     UART_Frame uartFrame = {onKLZDataReceivedCallback};

@@ -15,6 +15,7 @@
     Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
     void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
+        patternDetected = 0;
         
         if (patternDetected) {
             setStartRPM(800);
@@ -82,18 +83,26 @@
 
         // float breakComponent = (abs(position) / breakRatio);
         float diffComponent = (1 - (abs(position) / brakeOne));
+        diffComponent = std::clamp(diffComponent, 0.6f, 1.0f);
 
         brakeComponent = 1 - (abs(position) / brakeAll);
-        brakeComponent = std::clamp(brakeComponent, 0.0f, 1.0f);
+        brakeComponent = std::clamp(brakeComponent, 0.6f, 1.0f);
 
-        if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
+
+        // if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
 
         if (position >= 0) {
             setLeftMotorRPM  = startRPM * brakeComponent;
+            if(setLeftMotorRPM < cornerOutsideRPM) setLeftMotorRPM  = cornerOutsideRPM;
+
             setRightMotorRPM = startRPM * diffComponent * brakeComponent;
+            if(setRightMotorRPM < cornerInsideRPM) setRightMotorRPM = cornerInsideRPM;
         } else if (position < 0) {
             setRightMotorRPM = startRPM * brakeComponent;
+            if(setRightMotorRPM < cornerOutsideRPM) setRightMotorRPM = cornerOutsideRPM;
+
             setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
+            if(setLeftMotorRPM < cornerInsideRPM) setLeftMotorRPM = cornerInsideRPM;
         }
 
         float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float)startRPM, encoderRight.getRPM() / (float)startRPM);
