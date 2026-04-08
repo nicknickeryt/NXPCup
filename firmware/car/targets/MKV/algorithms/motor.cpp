@@ -15,7 +15,7 @@
     Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
 
     void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
-        patternDetected = 0;
+        // patternDetected = 0;
         
         if (patternDetected) {
             setStartRPM(800);
