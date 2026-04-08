@@ -22,7 +22,7 @@ private:
     NXP_PORT& pinA;
     NXP_PORT& pinB;
     Mode mode;
-    uint16_t lastTicksValue = 0;
+    int16_t lastTicksValue = 0;
     uint16_t ticksPerRevolution = 0;
     uint16_t lastRPMValue = 0;
 public:
@@ -58,7 +58,7 @@ public:
     }
 
     uint16_t getTicks() {
-        return lastTicksValue;
+        return abs(lastTicksValue);
     }
 
     uint16_t getRPM() {
@@ -66,12 +66,12 @@ public:
     }
 
     void updateTicks() {
-        lastTicksValue = ftm->CNT;
+        lastTicksValue = static_cast<int16_t>(ftm->CNT);
         ftm->CNT = 0;
     }
 
     void updateRPM() {
-        lastRPMValue = (float) ((float)lastTicksValue / (float)ticksPerRevolution) * 50.0f * 60.0f;
+        lastRPMValue = (float) ((float)abs(lastTicksValue) / (float)ticksPerRevolution) * 50.0f * 60.0f;
     }
 
     static void ISR(uint32_t* arg) {
