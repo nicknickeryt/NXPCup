@@ -286,7 +286,11 @@ void Kitty::proc() {
         frame[145]              = diffRightValue & 0xFF;
         frame[146]              = menuActive ? 0x01 : 0x00;
 
-        uartDebug.write((char*)frame, 147);
+        static int frameCounter = 0;
+        frameCounter++;
+        if (frameCounter % 2 == 0) {
+            uartDebug.write((char*)frame, 147);
+        }
         //////////////////////////////////////////////////////////////////////
 
         if (menuActive) {

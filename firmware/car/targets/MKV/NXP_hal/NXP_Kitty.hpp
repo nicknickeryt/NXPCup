@@ -121,7 +121,7 @@ class Kitty {
     NXP_DMA uart0DMA = {kDmaRequestMux0UART0Tx};
 
     // PIT
-    NXP_PIT pitCamera         = {NXP_PIT::CHANNEL::_0, 38000, NXP_Camera::pitInterruptStatic, nullptr};
+    NXP_PIT pitCamera         = {NXP_PIT::CHANNEL::_0, 55000, NXP_Camera::pitInterruptStatic, nullptr};
     NXP_PIT pitSendCameraData = {NXP_PIT::CHANNEL::_1, 30, pit_generalHandler, nullptr};
     NXP_PIT encodersPit       = {NXP_PIT::CHANNEL::_2, 50, nullptr, nullptr};
 
@@ -153,7 +153,7 @@ class Kitty {
 
     // UART
     NXP_Uart uartCommunication = {UART2, 921600, uart2RXmux, uart2TXmux, NXP_DMA::emptyDMA()};
-    NXP_Uart uartDebug         = {UART0, 460800, uart0RXmux, uart0TXmux, uart0DMA};
+    NXP_Uart uartDebug         = {UART0, 921600, uart0RXmux, uart0TXmux, uart0DMA};
     NXP_Uart uartKLZ           = {UART4, 115200, uart4RXmux, uart4TXmux, NXP_DMA::emptyDMA()};
 
     // DISPLAY

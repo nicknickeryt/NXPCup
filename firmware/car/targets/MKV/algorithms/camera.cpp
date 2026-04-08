@@ -41,6 +41,7 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     return (filteredPosition);
 }
 
+
 // przykładowy wzorzec — MUSISZ dopasować z realnych danych!
 static constexpr float pattern[128] = {7,   8,   13,  11, 18, 19, 28, 32, 36, 37, 41, 39, 34, 30, 40, 55, 71, 75, 78, 79,  81,  80,  84,  84,  89,  86,  88,  89,  89,  83,  68,  48,
                                    36,  37,  37,  37, 38, 37, 40, 40, 41, 44, 44, 45, 48, 47, 52, 51, 62, 78, 97, 105, 108, 105, 107, 107, 110, 108, 109, 108, 106, 111, 112, 108,
@@ -117,6 +118,67 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
     return false;
 }
+
+// // przykładowy wzorzec — MUSISZ dopasować z realnych danych!
+// static const uint32_t pattern[60] = {
+//     100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//     0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,
+//     100,100,100,100,100,100,100,0,0,0,0,0,0,0,0,0,
+//     0,0,0,0,0,0,0,0,0,0,0,0
+// };
+// bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis)
+// {
+//     if (currentMillis - algorithmStartTime < patternDetectTimeoutMs)
+//         return false;
+
+//     // ===== SMOOTH =====
+//     for (int i = 1; i < 127; i++)
+//         smoothedData[i] = (data[i - 1] + 5 * data[i] + data[i + 1]) / 7;
+
+//     // ===== SLIDING CROSS-CORRELATION =====
+//     int32_t bestCorr = 0;
+//     int bestIndex = -1;
+
+//     // Slide pattern over data
+//     for (int offset = 20; offset <= 100 - 60; offset++) {
+
+//         int32_t corr = 0;
+
+//         for (int i = 0; i < 60; i++) {
+//             corr += (int32_t)smoothedData[offset + i] * pattern[i];
+//         }
+
+//         if (corr > bestCorr) {
+//             bestCorr = corr;
+//             bestIndex = offset;
+//         }
+//     }
+
+//     // ===== THRESHOLD =====
+//     // MUST be tuned experimentally
+//     // originally was 200000
+//     const int32_t THRESHOLD = 2000000000;  
+
+//     if (bestCorr > THRESHOLD) {
+
+//         if (!patternDetected) {
+//             patternDetected   = true;
+//             patternsStartTime = currentMillis;
+//             // detectedIndex     = bestIndex; // optional: where pattern was found
+//             return true;
+//         }
+
+//         if (currentMillis - patternsStartTime > 5) {
+//             patternDetected = false;
+//             return true;
+//         }
+
+//     } else {
+//         patternDetected = false;
+//     }
+
+//     return false;
+// }
 
 void Algorithm::clearPatterns(uint32_t currentMillis) {
     patternDetected   = false;
