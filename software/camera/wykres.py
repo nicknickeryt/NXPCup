@@ -10,7 +10,9 @@ import time
 
 # ================= CONFIG =================
 BAUD_RATE = 460800  
-BT_MAC = "98:D3:32:11:A4:34"
+BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
+# BT_MAC = "00:4B:12:3C:F5:DA"   # ESP32
+# BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
 FRAME_SIZE = 147
@@ -23,6 +25,10 @@ log_file = None
 log_writer = None
 
 max_rpm_record = 0
+
+last_time = time.time()
+frame_count = 0
+fps = 0
 
 class MyWindow(pg.GraphicsLayoutWidget):
     def closeEvent(self, event):
@@ -405,6 +411,14 @@ def connect_bluetooth_rfcomm(mac_address):
 
 def read_uart():
     global buffer
+    
+    global last_time, frame_count, fps
+    frame_count += 1
+    current_time = time.time()
+    if current_time - last_time >= 1.0:  # co sekundę
+        fps = frame_count / (current_time - last_time)
+        frame_count = 0
+        last_time = current_time
 
     # 🔥 czytaj wszystko co przyszło
     while True:
@@ -509,6 +523,7 @@ def read_uart():
         <b>Początkowe RPM:</b> {startRPM}<br>
         <b>Silniki:</b> L {diffLeft:.2f} | R {diffRight:.2f}<br>
         <b>Odległość:</b> {sr04} mm<br>
+        <b>Odśw. kamery:</b> {fps:.1f} Hz
         """
 
         info_label.setText(text)
@@ -568,6 +583,6 @@ sock.setblocking(False)
 
 timer = QtCore.QTimer()
 timer.timeout.connect(read_uart)
-timer.start(6)  # ~150 fps
+timer.start(1)  # ~150 fps
 
 app.exec()
