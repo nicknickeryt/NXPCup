@@ -30,7 +30,7 @@ class Differential {
     uint32_t cornerOutsideRPM = 600;
     uint32_t cornerInsideRPM = 600;
 
-    float pidKp = 2.1f;
+    float pidKp = 1.9f;
     float pidKi = 0.0002f;
     float pidKd = 0.0f;
 
