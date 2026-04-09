@@ -24,11 +24,23 @@ logging_enabled = False
 log_file = None
 log_writer = None
 
+# 🔥 GLOBALNE
+run_start_time = None
+run_end_time   = None
+run_finished   = False
+elapsed = 0
+
 max_rpm_record = 0
 
 last_time = time.time()
 frame_count = 0
 fps = 0
+
+rpm_history_L = np.zeros(128)
+rpm_history_R = np.zeros(128)
+
+power_history_L = np.zeros(128)
+power_history_R = np.zeros(128)
 
 class MyWindow(pg.GraphicsLayoutWidget):
     def closeEvent(self, event):
@@ -84,6 +96,12 @@ def start_all():
     max_rpm_record = 0
     rpm_record_label.setText("Rekord RPM: 0")
     send_cmd("r")
+    
+    global run_start_time, run_end_time, run_finished, elapsed
+    elapsed = 0
+    run_start_time = None
+    run_end_time   = None
+    run_finished   = False
 
 def start_logging():
     global logging_enabled, log_file, log_writer
@@ -237,13 +255,41 @@ img_plot.setFixedHeight(120)   # 🔥 dużo niższy pasek
 win.nextRow()
 
 # LEFT: Camera 2D
-history_plot = win.addPlot(title="Obraz Pseudo-2D", colspan=5)
+history_plot = win.addPlot(title="Obraz Pseudo-2D", colspan=1)
 history_plot.setMouseEnabled(False, False)
 history_plot.hideAxis('left')
 history_plot.hideAxis('bottom')
 history_plot.getViewBox().setAspectLocked(True)
 
+# 👉 przejdź do prawej kolumny
+win.nextCol()
 
+# RPM plot (wąski)
+rpm_plot = win.addPlot(title="RPM", colspan=1)
+rpm_plot.setYRange(0, 6000)
+rpm_plot.setMouseEnabled(False, False)
+
+# Czarna, przerywana linia dla target RPM
+target_rpm_curve = rpm_plot.plot(pen=pg.mkPen(color='k', style=QtCore.Qt.PenStyle.DashLine, width=2))
+
+rpm_curve_L = rpm_plot.plot(pen=pg.mkPen('r', width=2))
+rpm_curve_R = rpm_plot.plot(pen=pg.mkPen('b', width=2))
+
+
+power_plot = win.addPlot(title="Moc", colspan=1)
+power_plot.setYRange(-1.0, 2.0)
+power_plot.setMouseEnabled(False, False)
+
+power_curve_L = power_plot.plot(pen=pg.mkPen('r', width=2))
+power_curve_R = power_plot.plot(pen=pg.mkPen('b', width=2))
+
+rpm_plot.invertX(True)
+power_plot.invertX(True)
+
+win.ci.layout.setColumnStretchFactor(0, 6)
+win.ci.layout.setColumnStretchFactor(1, 2)
+win.ci.layout.setColumnStretchFactor(2, 6)
+win.ci.layout.setColumnStretchFactor(3, 6)
 
 history_img = pg.ImageItem()
 history_plot.addItem(history_img)
@@ -259,8 +305,6 @@ img_plot.getViewBox().setDefaultPadding(0)
 history_plot.getViewBox().setDefaultPadding(0)
 
 
-win.ci.layout.setColumnStretchFactor(0, 10)  # wykresy (lewa)
-win.ci.layout.setColumnStretchFactor(1, 1)  # panel info (prawa)
 
 bars = pg.BarGraphItem(x=list(range(128)), height=[1]*128, width=1, brushes=[(0,0,0)]*128, pen=None)
 img_plot.addItem(bars)
@@ -413,6 +457,9 @@ def read_uart():
     global buffer
     
     global last_time, frame_count, fps
+    
+    global run_start_time, run_end_time, run_finished
+        
     frame_count += 1
     current_time = time.time()
     if current_time - last_time >= 1.0:  # co sekundę
@@ -443,6 +490,11 @@ def read_uart():
 
         frame = buffer[start_idx:start_idx+FRAME_SIZE]
 
+        # 🔹 PIERWSZA RAMKA po uruchomieniu
+        if run_start_time is None:
+            run_start_time = time.time()
+            print(f"[TIME] Start pomiaru: {run_start_time:.3f}s")
+
         last_frame = frame[4:132]  # kamera
 
         # 🔥 nowe pola
@@ -460,10 +512,41 @@ def read_uart():
         # opcjonalnie powrót do -1..1
         diffLeft  = (diffLeft / 100.0) - 1
         diffRight = (diffRight / 100.0) - 1
+        global np
+        # 🔥 NORMALIZACJA
+        rpm_norm_L = min(rpmLeft, 6000)
+        rpm_norm_R = min(rpmRight, 6000)    
+        
+        # Wypełnij całą długość historii target RPM
+        target_line = np.full(128, startRPM)
+        target_rpm_curve.setData(target_line)
+
+        power_L = max(0.0, min(1.0, diffLeft))
+        power_R = max(0.0, min(1.0, diffRight))
+
+        # 🔥 przesuwanie historii
+        rpm_history_L[1:] = rpm_history_L[:-1]
+        rpm_history_R[1:] = rpm_history_R[:-1]
+
+        power_history_L[1:] = power_history_L[:-1]
+        power_history_R[1:] = power_history_R[:-1]
+
+        rpm_history_L[0] = rpm_norm_L
+        rpm_history_R[0] = rpm_norm_R
+
+        power_history_L[0] = power_L
+        power_history_R[0] = power_R
 
         buffer = buffer[start_idx + FRAME_SIZE:]
         
         menuActive = frame[146]  # 1 = STOPPED, 0 = RUNNING
+        
+        # 🔹 KONIEC - startRPM = 800
+        if not run_finished and startRPM == 800:
+            run_end_time = time.time()
+            run_finished = True
+            elapsed = run_end_time - run_start_time if run_start_time else 0
+            print(f"[TIME] Koniec trasy: {run_end_time:.3f}s | Czas trwania: {elapsed:.3f}s")
         
         global max_rpm_record
 
@@ -513,6 +596,12 @@ def read_uart():
 
         history[1:] = history[:-1]
         history[0] = row
+        
+        rpm_curve_L.setData(rpm_history_L)
+        rpm_curve_R.setData(rpm_history_R)
+
+        power_curve_L.setData(power_history_L)
+        power_curve_R.setData(power_history_R)
 
         # 🔥 wyświetlenie
         history_img.setImage(np.rot90(history, k=1), autoLevels=False)
