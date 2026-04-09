@@ -98,7 +98,7 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
     corr /= (stdData * stdPattern);
 
     // ===== DECYZJA =====
-    const float THRESHOLD = 0.90; // 🔥 do strojenia
+    const float THRESHOLD = 0.88; // na wysokich predkoscuach nadal nie wykrywa prawdziwego a wykrywa zle...
 
     if (corr > THRESHOLD) {
         if (!patternDetected) {
