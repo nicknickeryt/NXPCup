@@ -94,8 +94,8 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             motorL += 0.1f;
             motorR += 0.1f;
 
-            motorL = std::clamp(motorL, -0.2f, 0.2f);
-            motorR = std::clamp(motorR, -0.2f, 0.2f);
+            motorL = std::clamp(motorL, -0.3f, 0.3f);
+            motorR = std::clamp(motorR, -0.3f, 0.3f);
 
             Kitty::kitty().motors.setValue(motorL, motorR);
             break;
