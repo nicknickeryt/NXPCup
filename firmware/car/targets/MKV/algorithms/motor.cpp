@@ -12,13 +12,15 @@
     *@param position is the current position of the car on the track
     */
 
-    Differential::Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight) : startRPM(startRPMValue), encoderLeft(encoderLeft), encoderRight(encoderRight) {}
+    Differential::Differential(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, NXP_Params& params) : encoderLeft(encoderLeft), encoderRight(encoderRight), params(params) {}
 
     void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
-        // patternDetected = 0;
+#ifdef DISABLE_PATTERN_DETECTION_SLOWDOWN
+        patternDetected = 0;
+#endif
         
         if (patternDetected) {
-            setStartRPM(800);
+            params.setStartRPM(800);
         }
 
         if (sr04Distance < 250 && patternDetected) {
@@ -82,31 +84,31 @@
         }
 
         // float breakComponent = (abs(position) / breakRatio);
-        float diffComponent = (1 - (abs(position) / brakeOne));
-        diffComponent = std::clamp(diffComponent, 0.6f, 1.0f);
+        float diffComponent = (1 - (abs(position) / params.getBrakeOne()));
+        diffComponent = std::clamp(diffComponent, params.getBrakeClamp(), 1.0f);
 
-        brakeComponent = 1 - (abs(position) / brakeAll);
-        brakeComponent = std::clamp(brakeComponent, 0.6f, 1.0f);
+        brakeComponent = 1 - (abs(position) / params.getBrakeAll());
+        brakeComponent = std::clamp(brakeComponent, params.getBrakeClamp(), 1.0f);
 
 
         // if (startRPM * brakeComponent < cornerRPM) brakeComponent = cornerRPM / (startRPM);
 
         if (position >= 0) {
-            setLeftMotorRPM  = startRPM * brakeComponent;
-            if(setLeftMotorRPM < cornerOutsideRPM) setLeftMotorRPM  = cornerOutsideRPM;
+            setLeftMotorRPM  = params.getStartRPM() * brakeComponent;
+            if(setLeftMotorRPM < params.getCornerOutsideRPM()) setLeftMotorRPM  = params.getCornerOutsideRPM();
 
-            setRightMotorRPM = startRPM * diffComponent * brakeComponent;
-            if(setRightMotorRPM < cornerInsideRPM) setRightMotorRPM = cornerInsideRPM;
+            setRightMotorRPM = params.getStartRPM() * diffComponent * brakeComponent;
+            if(setRightMotorRPM < params.getCornerInsideRPM()) setRightMotorRPM = params.getCornerInsideRPM();
         } else if (position < 0) {
-            setRightMotorRPM = startRPM * brakeComponent;
-            if(setRightMotorRPM < cornerOutsideRPM) setRightMotorRPM = cornerOutsideRPM;
+            setRightMotorRPM = params.getStartRPM() * brakeComponent;
+            if(setRightMotorRPM < params.getCornerOutsideRPM()) setRightMotorRPM = params.getCornerOutsideRPM();
 
-            setLeftMotorRPM  = startRPM * diffComponent * brakeComponent;
-            if(setLeftMotorRPM < cornerInsideRPM) setLeftMotorRPM = cornerInsideRPM;
+            setLeftMotorRPM  = params.getStartRPM() * diffComponent * brakeComponent;
+            if(setLeftMotorRPM < params.getCornerInsideRPM()) setLeftMotorRPM = params.getCornerInsideRPM();
         }
 
-        float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float)startRPM, encoderRight.getRPM() / (float)startRPM);
-        float pidOutRight = pidRight.calculate((float)setRightMotorRPM / (float) startRPM, encoderLeft.getRPM() / (float)startRPM);
+        float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float) params.getStartRPM(), encoderRight.getRPM() / (float) params.getStartRPM());
+        float pidOutRight = pidRight.calculate((float) setRightMotorRPM / (float) params.getStartRPM(), encoderLeft.getRPM() / (float) params.getStartRPM());
 
         leftMotorPower  = pidOutLeft;
         rightMotorPower = pidOutRight;
@@ -121,6 +123,3 @@
 
     float Differential::getLeft() { return leftMotorPower; }
     float Differential::getRight() { return rightMotorPower; }
-
-    void     Differential::setStartRPM(uint32_t value) { startRPM = value; }
-    uint32_t Differential::getStartRPM() { return startRPM; }

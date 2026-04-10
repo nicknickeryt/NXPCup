@@ -7,6 +7,7 @@
  */
 
 #include "NXP_encoder.hpp"
+#include "NXP_Params.hpp"
 #include "motor.hpp"
 
 #include <cstddef>
@@ -14,7 +15,6 @@
 #include <stdint.h>
 
 #define brightnessCut 0
-#define alpha         0.7
 
 #pragma once
 
@@ -39,8 +39,9 @@ class Algorithm {
 
 		NXP_Encoder& encoderLeft;
 		NXP_Encoder& encoderRight;
-
+		
 		Differential& differential;
+		NXP_Params& params;
 
 		uint32_t algorithmStartTime = 0;
 
@@ -51,7 +52,7 @@ class Algorithm {
 		bool findPatterns(uint16_t* data, uint32_t currentMillis);
 
   public:
-    Algorithm(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, Differential& differential) : encoderLeft(encoderLeft), encoderRight(encoderRight), differential(differential) {};
+    Algorithm(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, Differential& differential, NXP_Params& params) : encoderLeft(encoderLeft), encoderRight(encoderRight), differential(differential), params(params) {};
     float    calculatePosition(uint16_t* data, uint32_t currentMillis);
     uint32_t getBrightness() const { return brightness; }
 	uint32_t getCrossings() const { return crossings; }

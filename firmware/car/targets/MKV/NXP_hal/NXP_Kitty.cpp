@@ -55,14 +55,14 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             // kitty().servo.disable();
             fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
             kitty().motors.setEnabled(false);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case 'p':
             break;
         case 'o':
             fctprintf(logWrite, NULL, "\nkittyResume\n", 0);
-            kitty().differential.setStartRPM(0.3);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
+            kitty().params.setStartRPM(0.3);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case 'r':
             fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
@@ -73,20 +73,20 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().menu.startRace(millis());
             break;
         case '+': // 43
-            kitty().differential.setStartRPM(kitty().differential.getStartRPM() + 100);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
+            kitty().params.setStartRPM(kitty().params.getStartRPM() + 100);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case '-': // startVelocity--
-            kitty().differential.setStartRPM(kitty().differential.getStartRPM() - 100);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().differential.getStartRPM() / 100));
+            kitty().params.setStartRPM(kitty().params.getStartRPM() - 100);
+            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case 'a': // diffRatio++
-            kitty().differential.setDiffValue(kitty().differential.getDiffValue() + 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffValue()));
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() + 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().params.getBrakeOne()));
             break;
         case 'b': // diffRatio--
-            kitty().differential.setDiffValue(kitty().differential.getDiffValue() - 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().differential.getDiffValue()));
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() - 1);
+            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().params.getBrakeOne()));
             break;
         case '1': { // FORWARD
             Kitty::kitty().motors.run();
@@ -206,7 +206,8 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-uint8_t frame[147]; // 1 start + 128 danych + 1 end
+static constexpr size_t FRAME_SIZE = 168;
+uint8_t frame[FRAME_SIZE]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
 
@@ -268,7 +269,7 @@ void Kitty::proc() {
         frame[137] = rpmRight & 0xFF;        // LSB
 
 
-        uint16_t startRPM = differential.getStartRPM();
+        uint16_t startRPM = params.getStartRPM();
         frame[138]        = (startRPM >> 8) & 0xFF;
         frame[139]        = startRPM & 0xFF;
 
@@ -285,19 +286,61 @@ void Kitty::proc() {
         frame[144]              = (diffRightValue >> 8) & 0xFF;
         frame[145]              = diffRightValue & 0xFF;
         frame[146]              = menuActive ? 0x01 : 0x00;
+        frame[147]              = kitty().newAlgorithm.isPatternDetected() ? 0x01 : 0x00;
+
+        uint16_t servoDivider = (uint16_t)(params.getServoDivider() * 100);
+        frame[148] = (servoDivider >> 8) & 0xFF;
+        frame[149] = servoDivider & 0xFF;
+
+        uint16_t filterAlpha = (uint16_t)(params.getAlgorithmFilterAlpha() * 1000);
+        frame[150] = (filterAlpha >> 8) & 0xFF;
+        frame[151] = filterAlpha & 0xFF;
+
+        uint16_t patternTh = (uint16_t)(params.getPatternCorrelationThreshold() * 1000);
+        frame[152] = (patternTh >> 8) & 0xFF;
+        frame[153] = patternTh & 0xFF;
+
+        uint16_t kp = (uint16_t)(params.getPidKp() * 1000);
+        frame[154] = (kp >> 8) & 0xFF;
+        frame[155] = kp & 0xFF;
+
+        uint16_t ki = (uint16_t)(params.getPidKi() * 100000);
+        frame[156] = (ki >> 8) & 0xFF;
+        frame[157] = ki & 0xFF;
+
+        uint16_t brakeAll = (uint16_t)(params.getBrakeAll() * 1000);
+        frame[158] = (brakeAll >> 8) & 0xFF;
+        frame[159] = brakeAll & 0xFF;
+
+        uint16_t brakeOne = (uint16_t)(params.getBrakeOne() * 1000);
+        frame[160] = (brakeOne >> 8) & 0xFF;
+        frame[161] = brakeOne & 0xFF;
+
+        uint16_t brakeClamp = (uint16_t)(params.getBrakeClamp() * 1000);
+        frame[162] = (brakeClamp >> 8) & 0xFF;
+        frame[163] = brakeClamp & 0xFF;
+
+        uint16_t outsideRPM = params.getCornerOutsideRPM();
+        frame[164] = (outsideRPM >> 8) & 0xFF;
+        frame[165] = outsideRPM & 0xFF;
+
+        uint16_t insideRPM = params.getCornerInsideRPM();
+        frame[166] = (insideRPM >> 8) & 0xFF;
+        frame[167] = insideRPM & 0xFF;
 
         static int frameCounter = 0;
         frameCounter++;
         if (frameCounter % 2 == 0) {
-            uartDebug.write((char*)frame, 147);
+            uartDebug.write((char*)frame, FRAME_SIZE);
         }
         //////////////////////////////////////////////////////////////////////
 
         if (menuActive) {
+            // differential.proc(position, millis(), dist);
             return;
         }
 
-        float servoPosition = -(position / 20.0f);
+        float servoPosition = -(position / params.getServoDivider());
         if (differential.isDistanceModeActive()) servoPosition = 0;
 
         servo.set(servoPosition);

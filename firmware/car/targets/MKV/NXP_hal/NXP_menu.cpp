@@ -63,42 +63,42 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
     switch (currentMenuPage) {
         case PAGE_STARTRPM: {
-            std::string rpmText = formatString(differential.getStartRPM());
+            std::string rpmText = formatString(params.getStartRPM());
             display.print(rpmText.c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                differential.setStartRPM(differential.getStartRPM() + 50);
+                params.setStartRPM(params.getStartRPM() + 50);
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                differential.setStartRPM(differential.getStartRPM() - 50);
+                params.setStartRPM(params.getStartRPM() - 50);
                 menuDebounceTimer = currentMillis;
             }
 
             break;
         }
         case MenuPage::PAGE_DIFFRATIO: {
-            std::string diffRatioText = formatString(differential.getDiffValue());
+            std::string diffRatioText = formatString(params.getBrakeOne());
             display.print(diffRatioText.c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                differential.setDiffValue(differential.getDiffValue() + 1);
+                params.setBrakeOne(params.getBrakeOne() + 1);
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                differential.setDiffValue(differential.getDiffValue() - 1);
+                params.setBrakeOne(params.getBrakeOne() - 1);
                 menuDebounceTimer = currentMillis;
             }
             break;
         }
 
         case MenuPage::PAGE_BREAK: {
-            std::string brakeDividerText = formatString(differential.getBrakeDivider());
+            std::string brakeDividerText = formatString(params.getBrakeAll());
             display.print(brakeDividerText.c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                differential.setBrakeDivider(differential.getBrakeDivider() + 5);
+                params.setBrakeAll(params.getBrakeAll() + 5);
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                differential.setBrakeDivider(differential.getBrakeDivider() - 5);
+                params.setBrakeAll(params.getBrakeAll() - 5);
                 menuDebounceTimer = currentMillis;
             }
             break;
@@ -110,13 +110,13 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
         }
 
         case MenuPage::PAGE_PID_KP: {
-            display.print(formatString(differential.getPidKp() * 100).c_str());
+            display.print(formatString(params.getPidKp() * 100).c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                differential.setPidKp(differential.getPidKp() + 0.01f);
+                params.setPidKp(params.getPidKp() + 0.01f, differential.getLeftPID(), differential.getRightPID());
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                differential.setPidKp(differential.getPidKp() - 0.01f);
+                params.setPidKp(params.getPidKp() - 0.01f, differential.getLeftPID(), differential.getRightPID());
                 menuDebounceTimer = currentMillis;
             }
             break;

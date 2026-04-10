@@ -1,15 +1,16 @@
 #pragma once
 #include "NXP_encoder.hpp"
+#include "NXP_Params.hpp"
 #include "pid.hpp"
 
 #include <utility>
+
+#define DISABLE_PATTERN_DETECTION_SLOWDOWN
 
 class Differential {
     int   position;
     float leftMotorPower;
     float rightMotorPower;
-
-    uint32_t startRPM = 0;
 
     uint32_t setLeftMotorRPM;
     uint32_t setRightMotorRPM;
@@ -17,26 +18,15 @@ class Differential {
     NXP_Encoder& encoderLeft;
     NXP_Encoder& encoderRight;
 
-    uint16_t klzDistance = 0;
+    NXP_Params& params;
 
-  
+    uint16_t klzDistance = 0;
 
     float brakeComponent = 0;
 
-    // Lower - more brake!
-    float brakeAll = 22.0f;   
-    float brakeOne = 35.0f; // start 2600 max
-
-    uint32_t cornerOutsideRPM = 600;
-    uint32_t cornerInsideRPM = 600;
-
-    float pidKp = 1.9f;
-    float pidKi = 0.0002f;
-    float pidKd = 0.0f;
-
     // Kp     Ki     Kd     maxValue
-    PID pidLeft  = PID(pidKp, pidKi, pidKd, 1.0f);
-    PID pidRight = PID(pidKp, pidKi, pidKd, 1.0f);
+    PID pidLeft  = PID(params.getPidKp(), params.getPidKi(), 0.0f, 1.0f);
+    PID pidRight = PID(params.getPidKp(), params.getPidKi(), 0.0f, 1.0f);
 
     bool patternDetected = false;
 
@@ -46,12 +36,13 @@ class Differential {
     bool obstacleFinalBrake = false;
 
 
-PID distancePID = PID(
-    0.035f,   // Kp — szybciej reaguje
-    0.0002f,  // Ki — lekka korekta
-    0.012f    // Kd — tłumienie
-);
-uint32_t maxPowerTimer  = 0;
+    PID distancePID = PID(
+        0.035f,   // Kp — szybciej reaguje
+        0.0002f,  // Ki — lekka korekta
+        0.012f    // Kd — tłumienie
+    );
+
+    uint32_t maxPowerTimer  = 0;
     bool     maxPowerActive = false;
 
     uint32_t stableTimer  = 0;
@@ -61,31 +52,17 @@ uint32_t maxPowerTimer  = 0;
     bool distanceModeActive = false;
 
   public:
-    Differential(float startRPMValue, NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight);
+    Differential(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, NXP_Params& params);
     void proc(float position, uint32_t currentMillis, uint16_t sr04Distance);
 
     float getLeft();
     float getRight();
 
-    void     setStartRPM(uint32_t value);
-    uint32_t getStartRPM();
-
-    uint8_t getDiffValue() { return brakeOne; }
-    void    setDiffValue(uint8_t newValue) { brakeOne = newValue; }
-
-    uint8_t getBrakeDivider() { return brakeAll; }
-    void    setBrakeDivider(uint8_t newValue) { brakeAll = newValue; }
+    PID& getLeftPID() { return pidLeft; }
+    PID& getRightPID() { return pidRight; }
 
     void     setKlzDistance(uint16_t distance) { klzDistance = distance; }
     uint16_t getKlzDistance() { return klzDistance; }
-
-    void setPidKp(float kp) {
-        pidKp = kp;
-        pidLeft.setKp(pidKp);
-        pidRight.setKp(pidKp);
-    }
-
-    float getPidKp() { return pidKp; }
 
     void setPatternDetected(bool detected) { patternDetected = detected; }
 
@@ -94,7 +71,6 @@ uint32_t maxPowerTimer  = 0;
         obstacleFinalBrake = false;
         emergencyBrake     = false;
     }
-
 
     bool isDistanceModeActive() const { return distanceModeActive; }
 

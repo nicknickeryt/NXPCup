@@ -22,6 +22,10 @@ class PID {
 
     void  setKp(float kp);
     float getKp() const;
+
+    void  setKi(float ki);
+    float getKi() const;
+    
     void  reset() {
         integral      = 0;
         previousError = 0;

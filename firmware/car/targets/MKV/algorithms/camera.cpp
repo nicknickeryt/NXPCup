@@ -33,7 +33,7 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     adjustedPosition = (static_cast<float>(position) / 2.0f) - halfCameraBufferWith;
 
     // Lo pass filter position
-    filteredPosition = (filteredPosition * (1 - alpha)) + ((adjustedPosition + algorithmOffset) * alpha);
+    filteredPosition = (filteredPosition * (1 - params.getAlgorithmFilterAlpha())) + ((adjustedPosition + algorithmOffset) * params.getAlgorithmFilterAlpha());
 
     if (findPatterns(data, currentMillis)) differential.setPatternDetected(true);
 
@@ -97,10 +97,9 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
     corr /= (stdData * stdPattern);
 
-    // ===== DECYZJA =====
-    const float THRESHOLD = 0.88; // na wysokich predkoscuach nadal nie wykrywa prawdziwego a wykrywa zle...
+    // ===== DECYZJA ===== // na wysokich predkoscuach nadal nie wykrywa prawdziwego a wykrywa zle...
 
-    if (corr > THRESHOLD) {
+    if (corr > params.getPatternCorrelationThreshold()) {
         if (!patternDetected) {
             patternDetected   = true;
             patternsStartTime = currentMillis;

@@ -2,6 +2,7 @@
 #include "HALina_switches.hpp"
 #include "NXP_display.hpp"
 #include "NXP_motor.hpp"
+#include "NXP_Params.hpp"
 
 #include <algorithms/camera.hpp>
 #include <algorithms/motor.hpp>
@@ -22,6 +23,7 @@ class NXP_Menu {
     NXP_Motors&       motors;
     Differential&     differential;
     Algorithm&        algorithm;
+    NXP_Params&      params;
 
     bool menuTrigger = false;
 
@@ -38,8 +40,8 @@ class NXP_Menu {
     uint32_t menuDebounceTimeMs = 175;
 
   public:
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential, Algorithm& algorithm) :
-        buttons(buttons), switches(switches), display(display), motors(motors), differential(differential), algorithm(algorithm) {}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential, Algorithm& algorithm, NXP_Params& params) :
+        buttons(buttons), switches(switches), display(display), motors(motors), differential(differential), algorithm(algorithm), params(params) {}
 
     void init() {
         buttons.init();
