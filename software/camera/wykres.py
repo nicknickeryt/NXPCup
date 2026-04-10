@@ -15,10 +15,13 @@ BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
 # BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
-FRAME_SIZE = 147
+FRAME_SIZE = 168
 # ==========================================
 
 # ser = serial.Serial(PORT, BAUD, timeout=0)
+
+rpmLeft = 0
+rpmRight = 0
 
 logging_enabled = False
 log_file = None
@@ -29,8 +32,21 @@ run_start_time = None
 run_end_time   = None
 run_finished   = False
 elapsed = 0
+patterns = 0
 
 max_rpm_record = 0
+
+servoDivider = 0.0
+algorithmFilterAlpha = 0.0
+patternThreshold = 0.0
+pidKp = 0.0
+pidKi = 0.0
+
+brakeAll = 0
+brakeOne = 0
+brakeClamp = 0
+cornerOutsideRPM = 0
+cornerInsideRPM = 0
 
 last_time = time.time()
 frame_count = 0
@@ -102,6 +118,16 @@ def start_all():
     run_start_time = None
     run_end_time   = None
     run_finished   = False
+
+def add_log(text):
+    timestamp = time.strftime("%H:%M:%S")
+    item = f"[{timestamp}] {text}"
+
+    log_list.insertItem(0, item)  # NA GÓRĘ
+
+    # limit pamięci
+    if log_list.count() > 200:
+        log_list.takeItem(log_list.count() - 1)
 
 def start_logging():
     global logging_enabled, log_file, log_writer
@@ -184,7 +210,7 @@ info_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
 info_label.setStyleSheet("""
     QLabel {
-        font-size: 16px;
+        font-size: 14px;
         color: black;
         background-color: #ffffff;
         border: 1px solid #ccc;
@@ -234,7 +260,25 @@ rpm_record_label.setStyleSheet("""
     }
 """)
 
-main_layout.addWidget(rpm_record_label)
+pattern_label = QtWidgets.QLabel("Pattern: UNKNOWN")
+pattern_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+pattern_label.setStyleSheet("""
+    QLabel {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        background-color: #7f8c8d;
+        border-radius: 10px;
+        padding: 10px;
+    }
+""")
+
+
+top_row = QtWidgets.QHBoxLayout()
+top_row.addWidget(rpm_record_label)
+top_row.addWidget(pattern_label)
+main_layout.addLayout(top_row)
 
 
 win.nextRow()
@@ -324,7 +368,6 @@ plot.addItem(pos_line)
 main_widget.resize(1000, 700)
 main_widget.show()
 
-win.nextCol()   # 🔥 TO JEST KLUCZ
 btn_layout = QtWidgets.QGridLayout()
 
 btn_widget = QtWidgets.QWidget()
@@ -337,6 +380,24 @@ win.ci.layout.setColumnStretchFactor(1, 1)  # buttony (mała kolumna)
 
 win.ci.layout.setAlignment(proxy, QtCore.Qt.AlignmentFlag.AlignRight)
 
+log_list = QtWidgets.QListWidget()
+log_list.setMaximumWidth(350)
+log_list.setMinimumHeight(300)
+
+log_list.setStyleSheet("""
+QListWidget {
+    background-color: #111;
+    color: #0f0;
+    font-family: Consolas;
+    font-size: 12px;
+    border-radius: 8px;
+}
+""")
+
+win.addItem(QtWidgets.QGraphicsProxyWidget())
+proxy_log = QtWidgets.QGraphicsProxyWidget()
+proxy_log.setWidget(log_list)
+win.addItem(proxy_log)
 
 def make_btn(text, cmd, color, row, col):
     btn = QtWidgets.QPushButton(text)
@@ -392,16 +453,16 @@ def make_action_btn(text, func, color, row, col):
     return btn
 
 make_btn("STOP", "s", "#e74c3c", 0, 0)
-make_btn("Pauza", "p", "#4f4f4f", 0, 1)
+#make_btn("Pauza", "p", "#4f4f4f", 0, 1)
 
-make_btn("Wznów", "o", "#4f4f4f", 1, 0)
-make_action_btn("Uruchom", start_all, "#27ae60", 1, 1)
+#make_btn("Wznów", "o", "#4f4f4f", 1, 0)
+make_action_btn("Uruchom", start_all, "#27ae60", 0, 1)
 
-make_btn("Początkowe RPM+", "+", "#3498db", 2, 0)
-make_btn("Początkowe RPM-", "-", "#2980b9", 2, 1)
+make_btn("StartRPM+", "+", "#3498db", 2, 0)
+make_btn("StartRPM-", "-", "#2980b9", 2, 1)
 
-make_btn("DiffRatio+", "a", "#9b59b6", 3, 0)
-make_btn("DiffRatio-", "b", "#8e44ad", 3, 1)
+make_btn("brakeOne+", "a", "#9b59b6", 3, 0)
+make_btn("BrakeOne-", "b", "#8e44ad", 3, 1)
 
 make_action_btn("RESET", reset_all, "#f7c214", 4, 0)
 # 🔥 LOGGING BUTTONS (takie same jak reszta)
@@ -459,6 +520,8 @@ def read_uart():
     global last_time, frame_count, fps
     
     global run_start_time, run_end_time, run_finished
+
+    global rpmLeft, rpmRight
         
     frame_count += 1
     current_time = time.time()
@@ -490,10 +553,10 @@ def read_uart():
 
         frame = buffer[start_idx:start_idx+FRAME_SIZE]
 
-        # 🔹 PIERWSZA RAMKA po uruchomieniu
-        if run_start_time is None:
+        # 🔹 PIERWSZA RAMKA po uruchomieniu, ale tylko jeśli oba enkodery > 0
+        if run_start_time is None and rpmLeft > 0 and rpmRight > 0:
             run_start_time = time.time()
-            print(f"[TIME] Start pomiaru: {run_start_time:.3f}s")
+            print(f"[TIME] Start pomiaru czasu: {run_start_time:.3f}s")
 
         last_frame = frame[4:132]  # kamera
 
@@ -512,7 +575,7 @@ def read_uart():
         # opcjonalnie powrót do -1..1
         diffLeft  = (diffLeft / 100.0) - 1
         diffRight = (diffRight / 100.0) - 1
-        global np
+        global np, patterns
         # 🔥 NORMALIZACJA
         rpm_norm_L = min(rpmLeft, 6000)
         rpm_norm_R = min(rpmRight, 6000)    
@@ -541,12 +604,49 @@ def read_uart():
         
         menuActive = frame[146]  # 1 = STOPPED, 0 = RUNNING
         
+        isPatternDetected = frame[147]
+        if isPatternDetected: patterns = patterns + 1
+        
+        servoDivider = (frame[148] << 8) | frame[149]
+        algorithmFilterAlpha = (frame[150] << 8) | frame[151]
+        patternThreshold = (frame[152] << 8) | frame[153]
+        pidKp = (frame[154] << 8) | frame[155]
+        pidKi = (frame[156] << 8) | frame[157]
+        
+        brakeAll = (frame[158] << 8) | frame[159]
+        brakeOne = (frame[160] << 8) | frame[161]
+        brakeClamp = (frame[162] << 8) | frame[163]
+        cornerOutsideRPM = (frame[164] << 8) | frame[165]
+        cornerInsideRPM = (frame[166] << 8) | frame[167]
+        
+        servoDivider = servoDivider / 100.0
+        algorithmFilterAlpha = algorithmFilterAlpha / 1000.0
+        patternThreshold = patternThreshold / 1000.0
+        pidKp = pidKp / 1000.0
+        pidKi = pidKi / 100000.0
+        
+       
+        brakeAll /= 1000
+        brakeOne /= 1000
+        brakeClamp /= 1000
+        
         # 🔹 KONIEC - startRPM = 800
-        if not run_finished and startRPM == 800:
+        elapsed_temp = time.time() - run_start_time if run_start_time else 0
+        if isPatternDetected == True and elapsed_temp > 1.0:
             run_end_time = time.time()
             run_finished = True
             elapsed = run_end_time - run_start_time if run_start_time else 0
-            print(f"[TIME] Koniec trasy: {run_end_time:.3f}s | Czas trwania: {elapsed:.3f}s")
+            print(f"[TIME] Koniec trasy: {run_end_time:.3f}s | Czas trwania: {elapsed:.3f}s (liczone od ruszenia autaka do patternu, a potem miedzy kolejnymi patternami)")
+            add_log(f"Czas: {elapsed:.3f}s")  
+            
+            # resecik i od nowa liczymy
+            elapsed = 0
+            run_start_time = None
+            run_end_time   = None
+            run_finished   = False
+            
+            run_start_time = time.time()
+            print(f"[TIME] Start pomiaru czasu: {run_start_time:.3f}s")
         
         global max_rpm_record
 
@@ -554,6 +654,30 @@ def read_uart():
         if current_max <= 15000 and current_max > max_rpm_record:
             max_rpm_record = current_max
             rpm_record_label.setText(f"Rekord RPM: {max_rpm_record}")
+        if isPatternDetected == 1:
+            pattern_label.setText("Pattern: wykryty")
+            pattern_label.setStyleSheet("""
+                QLabel {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: white;
+                    background-color: #e67e22;
+                    border-radius: 10px;
+                    padding: 10px;
+                }
+            """)
+        else:
+            pattern_label.setText("Pattern: brak")
+            pattern_label.setStyleSheet("""
+                QLabel {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: white;
+                    background-color: #7f8c8d;
+                    border-radius: 10px;
+                    padding: 10px;
+                }
+            """)
 
     # 🔥 rysuj tylko najnowsze
     if last_frame:
@@ -608,11 +732,15 @@ def read_uart():
 
         
         text = f"""
-        <b>RPM:</b> L {rpmLeft} | R {rpmRight}<br>
-        <b>Początkowe RPM:</b> {startRPM}<br>
+        <b>RPM:</b> L {rpmLeft} | R {rpmRight} | <b>StartRPM:</b> <u>{startRPM}</u><br>
         <b>Silniki:</b> L {diffLeft:.2f} | R {diffRight:.2f}<br>
-        <b>Odległość:</b> {sr04} mm<br>
-        <b>Odśw. kamery:</b> {fps:.1f} Hz
+        <b>Odl:</b> {sr04} mm | <b>Odśw.:</b> {fps:.1f} Hz<br>
+        <b>Pattern:</b> {patterns} | <b>Threshold :</b> {patternThreshold:.2f}<br>
+        <b>Servo divider:</b> {servoDivider} | <b>Filter:</b> {algorithmFilterAlpha:.2f}<br>
+        <b>PID Kp:</b> {pidKp:.3f} | <b>PID Ki:</b> {pidKi:.4f}<br>
+        <b>Brake all:</b> {brakeAll:.1f} | <b>Brake one:</b> {brakeOne:.1f}<br>
+        <b>Brake clamp:</b> {brakeClamp:.1f}<br>
+        <b>Outside RPM:</b> {cornerOutsideRPM} | <b>Inside RPM:</b> {cornerInsideRPM}<br>
         """
 
         info_label.setText(text)
