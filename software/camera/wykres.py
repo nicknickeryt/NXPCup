@@ -15,7 +15,7 @@ BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
 # BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
-FRAME_SIZE = 182
+FRAME_SIZE = 184
 # ==========================================
 
 # ser = serial.Serial(PORT, BAUD, timeout=0)
@@ -49,6 +49,7 @@ cornerOutsideRPM = 0
 cornerInsideRPM = 0
 
 brightness = 0
+brightnessCrossThreshold = 0
 leftLine = 0
 rightLine = 0
 
@@ -163,7 +164,8 @@ def start_logging():
                 "crossingsBrightnessMultiplier",
                 "brightnessMeanAlpha",
                 "crossingsCut",
-                "cameraCrossingFilterAlpha"
+                "cameraCrossingFilterAlpha",
+                "brightnessCrossThreshold"
     ]
     log_writer.writerow(header)
 
@@ -384,6 +386,12 @@ plot.addItem(pos_line)
 brightness_line = pg.InfiniteLine(angle=0, movable=False)
 brightness_line.setPen(pg.mkPen('g', width=2))
 plot.addItem(brightness_line)
+
+
+# 🔥 brightnessthreshold (pozioma)
+brightnessThreshold_line = pg.InfiniteLine(angle=0, movable=False)
+brightnessThreshold_line.setPen(pg.mkPen('b', width=2))
+plot.addItem(brightnessThreshold_line)
 
 # 🔥 left / right (pionowe)
 left_line = pg.InfiniteLine(angle=90, movable=False)
@@ -821,6 +829,8 @@ def read_uart():
        
         cameraCrossingFilterAlpha = ((frame[180] << 8) | frame[181]) / 1000.0
         
+        brightnessCrossThreshold = (frame[182] << 8) | frame[183]
+        
         brakeAll /= 1000
         brakeOne /= 1000
         brakeClamp /= 1000
@@ -915,6 +925,7 @@ def read_uart():
 
         # 🔥 ustaw linie
         brightness_line.setPos(brightness_clamped)
+        brightnessThreshold_line.setPos(brightnessCrossThreshold)
         left_line.setPos(left_clamped)
         right_line.setPos(right_clamped)
 
@@ -1025,7 +1036,8 @@ def read_uart():
                 crossingsBrightnessMultiplier,
                 brightnessMeanAlpha,
                 crossingsCut,
-                cameraCrossingFilterAlpha
+                cameraCrossingFilterAlpha,
+                brightnessCrossThreshold
             ]
 
             log_writer.writerow(row)
