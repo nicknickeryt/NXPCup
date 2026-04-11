@@ -290,7 +290,7 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-static constexpr size_t FRAME_SIZE = 182;
+static constexpr size_t FRAME_SIZE = 184;
 uint8_t frame[FRAME_SIZE]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
@@ -437,10 +437,16 @@ void Kitty::proc() {
         frame[180] = (cameraCrossingFlterAlpha >> 8) & 0xFF;
         frame[181] = cameraCrossingFlterAlpha & 0xFF;
 
+        uint16_t brightnessCrossThreshold = static_cast<uint16_t>(newAlgorithm.getBrightnessCrossThreshold() / 110);
+        frame[182] = (brightnessCrossThreshold >> 8) & 0xFF;
+        frame[183] = brightnessCrossThreshold & 0xFF;
 
-        if(newAlgorithm.isPatternDetected()) {
-            uartDebug.write((char*)frame, FRAME_SIZE);
-        }
+
+
+
+        // if(newAlgorithm.isPatternDetected()) {
+        //     uartDebug.write((char*)frame, FRAME_SIZE);
+        // }
 
         static int frameCounter = 0;
         frameCounter++;

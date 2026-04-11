@@ -44,7 +44,7 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     for (size_t i = 0; i != cameraBufferWith; i++) {
         filteredData[i] = (filteredData[i] * (1.0f - params.getCameraCrossingFilterAlpha())) + (data[i] * params.getCameraCrossingFilterAlpha());
     }
-    
+
     findCrossings(filteredData);
 
     if (findPatterns(filteredData, currentMillis)) differential.setPatternDetected(true);
@@ -195,11 +195,11 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 bool Algorithm::findCrossings(uint16_t* data) {
     crossings = 0;
 
-    uint32_t threshold = brightnessMean * params.getCrossingsBrightnessMultiplier();
+    brightnessCrossThreshold = brightnessMean * params.getCrossingsBrightnessMultiplier();
 
     for (size_t i = 1 + params.getCrossingsCut(); i < cameraBufferWith - 3 - params.getCrossingsCut(); i++) {
-        if ((data[i - 1] < threshold) && (data[i] < threshold) && (data[i + 1] > threshold) && (data[i + 2] > threshold)) crossings++;
-        if ((data[i - 1] > threshold) && (data[i] > threshold) && (data[i + 1] < threshold) && (data[i + 2] < threshold)) crossings++;
+        if ((data[i - 1] < brightnessCrossThreshold) && (data[i] < brightnessCrossThreshold) && (data[i + 1] > brightnessCrossThreshold) && (data[i + 2] > brightnessCrossThreshold)) crossings++;
+        if ((data[i - 1] > brightnessCrossThreshold) && (data[i] > brightnessCrossThreshold) && (data[i + 1] < brightnessCrossThreshold) && (data[i + 2] < brightnessCrossThreshold)) crossings++;
     }
 
     return false;
