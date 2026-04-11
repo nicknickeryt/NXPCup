@@ -32,6 +32,12 @@ class NXP_Params {
     float pidKp = 1.9f;
     float pidKi = 0.0002f;
 
+    float crossingsBrightnessMultiplier = 1.0f;
+    float brightnessMeanAlpha = 0.3f;
+    uint8_t crossingsCut = 0;
+
+    float cameraCrossingFilterAlpha = 0.5f;
+
   public:
     NXP_Params() {}
     float getServoDivider() const { return servoDivider; }
@@ -74,4 +80,16 @@ class NXP_Params {
         pidRight.setKi(ki);
         pidKi = ki;
     }
+
+    float getCrossingsBrightnessMultiplier() const { return crossingsBrightnessMultiplier; }
+    void  setCrossingsBrightnessMultiplier(float multiplier) { crossingsBrightnessMultiplier = multiplier; }
+
+    float getBrightnessMeanAlpha() const { return brightnessMeanAlpha; }
+    void  setBrightnessMeanAlpha(float alpha) { brightnessMeanAlpha = alpha; }
+
+    uint8_t getCrossingsCut() const { return crossingsCut; }
+    void  setCrossingsCut(uint8_t cut) { crossingsCut = cut; }
+
+    float getCameraCrossingFilterAlpha() const { return cameraCrossingFilterAlpha; }
+    void  setCameraCrossingFilterAlpha(float alpha) { cameraCrossingFilterAlpha = alpha; }
 };

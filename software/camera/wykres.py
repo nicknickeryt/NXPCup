@@ -15,7 +15,7 @@ BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
 # BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
-FRAME_SIZE = 168
+FRAME_SIZE = 182
 # ==========================================
 
 # ser = serial.Serial(PORT, BAUD, timeout=0)
@@ -47,6 +47,18 @@ brakeOne = 0
 brakeClamp = 0
 cornerOutsideRPM = 0
 cornerInsideRPM = 0
+
+brightness = 0
+leftLine = 0
+rightLine = 0
+
+crossings = 0
+
+crossingsBrightnessMultiplier = 0.0
+brightnessMeanAlpha = 0.0
+crossingsCut = 0
+
+cameraCrossingFilterAlpha = 0
 
 last_time = time.time()
 frame_count = 0
@@ -118,6 +130,9 @@ def start_all():
     run_start_time = None
     run_end_time   = None
     run_finished   = False
+    
+def stop_all():
+    send_cmd("s")
 
 def add_log(text):
     timestamp = time.strftime("%H:%M:%S")
@@ -140,17 +155,25 @@ def start_logging():
     header += [f"cam_{i}" for i in range(128)]
     header += [
         "time","position","rpmLeft","rpmRight",
-        "startRPM","sr04","diffLeft","diffRight","menuActive"
+        "startRPM","sr04","diffLeft","diffRight","menuActive","isPatternDetected","servoDivider","algorithmFilterAlpha","patternThreshold","pidKp","pidKi","brakeAll","brakeOne","brakeClamp","cornerOutsideRPM","cornerInsideRPM",
+                "brightness",
+                "leftLine",
+                "rightLine",
+                "crossings",
+                "crossingsBrightnessMultiplier",
+                "brightnessMeanAlpha",
+                "crossingsCut",
+                "cameraCrossingFilterAlpha"
     ]
     log_writer.writerow(header)
 
     logging_enabled = True
 
     # 🔥 UI update
-    log_status.setText("Zapis: włączony")
+    log_status.setText("Zapis: wł.")
     log_status.setStyleSheet("""
         QLabel {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
             background-color: #27ae60;
@@ -172,10 +195,10 @@ def stop_logging():
         log_file = None
 
     # 🔥 UI update
-    log_status.setText("Zapis: wyłączony")
+    log_status.setText("Zapis: wył.")
     log_status.setStyleSheet("""
         QLabel {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
             background-color: #7f8c8d;
@@ -210,7 +233,7 @@ info_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
 info_label.setStyleSheet("""
     QLabel {
-        font-size: 14px;
+        font-size: 16px;
         color: black;
         background-color: #ffffff;
         border: 1px solid #ccc;
@@ -230,20 +253,14 @@ status_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
 status_label.setStyleSheet("""
     QLabel {
-        font-size: 32px;
+        font-size: 20px;
         font-weight: bold;
         color: white;
         background-color: gray;
         border-radius: 10px;
-        padding: 15px;
+        padding: 10px;
     }
 """)
-
-main_layout.addWidget(status_label)
-
-
-proxy_status = QtWidgets.QGraphicsProxyWidget()
-proxy_status.setWidget(status_label)
 
 
 rpm_record_label = QtWidgets.QLabel("Rekord RPM: 0")
@@ -275,14 +292,12 @@ pattern_label.setStyleSheet("""
 """)
 
 
-top_row = QtWidgets.QHBoxLayout()
+top_row = QtWidgets.QVBoxLayout()
 top_row.addWidget(rpm_record_label)
 top_row.addWidget(pattern_label)
+top_row.addWidget(status_label)
 main_layout.addLayout(top_row)
 
-
-win.nextRow()
-win.addItem(proxy_status, colspan=1)
 
 history = np.zeros((128, 128, 3), dtype=np.uint8)
 
@@ -290,11 +305,10 @@ history = np.zeros((128, 128, 3), dtype=np.uint8)
 win.nextRow()
 
 img_plot = win.addPlot(title="Piksele kamery", colspan=7)
-img_plot.setFixedHeight(120)
+img_plot.setFixedHeight(60)
 img_plot.setMouseEnabled(False, False)
 img_plot.hideAxis('left')
 img_plot.hideAxis('bottom')
-img_plot.setFixedHeight(120)   # 🔥 dużo niższy pasek
 
 win.nextRow()
 
@@ -365,6 +379,22 @@ pos_line = pg.InfiniteLine(angle=90, movable=False)
 pos_line.setPen(pg.mkPen('r', width=2))  # czerwona linia
 plot.addItem(pos_line)
 
+        
+# 🔥 brightness (pozioma)
+brightness_line = pg.InfiniteLine(angle=0, movable=False)
+brightness_line.setPen(pg.mkPen('g', width=2))
+plot.addItem(brightness_line)
+
+# 🔥 left / right (pionowe)
+left_line = pg.InfiniteLine(angle=90, movable=False)
+left_line.setPen(pg.mkPen('b', width=2))
+plot.addItem(left_line)
+
+right_line = pg.InfiniteLine(angle=90, movable=False)
+right_line.setPen(pg.mkPen('m', width=2))
+plot.addItem(right_line)
+        
+
 main_widget.resize(1000, 700)
 main_widget.show()
 
@@ -394,24 +424,41 @@ QListWidget {
 }
 """)
 
-win.addItem(QtWidgets.QGraphicsProxyWidget())
-proxy_log = QtWidgets.QGraphicsProxyWidget()
-proxy_log.setWidget(log_list)
-win.addItem(proxy_log)
+right_panel = QtWidgets.QWidget()
+right_layout = QtWidgets.QVBoxLayout(right_panel)
+
+# 1. logi
+right_layout.addWidget(log_list)
+
+# 2. top row POD logami
+top_row = QtWidgets.QVBoxLayout()
+top_row.addWidget(rpm_record_label)
+top_row.addWidget(pattern_label)
+top_row.addWidget(status_label)
+
+right_layout.addLayout(top_row)
+
+proxy_right = QtWidgets.QGraphicsProxyWidget()
+proxy_right.setWidget(right_panel)
+
+win.addLayout(row=0, col=3)
+win.ci.layout.addItem(proxy_right, 2, 5, 3, 2)
 
 def make_btn(text, cmd, color, row, col):
     btn = QtWidgets.QPushButton(text)
 
-    btn.setMinimumHeight(60)
-    btn.setMinimumWidth(80)
+    btn.setMinimumHeight(30)
+    btn.setMinimumWidth(30)
+    btn.setMaximumWidth(90)
 
     btn.setStyleSheet(f"""
         QPushButton {{
             background-color: {color};
             color: white;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             border-radius: 8px;
+            padding: 2px;
         }}
         QPushButton:hover {{
             background-color: #4f4f4f;
@@ -426,19 +473,20 @@ def make_btn(text, cmd, color, row, col):
     return btn  
     
 
-def make_action_btn(text, func, color, row, col):
+def make_action_btn(text, func, color, row, col, colspan):
     btn = QtWidgets.QPushButton(text)
-
-    btn.setMinimumHeight(60)
-    btn.setMinimumWidth(80)
+    
+    btn.setMinimumHeight(40)
+    btn.setMinimumWidth(50)
 
     btn.setStyleSheet(f"""
         QPushButton {{
             background-color: {color};
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 8px;
+            padding: 2px;
         }}
         QPushButton:hover {{
             background-color: #4f4f4f;
@@ -449,49 +497,185 @@ def make_action_btn(text, func, color, row, col):
     """)
 
     btn.clicked.connect(func)
-    btn_layout.addWidget(btn, row, col)
+    btn_layout.addWidget(btn, row, col, 1, colspan)
     return btn
 
-make_btn("STOP", "s", "#e74c3c", 0, 0)
-#make_btn("Pauza", "p", "#4f4f4f", 0, 1)
+make_action_btn("Uruchom", start_all, "#27ae60", 0, 0, 1)
+make_action_btn("STOP", stop_all, "#e74c3c", 0, 1, 1)
+make_action_btn("RESET", reset_all, "#b38704", 0, 2, 2)
 
-#make_btn("Wznów", "o", "#4f4f4f", 1, 0)
-make_action_btn("Uruchom", start_all, "#27ae60", 0, 1)
 
-make_btn("StartRPM+", "+", "#3498db", 2, 0)
-make_btn("StartRPM-", "-", "#2980b9", 2, 1)
 
-make_btn("brakeOne+", "a", "#9b59b6", 3, 0)
-make_btn("BrakeOne-", "b", "#8e44ad", 3, 1)
-
-make_action_btn("RESET", reset_all, "#f7c214", 4, 0)
 # 🔥 LOGGING BUTTONS (takie same jak reszta)
 
+
+make_action_btn("włącz", start_logging, "#16a085", 1, 2, 1)
+make_action_btn("wyłącz", stop_logging, "#c0392b", 1, 3, 1)
+
+
 # 🔥 STATUS OBOK PRZYCISKÓW
-log_status = QtWidgets.QLabel("Zapis: wyłączony")
+log_status = QtWidgets.QLabel("Zapis: wył.")
 log_status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
-log_status.setMinimumWidth(120)
+log_status.setMinimumWidth(50)
+log_status.setMinimumHeight(40)
 
 log_status.setStyleSheet("""
     QLabel {
-        font-size: 16px;
+        font-size: 12px;
         font-weight: bold;
         color: white;
         background-color: #7f8c8d;
         border-radius: 8px;
-        padding: 10px;
+        padding: 2px;
     }
 """)
 
-btn_layout.addWidget(log_status)
+btn_layout.addWidget(log_status, 1, 0, 1, 2)
 
 
+start_rpm_label = QtWidgets.QLabel("StartRPM: ?")
+start_rpm_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-make_action_btn("Zapis start", start_logging, "#16a085", 5, 0)
-make_action_btn("Zapis stop", stop_logging, "#c0392b", 5, 1)
+start_rpm_label.setStyleSheet("""
+QLabel {
+    font-size: 14px;
+    color: #000;
 
-btn_layout.addWidget(log_status, 6, 0, 1, 2)  # 🔥 span na 2 kolumny
+    border: 1px solid #2c3e50;
+    border-radius: 6px;
+
+    padding: 0px 6px;
+
+    min-width: 120px;
+}
+""")
+
+btn_layout.addWidget(start_rpm_label, 2, 0, 1, 2)
+
+make_btn("+", "+", "green", 2, 2)
+make_btn("-", "-", "red", 2, 3)
+
+servo_label = QtWidgets.QLabel("Servo div.: ?")
+servo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+
+servo_label.setStyleSheet(start_rpm_label.styleSheet())
+
+btn_layout.addWidget(servo_label, 3, 0, 1, 2)
+
+make_btn("+", "e", "green", 3, 2)
+make_btn("-", "f", "red", 3, 3)
+
+alg_label = QtWidgets.QLabel("Cam α: ?")
+alg_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+alg_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(alg_label, 4, 0, 1, 2)
+
+make_btn("+", "k", "green", 4, 2)
+make_btn("-", "l", "red", 4, 3)
+
+
+thr_label = QtWidgets.QLabel("Threshold: ?")
+thr_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+thr_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(thr_label, 5, 0, 1, 2)
+
+make_btn("+", "9", "green", 5, 2)
+make_btn("-", "0", "red", 5, 3)
+
+
+kp_label = QtWidgets.QLabel("Kp: ?")
+kp_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+kp_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(kp_label, 6, 0, 1, 2)
+
+make_btn("+", "g", "green", 6, 2)
+make_btn("-", "h", "red", 6, 3)
+
+
+ki_label = QtWidgets.QLabel("Ki: ?")
+ki_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+ki_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(ki_label, 7, 0, 1, 2)
+
+make_btn("+", "i", "green", 7, 2)
+make_btn("-", "j", "red", 7, 3)
+
+
+br_all_label = QtWidgets.QLabel("Brake All: ?")
+br_all_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+br_all_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(br_all_label, 8, 0, 1, 2)
+
+make_btn("+", "c", "green", 8, 2)
+make_btn("-", "d", "red", 8, 3)
+
+
+br_one_label = QtWidgets.QLabel("Brake One: ?")
+br_one_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+br_one_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(br_one_label, 9, 0, 1, 2)
+
+make_btn("+", "a", "green", 9, 2)
+make_btn("-", "b", "red", 9, 3)
+
+
+br_clamp_label = QtWidgets.QLabel("Clamp: ?")
+br_clamp_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+br_clamp_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(br_clamp_label, 10, 0, 1, 2)
+
+make_btn("+", "m", "green", 10, 2)
+make_btn("-", "n", "red", 10, 3)
+
+
+inside_rpm_label = QtWidgets.QLabel("Inside RPM: ?")
+inside_rpm_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+inside_rpm_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(inside_rpm_label, 11, 0, 1, 2)
+
+make_btn("+", "7", "green", 11, 2)
+make_btn("-", "8", "red", 11, 3)
+
+outside_rpm_label = QtWidgets.QLabel("Outside RPM: ?")
+outside_rpm_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+outside_rpm_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(outside_rpm_label, 12, 0, 1, 2)
+
+make_btn("+", "5", "green", 12, 2)
+make_btn("-", "6", "red", 12, 3)
+
+cross_cut_label = QtWidgets.QLabel("Cut: ?")
+cross_cut_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+cross_cut_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(cross_cut_label, 13, 0, 1, 2)
+
+make_btn("+", "#", "green", 13, 2)
+make_btn("-", "$", "red", 13, 3)
+
+brightness_alpha_label = QtWidgets.QLabel("Bright α: ?")
+brightness_alpha_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+brightness_alpha_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(brightness_alpha_label, 14, 0, 1, 2)
+
+make_btn("+", "%", "green", 14, 2)
+make_btn("-", "^", "red", 14, 3)
+
+mult_label = QtWidgets.QLabel("Cross mult: ?")
+mult_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+mult_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(mult_label, 15, 0, 1, 2)
+
+make_btn("+", "!", "green", 15, 2)
+make_btn("-", "@", "red", 15, 3)
+
+cross_alpha_label = QtWidgets.QLabel("Cross alpha: ?")
+cross_alpha_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+cross_alpha_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(cross_alpha_label, 16, 0, 1, 2)
+
+make_btn("+", "&", "green", 16, 2)
+make_btn("-", "*", "red", 16, 3)
 
 buffer = bytearray()
 
@@ -625,7 +809,18 @@ def read_uart():
         pidKp = pidKp / 1000.0
         pidKi = pidKi / 100000.0
         
+        brightness = (frame[168] << 8) | frame[169]
+        leftLine  = (frame[170] << 8) | frame[171]
+        rightLine = (frame[172] << 8) | frame[173]
+        
+        crossings = frame[174]
+        
+        crossingsBrightnessMultiplier = ((frame[175] << 8) | frame[176]) / 1000.0
+        brightnessMeanAlpha = ((frame[177] << 8) | frame[178]) / 1000.0
+        crossingsCut = frame[179]
        
+        cameraCrossingFilterAlpha = ((frame[180] << 8) | frame[181]) / 1000.0
+        
         brakeAll /= 1000
         brakeOne /= 1000
         brakeClamp /= 1000
@@ -678,6 +873,26 @@ def read_uart():
                     padding: 10px;
                 }
             """)
+            
+        start_rpm_label.setText(f"🚀 Start RPM: <b>{startRPM}</b>")
+        servo_label.setText(f"➗ Servo divider: <b>{servoDivider}</b>")
+        alg_label.setText(f"📸 Cam servo α: <b>{algorithmFilterAlpha:.2f}</b>")
+        thr_label.setText(f"Corr. threshold: <b>{patternThreshold:.2f}</b>")
+        kp_label.setText(f"PID Kp: <b>{pidKp:.3f}</b>")
+        ki_label.setText(f"PID Ki: <b>{pidKi:.5f}</b>")
+
+        br_all_label.setText(f"🛑 Brake all: <b>{brakeAll:.2f}</b>")
+        br_one_label.setText(f"🛑 Brake one: <b>{brakeOne:.2f}</b>")
+        br_clamp_label.setText(f"⛔ Brake clamp: <b>{brakeClamp:.2f}</b>")
+        inside_rpm_label.setText(f"Inside RPM: <b>{cornerInsideRPM}</b>")
+        outside_rpm_label.setText(f"Outside RPM: <b>{cornerOutsideRPM}</b>")
+
+        cross_cut_label.setText(f"✂️ Crossing cut: <b>{crossingsCut}</b>")
+
+        brightness_alpha_label.setText(f"💡 Brightness α: <b>{brightnessMeanAlpha:.2f}</b>")
+
+        mult_label.setText(f"Cross mult.: <b>{crossingsBrightnessMultiplier:.2f}</b>")
+        cross_alpha_label.setText(f"Crossing α: <b>{cameraCrossingFilterAlpha:.2f}</b>")
 
     # 🔥 rysuj tylko najnowsze
     if last_frame:
@@ -692,6 +907,16 @@ def read_uart():
         pos_clamped = max(0, min(127, position + 64))
 
         pos_line.setPos(pos_clamped)
+
+        # 🔥 clampy bezpieczeństwa
+        brightness_clamped = max(0, min(220, brightness))
+        left_clamped  = max(0, min(127, leftLine))
+        right_clamped = max(0, min(127, rightLine))
+
+        # 🔥 ustaw linie
+        brightness_line.setPos(brightness_clamped)
+        left_line.setPos(left_clamped)
+        right_line.setPos(right_clamped)
 
         # 🔥 generuj kolory (0-220 -> czarny-biały)
         colors = []
@@ -732,15 +957,11 @@ def read_uart():
 
         
         text = f"""
-        <b>RPM:</b> L {rpmLeft} | R {rpmRight} | <b>StartRPM:</b> <u>{startRPM}</u><br>
+        <b>RPM:</b> L {rpmLeft} | R {rpmRight}<br>
         <b>Silniki:</b> L {diffLeft:.2f} | R {diffRight:.2f}<br>
         <b>Odl:</b> {sr04} mm | <b>Odśw.:</b> {fps:.1f} Hz<br>
-        <b>Pattern:</b> {patterns} | <b>Threshold :</b> {patternThreshold:.2f}<br>
-        <b>Servo divider:</b> {servoDivider} | <b>Filter:</b> {algorithmFilterAlpha:.2f}<br>
-        <b>PID Kp:</b> {pidKp:.3f} | <b>PID Ki:</b> {pidKi:.4f}<br>
-        <b>Brake all:</b> {brakeAll:.1f} | <b>Brake one:</b> {brakeOne:.1f}<br>
-        <b>Brake clamp:</b> {brakeClamp:.1f}<br>
-        <b>Outside RPM:</b> {cornerOutsideRPM} | <b>Inside RPM:</b> {cornerInsideRPM}<br>
+        <b>Pattern:</b> {patterns}<br>
+        <b>Cross:</b> {crossings}
         """
 
         info_label.setText(text)
@@ -749,24 +970,24 @@ def read_uart():
             status_label.setText("Zatrzymany")
             status_label.setStyleSheet("""
                 QLabel {
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: bold;
                     color: white;
                     background-color: #e74c3c;  /* czerwony */
                     border-radius: 10px;
-                    padding: 20px;
+                    padding: 10px;
                 }
             """)
         else:
             status_label.setText("Uruchomiony")
             status_label.setStyleSheet("""
                 QLabel {
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: bold;
                     color: white;
                     background-color: #2ecc71;  /* zielony */
                     border-radius: 10px;
-                    padding: 20px;
+                    padding: 10px;
                 }
             """)
             
@@ -785,7 +1006,26 @@ def read_uart():
                 sr04,
                 diffLeft,
                 diffRight,
-                menuActive
+                menuActive,
+                isPatternDetected,
+                servoDivider,
+                algorithmFilterAlpha,
+                patternThreshold,
+                pidKp,
+                pidKi,
+                brakeAll,
+                brakeOne,
+                brakeClamp,
+                cornerOutsideRPM,
+                cornerInsideRPM,
+                brightness,
+                leftLine,
+                rightLine,
+                crossings,
+                crossingsBrightnessMultiplier,
+                brightnessMeanAlpha,
+                crossingsCut,
+                cameraCrossingFilterAlpha
             ]
 
             log_writer.writerow(row)

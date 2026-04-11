@@ -20,22 +20,25 @@
 
 class Algorithm {
 	private:
-    	bool                   initialized          = false;
-    	constexpr static int   lineSearchOffset     = 10;
-    	constexpr static int   cameraBufferWith     = 128;
-    	constexpr static int   halfCameraBufferWith = cameraBufferWith / 2;
-   	 	constexpr static float algorithmOffset      = 3.5f;
+    	bool                    initialized          = false;
+    	constexpr static int    lineSearchOffset     = 10;
+    	constexpr static size_t cameraBufferWith     = 128;
+    	constexpr static int    halfCameraBufferWith = cameraBufferWith / 2;
+   	 	constexpr static float  algorithmOffset      = 3.5f;
 
-    	uint16_t               smoothedData[128]    = {0};
-    	uint32_t               brightness           = 0;
-   		uint32_t               crossings            = 0;
-   		uint32_t               leftLinePosition     = 0;
-		uint32_t               rightLinePosition    = cameraBufferWith;
-		uint32_t               leftLineRange        = halfCameraBufferWith;
-		uint32_t               rightLineRange       = halfCameraBufferWith;
-		uint32_t               position             = halfCameraBufferWith;
-		float                  adjustedPosition     = halfCameraBufferWith;
-		float                  filteredPosition     = halfCameraBufferWith;
+    	uint16_t                smoothedData[128]    = {0};
+    	uint32_t                brightness           = 0;
+    	uint32_t                brightnessMean 	  	 = 0;
+   		uint8_t                 crossings            = 0;
+   		uint32_t                leftLinePosition     = 0;
+		uint32_t                rightLinePosition    = cameraBufferWith;
+		uint32_t                leftLineRange        = halfCameraBufferWith;
+		uint32_t                rightLineRange       = halfCameraBufferWith;
+		uint32_t                position             = halfCameraBufferWith;
+		float                   adjustedPosition     = halfCameraBufferWith;
+		float                   filteredPosition     = halfCameraBufferWith;
+
+		uint16_t				filteredData[128]      = {0};
 
 		NXP_Encoder& encoderLeft;
 		NXP_Encoder& encoderRight;
@@ -50,12 +53,17 @@ class Algorithm {
 		bool patternDetected = false;
 		uint32_t patternsStartTime = 0;
 		bool findPatterns(uint16_t* data, uint32_t currentMillis);
+		bool findCrossings(uint16_t* data);
 
   public:
     Algorithm(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, Differential& differential, NXP_Params& params) : encoderLeft(encoderLeft), encoderRight(encoderRight), differential(differential), params(params) {};
     float    calculatePosition(uint16_t* data, uint32_t currentMillis);
+
     uint32_t getBrightness() const { return brightness; }
-	uint32_t getCrossings() const { return crossings; }
+	uint32_t getLeftLinePosition() const { return leftLinePosition; }
+	uint32_t getRightLinePosition() const { return rightLinePosition; }
+
+	uint8_t getCrossings() const { return crossings; }
 	bool isPatternDetected() const { return patternDetected; }
 
 	void clearPatterns(uint32_t currentMillis);

@@ -14,7 +14,11 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     // Brightness
     brightness = 0;
 
-    for (size_t i = 0; i != cameraBufferWith; i++) brightness += (data[i] / cameraBufferWith);
+    for (size_t i = 0; i != cameraBufferWith; i++) brightness += data[i];
+    brightness /= cameraBufferWith;
+
+    // EMA filter on brightness
+    brightnessMean = (brightnessMean * (1.0f - params.getBrightnessMeanAlpha())) + (brightness * params.getBrightnessMeanAlpha());
 
     // Right line position
     rightLineRange = ((position / 2) - lineSearchOffset);
@@ -35,7 +39,16 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     // Lo pass filter position
     filteredPosition = (filteredPosition * (1 - params.getAlgorithmFilterAlpha())) + ((adjustedPosition + algorithmOffset) * params.getAlgorithmFilterAlpha());
 
-    if (findPatterns(data, currentMillis)) differential.setPatternDetected(true);
+
+    // EMA filter on data
+    for (size_t i = 0; i != cameraBufferWith; i++) {
+        filteredData[i] = (filteredData[i] * (1.0f - params.getCameraCrossingFilterAlpha())) + (data[i] * params.getCameraCrossingFilterAlpha());
+    }
+    
+    findCrossings(filteredData);
+
+    if (findPatterns(filteredData, currentMillis)) differential.setPatternDetected(true);
+
 
     // Return filtered position
     return (filteredPosition);
@@ -99,7 +112,7 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
     // ===== DECYZJA ===== // na wysokich predkoscuach nadal nie wykrywa prawdziwego a wykrywa zle...
 
-    if (corr > params.getPatternCorrelationThreshold()) {
+    if (corr > params.getPatternCorrelationThreshold() && crossings >= 5) {
         if (!patternDetected) {
             patternDetected   = true;
             patternsStartTime = currentMillis;
@@ -178,6 +191,19 @@ bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
 
 //     return false;
 // }
+
+bool Algorithm::findCrossings(uint16_t* data) {
+    crossings = 0;
+
+    uint32_t threshold = brightnessMean * params.getCrossingsBrightnessMultiplier();
+
+    for (size_t i = 1 + params.getCrossingsCut(); i < cameraBufferWith - 3 - params.getCrossingsCut(); i++) {
+        if ((data[i - 1] < threshold) && (data[i] < threshold) && (data[i + 1] > threshold) && (data[i + 2] > threshold)) crossings++;
+        if ((data[i - 1] > threshold) && (data[i] > threshold) && (data[i + 1] < threshold) && (data[i + 2] < threshold)) crossings++;
+    }
+
+    return false;
+}
 
 void Algorithm::clearPatterns(uint32_t currentMillis) {
     patternDetected   = false;

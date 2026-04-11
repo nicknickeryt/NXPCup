@@ -41,3 +41,7 @@ float PID::calculate(float setpoint, float current) {
 void PID::setKp(float kp) { Kp = kp; }
 
 float PID::getKp() const { return Kp; }
+
+void PID::setKi(float ki) { Ki = ki; }
+
+float PID::getKi() const { return Ki; }

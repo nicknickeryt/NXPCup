@@ -53,41 +53,125 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             // kitty().motors.setEnabled(false);
             // kitty().servo.set(0);
             // kitty().servo.disable();
-            fctprintf(logWrite, NULL, "\nkittyPause\n", 0);
             kitty().motors.setEnabled(false);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case 'p':
             break;
         case 'o':
-            fctprintf(logWrite, NULL, "\nkittyResume\n", 0);
             kitty().params.setStartRPM(0.3);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case 'r':
-            fctprintf(logWrite, NULL, "\nkittyRun\n", 0);
             kitty().menu.setTriggeredOff(true);
             kitty().motors.setEnabled(true);
             kitty().newAlgorithm.clearPatterns(millis());
             kitty().servo.init();
             kitty().menu.startRace(millis());
             break;
-        case '+': // 43
+
+        case '+': // startVelocty++
             kitty().params.setStartRPM(kitty().params.getStartRPM() + 100);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
         case '-': // startVelocity--
             kitty().params.setStartRPM(kitty().params.getStartRPM() - 100);
-            fctprintf(logWrite, NULL, "\nkittySV%02u\n", (uint8_t)(kitty().params.getStartRPM() / 100));
             break;
-        case 'a': // diffRatio++
-            kitty().params.setBrakeOne(kitty().params.getBrakeOne() + 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().params.getBrakeOne()));
+
+        case 'a': // brakeOne++
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() + 0.1f);
             break;
-        case 'b': // diffRatio--
-            kitty().params.setBrakeOne(kitty().params.getBrakeOne() - 1);
-            fctprintf(logWrite, NULL, "\nkittyDR%02u\n", (uint8_t)(kitty().params.getBrakeOne()));
+        case 'b': // brakeOne--
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() - 0.1f);
             break;
+
+        case 'c': // brakeAll++
+            kitty().params.setBrakeAll(kitty().params.getBrakeAll() + 0.1f);
+            break;
+        case 'd': // brakeAll--
+            kitty().params.setBrakeAll(kitty().params.getBrakeAll() - 0.1f);
+            break;
+        
+        case 'e': // servoDivider++
+            kitty().params.setServoDivider(kitty().params.getServoDivider() + 0.1f);
+            break;
+        case 'f': // servoDivider--
+            kitty().params.setServoDivider(kitty().params.getServoDivider() - 0.1f);
+            break;
+
+        case 'g': // pidKp++
+            kitty().params.setPidKp(kitty().params.getPidKp() + 0.05f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());
+            break;
+        case 'h': // pidKp--
+            kitty().params.setPidKp(kitty().params.getPidKp() - 0.05f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());            break;
+
+        case 'i': // pidKi++
+            kitty().params.setPidKi(kitty().params.getPidKi() + 0.0001f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());            break;
+        case 'j': // pidKi--
+            kitty().params.setPidKi(kitty().params.getPidKi() - 0.0001f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());
+            break;
+
+        case 'k': // filter++
+            kitty().params.setAlgorithmFilterAlpha(kitty().params.getAlgorithmFilterAlpha() + 0.05f);
+            break;
+        case 'l': // filter--
+            kitty().params.setAlgorithmFilterAlpha(kitty().params.getAlgorithmFilterAlpha() - 0.05f);
+            break;
+
+        case 'm': // brakeClamp++
+            kitty().params.setBrakeClamp(kitty().params.getBrakeClamp() + 0.05f);
+            break;
+        case 'n': // brakeClamp--
+            kitty().params.setBrakeClamp(kitty().params.getBrakeClamp() - 0.05f);
+            break;
+
+        case '5': // outsideRPM++
+            kitty().params.setCornerOutsideRPM(kitty().params.getCornerOutsideRPM() + 50);
+            break;
+        case '6': // outsideRPM--
+            kitty().params.setCornerOutsideRPM(kitty().params.getCornerOutsideRPM() - 50);
+            break;
+
+        case '7': // insideRPM++
+            kitty().params.setCornerInsideRPM(kitty().params.getCornerInsideRPM() + 50);
+            break;
+        case '8': // insideRPM--
+            kitty().params.setCornerInsideRPM(kitty().params.getCornerInsideRPM() - 50);
+            break;
+
+        case '9': // threshold++
+            kitty().params.setPatternCorrelationThreshold(kitty().params.getPatternCorrelationThreshold() + 0.01f);
+            break;
+        case '0': // threshold--
+            kitty().params.setPatternCorrelationThreshold(kitty().params.getPatternCorrelationThreshold() - 0.01f);
+            break;
+
+
+        case '!': // brighnessMultiplier++
+            kitty().params.setCrossingsBrightnessMultiplier(kitty().params.getCrossingsBrightnessMultiplier() + 0.05f);
+            break;
+        case '@': // brighnessMultiplier--
+            kitty().params.setCrossingsBrightnessMultiplier(kitty().params.getCrossingsBrightnessMultiplier() - 0.05f);
+            break;
+    
+        case '#': // crossingCut++
+            kitty().params.setCrossingsCut(kitty().params.getCrossingsCut() + 1);
+            break;
+        case '$': // crossingCut--
+            kitty().params.setCrossingsCut(kitty().params.getCrossingsCut() - 1);
+            break;
+
+        case '%': // brightnessMeanAlpha++
+            kitty().params.setBrightnessMeanAlpha(kitty().params.getBrightnessMeanAlpha() + 0.05f);
+            break;
+        case '^': // brightnessMeanAlpha--
+            kitty().params.setBrightnessMeanAlpha(kitty().params.getBrightnessMeanAlpha() - 0.05f);
+            break;
+
+        case '&': // crossingAlpha++
+            kitty().params.setCameraCrossingFilterAlpha(kitty().params.getCameraCrossingFilterAlpha() + 0.05f);
+            break;
+        case '*': // crossingAlpha--
+            kitty().params.setCameraCrossingFilterAlpha(kitty().params.getCameraCrossingFilterAlpha() - 0.05f);
+            break;
+
         case '1': { // FORWARD
             Kitty::kitty().motors.run();
 
@@ -119,7 +203,7 @@ void Kitty::uartCallback(uint8_t receivedByte) {
         case '4': // left
             Kitty::kitty().servo.set(Kitty::kitty().servo.get() - 0.2f);
             break;
-        case 'x': // resetw
+        case 'x': // reset
             fctprintf(logWrite, NULL, "kittyReset\n");
             NVIC_SystemReset();
             break;
@@ -206,13 +290,11 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-static constexpr size_t FRAME_SIZE = 168;
+static constexpr size_t FRAME_SIZE = 182;
 uint8_t frame[FRAME_SIZE]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
-
 uint8_t sr04Triggered = 0;
-
 
 void Kitty::proc() {
     if (!sr04Triggered) {
@@ -224,13 +306,6 @@ void Kitty::proc() {
         motors.setValue(0, 0);
         return;
     }
-    // TODO
-    // zaimplementowac jakiegos PIDa do hamowania, aby stanąć w idealnym miejscu
-    // powinien byc bardzo agresywny zwlaszcza na poczatku - nawet przy niskiej predkosci 1800
-    // hamowanie z sila 0.7 jest ledwo wystarczajace, doslownie na milimetry od klocka zaczynamy sie cofac
-    // tez moze trigger z sr04 jest za pozno otrzymywany?
-
-    // Bez pida zatrzymujemy sie jakies 30 cm przed klockiem, bo cofamy za dlugo - trzeba to cofanie na pida ogarnac
 
     menuActive = menu.proc(millis());
 
@@ -253,7 +328,7 @@ void Kitty::proc() {
 
         uint16_t* buffer = static_cast<uint16_t*>(cameraDataBuf);
 
-        for (size_t i = 0; i < 128; i++) frame[idx++] = (uint8_t)(buffer[i] / 158);
+        for (size_t i = 0; i < 128; i++) frame[idx++] = (uint8_t)(buffer[i] / 110);
 
         frame[132] = (uint8_t)(position + 63);
 
@@ -328,18 +403,57 @@ void Kitty::proc() {
         frame[166] = (insideRPM >> 8) & 0xFF;
         frame[167] = insideRPM & 0xFF;
 
+        uint16_t brightness = static_cast<uint16_t>(newAlgorithm.getBrightness() / 110);
+        frame[168] = (brightness >> 8) & 0xFF;
+        frame[169] = brightness & 0xFF;
+
+        uint16_t leftLine = static_cast<uint16_t>(newAlgorithm.getLeftLinePosition());
+        frame[170] = (leftLine >> 8) & 0xFF;
+        frame[171] = leftLine & 0xFF;
+
+        uint16_t rightLine = static_cast<uint16_t>(newAlgorithm.getRightLinePosition());
+        frame[172] = (rightLine >> 8) & 0xFF;
+        frame[173] = rightLine & 0xFF;
+
+        frame[174] = newAlgorithm.getCrossings();
+
+        uint16_t crossingsBrightnessMultiplier =
+            static_cast<uint16_t>(params.getCrossingsBrightnessMultiplier() * 1000.0f);
+
+        frame[175] = (crossingsBrightnessMultiplier >> 8) & 0xFF;
+        frame[176] = crossingsBrightnessMultiplier & 0xFF;
+
+        uint16_t brightnessMeanAlpha =
+            static_cast<uint16_t>(params.getBrightnessMeanAlpha() * 1000.0f);
+
+        frame[177] = (brightnessMeanAlpha >> 8) & 0xFF;
+        frame[178] = brightnessMeanAlpha & 0xFF;
+
+        frame[179] = params.getCrossingsCut();
+        
+        uint16_t cameraCrossingFlterAlpha =
+            static_cast<uint16_t>(params.getCameraCrossingFilterAlpha() * 1000.0f);
+
+        frame[180] = (cameraCrossingFlterAlpha >> 8) & 0xFF;
+        frame[181] = cameraCrossingFlterAlpha & 0xFF;
+
+
+        if(newAlgorithm.isPatternDetected()) {
+            uartDebug.write((char*)frame, FRAME_SIZE);
+        }
+
         static int frameCounter = 0;
         frameCounter++;
         if (frameCounter % 2 == 0) {
             uartDebug.write((char*)frame, FRAME_SIZE);
         }
-        //////////////////////////////////////////////////////////////////////
 
-        if (menuActive) {
-            // differential.proc(position, millis(), dist);
+
+
+        if (menuActive) 
             return;
-        }
-
+        
+        
         float servoPosition = -(position / params.getServoDivider());
         if (differential.isDistanceModeActive()) servoPosition = 0;
 
