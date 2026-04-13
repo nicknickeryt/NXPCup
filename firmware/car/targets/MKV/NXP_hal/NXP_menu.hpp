@@ -28,7 +28,8 @@ class NXP_Menu {
 
     bool menuTrigger = false;
 
-    enum MenuPage { PAGE_STARTRPM, 
+    enum MenuPage { 
+        PAGE_STARTRPM, 
         PAGE_SERVODIV, 
         PAGE_SERVOALPHA, 
         PAGE_CORR, 
