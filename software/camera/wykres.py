@@ -15,7 +15,7 @@ BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
 # BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
-FRAME_SIZE = 184
+FRAME_SIZE = 189
 # ==========================================
 
 # ser = serial.Serial(PORT, BAUD, timeout=0)
@@ -60,6 +60,11 @@ brightnessMeanAlpha = 0.0
 crossingsCut = 0
 
 cameraCrossingFilterAlpha = 0
+
+pitFrequency = 0
+algorithmOffset = 0
+
+patternTimeutMs = 0
 
 last_time = time.time()
 frame_count = 0
@@ -165,7 +170,10 @@ def start_logging():
                 "brightnessMeanAlpha",
                 "crossingsCut",
                 "cameraCrossingFilterAlpha",
-                "brightnessCrossThreshold"
+                "brightnessCrossThreshold",
+                "pitFrequency",
+                "algorithmOffset",
+                "patternTimeoutMs"
     ]
     log_writer.writerow(header)
 
@@ -320,6 +328,7 @@ history_plot.setMouseEnabled(False, False)
 history_plot.hideAxis('left')
 history_plot.hideAxis('bottom')
 history_plot.getViewBox().setAspectLocked(True)
+history_plot.invertY(True)
 
 # 👉 przejdź do prawej kolumny
 win.nextCol()
@@ -455,8 +464,8 @@ win.ci.layout.addItem(proxy_right, 2, 5, 3, 2)
 def make_btn(text, cmd, color, row, col):
     btn = QtWidgets.QPushButton(text)
 
-    btn.setMinimumHeight(30)
-    btn.setMinimumWidth(30)
+    btn.setMinimumHeight(25)
+    btn.setMinimumWidth(25)
     btn.setMaximumWidth(90)
 
     btn.setStyleSheet(f"""
@@ -685,6 +694,31 @@ btn_layout.addWidget(cross_alpha_label, 16, 0, 1, 2)
 make_btn("+", "&", "green", 16, 2)
 make_btn("-", "*", "red", 16, 3)
 
+camera_freq_label = QtWidgets.QLabel("📸 Camera freq: ?")
+camera_freq_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+camera_freq_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(camera_freq_label, 17, 0, 1, 2)
+
+make_btn("+", "(", "green", 17, 2)
+make_btn("-", ")", "red", 17, 3)
+
+alg_offset_label = QtWidgets.QLabel("📸 Algorithm offset: ?")
+alg_offset_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+alg_offset_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(alg_offset_label, 18, 0, 1, 2)
+
+make_btn("+", "{", "green", 18, 2)
+make_btn("-", "}", "red", 18, 3)
+
+
+pattern_timeout_label = QtWidgets.QLabel("📸 Pattern timeout: ?")
+pattern_timeout_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+pattern_timeout_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(pattern_timeout_label, 19, 0, 1, 2)
+
+make_btn("+", "[", "green", 19, 2)
+make_btn("-", "]", "red", 19, 3)
+
 buffer = bytearray()
 
 
@@ -833,13 +867,19 @@ def read_uart():
         
         brightnessCrossThreshold = (frame[182] << 8) | frame[183]
         
+        pitFrequency = frame[184]
+        
+        algorithmOffset = ((frame[185] << 8) | frame[186]) / 1000.0
+        
+        patternTimeoutMs = ((frame[187] << 8) | frame[188])
+        
         brakeAll /= 1000
         brakeOne /= 1000
         brakeClamp /= 1000
         
         # 🔹 KONIEC - startRPM = 800
         elapsed_temp = time.time() - run_start_time if run_start_time else 0
-        if isPatternDetected == True and elapsed_temp > 1.0:
+        if isPatternDetected == True and elapsed_temp > 0.5:
             run_end_time = time.time()
             run_finished = True
             elapsed = run_end_time - run_start_time if run_start_time else 0
@@ -905,6 +945,11 @@ def read_uart():
 
         mult_label.setText(f"Cross mult.: <b>{crossingsBrightnessMultiplier:.2f}</b>")
         cross_alpha_label.setText(f"Crossing α: <b>{cameraCrossingFilterAlpha:.2f}</b>")
+        camera_freq_label.setText(f"📸 Cam freq: <b>{pitFrequency}kHz (SI {1000*pitFrequency/268:.0f}Hz)</b>")
+        
+        alg_offset_label.setText(f"Alg. offset <b>{algorithmOffset:.1f}</b>")
+        
+        pattern_timeout_label.setText(f"⌛ Pattern timeout <b>{patternTimeoutMs/1000:.1f}s</b>")
 
     # 🔥 rysuj tylko najnowsze
     if last_frame:
@@ -1039,7 +1084,10 @@ def read_uart():
                 brightnessMeanAlpha,
                 crossingsCut,
                 cameraCrossingFilterAlpha,
-                brightnessCrossThreshold
+                brightnessCrossThreshold,
+                pitFrequency,
+                algorithmOffset,
+                patternTimeoutMs
             ]
 
             log_writer.writerow(row)

@@ -78,3 +78,8 @@ void NXP_PIT::channelEnable() {
     PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TIE_MASK; // timer enable interrupt
     PIT->CHANNEL[channel].TCTRL |= PIT_TCTRL_TEN_MASK; // timer enable
 }
+
+void NXP_PIT::setFrequency(uint32_t frequency) {
+    this->frequency = frequency;
+    PIT->CHANNEL[channel].LDVAL = (CLOCK_GetFreq(kCLOCK_BusClk) / frequency) - 1; // set timer counting
+}

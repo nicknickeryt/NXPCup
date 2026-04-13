@@ -1,3 +1,4 @@
+#include "NXP_PIT.hpp"
 #include "algorithms/pid.hpp"
 
 #pragma once
@@ -26,7 +27,7 @@ class NXP_Params {
     float diffClamp = 0.0f;
 
     // RPMs in corners
-    uint32_t cornerInsideRPM = 750;
+    uint32_t rpmOffset = 750;
 
     // PID params for motors
     float pidKp = 2.0f;
@@ -37,6 +38,12 @@ class NXP_Params {
     uint8_t crossingsCut = 0;
 
     float cameraCrossingFilterAlpha = 0.5f;
+
+    uint32_t cameraPitFrequency = 50000;
+
+    float algorithmOffset = 1.7f;
+
+		uint32_t patternDetectTimeoutMs = 1500;
 
   public:
     NXP_Params() {}
@@ -64,8 +71,8 @@ class NXP_Params {
     float getDiffClamp() const { return diffClamp; }
     void  setDiffClamp(float value) { diffClamp = value; }
 
-    uint32_t getCornerInsideRPM() const { return cornerInsideRPM; }
-    void     setCornerInsideRPM(uint32_t rpm) { cornerInsideRPM = rpm;  }
+    uint32_t getRPMOffset() const { return rpmOffset; }
+    void     setRPMOffset(uint32_t rpm) { rpmOffset = rpm;  }
 
     float getPidKp() const { return pidKp; }
     void  setPidKp(float kp, PID& pidLeft, PID& pidRight) { 
@@ -92,4 +99,13 @@ class NXP_Params {
 
     float getCameraCrossingFilterAlpha() const { return cameraCrossingFilterAlpha; }
     void  setCameraCrossingFilterAlpha(float alpha) { cameraCrossingFilterAlpha = alpha; }
+
+    uint32_t getCameraPitFrequency() const { return cameraPitFrequency; }
+    void     setCameraPitFrequency(NXP_PIT &pit, uint32_t frequency) { cameraPitFrequency = frequency; pit.setFrequency(frequency); }
+
+    float getAlgorithmOffset() const { return algorithmOffset; }
+    void  setAlgorithmOffset(float offset) { algorithmOffset = offset; }
+
+    uint32_t getPatternDetectTimeoutMs() const { return patternDetectTimeoutMs; }
+    void     setPatternDetectTimeoutMs(uint32_t timeout) { patternDetectTimeoutMs = timeout; }
 };

@@ -130,10 +130,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
 
         case '7': // insideRPM++
-            kitty().params.setCornerInsideRPM(kitty().params.getCornerInsideRPM() + 50);
+            kitty().params.setRPMOffset(kitty().params.getRPMOffset() + 50);
             break;
         case '8': // insideRPM--
-            kitty().params.setCornerInsideRPM(kitty().params.getCornerInsideRPM() - 50);
+            kitty().params.setRPMOffset(kitty().params.getRPMOffset() - 50);
             break;
 
         case '9': // threshold++
@@ -170,6 +170,27 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
         case '*': // crossingAlpha--
             kitty().params.setCameraCrossingFilterAlpha(kitty().params.getCameraCrossingFilterAlpha() - 0.05f);
+            break;
+
+        case '(': // camFreq++
+            kitty().params.setCameraPitFrequency(kitty().pitCamera, kitty().params.getCameraPitFrequency() + 1000);
+            break;
+        case ')': // camFreq--
+            kitty().params.setCameraPitFrequency(kitty().pitCamera, kitty().params.getCameraPitFrequency() - 1000);
+            break;
+
+        case '{': // offset++
+            kitty().params.setAlgorithmOffset(kitty().params.getAlgorithmOffset() + 0.1f);
+            break;
+        case '}': // offset--
+            kitty().params.setAlgorithmOffset(kitty().params.getAlgorithmOffset() - 0.1f);
+            break;
+
+        case '[': // pattern timeout++
+            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() + 100);
+            break;
+        case ']': // pattern timeout--
+            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() - 100);
             break;
 
         case '1': { // FORWARD
@@ -210,6 +231,7 @@ void Kitty::uartCallback(uint8_t receivedByte) {
         default: break;
     }
 }
+
 
 void Kitty::uartKLZCallback(uint8_t data) { Kitty::kitty().uartFrame.deserialize(&data, sizeof(data)); }
 
@@ -262,6 +284,7 @@ void Kitty::init() {
     // commandManager.init(printCommandManager);
 
     camera.start();
+    pitCamera.setFrequency(params.getCameraPitFrequency());
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderRight));
     encodersPit.appendCallback(NXP_Encoder::ISR, reinterpret_cast<uint32_t*>(&encoderLeft));
     encodersPit.init();
@@ -294,7 +317,7 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-static constexpr size_t FRAME_SIZE = 184;
+static constexpr size_t FRAME_SIZE = 189;
 uint8_t frame[FRAME_SIZE]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
@@ -403,7 +426,7 @@ void Kitty::proc() {
         frame[164] = (outsideRPM >> 8) & 0xFF;
         frame[165] = outsideRPM & 0xFF;
 
-        uint16_t insideRPM = params.getCornerInsideRPM();
+        uint16_t insideRPM = params.getRPMOffset();
         frame[166] = (insideRPM >> 8) & 0xFF;
         frame[167] = insideRPM & 0xFF;
 
@@ -437,7 +460,6 @@ void Kitty::proc() {
         
         uint16_t cameraCrossingFlterAlpha =
             static_cast<uint16_t>(params.getCameraCrossingFilterAlpha() * 1000.0f);
-
         frame[180] = (cameraCrossingFlterAlpha >> 8) & 0xFF;
         frame[181] = cameraCrossingFlterAlpha & 0xFF;
 
@@ -445,7 +467,16 @@ void Kitty::proc() {
         frame[182] = (brightnessCrossThreshold >> 8) & 0xFF;
         frame[183] = brightnessCrossThreshold & 0xFF;
 
+        uint8_t frequency = static_cast<uint8_t>(params.getCameraPitFrequency() / 1000);
+        frame[184] = frequency;
 
+        uint16_t algorithmOffset = static_cast<uint16_t>(params.getAlgorithmOffset() * 1000.0f);
+        frame[185] = (algorithmOffset >> 8) & 0xFF;
+        frame[186] = algorithmOffset & 0xFF;
+
+        uint16_t patternDetectTimeout = params.getPatternDetectTimeoutMs();
+        frame[187] = (patternDetectTimeout >> 8) & 0xFF;
+        frame[188] = patternDetectTimeout & 0xFF;
 
 
         // if(newAlgorithm.isPatternDetected()) {

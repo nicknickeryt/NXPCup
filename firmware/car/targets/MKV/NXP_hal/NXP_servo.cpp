@@ -20,7 +20,7 @@
  }
  
  void NXP_Servo::set(float value){
-     value = std::clamp(value + offset, -0.8f, 0.8f);
+     value = std::clamp(value + offset, -0.9f, 0.9f);
      currentValue = value;
      value = (float)maxTicksDeviation * value * servoMultiplier;
      pwm.setRawPeriod(centerTicks + value, pwm.getChannel());

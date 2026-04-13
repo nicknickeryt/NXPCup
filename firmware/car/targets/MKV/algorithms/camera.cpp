@@ -37,7 +37,7 @@ float Algorithm::calculatePosition(uint16_t* data, uint32_t currentMillis) {
     adjustedPosition = (static_cast<float>(position) / 2.0f) - halfCameraBufferWith;
 
     // Lo pass filter position
-    filteredPosition = (filteredPosition * (1 - params.getAlgorithmFilterAlpha())) + ((adjustedPosition + algorithmOffset) * params.getAlgorithmFilterAlpha());
+    filteredPosition = (filteredPosition * (1 - params.getAlgorithmFilterAlpha())) + ((adjustedPosition + params.getAlgorithmOffset()) * params.getAlgorithmFilterAlpha());
 
 
     // EMA filter on data
@@ -62,7 +62,7 @@ static constexpr float pattern[128] = {7,   8,   13,  11, 18, 19, 28, 32, 36, 37
                                    103, 100, 100, 96, 96, 93, 92, 80, 59, 40, 41, 50, 60, 58, 58, 52, 52, 47, 44, 38,  37,  26,  20,  16,  14,  9,   10,  6,   8,   4,   0,   0};
 
 bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
-    if (currentMillis - algorithmStartTime < patternDetectTimeoutMs) return false;
+    if (currentMillis - algorithmStartTime < params.getPatternDetectTimeoutMs()) return false;
 
     // ===== SMOOTH =====
     for (int i = 1; i < 127; i++) smoothedData[i] = (data[i - 1] + 5 * data[i] + data[i + 1]) / 7;

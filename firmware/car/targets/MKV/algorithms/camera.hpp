@@ -24,7 +24,6 @@ class Algorithm {
     	constexpr static int    lineSearchOffset     = 10;
     	constexpr static size_t cameraBufferWith     = 128;
     	constexpr static int    halfCameraBufferWith = cameraBufferWith / 2;
-   	 	constexpr static float  algorithmOffset      = 1.7f;
 
     	uint16_t                smoothedData[128]    = {0};
     	uint32_t                brightness           = 0;
@@ -49,7 +48,6 @@ class Algorithm {
 
 		uint32_t algorithmStartTime = 0;
 
-		uint32_t patternDetectTimeoutMs = 1500;
 		uint32_t patternsAmount = 0;
 		bool patternDetected = false;
 		uint32_t patternsStartTime = 0;

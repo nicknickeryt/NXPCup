@@ -96,11 +96,11 @@
         if (position >= 0) {
             setLeftMotorRPM  = params.getStartRPM() * brakeComponent;
 
-            setRightMotorRPM = (params.getStartRPM() * brakeComponent) - (params.getCornerInsideRPM() * (1 - diffComponent));
+            setRightMotorRPM = (params.getStartRPM() * brakeComponent) - (params.getRPMOffset() * (1 - diffComponent));
         } else if (position < 0) {
             setRightMotorRPM = params.getStartRPM() * brakeComponent;
 
-            setLeftMotorRPM  = (params.getStartRPM() * brakeComponent) - (params.getCornerInsideRPM() * (1 - diffComponent));
+            setLeftMotorRPM  = (params.getStartRPM() * brakeComponent) - (params.getRPMOffset() * (1 - diffComponent));
         }
 
         float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float) params.getStartRPM(), encoderRight.getRPM() / (float) params.getStartRPM());

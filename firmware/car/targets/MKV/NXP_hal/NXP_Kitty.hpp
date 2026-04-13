@@ -178,7 +178,7 @@ class Kitty {
     UART_Frame uartFrame = {onKLZDataReceivedCallback};
 
     // MENU
-    NXP_Menu menu = {buttons, switches, display, motors, differential, newAlgorithm, params};
+    NXP_Menu menu = {buttons, switches, display, motors, differential, newAlgorithm, params, pitCamera};
 
     // HC-SR04
     NXP_GPIO triggerPin = {PORTD, GPIOD, 7U, NXP_GPIO::Mode::OUTPUT};

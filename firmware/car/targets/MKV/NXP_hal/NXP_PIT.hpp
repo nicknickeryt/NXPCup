@@ -49,6 +49,8 @@ public:
             callbackFunctions[i](args[i]);
         }
     }
+
+    void setFrequency(uint32_t frequency);
 };
 
 

@@ -23,11 +23,30 @@ class NXP_Menu {
     NXP_Motors&       motors;
     Differential&     differential;
     Algorithm&        algorithm;
-    NXP_Params&      params;
+    NXP_Params&       params;
+    NXP_PIT&          cameraPit;
 
     bool menuTrigger = false;
 
-    enum MenuPage { PAGE_STARTRPM, PAGE_DIFFRATIO, PAGE_BREAK, PAGE_0RPM, PAGE_PID_KP };
+    enum MenuPage { PAGE_STARTRPM, 
+        PAGE_SERVODIV, 
+        PAGE_SERVOALPHA, 
+        PAGE_CORR, 
+        PAGE_PID_KP, 
+        PAGE_PID_KI, 
+        PAGE_BRAKE_ALL, 
+        PAGE_BRAKE_ONE, 
+        PAGE_BRAKE_CLAMP, 
+        PAGE_RPMOFFSET, 
+        PAGE_DIFFCLAMP,
+        PAGE_CROSSCUT,
+        PAGE_BRIGHTNESSALPHA,
+        PAGE_CROSSING_MULT,
+        PAGE_CROSSINGALPHA,
+        PAGE_CAMFREQ,
+        PAGE_ALGORITHM_OFFSET,
+        PAGE_PATTERN_TIMEOUT,
+        PAGE_0RPM, };
 
     enum MenuButton { BUTTON_PAGE, BUTTON_VALUE_PLUS, BUTTON_VALUE_MINUS, BUTTON_RUN };
 
@@ -40,8 +59,8 @@ class NXP_Menu {
     uint32_t menuDebounceTimeMs = 175;
 
   public:
-    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential, Algorithm& algorithm, NXP_Params& params) :
-        buttons(buttons), switches(switches), display(display), motors(motors), differential(differential), algorithm(algorithm), params(params) {}
+    NXP_Menu(halina::Buttons& buttons, halina::Switches& switches, NXP_Display& display, NXP_Motors& motors, Differential& differential, Algorithm& algorithm, NXP_Params& params, NXP_PIT& cameraPit) :
+        buttons(buttons), switches(switches), display(display), motors(motors), differential(differential), algorithm(algorithm), params(params), cameraPit(cameraPit) {}
 
     void init() {
         buttons.init();
