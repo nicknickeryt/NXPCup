@@ -24,7 +24,7 @@ class Algorithm {
     	constexpr static int    lineSearchOffset     = 10;
     	constexpr static size_t cameraBufferWith     = 128;
     	constexpr static int    halfCameraBufferWith = cameraBufferWith / 2;
-   	 	constexpr static float  algorithmOffset      = 3.5f;
+   	 	constexpr static float  algorithmOffset      = 1.7f;
 
     	uint16_t                smoothedData[128]    = {0};
     	uint32_t                brightness           = 0;
