@@ -85,7 +85,7 @@
 
         // float breakComponent = (abs(position) / breakRatio);
         float diffComponent = (1 - (abs(position) / params.getBrakeOne()));
-        diffComponent = std::clamp(diffComponent, params.getBrakeClamp(), 1.0f);
+        diffComponent = std::clamp(diffComponent, params.getDiffClamp(), 1.0f);
 
         brakeComponent = 1 - (abs(position) / params.getBrakeAll());
         brakeComponent = std::clamp(brakeComponent, params.getBrakeClamp(), 1.0f);
@@ -95,16 +95,12 @@
 
         if (position >= 0) {
             setLeftMotorRPM  = params.getStartRPM() * brakeComponent;
-            if(setLeftMotorRPM < params.getCornerOutsideRPM()) setLeftMotorRPM  = params.getCornerOutsideRPM();
 
-            setRightMotorRPM = params.getStartRPM() * diffComponent * brakeComponent;
-            if(setRightMotorRPM < params.getCornerInsideRPM()) setRightMotorRPM = params.getCornerInsideRPM();
+            setRightMotorRPM = (params.getStartRPM() * brakeComponent) - (params.getCornerInsideRPM() * (1 - diffComponent));
         } else if (position < 0) {
             setRightMotorRPM = params.getStartRPM() * brakeComponent;
-            if(setRightMotorRPM < params.getCornerOutsideRPM()) setRightMotorRPM = params.getCornerOutsideRPM();
 
-            setLeftMotorRPM  = params.getStartRPM() * diffComponent * brakeComponent;
-            if(setLeftMotorRPM < params.getCornerInsideRPM()) setLeftMotorRPM = params.getCornerInsideRPM();
+            setLeftMotorRPM  = (params.getStartRPM() * brakeComponent) - (params.getCornerInsideRPM() * (1 - diffComponent));
         }
 
         float pidOutLeft  = pidLeft.calculate((float) setLeftMotorRPM / (float) params.getStartRPM(), encoderRight.getRPM() / (float) params.getStartRPM());

@@ -76,24 +76,24 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
 
         case 'a': // brakeOne++
-            kitty().params.setBrakeOne(kitty().params.getBrakeOne() + 0.1f);
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() + 0.5f);
             break;
         case 'b': // brakeOne--
-            kitty().params.setBrakeOne(kitty().params.getBrakeOne() - 0.1f);
+            kitty().params.setBrakeOne(kitty().params.getBrakeOne() - 0.5f);
             break;
 
         case 'c': // brakeAll++
-            kitty().params.setBrakeAll(kitty().params.getBrakeAll() + 0.1f);
+            kitty().params.setBrakeAll(kitty().params.getBrakeAll() + 0.5f);
             break;
         case 'd': // brakeAll--
-            kitty().params.setBrakeAll(kitty().params.getBrakeAll() - 0.1f);
+            kitty().params.setBrakeAll(kitty().params.getBrakeAll() - 0.5f);
             break;
         
         case 'e': // servoDivider++
-            kitty().params.setServoDivider(kitty().params.getServoDivider() + 0.1f);
+            kitty().params.setServoDivider(kitty().params.getServoDivider() + 0.5f);
             break;
         case 'f': // servoDivider--
-            kitty().params.setServoDivider(kitty().params.getServoDivider() - 0.1f);
+            kitty().params.setServoDivider(kitty().params.getServoDivider() - 0.5f);
             break;
 
         case 'g': // pidKp++
@@ -123,10 +123,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
 
         case '5': // outsideRPM++
-            kitty().params.setCornerOutsideRPM(kitty().params.getCornerOutsideRPM() + 50);
+            kitty().params.setDiffClamp(kitty().params.getDiffClamp() + 0.05f);
             break;
         case '6': // outsideRPM--
-            kitty().params.setCornerOutsideRPM(kitty().params.getCornerOutsideRPM() - 50);
+            kitty().params.setDiffClamp(kitty().params.getDiffClamp() - 0.05f);
             break;
 
         case '7': // insideRPM++
@@ -277,6 +277,10 @@ void Kitty::init() {
     camera.start();
     log_notice("KiTTy init finished");
 
+    // servo.init();
+    // servo.set(0.0f);
+    // return;
+
 }
 
 
@@ -395,7 +399,7 @@ void Kitty::proc() {
         frame[162] = (brakeClamp >> 8) & 0xFF;
         frame[163] = brakeClamp & 0xFF;
 
-        uint16_t outsideRPM = params.getCornerOutsideRPM();
+        uint16_t outsideRPM = (uint16_t)(params.getDiffClamp() * 1000);
         frame[164] = (outsideRPM >> 8) & 0xFF;
         frame[165] = outsideRPM & 0xFF;
 

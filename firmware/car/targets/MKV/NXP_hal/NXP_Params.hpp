@@ -5,7 +5,7 @@
 class NXP_Params {
   private:
     // Divides position in final servo set in NXP_Kitty
-    float servoDivider = 20.0f;
+    float servoDivider = 19.0f;
 
     // EMA filter alpha for algorithm position from camera data
     float algorithmFilterAlpha = 0.7f;
@@ -14,23 +14,23 @@ class NXP_Params {
     float patternCorrelationThreshold = 0.88f;
 
     // Target RPM value for motors
-    uint32_t startRPM = 4000;
+    uint32_t startRPM = 3500;
 
     // Braking parameters for motor algorithm - in corners
     // Lower - more brake!
-    float brakeAll = 22.0f;
-    float brakeOne = 35.0f;
+    float brakeAll = 19.0f;
+    float brakeOne = 19.5f;
 
     // Braking clamp for motor algorithm - in corners
-    float brakeClamp = 0.6f;
+    float brakeClamp = 0.55f;
+    float diffClamp = 0.0f;
 
     // RPMs in corners
-    uint32_t cornerOutsideRPM = 600;
-    uint32_t cornerInsideRPM = 600;
+    uint32_t cornerInsideRPM = 750;
 
     // PID params for motors
-    float pidKp = 1.9f;
-    float pidKi = 0.0002f;
+    float pidKp = 2.0f;
+    float pidKi = 0.00659f;
 
     float crossingsBrightnessMultiplier = 1.0f;
     float brightnessMeanAlpha = 0.3f;
@@ -61,8 +61,8 @@ class NXP_Params {
     float getBrakeClamp() const { return brakeClamp; }
     void  setBrakeClamp(float value) { brakeClamp = value; }
 
-    uint32_t getCornerOutsideRPM() const { return cornerOutsideRPM; }
-    void     setCornerOutsideRPM(uint32_t rpm) { cornerOutsideRPM = rpm; }
+    float getDiffClamp() const { return diffClamp; }
+    void  setDiffClamp(float value) { diffClamp = value; }
 
     uint32_t getCornerInsideRPM() const { return cornerInsideRPM; }
     void     setCornerInsideRPM(uint32_t rpm) { cornerInsideRPM = rpm;  }

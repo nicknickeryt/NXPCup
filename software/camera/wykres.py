@@ -45,7 +45,7 @@ pidKi = 0.0
 brakeAll = 0
 brakeOne = 0
 brakeClamp = 0
-cornerOutsideRPM = 0
+diffClamp = 0
 cornerInsideRPM = 0
 
 brightness = 0
@@ -156,7 +156,7 @@ def start_logging():
     header += [f"cam_{i}" for i in range(128)]
     header += [
         "time","position","rpmLeft","rpmRight",
-        "startRPM","sr04","diffLeft","diffRight","menuActive","isPatternDetected","servoDivider","algorithmFilterAlpha","patternThreshold","pidKp","pidKi","brakeAll","brakeOne","brakeClamp","cornerOutsideRPM","cornerInsideRPM",
+        "startRPM","sr04","diffLeft","diffRight","menuActive","isPatternDetected","servoDivider","algorithmFilterAlpha","patternThreshold","pidKp","pidKi","brakeAll","brakeOne","brakeClamp","diffClamp","cornerInsideRPM",
                 "brightness",
                 "leftLine",
                 "rightLine",
@@ -808,7 +808,9 @@ def read_uart():
         brakeAll = (frame[158] << 8) | frame[159]
         brakeOne = (frame[160] << 8) | frame[161]
         brakeClamp = (frame[162] << 8) | frame[163]
-        cornerOutsideRPM = (frame[164] << 8) | frame[165]
+        diffClamp = (frame[164] << 8) | frame[165]
+        diffClamp = diffClamp / 1000.0
+        
         cornerInsideRPM = (frame[166] << 8) | frame[167]
         
         servoDivider = servoDivider / 100.0
@@ -895,7 +897,7 @@ def read_uart():
         br_one_label.setText(f"🛑 Brake one: <b>{brakeOne:.2f}</b>")
         br_clamp_label.setText(f"⛔ Brake clamp: <b>{brakeClamp:.2f}</b>")
         inside_rpm_label.setText(f"Inside RPM: <b>{cornerInsideRPM}</b>")
-        outside_rpm_label.setText(f"Outside RPM: <b>{cornerOutsideRPM}</b>")
+        outside_rpm_label.setText(f"DIff clamp: <b>{diffClamp:.2f}</b>")
 
         cross_cut_label.setText(f"✂️ Crossing cut: <b>{crossingsCut}</b>")
 
@@ -1027,7 +1029,7 @@ def read_uart():
                 brakeAll,
                 brakeOne,
                 brakeClamp,
-                cornerOutsideRPM,
+                diffClamp,
                 cornerInsideRPM,
                 brightness,
                 leftLine,
