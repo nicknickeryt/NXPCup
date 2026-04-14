@@ -15,9 +15,8 @@
     Differential::Differential(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, NXP_Params& params) : encoderLeft(encoderLeft), encoderRight(encoderRight), params(params) {}
 
     void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
-#ifdef DISABLE_PATTERN_DETECTION_SLOWDOWN
-        patternDetected = 0;
-#endif
+        if(!params.getIsPatternStopEnabled())
+            patternDetected = 0;
         
         if (patternDetected) {
             params.setStartRPM(800);

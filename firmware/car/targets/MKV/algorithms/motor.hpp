@@ -5,8 +5,6 @@
 
 #include <utility>
 
-#define DISABLE_PATTERN_DETECTION_SLOWDOWN
-
 class Differential {
     int   position;
     float leftMotorPower;
@@ -25,8 +23,8 @@ class Differential {
     float brakeComponent = 0;
 
     // Kp     Ki     Kd     maxValue
-    PID pidLeft  = PID(params.getPidKp(), params.getPidKi(), 0.0f, 1.0f);
-    PID pidRight = PID(params.getPidKp(), params.getPidKi(), 0.0f, 1.0f);
+    PID pidLeft  = PID(params.getPidKp(), params.getPidKi(), params.getPidKd(), 1.0f);
+    PID pidRight = PID(params.getPidKp(), params.getPidKi(), params.getPidKd(), 1.0f);
 
     bool patternDetected = false;
 

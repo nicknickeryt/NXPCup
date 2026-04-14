@@ -35,12 +35,14 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
     if (!buttons.at(MenuButton::BUTTON_PAGE).get()) {
         currentMenuPage = static_cast<MenuPage>(currentMenuPage + 1);
-        if (currentMenuPage > 17) currentMenuPage = MenuPage::PAGE_STARTRPM; // DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (currentMenuPage > 18) currentMenuPage = MenuPage::PAGE_STARTRPM; // DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         switch (currentMenuPage) {
             case MenuPage::PAGE_STARTRPM:
                 display.print("RP\\[");
                 break;
+                
+            case MenuPage::PAGE_PATTERN_STOP_ENABLE: display.print("PATT"); break;
             case MenuPage::PAGE_SERVODIV: display.print("SDIV"); break;
             case MenuPage::PAGE_SERVOALPHA: display.print("SALP"); break;
             case MenuPage::PAGE_CORR: display.print("CORR"); break;
@@ -82,6 +84,21 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
                 menuDebounceTimer = currentMillis;
             } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
                 params.setStartRPM(params.getStartRPM() - 50);
+                menuDebounceTimer = currentMillis;
+            }
+
+            break;
+        }
+
+        case PAGE_PATTERN_STOP_ENABLE: {
+            std::string rpmText = params.getIsPatternStopEnabled() ? "ON  " : "OFF ";
+            display.print(rpmText.c_str());
+
+            if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
+                params.setIsPatternStopEnabled(true);
+                menuDebounceTimer = currentMillis;
+            } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
+                params.setIsPatternStopEnabled(false);
                 menuDebounceTimer = currentMillis;
             }
 

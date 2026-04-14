@@ -45,3 +45,7 @@ float PID::getKp() const { return Kp; }
 void PID::setKi(float ki) { Ki = ki; }
 
 float PID::getKi() const { return Ki; }
+
+void PID::setKd(float kd) { Kd = kd; }
+
+float PID::getKd() const { return Kd; }

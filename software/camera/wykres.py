@@ -15,7 +15,7 @@ BT_MAC = "98:D3:32:11:A4:34" # Kitty HC-06
 # BT_MAC = "00:21:13:00:1F:26"      # NXP
 
 START = b'\x00\xff\x00\xff'
-FRAME_SIZE = 189
+FRAME_SIZE = 191
 # ==========================================
 
 # ser = serial.Serial(PORT, BAUD, timeout=0)
@@ -41,12 +41,13 @@ algorithmFilterAlpha = 0.0
 patternThreshold = 0.0
 pidKp = 0.0
 pidKi = 0.0
+pidKd = 0.0
 
 brakeAll = 0
 brakeOne = 0
 brakeClamp = 0
 diffClamp = 0
-cornerInsideRPM = 0
+rpmOffset = 0
 
 brightness = 0
 brightnessCrossThreshold = 0
@@ -161,7 +162,7 @@ def start_logging():
     header += [f"cam_{i}" for i in range(128)]
     header += [
         "time","position","rpmLeft","rpmRight",
-        "startRPM","sr04","diffLeft","diffRight","menuActive","isPatternDetected","servoDivider","algorithmFilterAlpha","patternThreshold","pidKp","pidKi","brakeAll","brakeOne","brakeClamp","diffClamp","cornerInsideRPM",
+        "startRPM","sr04","diffLeft","diffRight","menuActive","isPatternDetected","servoDivider","algorithmFilterAlpha","patternThreshold","pidKp","pidKi","brakeAll","brakeOne","brakeClamp","diffClamp","rpmOffset",
                 "brightness",
                 "leftLine",
                 "rightLine",
@@ -301,11 +302,11 @@ pattern_label.setStyleSheet("""
     }
 """)
 
-
 top_row = QtWidgets.QVBoxLayout()
 top_row.addWidget(rpm_record_label)
 top_row.addWidget(pattern_label)
 top_row.addWidget(status_label)
+
 main_layout.addLayout(top_row)
 
 
@@ -490,6 +491,8 @@ def make_btn(text, cmd, color, row, col):
     return btn  
     
 
+    
+
 def make_action_btn(text, func, color, row, col, colspan):
     btn = QtWidgets.QPushButton(text)
     
@@ -519,7 +522,7 @@ def make_action_btn(text, func, color, row, col, colspan):
 
 make_action_btn("Uruchom", start_all, "#27ae60", 0, 0, 1)
 make_action_btn("STOP", stop_all, "#e74c3c", 0, 1, 1)
-make_action_btn("RESET", reset_all, "#b38704", 0, 2, 2)
+make_action_btn("RESET", reset_all, "#b38704", 0, 2, 1)
 
 
 
@@ -618,106 +621,123 @@ btn_layout.addWidget(ki_label, 7, 0, 1, 2)
 make_btn("+", "i", "green", 7, 2)
 make_btn("-", "j", "red", 7, 3)
 
+kd_label = QtWidgets.QLabel("Kd: ?")
+kd_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+kd_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(kd_label, 8, 0, 1, 2)
+
+make_btn("+", ",", "green", 8, 2)
+make_btn("-", ".", "red", 8, 3)
+
 
 br_all_label = QtWidgets.QLabel("Brake All: ?")
 br_all_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 br_all_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(br_all_label, 8, 0, 1, 2)
+btn_layout.addWidget(br_all_label, 9, 0, 1, 2)
 
-make_btn("+", "c", "green", 8, 2)
-make_btn("-", "d", "red", 8, 3)
+make_btn("+", "c", "green", 9, 2)
+make_btn("-", "d", "red", 9, 3)
 
 
 br_one_label = QtWidgets.QLabel("Brake One: ?")
 br_one_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 br_one_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(br_one_label, 9, 0, 1, 2)
+btn_layout.addWidget(br_one_label, 10, 0, 1, 2)
 
-make_btn("+", "a", "green", 9, 2)
-make_btn("-", "b", "red", 9, 3)
+make_btn("+", "a", "green", 10, 2)
+make_btn("-", "b", "red", 10, 3)
 
 
 br_clamp_label = QtWidgets.QLabel("Clamp: ?")
 br_clamp_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 br_clamp_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(br_clamp_label, 10, 0, 1, 2)
+btn_layout.addWidget(br_clamp_label, 11, 0, 1, 2)
 
-make_btn("+", "m", "green", 10, 2)
-make_btn("-", "n", "red", 10, 3)
+make_btn("+", "m", "green", 11, 2)
+make_btn("-", "n", "red", 11, 3)
 
 
-inside_rpm_label = QtWidgets.QLabel("Inside RPM: ?")
+inside_rpm_label = QtWidgets.QLabel("RPM offset: ?")
 inside_rpm_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 inside_rpm_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(inside_rpm_label, 11, 0, 1, 2)
+btn_layout.addWidget(inside_rpm_label, 12, 0, 1, 2)
 
-make_btn("+", "7", "green", 11, 2)
-make_btn("-", "8", "red", 11, 3)
+make_btn("+", "7", "green", 12, 2)
+make_btn("-", "8", "red", 12, 3)
 
 outside_rpm_label = QtWidgets.QLabel("Outside RPM: ?")
 outside_rpm_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 outside_rpm_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(outside_rpm_label, 12, 0, 1, 2)
+btn_layout.addWidget(outside_rpm_label, 13, 0, 1, 2)
 
-make_btn("+", "5", "green", 12, 2)
-make_btn("-", "6", "red", 12, 3)
+make_btn("+", "5", "green", 13, 2)
+make_btn("-", "6", "red", 13, 3)
 
 cross_cut_label = QtWidgets.QLabel("Cut: ?")
 cross_cut_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 cross_cut_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(cross_cut_label, 13, 0, 1, 2)
+btn_layout.addWidget(cross_cut_label, 14, 0, 1, 2)
 
-make_btn("+", "#", "green", 13, 2)
-make_btn("-", "$", "red", 13, 3)
+make_btn("+", "#", "green", 14, 2)
+make_btn("-", "$", "red", 14, 3)
 
 brightness_alpha_label = QtWidgets.QLabel("Bright α: ?")
 brightness_alpha_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 brightness_alpha_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(brightness_alpha_label, 14, 0, 1, 2)
+btn_layout.addWidget(brightness_alpha_label, 15, 0, 1, 2)
 
-make_btn("+", "%", "green", 14, 2)
-make_btn("-", "^", "red", 14, 3)
+make_btn("+", "%", "green", 15, 2)
+make_btn("-", "^", "red", 15, 3)
 
 mult_label = QtWidgets.QLabel("Cross mult: ?")
 mult_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 mult_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(mult_label, 15, 0, 1, 2)
+btn_layout.addWidget(mult_label, 16, 0, 1, 2)
 
-make_btn("+", "!", "green", 15, 2)
-make_btn("-", "@", "red", 15, 3)
+make_btn("+", "!", "green", 16, 2)
+make_btn("-", "@", "red", 16, 3)
 
 cross_alpha_label = QtWidgets.QLabel("Cross alpha: ?")
 cross_alpha_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 cross_alpha_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(cross_alpha_label, 16, 0, 1, 2)
+btn_layout.addWidget(cross_alpha_label, 17, 0, 1, 2)
 
-make_btn("+", "&", "green", 16, 2)
-make_btn("-", "*", "red", 16, 3)
+make_btn("+", "&", "green", 17, 2)
+make_btn("-", "*", "red", 17, 3)
 
 camera_freq_label = QtWidgets.QLabel("📸 Camera freq: ?")
 camera_freq_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 camera_freq_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(camera_freq_label, 17, 0, 1, 2)
+btn_layout.addWidget(camera_freq_label, 18, 0, 1, 2)
 
-make_btn("+", "(", "green", 17, 2)
-make_btn("-", ")", "red", 17, 3)
+make_btn("+", "(", "green", 18, 2)
+make_btn("-", ")", "red", 18, 3)
 
 alg_offset_label = QtWidgets.QLabel("📸 Algorithm offset: ?")
 alg_offset_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 alg_offset_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(alg_offset_label, 18, 0, 1, 2)
+btn_layout.addWidget(alg_offset_label, 19, 0, 1, 2)
 
-make_btn("+", "{", "green", 18, 2)
-make_btn("-", "}", "red", 18, 3)
+make_btn("+", "{", "green", 19, 2)
+make_btn("-", "}", "red", 19, 3)
 
 
 pattern_timeout_label = QtWidgets.QLabel("📸 Pattern timeout: ?")
 pattern_timeout_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 pattern_timeout_label.setStyleSheet(start_rpm_label.styleSheet())
-btn_layout.addWidget(pattern_timeout_label, 19, 0, 1, 2)
+btn_layout.addWidget(pattern_timeout_label, 20, 0, 1, 2)
 
-make_btn("+", "[", "green", 19, 2)
-make_btn("-", "]", "red", 19, 3)
+make_btn("+", "[", "green", 20, 2)
+make_btn("-", "]", "red", 20, 3)
+
+
+pattern_stop_label = QtWidgets.QLabel("📸 Patterny - zatrzymanie")
+pattern_stop_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+pattern_stop_label.setStyleSheet(start_rpm_label.styleSheet())
+btn_layout.addWidget(pattern_stop_label, 21, 0, 1, 2)
+
+make_btn("włącz", ":", "green", 21, 2)
+make_btn("wyłącz", ";", "red", 21, 3)
 
 buffer = bytearray()
 
@@ -836,8 +856,8 @@ def read_uart():
         servoDivider = (frame[148] << 8) | frame[149]
         algorithmFilterAlpha = (frame[150] << 8) | frame[151]
         patternThreshold = (frame[152] << 8) | frame[153]
-        pidKp = (frame[154] << 8) | frame[155]
-        pidKi = (frame[156] << 8) | frame[157]
+        pidKp = ( (frame[154] << 8) | frame[155] )/ 1000.0
+        pidKi = ( (frame[156] << 8) | frame[157] ) / 100000.0
         
         brakeAll = (frame[158] << 8) | frame[159]
         brakeOne = (frame[160] << 8) | frame[161]
@@ -845,13 +865,11 @@ def read_uart():
         diffClamp = (frame[164] << 8) | frame[165]
         diffClamp = diffClamp / 1000.0
         
-        cornerInsideRPM = (frame[166] << 8) | frame[167]
+        rpmOffset = (frame[166] << 8) | frame[167]
         
         servoDivider = servoDivider / 100.0
         algorithmFilterAlpha = algorithmFilterAlpha / 1000.0
         patternThreshold = patternThreshold / 1000.0
-        pidKp = pidKp / 1000.0
-        pidKi = pidKi / 100000.0
         
         brightness = (frame[168] << 8) | frame[169]
         leftLine  = (frame[170] << 8) | frame[171]
@@ -872,6 +890,8 @@ def read_uart():
         algorithmOffset = ((frame[185] << 8) | frame[186]) / 1000.0
         
         patternTimeoutMs = ((frame[187] << 8) | frame[188])
+        
+        pidKd = ( (frame[189] << 8) | frame[190] ) / 1000.0
         
         brakeAll /= 1000
         brakeOne /= 1000
@@ -932,11 +952,12 @@ def read_uart():
         thr_label.setText(f"Corr. threshold: <b>{patternThreshold:.2f}</b>")
         kp_label.setText(f"PID Kp: <b>{pidKp:.3f}</b>")
         ki_label.setText(f"PID Ki: <b>{pidKi:.5f}</b>")
+        kd_label.setText(f"PID Kd: <b>{pidKd:.3f}</b>")
 
         br_all_label.setText(f"🛑 Brake all: <b>{brakeAll:.2f}</b>")
         br_one_label.setText(f"🛑 Brake one: <b>{brakeOne:.2f}</b>")
         br_clamp_label.setText(f"⛔ Brake clamp: <b>{brakeClamp:.2f}</b>")
-        inside_rpm_label.setText(f"Inside RPM: <b>{cornerInsideRPM}</b>")
+        inside_rpm_label.setText(f"RPM offset: <b>{rpmOffset}</b>")
         outside_rpm_label.setText(f"DIff clamp: <b>{diffClamp:.2f}</b>")
 
         cross_cut_label.setText(f"✂️ Crossing cut: <b>{crossingsCut}</b>")
@@ -1075,7 +1096,7 @@ def read_uart():
                 brakeOne,
                 brakeClamp,
                 diffClamp,
-                cornerInsideRPM,
+                rpmOffset,
                 brightness,
                 leftLine,
                 rightLine,

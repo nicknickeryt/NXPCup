@@ -66,6 +66,8 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().newAlgorithm.clearPatterns(millis());
             kitty().servo.init();
             kitty().menu.startRace(millis());
+            kitty().differential.getLeftPID().reset();
+            kitty().differential.getRightPID().reset();
             break;
 
         case '+': // startVelocty++
@@ -193,6 +195,22 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() - 100);
             break;
 
+        
+        case ':': // pattern stop enable
+            kitty().params.setIsPatternStopEnabled(true);
+            break;
+        case ';': // pattern stop disable
+            kitty().params.setIsPatternStopEnabled(false);
+            break;
+
+        case ',': // pidKd++
+            kitty().params.setPidKd(kitty().params.getPidKd() + 0.005f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());
+            break;
+        case '.': // pidKd--
+            kitty().params.setPidKd(kitty().params.getPidKd() - 0.005f, kitty().differential.getLeftPID(), kitty().differential.getRightPID());            
+            break;
+
+
         case '1': { // FORWARD
             Kitty::kitty().motors.run();
 
@@ -301,7 +319,7 @@ void Kitty::init() {
     log_notice("KiTTy init finished");
 
     // servo.init();
-    // servo.set(0.0f);
+    // servo.set(0.9f);
     // return;
 
 }
@@ -317,7 +335,7 @@ void Kitty::FTM_Init() {
     SIM->SCGC6 |= SIM_SCGC6_FTM3_MASK;
 }
 
-static constexpr size_t FRAME_SIZE = 189;
+static constexpr size_t FRAME_SIZE = 191;
 uint8_t frame[FRAME_SIZE]; // 1 start + 128 danych + 1 end
 
 bool menuActive = false;
@@ -422,13 +440,13 @@ void Kitty::proc() {
         frame[162] = (brakeClamp >> 8) & 0xFF;
         frame[163] = brakeClamp & 0xFF;
 
-        uint16_t outsideRPM = (uint16_t)(params.getDiffClamp() * 1000);
-        frame[164] = (outsideRPM >> 8) & 0xFF;
-        frame[165] = outsideRPM & 0xFF;
+        uint16_t diffClamp = (uint16_t)(params.getDiffClamp() * 1000);
+        frame[164] = (diffClamp >> 8) & 0xFF;
+        frame[165] = diffClamp & 0xFF;
 
-        uint16_t insideRPM = params.getRPMOffset();
-        frame[166] = (insideRPM >> 8) & 0xFF;
-        frame[167] = insideRPM & 0xFF;
+        uint16_t rpmOffset = params.getRPMOffset();
+        frame[166] = (rpmOffset >> 8) & 0xFF;
+        frame[167] = rpmOffset & 0xFF;
 
         uint16_t brightness = static_cast<uint16_t>(newAlgorithm.getBrightness() / 110);
         frame[168] = (brightness >> 8) & 0xFF;
@@ -477,6 +495,10 @@ void Kitty::proc() {
         uint16_t patternDetectTimeout = params.getPatternDetectTimeoutMs();
         frame[187] = (patternDetectTimeout >> 8) & 0xFF;
         frame[188] = patternDetectTimeout & 0xFF;
+
+        uint16_t kd = (uint16_t)(params.getPidKd() * 1000);
+        frame[189] = (kd >> 8) & 0xFF;
+        frame[190] = kd & 0xFF;
 
 
         // if(newAlgorithm.isPatternDetected()) {

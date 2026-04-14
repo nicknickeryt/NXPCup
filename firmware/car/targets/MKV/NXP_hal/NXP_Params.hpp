@@ -12,10 +12,10 @@ class NXP_Params {
     float algorithmFilterAlpha = 0.7f;
 
     // Threshold for correlation-based pattern detection in algorithm
-    float patternCorrelationThreshold = 0.88f;
+    float patternCorrelationThreshold = 0.68f;
 
     // Target RPM value for motors
-    uint32_t startRPM = 3500;
+    uint32_t startRPM = 3800;
 
     // Braking parameters for motor algorithm - in corners
     // Lower - more brake!
@@ -32,6 +32,7 @@ class NXP_Params {
     // PID params for motors
     float pidKp = 2.0f;
     float pidKi = 0.00659f;
+    float pidKd = 0.01f;
 
     float crossingsBrightnessMultiplier = 1.0f;
     float brightnessMeanAlpha = 0.3f;
@@ -44,6 +45,8 @@ class NXP_Params {
     float algorithmOffset = 1.7f;
 
 		uint32_t patternDetectTimeoutMs = 1500;
+
+    bool isPatternStopEnabled = false; 
 
   public:
     NXP_Params() {}
@@ -108,4 +111,16 @@ class NXP_Params {
 
     uint32_t getPatternDetectTimeoutMs() const { return patternDetectTimeoutMs; }
     void     setPatternDetectTimeoutMs(uint32_t timeout) { patternDetectTimeoutMs = timeout; }
+
+    bool getIsPatternStopEnabled() const { return isPatternStopEnabled; }
+    void setIsPatternStopEnabled(bool enabled) { isPatternStopEnabled = enabled; }
+
+    float getPidKd() const { return pidKd; }
+    void  setPidKd(float kd, PID& pidLeft, PID& pidRight) { 
+        pidLeft.setKd(kd);
+        pidRight.setKd(kd);
+        pidKd = kd;
+    }
+
+
 };
