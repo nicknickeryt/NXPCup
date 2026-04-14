@@ -77,7 +77,7 @@ void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Dis
             stableActive = false;
 
             float output = distancePID.calculate(current, target);
-            output       = std::clamp(output, -0.7f, 0.1f);
+            output       = std::clamp(output, -0.7f, 0.08f);
 
             leftMotorPower  = output;
             rightMotorPower = output;
