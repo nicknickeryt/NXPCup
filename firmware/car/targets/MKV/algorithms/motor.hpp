@@ -35,7 +35,7 @@ class Differential {
 
 
     PID distancePID = PID(
-        0.035f,   // Kp — szybciej reaguje
+        0.015f,   // Kp — szybciej reaguje
         0.0002f,  // Ki — lekka korekta
         0.012f    // Kd — tłumienie
     );
