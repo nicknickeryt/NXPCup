@@ -12,7 +12,7 @@ class NXP_Params {
     float algorithmFilterAlpha = 0.7f;
 
     // Threshold for correlation-based pattern detection in algorithm
-    float patternCorrelationThreshold = 0.68f;
+    float patternCorrelationThreshold = 0.58f;
 
     // Target RPM value for motors
     uint32_t startRPM = 3800;

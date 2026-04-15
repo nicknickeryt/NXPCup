@@ -16,6 +16,9 @@ Differential::Differential(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, 
 
 
 
+uint64_t stopTimerIterator = 0;
+bool stopTimerFlag = false;
+
 void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
     if (!params.getIsPatternStopEnabled()) patternDetected = 0;
 
@@ -47,6 +50,12 @@ void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Dis
         distanceModeActive = true;
     }
 
+    if (sr04Distance < 300 && patternDetected && !stopTimerFlag) {
+        stopTimerFlag = true;
+        patternDetectedMillis = currentMillis;
+    }
+
+
     if (finalStopDone) {
         leftMotorPower  = 0.0f;
         rightMotorPower = 0.0f;
@@ -57,10 +66,13 @@ void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Dis
         // if(encoderLeft.getRPM() < 1000 && encoderLeft.getRPM() < 1000) {
         //     params.setAlgorithmFilterAlpha(0.005f);
         // }
-        float target  = 90.0f;
+        float target  = 150.0f;
+
         float current = sr04Distance;
 
-        bool inRange = fabs(current - target) < 15.0f;
+        if(current < 150.0f) target = 90.0f;
+
+        bool inRange = fabs(current - target) < 10.0f;
 
         // 🔥 jeśli jesteśmy blisko → NIE używamy PID
         if (inRange) {
@@ -80,10 +92,18 @@ void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Dis
             }
 
         } else {
+
+
             stableActive = false;
 
             float output = distancePID.calculate(current, target);
-            output       = std::clamp(output, -0.7f, 0.12f);
+
+
+            if(currentMillis - patternDetectedMillis > 10000) {
+                output       = std::clamp(output, -0.7f, 0.15f);
+            } else {
+                output       = std::clamp(output, -0.7f, 0.05f);
+            }
 
             leftMotorPower  = output;
             rightMotorPower = output;

@@ -30,10 +30,12 @@ class NXP_Menu {
 
     enum MenuPage { 
         PAGE_STARTRPM, 
+        PAGE_ENABLE_UART,
+        PAGE_CORR, 
+        PAGE_PATTERN_TIMEOUT,
         PAGE_PATTERN_STOP_ENABLE,
         PAGE_SERVODIV, 
         PAGE_SERVOALPHA, 
-        PAGE_CORR, 
         PAGE_PID_KP, 
         PAGE_PID_KI, 
         PAGE_BRAKE_ALL, 
@@ -47,8 +49,6 @@ class NXP_Menu {
         PAGE_CROSSINGALPHA,
         PAGE_CAMFREQ,
         PAGE_ALGORITHM_OFFSET,
-        PAGE_ENABLE_UART,
-        PAGE_PATTERN_TIMEOUT,
         PAGE_0RPM};
 
     enum MenuButton { BUTTON_PAGE, BUTTON_VALUE_PLUS, BUTTON_VALUE_MINUS, BUTTON_RUN };
