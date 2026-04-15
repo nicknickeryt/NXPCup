@@ -22,6 +22,11 @@ class Differential {
 
     float brakeComponent = 0;
 
+    uint32_t patternDetectedMillis = 0;
+    uint32_t patternRpm =  0;
+    bool slowedDown = false;
+    //bool     patternSetRPM         = false;
+
     // Kp     Ki     Kd     maxValue
     PID pidLeft  = PID(params.getPidKp(), params.getPidKi(), params.getPidKd(), 1.0f);
     PID pidRight = PID(params.getPidKp(), params.getPidKi(), params.getPidKd(), 1.0f);

@@ -35,7 +35,7 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
 
     if (!buttons.at(MenuButton::BUTTON_PAGE).get()) {
         currentMenuPage = static_cast<MenuPage>(currentMenuPage + 1);
-        if (currentMenuPage > 18) currentMenuPage = MenuPage::PAGE_STARTRPM; // DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (currentMenuPage > 19) currentMenuPage = MenuPage::PAGE_STARTRPM; // DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         switch (currentMenuPage) {
             case MenuPage::PAGE_STARTRPM:
@@ -59,6 +59,7 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
             case MenuPage::PAGE_CROSSINGALPHA: display.print("CALP"); break;
             case MenuPage::PAGE_CAMFREQ: display.print("CFRE"); break;
             case MenuPage::PAGE_ALGORITHM_OFFSET: display.print("AOFF"); break;
+            case MenuPage::PAGE_ENABLE_UART: display.print("UART"); break;
             case MenuPage::PAGE_PATTERN_TIMEOUT: display.print("TI\\["); break;
             case MenuPage::PAGE_0RPM:
                 motors.setEnabled(false);
@@ -342,14 +343,28 @@ bool NXP_Menu::proc(uint32_t currentMillis) {
         }
 
         case MenuPage::PAGE_PATTERN_TIMEOUT: {
-            std::string servoDivText = formatString(params.getPatternDetectTimeoutMs());
+            std::string servoDivText = formatString(params.getPatternDetectTimeoutMs() / 100.0f);
             display.print(servoDivText.c_str());
 
             if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
-                params.setPatternDetectTimeoutMs(params.getPatternDetectTimeoutMs() + 100);
+                params.setPatternDetectTimeoutMs(params.getPatternDetectTimeoutMs() + 250);
                 menuDebounceTimer = currentMillis;
-            } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get()) {
-                params.setPatternDetectTimeoutMs(params.getPatternDetectTimeoutMs() - 100);
+            } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get() / 100.0f) {
+                params.setPatternDetectTimeoutMs(params.getPatternDetectTimeoutMs() - 250);
+                menuDebounceTimer = currentMillis;
+            }
+            break;
+        }
+
+        case MenuPage::PAGE_ENABLE_UART: {
+            std::string servoDivText = params.getUartEnabled() ? "ON  " : "OFF ";
+            display.print(servoDivText.c_str());
+
+            if (!buttons.at(MenuButton::BUTTON_VALUE_PLUS).get()) {
+                params.setUartEnabled(true);
+                menuDebounceTimer = currentMillis;
+            } else if (!buttons.at(MenuButton::BUTTON_VALUE_MINUS).get() / 100.0f) {
+                params.setUartEnabled(false);
                 menuDebounceTimer = currentMillis;
             }
             break;

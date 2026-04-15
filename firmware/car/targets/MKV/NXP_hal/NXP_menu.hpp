@@ -47,6 +47,7 @@ class NXP_Menu {
         PAGE_CROSSINGALPHA,
         PAGE_CAMFREQ,
         PAGE_ALGORITHM_OFFSET,
+        PAGE_ENABLE_UART,
         PAGE_PATTERN_TIMEOUT,
         PAGE_0RPM};
 

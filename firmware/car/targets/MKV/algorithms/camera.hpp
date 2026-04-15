@@ -48,6 +48,8 @@ class Algorithm {
 
 		uint32_t algorithmStartTime = 0;
 
+		uint64_t patternTimeIterator = 0;
+
 		uint32_t patternsAmount = 0;
 		bool patternDetected = false;
 		uint32_t patternsStartTime = 0;
@@ -69,4 +71,6 @@ class Algorithm {
 	void clearPatterns(uint32_t currentMillis);
 
 	void setAlgorithmStartTime(uint32_t currentMillis);
+
+	void resetPatternIterator() { patternTimeIterator = 0;  }
 };

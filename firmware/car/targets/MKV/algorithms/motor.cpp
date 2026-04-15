@@ -14,28 +14,34 @@
 
 Differential::Differential(NXP_Encoder& encoderLeft, NXP_Encoder& encoderRight, NXP_Params& params) : encoderLeft(encoderLeft), encoderRight(encoderRight), params(params) {}
 
-uint32_t patternDetectedMillis = 0;
-bool     patternSetRPM         = false;
+
 
 void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Distance) {
     if (!params.getIsPatternStopEnabled()) patternDetected = 0;
 
-    if (patternDetected && !patternSetRPM) {
+    if (patternDetected) {
         if (patternDetectedMillis == 0) {
             patternDetectedMillis = currentMillis;
         }
-        if (currentMillis - patternDetectedMillis >= 100 && params.getStartRPM() != 800) {
-            params.setStartRPM(800);
-            patternSetRPM = true;
+        if (slowedDown == false){
+            patternRpm = (params.getStartRPM() - ((currentMillis - patternDetectedMillis) / 20));
+            if(patternRpm < 450 || patternRpm > 7000){
+                patternRpm = 450;
+                slowedDown = true;
+            }
+            params.setStartRPM(patternRpm);
         }
+
+        if(slowedDown){
+            params.setBrakeClamp(1.0f);
+            params.setDiffClamp(1.0f);
+        }
+
     }
 
-
-    if (patternDetected && currentMillis - patternDetectedMillis >= 2000) {
-        params.setStartRPM(400);
-        params.setBrakeClamp(1.0f);
-        params.setDiffClamp(1.0f);
-    }
+    //     if (patternDetected && currentMillis - patternDetectedMillis >= 1000) {
+    //     params.setStartRPM(800);
+    // }
 
     if (sr04Distance < 300 && patternDetected) {
         distanceModeActive = true;
@@ -77,7 +83,7 @@ void Differential::proc(float position, uint32_t currentMillis, uint16_t sr04Dis
             stableActive = false;
 
             float output = distancePID.calculate(current, target);
-            output       = std::clamp(output, -0.7f, 0.08f);
+            output       = std::clamp(output, -0.7f, 0.12f);
 
             leftMotorPower  = output;
             rightMotorPower = output;

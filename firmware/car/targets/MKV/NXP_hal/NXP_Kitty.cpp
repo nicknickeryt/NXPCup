@@ -45,6 +45,7 @@ float motorL = 0.0f;
 float motorR = 0.0f;
 
 void Kitty::uartCallback(uint8_t receivedByte) {
+    if(!kitty().params.getUartEnabled()) return;
     switch (receivedByte) {
         case 's':
             // fctprintf(logWrite, NULL, "\nkittyStop\n", 0);
@@ -68,6 +69,7 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             kitty().menu.startRace(millis());
             kitty().differential.getLeftPID().reset();
             kitty().differential.getRightPID().reset();
+            kitty().newAlgorithm.setAlgorithmStartTime(millis());
             break;
 
         case '+': // startVelocty++
@@ -189,10 +191,10 @@ void Kitty::uartCallback(uint8_t receivedByte) {
             break;
 
         case '[': // pattern timeout++
-            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() + 100);
+            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() + 250);
             break;
         case ']': // pattern timeout--
-            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() - 100);
+            kitty().params.setPatternDetectTimeoutMs(kitty().params.getPatternDetectTimeoutMs() - 250);
             break;
 
         

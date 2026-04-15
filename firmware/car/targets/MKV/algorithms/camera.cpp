@@ -61,8 +61,15 @@ static constexpr float pattern[128] = {7,   8,   13,  11, 18, 19, 28, 32, 36, 37
                                    111, 100, 91,  79, 78, 75, 79, 77, 80, 77, 79, 79, 82, 79, 83, 82, 84, 80, 82, 81,  84,  86,  98,  105, 110, 105, 107, 104, 108, 105, 106, 103,
                                    103, 100, 100, 96, 96, 93, 92, 80, 59, 40, 41, 50, 60, 58, 58, 52, 52, 47, 44, 38,  37,  26,  20,  16,  14,  9,   10,  6,   8,   4,   0,   0};
 
-bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) {
-    if (currentMillis - algorithmStartTime < params.getPatternDetectTimeoutMs()) return false;
+
+
+
+bool Algorithm::findPatterns(uint16_t* data, uint32_t currentMillis) { 
+    patternTimeIterator++;
+    
+    // if (currentMillis - algorithmStartTime < params.getPatternDetectTimeoutMs()) return false;
+
+    if(( patternTimeIterator / ( params.getCameraPitFrequency() / 268.0f) ) * 1000 < params.getPatternDetectTimeoutMs() ) return false;
 
     // ===== SMOOTH =====
     for (int i = 1; i < 127; i++) smoothedData[i] = (data[i - 1] + 5 * data[i] + data[i + 1]) / 7;
@@ -211,4 +218,7 @@ void Algorithm::clearPatterns(uint32_t currentMillis) {
     differential.clearAllFlags();
 }
 
-void Algorithm::setAlgorithmStartTime(uint32_t currentMillis) { algorithmStartTime = currentMillis; }
+void Algorithm::setAlgorithmStartTime(uint32_t currentMillis) { 
+    algorithmStartTime = currentMillis; 
+    resetPatternIterator();
+}

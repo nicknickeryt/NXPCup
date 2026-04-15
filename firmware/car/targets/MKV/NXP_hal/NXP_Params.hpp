@@ -46,7 +46,9 @@ class NXP_Params {
 
 		uint32_t patternDetectTimeoutMs = 1500;
 
-    bool isPatternStopEnabled = false; 
+    bool isPatternStopEnabled = true; 
+
+    bool uartEnabled = true;
 
   public:
     NXP_Params() {}
@@ -122,5 +124,7 @@ class NXP_Params {
         pidKd = kd;
     }
 
+    bool getUartEnabled() { return uartEnabled; }
+    void setUartEnabled(bool enabled) { uartEnabled = enabled; }
 
 };
